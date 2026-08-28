@@ -82,3 +82,24 @@ Mined verbatims (10):
 Slide 2 second cover: "If you've ever stared at the little red badge until your chest feels [[tight]], promising yourself you'll open it 'in five minutes,' this is for you." — pays winner? Y
 Re-hooks 4 & 6: "Here is what to do next." / "So how do you unfreeze?"
 Later — saves / shares / sends-per-reach: _ / _ / _
+
+---
+
+### 20260828_say_yes_resent — Pattern: Script / Template — Intent: sends — Date: 2026-08-28
+Winner: "Saying 'yes of course!' while your stomach [[drops]]." / "(and dreading the plans for three days)" — Scores: Gap 8 Spec 8 Rel 10 Clar 10 Trust 8 = 44/50
+Mined verbatims (10):
+1. "Said yes when meant no, then resent, then guilt for resenting"
+2. "Saying 'yes of course!' with exclamation marks then immediately regretting it"
+3. "Stomach drops right after agreeing to plans"
+4. "Agreeing to weekend plans at 5pm on Friday and immediately wanting to cancel"
+5. "Why did I say yes when I know I'm exhausted?"
+6. "Dreading an event for 3 days because I couldn't say no"
+7. "Fawning by saying yes to keep everyone happy"
+8. "Saying yes to avoid awkwardness, then feeling angry at them for asking"
+9. "Can't say no on the spot without panicking"
+10. "Trading my peace just so someone isn't mildly disappointed"
+4 checks: No second-person DSM? Y | Filmable? Y | One breath? Y | You=hero? Y
+Slide 2 second cover: "If you have ever typed an enthusiastic yes while your chest tightened, then spent days dreading Friday night, this is for [[you]]." — pays winner? Y
+Re-hooks 4 & 6: "Here is what to do [[next]]." / "Still feeling [[stuck]]?"
+Later — saves / shares / sends-per-reach: _ / _ / _
+
