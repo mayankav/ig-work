@@ -646,6 +646,7 @@ body{{background:{t['ground']};color:{t['ink']};position:relative;overflow:hidde
 
 .canvas{{position:absolute;left:{MARGIN}px;right:{MARGIN}px;top:{MARGIN}px;bottom:{FOOTER_H+12}px;
   z-index:5;display:flex;flex-direction:column;justify-content:center;gap:28px;align-items:center;}}
+.canvas.source-pad{{padding-top:32px}}
 /* With no figure the copy owns the slide and is centred in it. Spreading the
    blocks apart with space-between only moved the void into the middle, which
    looks broken rather than composed. */
@@ -824,7 +825,10 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
     else:
         # No eyebrow label anywhere. It was a dot and a caption that pushed the
         # real headline down and added nothing a reader needed.
-        body.append('<div class="canvas" id="copy">')
+        if is_source:
+            body.append('<div class="canvas source-pad" id="copy">')
+        else:
+            body.append('<div class="canvas" id="copy">')
         if is_source:
             if any(k in s for k in ("source_claim", "source_translation", "source_explains")):
                 body.append('<div class="source-stack">')

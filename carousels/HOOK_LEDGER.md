@@ -25,6 +25,26 @@ Later — saves / shares / sends-per-reach: _ / _ / _
 
 ---
 
+### 20260828_family_15_again — Pattern: Identity Mirror — Intent: sends — Date: 2026-08-28
+Winner: "Walking into your parents' house and becoming [[15]]." / "(and why old roles reload instantly)" — Scores: Gap 8 Spec 9 Rel 10 Clar 10 Trust 8 = 45/50
+Mined verbatims (10):
+1. "Walking through parents' door, shoulders shrink, voice changes, faintly furious about breakfast"
+2. "I'm 30 years old with a mortgage but when I visit home I become a defensive teenager"
+3. "Stepping into childhood home and regressing within 10 minutes"
+4. "Why do I act like an immature teenager around my family?"
+5. "Can manage a team at work but turn into a slammed-door 15 year old at Mom's"
+6. "Family visits feel like an emotional time machine"
+7. "Old family roles loading automatically the second you walk through the door"
+8. "Arguing over cereal choices with my parents at age 29"
+9. "Feeling defensive over kitchen chores when visiting family"
+10. "All my personal growth disappears when I visit home"
+4 checks: No second-person DSM? Y | Filmable? Y | One breath? Y | You=hero? Y
+Slide 2 second cover: "If you manage a team at work but turn defensive over kitchen chores the moment you visit home, this is for [[you]]." — pays winner? Y
+Re-hooks 4 & 6: "Here is what to do [[next]]." / "Still feeling [[stuck]]?"
+Later — saves / shares / sends-per-reach: _ / _ / _
+
+---
+
 ### 20260828_reread_okay — Pattern: Visual Comparison — Intent: sends — Date: 2026-08-28
 Winner: "You reread their 'okay.' text four [[times]]." / "(and why a period feels dangerous)" — Scores: Gap 5 Spec 9 Rel 10 Clar 10 Trust 8 = 42/50
 Mined verbatims (10):

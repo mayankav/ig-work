@@ -254,11 +254,11 @@
   ],
   "20260828_say_yes_resent": [
     "knees_hugged",
-    "floor_slumped",
+    "clutching",
     "laughing",
     "point_down",
     "warm_mug",
-    "sitting",
+    "framing",
     "standing_tall",
     "serene",
     "waving"
@@ -273,5 +273,16 @@
     "holding_board",
     "phone_down",
     "waving_m"
+  ],
+  "20260828_family_15_again": [
+    "thumbjack_back",
+    "face_down",
+    "guarded",
+    "side_eye",
+    "warm_mug",
+    "walking",
+    "steadying",
+    "walking_away_m",
+    "waving"
   ]
 }
