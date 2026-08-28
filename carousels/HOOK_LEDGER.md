@@ -25,6 +25,26 @@ Later — saves / shares / sends-per-reach: _ / _ / _
 
 ---
 
+### 20260828_reread_okay — Pattern: Visual Comparison — Intent: sends — Date: 2026-08-28
+Winner: "You reread their 'okay.' text four [[times]]." / "(and why a period feels dangerous)" — Scores: Gap 5 Spec 9 Rel 10 Clar 10 Trust 8 = 42/50
+Mined verbatims (10):
+1. "Rereading 'okay' 4 times for tone, checking last seen, two apps open"
+2. "Why does a period at the end of a one word text feel like a slammed door"
+3. "Staring at 'okay.' wondering if they hate me"
+4. "Sent 3 paragraphs of excitement, got back 'okay.'"
+5. "Overanalyzing punctuation in text messages"
+6. "Checking timestamps and last active to see if they're mad"
+7. "Heart drops when someone drops punctuation suddenly"
+8. "Typing 'are you mad at me?' then deleting it 5 times"
+9. "Panicking over a dry text message"
+10. "Feeling like every short reply means distance"
+4 checks: No second-person DSM? Y | Filmable? Y | One breath? Y | You=hero? Y
+Slide 2 second cover: "If you have ever stared at a flat one-word text until your stomach tightened, wondering what you did wrong, this is for [[you]]." — pays winner? Y
+Re-hooks 4 & 6: "Here is what to do [[next]]." / "Still feeling [[stuck]]?"
+Later — saves / shares / sends-per-reach: _ / _ / _
+
+---
+
 ### 20260828_replay_conversations — Pattern: Tier 1 — Intent: saves — Date: 2026-08-28
 Winner: "Lying in bed at 2am, replaying a 10-second conversation from [[lunch]]." / "(and what your body is actually doing)" — Scores: Gap 8 Spec 10 Rel 10 Clar 10 Trust 8 = 46/50
 Mined verbatims (10):
