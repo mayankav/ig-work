@@ -62,3 +62,23 @@ Mined verbatims (10):
 Slide 2 second cover: "If you've ever stared at 17 open tabs for two hours because you can't start a new task before a meeting, this is for you." — pays winner? Y
 Re-hooks 4 & 6: "So how do you unfreeze?" / "Still frozen?"
 Later — saves / shares / sends-per-reach: _ / _ / _
+
+---
+
+### 20260828_inbox_panic — Pattern: Tier 1 — Intent: sends — Date: 2026-08-28
+Winner: "Staring at 127 unread emails at 11:47pm." / "(and why you can't just open it)" — Scores: Gap 9 Spec 9 Rel 10 Clar 10 Trust 9 = 47/50
+Mined verbatims (10):
+1. "127 unread at 11:47pm, chest tight, palms sweat before..."
+2. "Promising myself I'll open it in five minutes, but I never do."
+3. "The red badge makes me physically anxious."
+4. "Staring at the screen, paralyzed."
+5. "I have so many unread emails that I'm afraid to look."
+6. "Every new email feels like a threat."
+7. "Closing my laptop and checking mail on my phone in bed."
+8. "Feeling flooded by just opening the app."
+9. "Can't bring myself to reply to a simple message."
+10. "Email anxiety keeping me up at night."
+4 checks: No second-person DSM? Y | Filmable? Y | One breath? Y | You=hero? Y
+Slide 2 second cover: "If you've ever stared at the little red badge until your chest feels [[tight]], promising yourself you'll open it 'in five minutes,' this is for you." — pays winner? Y
+Re-hooks 4 & 6: "Here is what to do next." / "So how do you unfreeze?"
+Later — saves / shares / sends-per-reach: _ / _ / _

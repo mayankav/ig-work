@@ -637,11 +637,12 @@ When generating a carousel, the agent MUST format output following this exact Ma
 ### Slide 3 to Slide N-2: [Core Insights / Framework Points]
 - **Slide Type:** Value Step [1..k]
 - **Step Number & Title:** [e.g. 01. The Hyper-Vigilance Loop]
-- **Micro-Insight:** [Why it happens]
-- **Before vs After / Script:**
-  - ❌ *Old Reaction:* "..."
-  - ✅ *Regulated Response:* "..."
-- **Design Note:** [Boxed highlight, 2-column comparison, or clean bulleted cards]
+- **Micro-Insight:** [Why it happens — one sentence, plain language]
+- **When → Say / Script (never presume their old words):**
+  - **When:** [specific moment, e.g., "When you're staring at the screen, frozen, chest tight"]
+  - **Say:** "[copy-paste script with [brackets] — <20w, sayable while anxious]"
+  - *Why this works:* `When` is a condition they can test (`am I staring right now?`), not a line they must have said. Old `WHAT YOU SAY / "Staring at the screen, paralyzed."` is deprecated — it puts words in their mouth and leaks viewers who don't say that exact sentence. Use `When` + `Say`, not `Old Reaction`.
+- **Design Note:** [Boxed highlight, single script card, or clean bullets — one script per slide, no two-column accusation]
 
 ---
 
