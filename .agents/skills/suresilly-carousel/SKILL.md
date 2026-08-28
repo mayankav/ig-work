@@ -80,12 +80,11 @@ Why rearranged: Old was `Topic → Hook → Source → Value → Humanize → Ch
 
 **"I'm feeling lucky"** — pick via two scored layers, then run the full 10-step protocol. Do not ask what it should be about.
 
-**Layer 1 — Suggestion (ranked evidence, don't guess).** Weighted per `references/topic-ranking.md` (Popularity×Trust). Pull 12-15 candidates:
-* 40% Evergreen high-trust (anxiety 19%, burnout 55%, depression 8-13% — CDC/WHO/NIMH ★★★★★)
-* 30% Emerging arbitrage (functional freeze NYT Dec25, waiting mode 3.7M TikTok, RSD — low competition, high save)
-* 20% Community growth (CPTSD +27.9%/yr, fawn)
-* 10% Trend pulse (bed rotting 224M, doomscroll)
-Breakdown: 5 from `topic-bank.md` (filter `Last used == -`), 5 from VOC verbatims (number/body/place), 2 from pattern gaps (which Tier 1 not used last 5), 2 from trend. Run `suggest_topics.py --suggest 8`. No scene invented — pasted verbatim with URL.
+**Layer 1 — Suggestion — SURGE: 70%+ Relational / Attachment (for follower surge).** Per `brand-voice.md` niche #1 (9.8 shareability, 9.5 virality) + `topic-ranking.md`. Pull 12-15 candidates as:
+* **70% Relational / Attachment** — Bowlby/Ainsworth/Johnson/Tatkin/Gottman/Perel/Levine&Heller: `reread-okay` (scanning), `family-15-again` (reunion), `apologies-reflex`/`say-yes-resent` (fawn), `burden-feel`/`burden-boundaries`, `inbox-reread-boss` (bids) — all `sends` intent, `Visual Comparison` or `Script / Template` pattern, filmable domestic scene. This is the DM-share engine for surge.
+* **20% Emerging arbitrage** (functional freeze, waiting mode, RSD) — keep 1-2 max, not as lead, to avoid `brain did it` monotony.
+* **10% Community / Trend** — CPTSD, doomscroll only as support.
+Breakdown: 7-8 from `topic-bank.md` where `Niche pillar` contains `People-pleasing, Hypervigilance, Family, Boundaries, Self-worth` (filter `Last used == -`), 3 from VOC verbatims relational, 2 from pattern gaps. Run `suggest_topics.py --suggest 8 --intent sends` — now pillar+pattern rotation enforces no same pillar/pattern as last 2. No scene invented.
 
 **Layer 2 — Selection (score, then qualify).** 1-5 on: Scene filmable? / Self-blame invertibility? / Stealability? (one sentence survives DM) / Freshness (+1 emerging Rank 5-6, -1 oversaturated per HireInfluence) / Intent fit (sends ≤8w Unspoken Reality vs saves 9-12w Absolution per SocialInsider). Total 25, ship ≥18, <15 for all = bank stale → mine 10 new VOC. Winner goes through Step 0 three questions as final gate.
 

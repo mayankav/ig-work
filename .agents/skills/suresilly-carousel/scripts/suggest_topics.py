@@ -146,6 +146,12 @@ def score_topic(topic, recent, intent_filter=None):
                 break
     except Exception:
         pass
+    # SURGE boost: Relational / Attachment pillars get +1 (follower surge needs sends)
+    try:
+        if any(k in topic["pillar"].lower() for k in ("people-pleasing","hypervigilance","family","boundaries","self-worth","people","relationship")):
+            freshness = min(5, freshness + 1)
+    except Exception:
+        pass
     # Pattern rotation: penalize same pattern as last 2 (fixes "all Hidden Mechanism brain did it" monotony)
     try:
         recent_pats = recent_patterns(2)

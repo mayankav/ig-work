@@ -78,15 +78,14 @@ avoidance        arguments                 right, just to make the silence stop
 
 If your hook is at category level, you have written a textbook heading.
 
-### Test 4 · The niche fence
+### Test 4 · The niche fence — SURGE: 70%+ Relational / Attachment
 
 @suresilly is **relational psychology** — how people behave with other people, and with
-themselves in relation to other people. Adjacent-but-out: productivity, habits, discipline,
-career, general self-improvement, book summaries.
+themselves in relation to other people. For surge (starting off, need followers), **70%+ of decks must be Relational / Attachment** — People-pleasing, Hypervigilance, Family/Trauma, Boundaries, Self-worth. These drive 9.8 shareability and 4-6x shares vs finance (TAM ~2B, attachment +340% since 2020). Adjacent-but-out: productivity, habits, discipline, career, general self-improvement, book summaries, pure general philosophy without a relationship scene.
 
 `atomic_habits_identity` failed this test. It is a competent deck about a good book, and it is
 not this page. **A book summary is not an insight.** If a deck could run unchanged on a
-productivity account, do not make it.
+productivity account, do not make it. For surge, if your scene could run on a general anxiety page without mentioning another person, it's not relational enough — add the other person.
 
 ### Test 5 · Rotate the pattern
 
