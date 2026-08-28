@@ -1,0 +1,3399 @@
+{
+  "poses": {
+    "deadpan": {
+      "tags": [
+        "blank",
+        "deadpan",
+        "dry",
+        "flat",
+        "level look",
+        "not amused",
+        "skeptical",
+        "staring",
+        "straight at",
+        "unimpressed"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "clutching": {
+      "tags": [
+        "alarm",
+        "alarm bells",
+        "anxious",
+        "bracing",
+        "clutch",
+        "clutching",
+        "danger",
+        "dread",
+        "dread rising",
+        "fear",
+        "on edge",
+        "overwhelm",
+        "panic",
+        "spiral",
+        "threat",
+        "worried"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "serene": {
+      "tags": [
+        "boring",
+        "calm",
+        "content",
+        "ease",
+        "eyes closed",
+        "peace",
+        "peaceful",
+        "quiet",
+        "relaxed",
+        "rest",
+        "serene",
+        "settled",
+        "steady",
+        "stillness",
+        "undramatic",
+        "unremarkable"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 0.0
+    },
+    "realising": {
+      "tags": [
+        "aha",
+        "chemistry",
+        "dawning",
+        "it clicks",
+        "mid-realisation",
+        "oh",
+        "penny drops",
+        "pointing up",
+        "realisation",
+        "realising",
+        "realization",
+        "spark",
+        "wait"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "welcoming": {
+      "tags": [
+        "arms wide",
+        "come in",
+        "greeting",
+        "inviting",
+        "open",
+        "open arms",
+        "send this",
+        "share",
+        "warm grin",
+        "welcome",
+        "welcoming"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "spiralling": {
+      "tags": [
+        "cannot stop",
+        "chaos",
+        "head in hooves",
+        "looping",
+        "overthinking",
+        "racing",
+        "rumination",
+        "spiralling",
+        "squeezed shut"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "watchful": {
+      "tags": [
+        "alert",
+        "hypervigilant",
+        "on guard",
+        "reading into",
+        "scanning",
+        "scanning for danger",
+        "suspicious",
+        "tense",
+        "waiting for the shoe",
+        "watchful"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.4
+    },
+    "hesitating": {
+      "tags": [
+        "about to speak",
+        "hesitating",
+        "mid air",
+        "second-guessing",
+        "uncertain",
+        "unsure"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "sleepless": {
+      "tags": [
+        "3am",
+        "awake",
+        "blanket",
+        "brain will not stop",
+        "cannot sleep",
+        "insomnia",
+        "lying awake",
+        "night",
+        "replaying",
+        "sleepless"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "phone_down": {
+      "tags": [
+        "face down",
+        "ghosted",
+        "message",
+        "phone",
+        "text",
+        "typing",
+        "waiting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "relieved": {
+      "tags": [
+        "exhale",
+        "finally",
+        "let go",
+        "relief",
+        "shoulders drop",
+        "unclench"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "guarded": {
+      "tags": [
+        "armour",
+        "arms folded",
+        "chin down",
+        "closed off",
+        "defensive",
+        "guarded",
+        "keeping distance",
+        "protecting yourself",
+        "walls up",
+        "withdrawn"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "reaching": {
+      "tags": [
+        "bid",
+        "hopeful",
+        "offering connection",
+        "reaching",
+        "tentative",
+        "vulnerable"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "turning_away": {
+      "tags": [
+        "avoidant",
+        "shutting down",
+        "silent",
+        "stonewalling",
+        "turning away",
+        "withdraw"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "listening": {
+      "tags": [
+        "asking",
+        "attentive",
+        "attuned",
+        "curiosity",
+        "hearing",
+        "hearing them",
+        "leaning forward",
+        "listening",
+        "one more question",
+        "present"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.0
+    },
+    "holding_heart": {
+      "tags": [
+        "affection",
+        "attachment",
+        "care",
+        "heart",
+        "love",
+        "tender"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "shrugging": {
+      "tags": [
+        "clueless",
+        "confused",
+        "dont know",
+        "shrug",
+        "who knows"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "palm_out": {
+      "tags": [
+        "boundary",
+        "enough",
+        "hand up",
+        "limit",
+        "no",
+        "not available",
+        "pause",
+        "saying no",
+        "stop"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "standing_tall": {
+      "tags": [
+        "chest open",
+        "confident",
+        "deserving",
+        "full height",
+        "grounded",
+        "not shrinking",
+        "secure",
+        "self-worth",
+        "standing tall",
+        "take up space",
+        "worth"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "declining": {
+      "tags": [
+        "declining",
+        "enough",
+        "firm",
+        "no explanation",
+        "not this time",
+        "refusing",
+        "saying no",
+        "without a paragraph"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "hoof_on_chest": {
+      "tags": [
+        "deserving",
+        "hand on heart",
+        "own it",
+        "proud",
+        "self respect",
+        "self-compassion",
+        "sincere",
+        "take up space",
+        "worth"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "putting_down": {
+      "tags": [
+        "burden",
+        "carrying",
+        "heavy",
+        "letting go",
+        "releasing",
+        "unload"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "unimpressed": {
+      "tags": [
+        "eyebrow raised",
+        "not buying it",
+        "unbothered",
+        "unimpressed"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "reading": {
+      "tags": [
+        "book",
+        "evidence",
+        "glasses",
+        "learn",
+        "read",
+        "research",
+        "science",
+        "source",
+        "study"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.0
+    },
+    "pondering": {
+      "tags": [
+        "attraction",
+        "chemistry",
+        "chin",
+        "considering",
+        "mulling",
+        "pondering",
+        "reflect",
+        "thinking",
+        "thoughtful",
+        "wondering",
+        "wondering why"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.0
+    },
+    "explaining": {
+      "tags": [
+        "adrenaline",
+        "cortisol",
+        "explaining",
+        "here is why",
+        "mechanism",
+        "pointing",
+        "showing",
+        "teaching",
+        "the mechanism",
+        "the reason"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "holding_board": {
+      "tags": [
+        "board",
+        "cheat sheet",
+        "checklist",
+        "clipboard",
+        "framework",
+        "list",
+        "reality check",
+        "recap",
+        "save this",
+        "summary",
+        "takeaways",
+        "the list"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "idea": {
+      "tags": [
+        "adrenaline",
+        "clever",
+        "figured it out",
+        "figured out",
+        "genius",
+        "idea",
+        "insight",
+        "lightbulb",
+        "the mechanism",
+        "why it happens"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 2.0
+    },
+    "knowing_look": {
+      "tags": [
+        "knowing",
+        "of course",
+        "smug",
+        "told you",
+        "wry"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "scarf": {
+      "tags": [
+        "comfort",
+        "cosy",
+        "safe",
+        "snug",
+        "warm",
+        "winter"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "cardigan_mug": {
+      "tags": [
+        "coffee",
+        "morning",
+        "routine",
+        "slow start",
+        "tired"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "bathrobe": {
+      "tags": [
+        "bad day",
+        "home",
+        "just woke",
+        "lazy",
+        "messy",
+        "unmotivated"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "detective": {
+      "tags": [
+        "analysing",
+        "clues",
+        "investigating",
+        "looking for",
+        "magnifying",
+        "searching"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "lab_coat": {
+      "tags": [
+        "experiment",
+        "hypothesis",
+        "laboratory",
+        "science",
+        "testing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "caped": {
+      "tags": [
+        "big",
+        "bold",
+        "brave",
+        "cape",
+        "empowered",
+        "hero",
+        "saving",
+        "strong",
+        "take up space",
+        "unapologetic"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "side_eye": {
+      "tags": [
+        "judging",
+        "really",
+        "side eye",
+        "sideways",
+        "skeptical"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "slow_blink": {
+      "tags": [
+        "bored",
+        "numb",
+        "over it",
+        "slow blink",
+        "tired of it"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "fake_smile": {
+      "tags": [
+        "fake smile",
+        "forced",
+        "full time job",
+        "i am fine",
+        "im fine",
+        "masking",
+        "people pleasing",
+        "performing",
+        "pretending"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "peeping": {
+      "tags": [
+        "cannot look",
+        "cringe",
+        "embarrassed",
+        "hiding",
+        "peeking through",
+        "shy"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "big_sigh": {
+      "tags": [
+        "dramatic",
+        "exasperated",
+        "fed up",
+        "sigh",
+        "ugh"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "offering": {
+      "tags": [
+        "generous",
+        "help",
+        "kind",
+        "offering",
+        "palm up",
+        "support"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "self_hug": {
+      "tags": [
+        "comfort",
+        "gentle",
+        "inner child",
+        "self hug",
+        "self soothing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.0
+    },
+    "flower": {
+      "tags": [
+        "apology",
+        "flower",
+        "making up",
+        "peace offering",
+        "repair"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 2.0
+    },
+    "warm_mug": {
+      "tags": [
+        "cosy",
+        "self care",
+        "slow",
+        "tea",
+        "warm mug"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.0
+    },
+    "head_tilt": {
+      "tags": [
+        "asking",
+        "attuned",
+        "curiosity",
+        "curious",
+        "empathy",
+        "gentle",
+        "head tilt",
+        "listening",
+        "one more question",
+        "soft"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.2
+    },
+    "sitting": {
+      "tags": [
+        "at ease",
+        "grounded",
+        "ordinary",
+        "quiet",
+        "resting",
+        "settled",
+        "sitting",
+        "steady",
+        "undramatic"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 0.0
+    },
+    "cheering": {
+      "tags": [
+        "celebrating",
+        "cheering",
+        "excited",
+        "joy",
+        "win",
+        "yes"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "laughing": {
+      "tags": [
+        "amused",
+        "delight",
+        "funny",
+        "head back",
+        "laughing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "ready": {
+      "tags": [
+        "committed",
+        "determined",
+        "fists",
+        "ready",
+        "resolve",
+        "sleeves up"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "jumping": {
+      "tags": [
+        "bouncing",
+        "eager",
+        "energy",
+        "jumping",
+        "thrilled"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "finished": {
+      "tags": [
+        "complete",
+        "done",
+        "dusting off",
+        "finished",
+        "satisfied",
+        "sorted"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "stretching": {
+      "tags": [
+        "fresh",
+        "new start",
+        "stretching",
+        "waking",
+        "yawn"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "pointing": {
+      "tags": [
+        "calling out",
+        "direct",
+        "pointing at you",
+        "this one",
+        "you"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "blank_card": {
+      "tags": [
+        "card",
+        "message",
+        "note",
+        "reminder",
+        "screenshot"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "approving": {
+      "tags": [
+        "agree",
+        "approve",
+        "good",
+        "thumbs up",
+        "yes"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "beckoning": {
+      "tags": [
+        "closer",
+        "come here",
+        "follow",
+        "invite",
+        "join"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "waving": {
+      "tags": [
+        "friendly",
+        "goodbye",
+        "hello",
+        "see you",
+        "wave"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "winking": {
+      "tags": [
+        "cheeky",
+        "knowing",
+        "nod",
+        "playful",
+        "wink"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "face_down": {
+      "tags": [
+        "burnout",
+        "collapsed",
+        "defeated",
+        "face down",
+        "flat out",
+        "floored",
+        "given up"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "on_back": {
+      "tags": [
+        "3am",
+        "cannot sleep",
+        "lying awake",
+        "lying down",
+        "night",
+        "on back",
+        "staring at the ceiling",
+        "staring up",
+        "thinking at night"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 0.6
+    },
+    "curled_up": {
+      "tags": [
+        "ball",
+        "curled up",
+        "fetal",
+        "hiding",
+        "protecting",
+        "shut down",
+        "small"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "knees_hugged": {
+      "tags": [
+        "anxious",
+        "comfort",
+        "holding on",
+        "knees hugged",
+        "self soothing",
+        "small"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "floor_slumped": {
+      "tags": [
+        "done",
+        "drained",
+        "exhausted",
+        "hopeless",
+        "low",
+        "no energy",
+        "slumped"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "propped_up": {
+      "tags": [
+        "bored",
+        "idle",
+        "lounging",
+        "propped up",
+        "unbothered",
+        "waiting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "crouched_tight": {
+      "tags": [
+        "anticipating",
+        "bracing",
+        "crouched",
+        "flinching",
+        "protecting",
+        "small",
+        "tense",
+        "waiting for it"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.33
+    },
+    "crouch_start": {
+      "tags": [
+        "about to go",
+        "launch",
+        "poised",
+        "ready to run",
+        "starting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "kneeling": {
+      "tags": [
+        "calm",
+        "grounded",
+        "kneeling",
+        "ordinary",
+        "patient",
+        "present",
+        "repetitive",
+        "settled",
+        "slow",
+        "steady"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.25
+    },
+    "catching_breath": {
+      "tags": [
+        "burnt out",
+        "depleted",
+        "exhausted",
+        "out of breath",
+        "overdone it",
+        "recovering",
+        "running on empty",
+        "spent",
+        "tired",
+        "too much"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "picking_up": {
+      "tags": [
+        "effort",
+        "gathering",
+        "picking up",
+        "reaching down",
+        "rebuilding",
+        "small steps",
+        "starting again",
+        "starting over"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "running": {
+      "tags": [
+        "chasing",
+        "escaping",
+        "fast",
+        "hurrying",
+        "running",
+        "rushing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "running_m": {
+      "tags": [
+        "chasing",
+        "escaping",
+        "fast",
+        "hurrying",
+        "running",
+        "rushing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "fleeing": {
+      "tags": [
+        "avoiding",
+        "escaping",
+        "fleeing",
+        "looking back",
+        "panic",
+        "running away"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "fleeing_m": {
+      "tags": [
+        "avoiding",
+        "escaping",
+        "fleeing",
+        "looking back",
+        "panic",
+        "running away"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "walking": {
+      "tags": [
+        "going",
+        "moving on",
+        "progress",
+        "steady",
+        "walking"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "walking_m": {
+      "tags": [
+        "going",
+        "moving on",
+        "progress",
+        "steady",
+        "walking"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "walking_away": {
+      "tags": [
+        "ending",
+        "enough",
+        "giving up",
+        "leaving",
+        "not giving up",
+        "sad",
+        "the boundary",
+        "walking away",
+        "withdrawing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "walking_away_m": {
+      "tags": [
+        "ending",
+        "enough",
+        "giving up",
+        "leaving",
+        "not giving up",
+        "sad",
+        "the boundary",
+        "walking away",
+        "withdrawing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "falling": {
+      "tags": [
+        "falling",
+        "letting go",
+        "losing control",
+        "off balance",
+        "slipping"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "falling_m": {
+      "tags": [
+        "falling",
+        "letting go",
+        "losing control",
+        "off balance",
+        "slipping"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "leaping": {
+      "tags": [
+        "breakthrough",
+        "free",
+        "joyful",
+        "jumping",
+        "leaping",
+        "released"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "leaping_m": {
+      "tags": [
+        "breakthrough",
+        "free",
+        "joyful",
+        "jumping",
+        "leaping",
+        "released"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "point_up": {
+      "tags": [
+        "above",
+        "look up",
+        "point up",
+        "this above",
+        "upward"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_up_m": {
+      "tags": [
+        "above",
+        "look up",
+        "point up",
+        "this above",
+        "upward"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_down": {
+      "tags": [
+        "below",
+        "down here",
+        "look down",
+        "point down",
+        "this below"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_down_m": {
+      "tags": [
+        "below",
+        "down here",
+        "look down",
+        "point down",
+        "this below"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_left": {
+      "tags": [
+        "gesturing left",
+        "over there left",
+        "point left",
+        "this way left"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_left_m": {
+      "tags": [
+        "gesturing right",
+        "over there right",
+        "point right",
+        "this way right"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_right": {
+      "tags": [
+        "gesturing right",
+        "next",
+        "over there right",
+        "point right",
+        "swipe",
+        "this way right"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_right_m": {
+      "tags": [
+        "gesturing left",
+        "next",
+        "over there left",
+        "point left",
+        "swipe",
+        "this way left"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_downleft": {
+      "tags": [
+        "down and left",
+        "over here",
+        "point down left",
+        "this one"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_downleft_m": {
+      "tags": [
+        "down and right",
+        "over here",
+        "point down right",
+        "this one"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_both_down": {
+      "tags": [
+        "both hooves down",
+        "emphasis",
+        "right here",
+        "this exact thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "point_both_down_m": {
+      "tags": [
+        "both hooves down",
+        "emphasis",
+        "left here",
+        "this exact thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "presenting": {
+      "tags": [
+        "here it is",
+        "introducing",
+        "offering up",
+        "palm up",
+        "presenting",
+        "recap",
+        "showing",
+        "summary",
+        "the takeaways"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "presenting_m": {
+      "tags": [
+        "here it is",
+        "introducing",
+        "offering up",
+        "palm up",
+        "presenting",
+        "recap",
+        "showing",
+        "summary",
+        "the takeaways"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "leaning_on": {
+      "tags": [
+        "at ease",
+        "casual",
+        "chilling",
+        "leaning",
+        "relaxed",
+        "resting on"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "leaning_on_m": {
+      "tags": [
+        "at ease",
+        "casual",
+        "chilling",
+        "leaning",
+        "relaxed",
+        "resting on"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "sitting_ledge": {
+      "tags": [
+        "legs dangling",
+        "perched",
+        "relaxed",
+        "sitting on edge",
+        "waiting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 0.0
+    },
+    "sitting_ledge_m": {
+      "tags": [
+        "legs dangling",
+        "perched",
+        "relaxed",
+        "sitting on edge",
+        "waiting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 0.0
+    },
+    "pressing": {
+      "tags": [
+        "action",
+        "button",
+        "do this",
+        "pressing",
+        "pushing",
+        "tap"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "pressing_m": {
+      "tags": [
+        "action",
+        "button",
+        "do this",
+        "pressing",
+        "pushing",
+        "tap"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "holding_up": {
+      "tags": [
+        "burden",
+        "carrying",
+        "holding up",
+        "straining",
+        "supporting",
+        "weight"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "holding_up_m": {
+      "tags": [
+        "burden",
+        "carrying",
+        "holding up",
+        "straining",
+        "supporting",
+        "weight"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "framing": {
+      "tags": [
+        "all of it",
+        "both arms wide",
+        "framing",
+        "look at this",
+        "overview",
+        "reality check",
+        "spanning",
+        "the whole picture",
+        "this whole thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "framing_m": {
+      "tags": [
+        "all of it",
+        "both arms wide",
+        "framing",
+        "look at this",
+        "overview",
+        "reality check",
+        "spanning",
+        "the whole picture",
+        "this whole thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "comparing": {
+      "tags": [
+        "both readings",
+        "both sides",
+        "certainty",
+        "comparing",
+        "either or",
+        "this or that",
+        "two options",
+        "versus",
+        "weighing",
+        "weighing up"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.75
+    },
+    "comparing_m": {
+      "tags": [
+        "both readings",
+        "both sides",
+        "certainty",
+        "comparing",
+        "either or",
+        "this or that",
+        "two options",
+        "versus",
+        "weighing",
+        "weighing up"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.75
+    },
+    "weighing": {
+      "tags": [
+        "balance",
+        "deciding",
+        "pros and cons",
+        "trade off",
+        "weighing",
+        "which one"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "weighing_m": {
+      "tags": [
+        "balance",
+        "deciding",
+        "pros and cons",
+        "trade off",
+        "weighing",
+        "which one"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "looking_up": {
+      "tags": [
+        "above",
+        "aspiring",
+        "big picture",
+        "looking up",
+        "overwhelmed by",
+        "what is coming"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "looking_up_m": {
+      "tags": [
+        "above",
+        "aspiring",
+        "big picture",
+        "looking up",
+        "overwhelmed by",
+        "what is coming"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "looking_far": {
+      "tags": [
+        "distance",
+        "future",
+        "long term",
+        "looking ahead",
+        "scanning",
+        "searching"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "looking_far_m": {
+      "tags": [
+        "distance",
+        "future",
+        "long term",
+        "looking ahead",
+        "scanning",
+        "searching"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "glancing_back": {
+      "tags": [
+        "behind you",
+        "glancing back",
+        "looking back",
+        "startled",
+        "the past",
+        "who is there"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "glancing_back_m": {
+      "tags": [
+        "behind you",
+        "glancing back",
+        "looking back",
+        "startled",
+        "the past",
+        "who is there"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "thumb_back": {
+      "tags": [
+        "back there",
+        "earlier",
+        "pointing behind",
+        "previous slide",
+        "that thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "thumb_back_m": {
+      "tags": [
+        "back there",
+        "earlier",
+        "pointing behind",
+        "previous slide",
+        "that thing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "guardian": {
+      "tags": [
+        "armour",
+        "boundary",
+        "defending",
+        "guardian",
+        "keeping safe",
+        "protecting",
+        "shield"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "sage": {
+      "tags": [
+        "elder",
+        "knows",
+        "sage",
+        "teacher",
+        "the research",
+        "wisdom",
+        "wise"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "healer": {
+      "tags": [
+        "careful",
+        "fragile",
+        "healer",
+        "holding gently",
+        "nurture",
+        "repair",
+        "tender"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "explorer": {
+      "tags": [
+        "curious",
+        "explorer",
+        "growth",
+        "journey",
+        "new territory",
+        "seeking",
+        "setting out"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "caregiver": {
+      "tags": [
+        "caregiver",
+        "carrying everyone",
+        "emotional labour",
+        "everyone's therapist",
+        "giving",
+        "over functioning",
+        "people pleasing",
+        "the helper",
+        "too much"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "rebel": {
+      "tags": [
+        "against the grain",
+        "contrarian",
+        "pushing back",
+        "rebel",
+        "refusing",
+        "unconvinced"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "hero_stance": {
+      "tags": [
+        "capable",
+        "cape",
+        "confident",
+        "empowered",
+        "hero",
+        "standing strong"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    },
+    "hero_flying": {
+      "tags": [
+        "above it",
+        "breakthrough",
+        "flying",
+        "free",
+        "momentum",
+        "soaring"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "hero_landing": {
+      "tags": [
+        "arriving",
+        "hero landing",
+        "landing",
+        "ready",
+        "showing up",
+        "touching down"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "hero_fumbling": {
+      "tags": [
+        "awkward",
+        "fumbling",
+        "getting ready",
+        "not quite",
+        "struggling to start"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "hero_defeated": {
+      "tags": [
+        "burnt out",
+        "cape over head",
+        "defeated",
+        "gave up",
+        "hiding under",
+        "overwhelmed"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "hero_hiding": {
+      "tags": [
+        "avoiding",
+        "behind a shield",
+        "hiding",
+        "not ready",
+        "peeking out"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "lantern_bearer": {
+      "tags": [
+        "clarity",
+        "guiding",
+        "hope",
+        "lantern",
+        "light the way",
+        "showing the path"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "traveller": {
+      "tags": [
+        "bundle",
+        "journey",
+        "leaving",
+        "moving on",
+        "starting over",
+        "traveller"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "storyteller": {
+      "tags": [
+        "explaining",
+        "narrative",
+        "recounting",
+        "storyteller",
+        "the story you tell"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "gardener": {
+      "tags": [
+        "gardener",
+        "growth",
+        "nurturing",
+        "patience",
+        "rebuilding",
+        "slow work",
+        "small steady effort",
+        "tending",
+        "watering"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "patient_one": {
+      "tags": [
+        "boring work",
+        "not rushing",
+        "over time",
+        "patient",
+        "showing up",
+        "small steady effort",
+        "staying put",
+        "steady",
+        "time",
+        "waiting"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.67
+    },
+    "night_watch": {
+      "tags": [
+        "alone at night",
+        "keeping guard",
+        "night watch",
+        "vigilance",
+        "watching over"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "pursue_withdraw": {
+      "tags": [
+        "anxious avoidant",
+        "between you",
+        "both of you",
+        "chases",
+        "chasing and pulling away",
+        "pulls away",
+        "pursue and withdraw",
+        "relationship",
+        "the cycle",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 3.0
+    },
+    "back_to_back": {
+      "tags": [
+        "back to back",
+        "between you",
+        "both of you",
+        "both protecting",
+        "neither is the villain",
+        "not speaking",
+        "relationship",
+        "silent treatment",
+        "standoff",
+        "the pair",
+        "turned away",
+        "two people",
+        "two sides"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "not_listening": {
+      "tags": [
+        "between you",
+        "blank",
+        "both of you",
+        "not listening",
+        "relationship",
+        "stonewalling",
+        "talking past",
+        "the pair",
+        "two people",
+        "unheard"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "secure": {
+      "tags": [
+        "attuned",
+        "between you",
+        "both of you",
+        "calm",
+        "healthy",
+        "relationship",
+        "safe",
+        "secure",
+        "steady together",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 0.0
+    },
+    "steadying": {
+      "tags": [
+        "between you",
+        "both of you",
+        "grounding",
+        "holding steady",
+        "reassurance",
+        "relationship",
+        "steadying",
+        "support",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.0
+    },
+    "side_by_side": {
+      "tags": [
+        "alongside",
+        "between you",
+        "both of you",
+        "companionship",
+        "relationship",
+        "same direction",
+        "side by side",
+        "the pair",
+        "together",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "arguing": {
+      "tags": [
+        "arguing",
+        "between you",
+        "both of you",
+        "both talking",
+        "conflict",
+        "escalating",
+        "fight",
+        "going in circles",
+        "relationship",
+        "row",
+        "the pair",
+        "the same fight",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "accusing": {
+      "tags": [
+        "accusing",
+        "between you",
+        "blaming",
+        "both of you",
+        "criticism",
+        "defending",
+        "pointing the finger",
+        "relationship",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "shouting_shrinking": {
+      "tags": [
+        "between you",
+        "both of you",
+        "intimidating",
+        "making small",
+        "raised voice",
+        "relationship",
+        "shouting",
+        "shrinking",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "sulking": {
+      "tags": [
+        "between you",
+        "both of you",
+        "both turned away",
+        "cold war",
+        "relationship",
+        "silent treatment",
+        "stubborn",
+        "sulking",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.5
+    },
+    "repair_attempt": {
+      "tags": [
+        "between you",
+        "both of you",
+        "offering peace",
+        "reaching out mid fight",
+        "relationship",
+        "repair attempt",
+        "still angry",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.33
+    },
+    "too_late": {
+      "tags": [
+        "between you",
+        "both of you",
+        "gone",
+        "missed it",
+        "reaching after",
+        "relationship",
+        "the pair",
+        "they already left",
+        "too late",
+        "two people",
+        "two people",
+        "both of you",
+        "the pair",
+        "relationship",
+        "between you"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "clinging": {
+      "tags": [
+        "anxious attachment",
+        "between you",
+        "both of you",
+        "clinging",
+        "holding on",
+        "leaning away",
+        "relationship",
+        "the pair",
+        "too close",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 1.0
+    },
+    "chasing": {
+      "tags": [
+        "between you",
+        "both of you",
+        "chases",
+        "chasing",
+        "not looking back",
+        "pursuing",
+        "reaching for them",
+        "relationship",
+        "running after",
+        "the more you",
+        "the pair",
+        "trying to keep up",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.67
+    },
+    "checking_back": {
+      "tags": [
+        "are you following",
+        "between you",
+        "both of you",
+        "checking back",
+        "looking over shoulder",
+        "relationship",
+        "testing",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "mirroring": {
+      "tags": [
+        "attuned",
+        "between you",
+        "both of you",
+        "in step",
+        "matched",
+        "mirroring",
+        "relationship",
+        "same wavelength",
+        "synced",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "comforting": {
+      "tags": [
+        "a hoof on the back",
+        "after the fight",
+        "being there",
+        "between you",
+        "both of you",
+        "comforting",
+        "holding space",
+        "kneeling beside",
+        "relationship",
+        "repair",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.0
+    },
+    "carrying_it_all": {
+      "tags": [
+        "between you",
+        "both of you",
+        "carrying it all",
+        "doing everything",
+        "doing it all",
+        "emotional labour",
+        "everyone's therapist",
+        "imbalance",
+        "one sided",
+        "relationship",
+        "the load",
+        "the pair",
+        "two people",
+        "unequal"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "hugging": {
+      "tags": [
+        "after the fight",
+        "between you",
+        "both of you",
+        "close",
+        "closeness",
+        "coming back",
+        "embrace",
+        "held",
+        "hugging",
+        "reconnecting",
+        "relationship",
+        "repair",
+        "reunion",
+        "the pair",
+        "two people",
+        "warmth"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.0
+    },
+    "high_five": {
+      "tags": [
+        "between you",
+        "both of you",
+        "celebrating together",
+        "high five",
+        "in sync",
+        "relationship",
+        "shared win",
+        "teamwork",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "laughing_together": {
+      "tags": [
+        "between you",
+        "both of you",
+        "ease",
+        "fun",
+        "joy",
+        "laughing together",
+        "play",
+        "relationship",
+        "shared humour",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "apologising": {
+      "tags": [
+        "after the fight",
+        "apologising",
+        "between you",
+        "both of you",
+        "coming back",
+        "making amends",
+        "offering a flower",
+        "relationship",
+        "repair",
+        "softening",
+        "sorry",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "talking_easily": {
+      "tags": [
+        "between you",
+        "both of you",
+        "connecting",
+        "conversation",
+        "facing each other",
+        "open",
+        "relationship",
+        "talking easily",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "shoulder_hold": {
+      "tags": [
+        "between you",
+        "both of you",
+        "hoof on shoulder",
+        "looking forward together",
+        "relationship",
+        "solidarity",
+        "support",
+        "the pair",
+        "two people",
+        "with you"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "far_apart": {
+      "tags": [
+        "across the room",
+        "between you",
+        "both of you",
+        "distance",
+        "drifted",
+        "drifting",
+        "far apart",
+        "gap between you",
+        "relationship",
+        "the distance",
+        "the gap",
+        "the pair",
+        "two people",
+        "two sides"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "back_to_back_sitting": {
+      "tags": [
+        "back to back sitting",
+        "between you",
+        "both of you",
+        "each in their own world",
+        "own world",
+        "parallel lives",
+        "relationship",
+        "separate",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 0.0
+    },
+    "one_awake": {
+      "tags": [
+        "3am",
+        "beside them but alone",
+        "between you",
+        "both of you",
+        "cannot sleep",
+        "lying awake",
+        "one awake",
+        "relationship",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "already_leaving": {
+      "tags": [
+        "already leaving",
+        "between you",
+        "both of you",
+        "ending",
+        "goodbye",
+        "one foot out",
+        "relationship",
+        "the pair",
+        "two people",
+        "walking off"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "empty_space": {
+      "tags": [
+        "apart",
+        "between you",
+        "both of you",
+        "distance between",
+        "empty space",
+        "opposite ends",
+        "relationship",
+        "the gap",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "almost_touching": {
+      "tags": [
+        "almost touching",
+        "between you",
+        "both of you",
+        "just missed",
+        "nearly",
+        "not quite",
+        "relationship",
+        "so close",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported",
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "cheering_m": {
+      "tags": [
+        "celebrating",
+        "cheering",
+        "excited",
+        "joy",
+        "win",
+        "yes"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "laughing_m": {
+      "tags": [
+        "amused",
+        "delight",
+        "funny",
+        "head back",
+        "laughing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "ready_m": {
+      "tags": [
+        "committed",
+        "determined",
+        "fists",
+        "ready",
+        "resolve",
+        "sleeves up"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": -1.2,
+      "arousal": 3.0
+    },
+    "jumping_m": {
+      "tags": [
+        "bouncing",
+        "eager",
+        "energy",
+        "jumping",
+        "thrilled"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 3.0
+    },
+    "finished_m": {
+      "tags": [
+        "complete",
+        "done",
+        "dusting off",
+        "finished",
+        "satisfied",
+        "sorted"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "stretching_m": {
+      "tags": [
+        "fresh",
+        "new start",
+        "stretching",
+        "waking",
+        "yawn"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "pointing_m": {
+      "tags": [
+        "calling out",
+        "direct",
+        "pointing at you",
+        "this one",
+        "you"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 2.0
+    },
+    "blank_card_m": {
+      "tags": [
+        "card",
+        "message",
+        "note",
+        "reminder",
+        "screenshot"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "approving_m": {
+      "tags": [
+        "agree",
+        "approve",
+        "good",
+        "thumbs up",
+        "yes"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "beckoning_m": {
+      "tags": [
+        "closer",
+        "come here",
+        "follow",
+        "invite",
+        "join"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 0.0,
+      "arousal": 1.5
+    },
+    "waving_m": {
+      "tags": [
+        "friendly",
+        "goodbye",
+        "hello",
+        "see you",
+        "wave"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "winking_m": {
+      "tags": [
+        "cheeky",
+        "knowing",
+        "nod",
+        "playful",
+        "wink"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "mirrored": true,
+      "valence": 1.5,
+      "arousal": 1.5
+    },
+    "far_apart2": {
+      "tags": [
+        "apart",
+        "between you",
+        "both of you",
+        "distance",
+        "far apart2",
+        "gap",
+        "relationship",
+        "the pair",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "thumbjack": {
+      "tags": [
+        "behind him",
+        "brushing it off",
+        "deadpan",
+        "dismissive",
+        "moving on",
+        "not looking back",
+        "over the shoulder",
+        "thumbjack"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "thumbjack_back": {
+      "tags": [
+        "behind him",
+        "brushing it off",
+        "dismissive",
+        "moving on",
+        "not looking back",
+        "over the shoulder",
+        "thumbjack back",
+        "turned away",
+        "walking away"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "valence": -1.2,
+      "arousal": 2.0
+    }
+  },
+  "role_default": {
+    "hook": "deadpan",
+    "agitation": "clutching",
+    "source": "reading",
+    "value": "explaining",
+    "script": "offering",
+    "cheat": "holding_board",
+    "cta": "approving"
+  },
+  "rotation": [
+    "pondering",
+    "realising",
+    "watchful",
+    "idea",
+    "guarded",
+    "standing_tall",
+    "listening",
+    "unimpressed",
+    "spiralling",
+    "relieved"
+  ],
+  "mood_lexicon": {
+    "valence": {
+      "-2": [
+        "panic",
+        "anxious",
+        "dread",
+        "fear",
+        "despair",
+        "hopeless",
+        "defeated",
+        "exhausted",
+        "burnt out",
+        "overwhelm",
+        "shouting",
+        "arguing",
+        "accusing",
+        "blaming",
+        "conflict",
+        "sulking",
+        "stonewalling",
+        "shutting down",
+        "cold war",
+        "alone",
+        "abandoned",
+        "gone",
+        "too late",
+        "drained",
+        "cannot sleep",
+        "insomnia",
+        "spiralling",
+        "rumination",
+        "escaping",
+        "fleeing",
+        "losing control",
+        "falling",
+        "danger",
+        "threat",
+        "chaos",
+        "volatile",
+        "explosion",
+        "rupture",
+        "betrayal",
+        "abandonment",
+        "sabotage",
+        "crisis",
+        "unsafe",
+        "terrified"
+      ],
+      "-1": [
+        "worried",
+        "tense",
+        "guarded",
+        "defensive",
+        "withdrawn",
+        "hesitating",
+        "unsure",
+        "uncertain",
+        "suspicious",
+        "hypervigilant",
+        "on guard",
+        "bored",
+        "numb",
+        "over it",
+        "masking",
+        "forced",
+        "pretending",
+        "fake smile",
+        "sigh",
+        "exasperated",
+        "fed up",
+        "distance",
+        "drifting",
+        "the gap",
+        "apart",
+        "imbalance",
+        "one sided",
+        "clinging",
+        "chasing",
+        "unheard",
+        "turning away",
+        "avoiding",
+        "guarded",
+        "skeptical",
+        "judging",
+        "unimpressed",
+        "not buying it",
+        "declining",
+        "refusing"
+      ],
+      "0": [
+        "deadpan",
+        "flat",
+        "blank",
+        "staring",
+        "thinking",
+        "pondering",
+        "wondering",
+        "considering",
+        "reflect",
+        "explaining",
+        "showing",
+        "waiting",
+        "patient",
+        "steady",
+        "listening",
+        "attentive",
+        "comparing",
+        "weighing",
+        "deciding",
+        "reading",
+        "study",
+        "research",
+        "looking",
+        "scanning",
+        "pointing",
+        "presenting",
+        "holding",
+        "carrying",
+        "walking",
+        "sitting",
+        "kneeling",
+        "crouched"
+      ],
+      "1": [
+        "calm",
+        "peaceful",
+        "content",
+        "relaxed",
+        "settled",
+        "ease",
+        "quiet",
+        "relief",
+        "exhale",
+        "let go",
+        "grounded",
+        "secure",
+        "safe",
+        "steady together",
+        "attuned",
+        "present",
+        "gentle",
+        "soft",
+        "kind",
+        "warm",
+        "cosy",
+        "comfort",
+        "reassurance",
+        "support",
+        "hopeful",
+        "curious",
+        "realisation",
+        "insight",
+        "clever",
+        "confident",
+        "self-worth",
+        "standing tall",
+        "proud",
+        "boundary",
+        "repair",
+        "healing",
+        "trust",
+        "understood",
+        "seen",
+        "held",
+        "tender",
+        "undramatic"
+      ],
+      "2": [
+        "joy",
+        "delight",
+        "celebrating",
+        "cheering",
+        "laughing",
+        "thrilled",
+        "excited",
+        "welcome",
+        "inviting",
+        "open arms",
+        "hugging",
+        "embrace",
+        "high five",
+        "love",
+        "affection",
+        "tender",
+        "breakthrough",
+        "free",
+        "triumphant",
+        "win",
+        "empowered",
+        "heroic"
+      ]
+    },
+    "arousal": {
+      "0": [
+        "eyes closed",
+        "serene",
+        "calm",
+        "peaceful",
+        "content",
+        "relaxed",
+        "rest",
+        "settled",
+        "quiet",
+        "sleepless",
+        "lying down",
+        "on back",
+        "sitting",
+        "resting",
+        "at ease",
+        "slow blink",
+        "bored",
+        "numb",
+        "patient",
+        "waiting",
+        "still"
+      ],
+      "1": [
+        "thinking",
+        "pondering",
+        "wondering",
+        "reflect",
+        "listening",
+        "attentive",
+        "reading",
+        "study",
+        "deadpan",
+        "flat",
+        "staring",
+        "guarded",
+        "withdrawn",
+        "hesitating",
+        "gentle",
+        "soft",
+        "comfort",
+        "kneeling",
+        "head tilt",
+        "curious",
+        "holding",
+        "warm"
+      ],
+      "2": [
+        "explaining",
+        "pointing",
+        "presenting",
+        "showing",
+        "walking",
+        "reaching",
+        "offering",
+        "curious",
+        "realisation",
+        "insight",
+        "confident",
+        "standing tall",
+        "boundary",
+        "declining",
+        "comparing",
+        "weighing",
+        "carrying",
+        "picking up",
+        "crouched",
+        "tense",
+        "suspicious",
+        "hypervigilant"
+      ],
+      "3": [
+        "panic",
+        "alarm",
+        "shouting",
+        "arguing",
+        "running",
+        "chasing",
+        "fleeing",
+        "jumping",
+        "leaping",
+        "celebrating",
+        "cheering",
+        "laughing",
+        "thrilled",
+        "excited",
+        "spiralling",
+        "falling",
+        "smash",
+        "high five",
+        "bouncing",
+        "escaping",
+        "ready"
+      ]
+    }
+  },
+  "concepts": {
+    "withdrawn": [
+      "shut down",
+      "shutting down",
+      "checked out",
+      "closed off",
+      "pulling away",
+      "cold shoulder",
+      "closing off",
+      "gone quiet"
+    ],
+    "apart": [
+      "growing apart",
+      "drifting apart",
+      "grown apart",
+      "far away from each other"
+    ],
+    "exhaust": [
+      "running on empty",
+      "nothing left to give",
+      "tapped out completely",
+      "totally drained",
+      "emotionally exhausted"
+    ],
+    "panic": [
+      "freaking out",
+      "losing it completely",
+      "cannot breathe",
+      "panicking internally"
+    ],
+    "rest": [
+      "allowed to rest",
+      "permission to stop",
+      "resting without guilt",
+      "taking a break",
+      "earn a break"
+    ],
+    "boundary": [
+      "setting a boundary",
+      "drawing the line",
+      "holding the line",
+      "standing your ground"
+    ],
+    "repair": [
+      "making up",
+      "making amends",
+      "coming back together",
+      "rebuilding trust",
+      "mending things"
+    ],
+    "realis": [
+      "it clicks",
+      "lightbulb moment",
+      "connecting the dots",
+      "putting it together",
+      "figuring it out"
+    ],
+    "argu": [
+      "blowing up",
+      "getting heated",
+      "turning into a fight",
+      "same fight again"
+    ],
+    "silent": [
+      "refusing to speak",
+      "going quiet",
+      "giving nothing back",
+      "not speaking"
+    ],
+    "skeptical": [
+      "the ick",
+      "instant turn off",
+      "grossed out",
+      "not buying it"
+    ],
+    "hesitat": [
+      "second guessing",
+      "on the fence",
+      "torn between",
+      "not sure what to do"
+    ],
+    "celebrat": [
+      "small win",
+      "proud of yourself",
+      "worth celebrating"
+    ],
+    "growth": [
+      "slow and steady progress",
+      "one step at a time",
+      "small consistent effort"
+    ],
+    "reach": [
+      "reaching out first",
+      "making the first move",
+      "putting yourself out there"
+    ],
+    "cling": [
+      "seeking constant reassurance",
+      "needing constant reassurance",
+      "cannot stop checking"
+    ]
+  }
+}

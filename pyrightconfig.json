@@ -1,0 +1,7 @@
+{
+  "venvPath": ".agents/skills/suresilly-carousel",
+  "venv": ".venv",
+  "extraPaths": [
+    ".agents/skills/suresilly-carousel/scripts"
+  ]
+}

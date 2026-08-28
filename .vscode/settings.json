@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.agents/skills/suresilly-carousel/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/.agents/skills/suresilly-carousel/scripts"
+  ]
+}
