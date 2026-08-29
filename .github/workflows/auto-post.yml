@@ -34,7 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      DRY_RUN: ${{ inputs.dry_run || 'true' }}
+      # Auto 2x/day via schedule must publish (false). Manual dispatch defaults to dry_run true (safe preview).
+      DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run || 'true' }}
       INTENT: ${{ inputs.intent || 'sends' }}
 
     steps:
@@ -71,15 +72,104 @@ jobs:
             DATE=$(date -u +"%Y%m%d")
             OUT="carousels/${DATE}_${SLUG}/carousel.md"
             mkdir -p "$(dirname "$OUT")"
-            # Call the skill's generator (if you have a generate.py, else this step is where your LLM call writes the md)
-            # Placeholder: fail if no generator — the workflow will still test audit/build on existing waiting-mode as dry-run example
+            # Generation: if OUT doesn't exist, the lucky generator should have created it.
+            # For now (before LLM generator is wired), fallback to any existing carousel as fixture.
             if [ -f "$OUT" ]; then
               echo "OUT exists: $OUT"
             else
-              echo "No generator found — using existing 20260828_waiting-mode as dry-run fixture"
-              OUT="carousels/20260828_waiting-mode/carousel.md"
-              # For the very first dry runs before you wire the LLM generator, we reuse the fixture
-              # Replace the next line with your actual generation call:
+              EXISTING=$(find carousels -name "carousel.md" -type f | head -1)
+              if [ -n "$EXISTING" ]; then
+                echo "No generator found — using existing $EXISTING as fixture"
+                OUT="$EXISTING"
+              else
+                echo "No carousel found at all — creating minimal fixture at $OUT"
+                mkdir -p "$(dirname "$OUT")"
+                cat > "$OUT" << 'EOFMD'
+# Carousel: Fixture — Waiting Mode
+**Pattern:** The Hidden Mechanism
+**Content Pillar:** Executive Function / ADHD
+**Core Emotion:** Relief
+
+### Slide 1 · Hook
+- **Layout:** Template A
+- **H1:** You have 17 tabs and no [[task]].
+- **H2:** (waiting mode, not laziness)
+- **Mascot:** Silly hunched over desk, laptop with 17 tabs
+
+### Slide 2 · Agitation
+- **Layout:** Template A
+- **Body:** You had five free hours before the appointment. You did [[nothing]].
+- **Mascot:** Silly staring at clock
+
+### Slide 3 · Source Anchor
+- **Layout:** Template F
+- **Body:** When your brain can't track time, it parks you in [[standby]] to avoid missing what's next.
+- **Source:** — Russell Barkley, *Taking Charge of Adult ADHD* (2010)
+- **Mascot:** Silly reading book
+
+### Slide 4 · Value Step 1
+- **Layout:** Template B
+- **Badge:** 01
+- **H2:** Not laziness. [[Waiting mode]].
+- **Body:** You want to start. Your system says not yet. It's still guarding what's next, so you [[hover]].
+
+### Slide 5 · Value Step 2
+- **Layout:** Template C
+- **❌ Old Reaction:** "I have no discipline. I wasted five hours doing [[nothing]] — what's wrong with me?"
+- **✅ Regulated Response:** "I'm in [[waiting mode]]. Holding the appointment in the background, so nothing else could load."
+- **Mascot:** Silly holding phone
+
+### Slide 6 · Value Step 3
+- **Layout:** Template B
+- **Badge:** 02
+- **H2:** If hovering at 2:47, then [[this]].
+- **Body:** If you're hovering at 2:47pm with 17 tabs open, then phone face-down, set 10:00 timer, open only the document, write title only till it dings.
+
+### Slide 7 · Value Step 4
+- **Layout:** Template B
+- **Badge:** 03
+- **H2:** Give the wait a [[job]].
+- **Body:** Don't fight the hold. Anchor it: set two timers — one to start a 10-minute starter task, one for when you must leave. The timers hold the time so your body doesn't have to.
+
+### Slide 8 · Cheat Sheet
+- **Layout:** Template D
+- **H2:** Your 2-timer [[reset]]
+- **Callout:** Save this for your next waiting mode
+- **Bullets:**
+  • Name it: "I'm in [[waiting mode]], not lazy"
+  • Do one 10-minute starter task [[now]]
+  • Set two timers: start + must-leave
+  • Phone face-down, let timers [[hold]] time
+- **Mascot:** Silly writing in notebook
+
+### Slide 9 · CTA
+- **Layout:** Template E
+- **Closing thought:** A brain on [[standby]] isn't broken. Just holding so you don't miss what's next.
+- **Primary CTA:** Send this to the friend who waits hours before an [[appointment]].
+- **Handle:** @suresilly
+- **Mascot:** Silly waving
+
+## Caption
+You have 17 tabs open. 4 snacks. No task started. That's waiting mode.
+
+## Hashtags
+#suresilly #waitingmode #adhd
+
+## Alt Text
+Slide 1: Hook — 17 tabs open and no task.
+Slide 2: Agitation — five free hours before appointment.
+Slide 3: Source — Barkley on waiting mode.
+Slide 4: Value — not laziness, waiting mode.
+Slide 5: Value — old vs new script.
+Slide 6: Value — if hovering at 2:47 then this.
+Slide 7: Value — give the wait a job.
+Slide 8: Cheat sheet — your 2-timer reset.
+Slide 9: CTA — send to friend who waits before appointment.
+
+**DM-Share Hypothesis:** People will send this to a friend who waits hours before an appointment.
+EOFMD
+              fi
+              # Replace the next line with your actual generation call when ready:
               # python scripts/generate_lucky.py --topic "$TOPIC" --intent "$INTENT" --out "$OUT"
             fi
             echo "OUT=$OUT" >> $GITHUB_ENV
