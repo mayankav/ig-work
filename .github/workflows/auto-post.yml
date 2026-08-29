@@ -150,6 +150,27 @@ jobs:
           keep_files: true     # preserve previous carousel images across runs
           cname: media.suresilly.com
 
+      - name: Wait for Pages deploy (Instagram fetcher needs 200)
+        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+        run: |
+          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
+          URL="https://media.suresilly.com/slides/$SLUG/slides/01_slide_1_hook.png"
+          echo "Waiting for $URL to return 200 (Pages deploy)..."
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo 000)
+            if [ "$CODE" = "200" ]; then
+              echo "Pages live on try $i: $URL -> $CODE"
+              curl -I -s "$URL" | head -n 5
+              break
+            fi
+            echo "Try $i/12: $CODE — not yet, sleeping 10s..."
+            sleep 10
+          done
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo 000)
+          if [ "$CODE" != "200" ]; then
+            echo "::warning::Pages not 200 after 120s: $URL -> $CODE (Instagram will fail)"
+          fi
+
       - name: Post to Instagram (only if not dry run)
         if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
         env:
