@@ -125,6 +125,34 @@ HOOKS = {
     ],
 }
 
+# Agitation slide (slide 2) — must be topic-specific, ≤25w, own [[accent]], no early jargon
+AGITATION = {
+    "waiting-mode": "You had five free hours before the appointment. You did [[nothing]].",
+    "laptop-refresh": "Closed the laptop at 8:30pm and kept checking your [[inbox]] from the couch.",
+    "replay-conversations": "Replayed a 10-second lunch chat on loop until [[midnight]].",
+    "doomscroll-2am": "Phone glow on your face at 2am, 'one more video' for 45 [[minutes]].",
+    "over-explain-no": "Wrote 4 paragraphs to say 'no' and still felt [[guilty]].",
+    "self-proving-lazy": "Bought shoes, left them boxed, wrote two [[sentences]] in three hours.",
+    "inbox-reread-boss": "Re-read your boss's email 8 times to check if it's [[mad]].",
+    "numbing-zelda": "Put Zelda on for 2 hours to not feel, then felt [[worse]].",
+    "inbox-panic": "Saw 127 unread at 11:47pm and felt your chest get [[tight]].",
+    "reread-okay": "Reread 'okay.' four times and checked last seen in two [[apps]].",
+    "family-15-again": "Walked through your parents' door and felt your voice get [[small]].",
+    "say-yes-resent": "Said 'yes of course!' and felt your stomach [[drop]] for three days.",
+    "apologies-reflex": "Said 'sorry' before you asked the [[question]].",
+    "sleep-clock-check": "Checked the clock at 2, 3, 4:30 and called it [[sleep]].",
+    "tabs-paralysis": "Opened 17 tabs, 4 snacks, and still couldn't open the [[doc]].",
+    "fawn-mask": "Smiled and agreed before you knew what you [[needed]].",
+    "functional-freeze": "Did everything all day then froze on the [[couch]].",
+    "burden-feel": "Felt like a burden for needing help with [[dishes]].",
+    "self-fulfilling": "Pulled away to stay safe and proved you were [[alone]].",
+    "waiting-mode-2": "Had hours free before an appointment and did [[nothing]].",
+    "clock-217am": "Woke at 2:17am, stared at the clock, heart [[pounding]].",
+    "burden-boundaries": "Said no and felt like you were being [[mean]].",
+    "need-to-exceed": "Did extra to feel safe and still felt [[behind]].",
+    "heart-flip": "Heart flipped and chest went [[weird]] for 20 seconds.",
+}
+
 def parse_bank():
     if not BANK.is_file():
         return {}
@@ -154,17 +182,16 @@ def make_carousel(topic: str, intent: str, out_path: Path) -> Path:
     stealable = info.get("stealable", "")
     # Hook — pick random variant so same topic never repeats verbatim (on-the-fly)
     if topic in HOOKS:
-        # Seed with topic+date+microseconds for per-run variety, but deterministic per file
         random.seed(f"{topic}-{out_path}-{datetime.datetime.utcnow().isoformat()}")
         h1, h2 = random.choice(HOOKS[topic])
     else:
-        # Generic ≤8w hook: take scene concrete fragment
         words = re.findall(r"[A-Za-z0-9']+", scene)
-        # keep first 6 words + accent on last
         base = " ".join(words[:6]) if len(words) >= 6 else scene.split(",")[0]
         base = re.sub(r"[\[\]]", "", base)[:45]
         h1 = f"{base.strip()} [[tonight]]."
         h2 = "(and why it happens)"
+    # Agitation — topic-specific so slide 2 never repeats across decks
+    agitation = AGITATION.get(topic, f"If you {scene[:50].lower()} and did [[nothing]], this is for you.")
     # Source — pick by pillar
     if "family" in pillar.lower() or "people" in pillar.lower():
         source = "— Murray Bowen, *Family Therapy in Clinical Practice* (1978)"
@@ -198,8 +225,6 @@ def make_carousel(topic: str, intent: str, out_path: Path) -> Path:
 
     # Build markdown — must satisfy all audit gates
     title = topic.replace("-", " ").title()
-    # Keep slide 2/4 bodies generic-safe to avoid early-jargon/seesaw; uniqueness comes from
-    # random hook variant + palette + caption/scene, not from agitation copy
     md = f"""# Carousel: {title} — {date_str}
 
 **Pattern:** {pattern} · **Content Pillar:** {pillar} · **Core Emotion:** Relief
@@ -213,7 +238,7 @@ def make_carousel(topic: str, intent: str, out_path: Path) -> Path:
 
 ### Slide 2 · Agitation
 - **Layout:** Template A
-- **Body:** If you had five free hours before the appointment and did [[nothing]], this is for you.
+- **Body:** {agitation}
 - **Mascot:** {mascot[1]}
 
 ### Slide 3 · Source Anchor
