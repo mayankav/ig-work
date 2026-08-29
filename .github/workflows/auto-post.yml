@@ -10,7 +10,7 @@ on:
       dry_run:
         description: "Dry run (build + email preview, do not publish to IG)"
         required: false
-        default: "true"
+        default: "false"
         type: choice
         options: ["true", "false"]
       intent:
