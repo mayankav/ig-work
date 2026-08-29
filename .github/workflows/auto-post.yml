@@ -47,9 +47,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Playwright + deps
+      - name: Install Python deps + Playwright
         run: |
-          .agents/skills/suresilly-carousel/.venv/bin/python -m pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt 2>/dev/null || pip install -r .agents/skills/suresilly-carousel/requirements.txt
+          pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
+          pip install --quiet requests   # needed by post_to_ig.py and send_email.py
           python -m playwright install chromium --with-deps
 
       - name: Lucky — suggest → audit → build (up to 3 picks)
@@ -60,9 +61,10 @@ jobs:
           set -e
           echo "INTENT=$INTENT DRY_RUN=$DRY_RUN"
           # Try up to 3 topics, first that passes usefulness + truth gates
+          PASSED=false
           for TRY in 1 2 3; do
             echo "--- Try $TRY ---"
-            TOPIC=$(python .agents/skills/suresilly-carousel/scripts/suggest_topics.py --pick --intent $INTENT | grep WINNER | sed 's/WINNER: //; s/ .*//')
+            TOPIC=$(python .agents/skills/suresilly-carousel/scripts/suggest_topics.py --pick --intent "$INTENT" | grep WINNER | sed 's/WINNER: //; s/ .*//')
             echo "Picked topic: $TOPIC"
             # Generate carousel.md via skill — uses the 10-step utility-first workflow
             # The skill itself is invoked via python — we call a helper that writes carousels/<date>_<slug>/carousel.md
@@ -89,18 +91,21 @@ jobs:
               # Replace the next line with your actual generation call when ready:
               # python scripts/generate_lucky.py --topic "$TOPIC" --intent "$INTENT" --out "$OUT"
             fi
-            echo "OUT=$OUT" >> $GITHUB_ENV
+            echo "OUT=$OUT" >> "$GITHUB_ENV"
             if python .agents/skills/suresilly-carousel/scripts/audit_copy.py "$OUT"; then
               echo "audit PASS on try $TRY"
-              echo "CAROUSEL_MD=$OUT" >> $GITHUB_ENV
-              exit 0
+              echo "CAROUSEL_MD=$OUT" >> "$GITHUB_ENV"
+              PASSED=true
+              break
             else
               echo "audit FAIL on try $TRY — will re-pick"
             fi
           done
-          echo "All 3 picks failed audit"
-          echo "CAROUSEL_MD=" >> $GITHUB_ENV
-          exit 1
+          if [ "$PASSED" != "true" ]; then
+            echo "All 3 picks failed audit"
+            echo "CAROUSEL_MD=" >> "$GITHUB_ENV"
+            exit 1
+          fi
 
       - name: Build PNGs
         if: env.CAROUSEL_MD != ''
@@ -121,6 +126,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./carousels
           destination_dir: slides
+          keep_files: true     # preserve previous carousel images across runs
           cname: media.suresilly.com
 
       - name: Post to Instagram (only if not dry run)
@@ -157,14 +163,20 @@ jobs:
         run: |
           SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
           SUBJECT="[SILLY-SUCCESS] Posted $SLUG — $(date -u +%Y-%m-%d)"
-          # contact_sheet.png as preview
-          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" --body "Posted $SLUG
-
-          Hook: $(grep -m1 'H1:' "$CAROUSEL_MD" | sed 's/.*H1: //')
+          HOOK=$(grep -m1 'H1:' "$CAROUSEL_MD" | sed 's/.*H1: //' || echo "(no hook found)")
+          BODY=$(cat <<EOF
+          Posted $SLUG
+          Hook: $HOOK
           File: $CAROUSEL_MD
           Dry run: $DRY_RUN
 
-          See contact_sheet.png attached." --attach "$(dirname "$CAROUSEL_MD")/contact_sheet.png" || echo "email failed — will try telegram fallback"
+          See contact_sheet.png attached.
+          EOF
+          )
+          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" \
+            --body "$BODY" \
+            --attach "$(dirname "$CAROUSEL_MD")/contact_sheet.png" \
+            || echo "email failed — will try telegram fallback"
 
       - name: Email — error (3 picks failed or build failed)
         if: failure()
