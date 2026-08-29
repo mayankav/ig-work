@@ -37,6 +37,15 @@ MARGIN = 92
 FOOTER_H = 132
 RULE_Y = 96
 BANNER_MAX_H = 380
+# Minimum internal breathing room — guarantees the type block never kisses
+# the viewport edge, even when FIT_FIGURE centers short copy. Applied as
+# padding inside .canvas so getBoundingClientRect() measurements stay true.
+CANVAS_PAD_TOP = 36
+CANVAS_PAD_BOTTOM = 36
+# Source slides carry a dense 3-block stack (kicker + line ×3 + credit) and
+# need a touch more headroom than a regular value slide. This is the *total*
+# top padding for source (not additive to CANVAS_PAD_TOP).
+SOURCE_PAD_TOP = 56
 # ── The type scale. Fixed, and identical on every slide of every carousel.
 #
 # It used to auto-fit: each slide shrank its own text until the copy fitted, so
@@ -645,8 +654,9 @@ body{{background:{t['ground']};color:{t['ink']};position:relative;overflow:hidde
   background-image:url({{GRAIN}});background-size:128px 128px;mix-blend-mode:overlay}}
 
 .canvas{{position:absolute;left:{MARGIN}px;right:{MARGIN}px;top:{MARGIN}px;bottom:{FOOTER_H+12}px;
-  z-index:5;display:flex;flex-direction:column;justify-content:center;gap:28px;align-items:center;}}
-.canvas.source-pad{{padding-top:32px}}
+  z-index:5;display:flex;flex-direction:column;justify-content:center;gap:28px;align-items:center;
+  padding-top:{CANVAS_PAD_TOP}px;padding-bottom:{CANVAS_PAD_BOTTOM}px;}}
+.canvas.source-pad{{padding-top:{SOURCE_PAD_TOP}px;justify-content:flex-start}}
 /* With no figure the copy owns the slide and is centred in it. Spreading the
    blocks apart with space-between only moved the void into the middle, which
    looks broken rather than composed. */
@@ -993,19 +1003,22 @@ FIT_FIGURE = """(cfg) => {
   }
   // Inline mascot (flex child inside canvas) — fixed 460px, no dynamic room calc
   if (fig && fig.classList.contains('mascot-inline')) {
-    const canvas = fig.closest('.canvas');
-    if (canvas) {
-      const cb = canvas.getBoundingClientRect().bottom;
-      const limit = cfg.pageH - cfg.footerH - 8;
-      if (cb > limit) {
-        const over = Math.round(cb - limit);
-        const curH = fig.getBoundingClientRect().height;
-        const newH = Math.max(320, Math.round(curH - over - 16));
+    const limit = cfg.pageH - cfg.footerH - 8;
+    let fb = fig.getBoundingClientRect().bottom;
+    if (fb > limit) {
+      const over = Math.round(fb - limit);
+      const curH = fig.getBoundingClientRect().height;
+      let newH = Math.max(240, Math.round(curH - over - 16));
+      fig.style.height = newH + 'px';
+      fb = fig.getBoundingClientRect().bottom;
+      if (fb > limit) {
+        const over2 = Math.round(fb - limit);
+        newH = Math.max(180, Math.round(newH - over2 - 8));
         fig.style.height = newH + 'px';
-        out.figure = newH;
-        out.field = 'inline-shrunk';
-        return out;
       }
+      out.figure = parseInt(fig.style.height, 10);
+      out.field = 'inline-shrunk';
+      return out;
     }
     out.figure = fig.getBoundingClientRect().height;
     return out;
@@ -1077,10 +1090,16 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
                 sys.exit(f"ERROR: font(s) failed to load: {', '.join(missing)}.\n"
                          f"Slides would silently render in a fallback face — aborting.\n"
                          f"Check assets/fonts/ contains valid TrueType files.")
+            # Per-slide effective top accounts for the minimum canvas padding
+            # (SOURCE_PAD_TOP vs CANVAS_PAD_TOP). Bottom is factored via an
+            # effective footer that includes the canvas bottom inset + inner pad.
+            _is_src = "source" in s.get("role", "") or s.get("layout", "").startswith("Template F")
+            _top_eff = MARGIN + (SOURCE_PAD_TOP if _is_src else CANVAS_PAD_TOP)
+            _footer_eff = FOOTER_H + 12 + CANVAS_PAD_BOTTOM
             fit = page.evaluate(FIT_FIGURE, {
                 "pageH": H, "pageW": W, "margin": MARGIN,
-                "footerH": FOOTER_H, "gap": 22, "top": MARGIN,
-                "clear": 40, "copyMaxY": MARGIN + COPY_MAX_H,
+                "footerH": _footer_eff, "gap": 22, "top": _top_eff,
+                "clear": 40, "copyMaxY": _top_eff + COPY_MAX_H,
                 "min": MASCOT_MIN, "max": MASCOT_MAX})
             if verbose and fit["figure"] == 0:
                 textonly.append(i)
