@@ -27,7 +27,17 @@ except ImportError:
     print("requests not installed — pip install requests")
     sys.exit(1)
 
-GRAPH = "https://graph.facebook.com/v20.0"
+GRAPH_FACEBOOK = "https://graph.facebook.com/v20.0"
+GRAPH_INSTAGRAM = "https://graph.instagram.com/v21.0"
+
+def graph_base(token: str) -> str:
+    """Pick the right API host based on token type.
+    IGAAP... tokens come from the new Instagram API → graph.instagram.com
+    EAA...  tokens come from Facebook Login       → graph.facebook.com
+    """
+    if token.startswith("IGAAP"):
+        return GRAPH_INSTAGRAM
+    return GRAPH_FACEBOOK
 
 def parse_caption(md_path: Path) -> str:
     txt = md_path.read_text(encoding="utf-8")
@@ -58,7 +68,8 @@ def list_images(carousel_dir: Path, base_url: str) -> list[str]:
     return urls
 
 def create_image_container(ig_user_id: str, token: str, image_url: str) -> str:
-    r = requests.post(f"{GRAPH}/{ig_user_id}/media", data={
+    base = graph_base(token)
+    r = requests.post(f"{base}/{ig_user_id}/media", data={
         "image_url": image_url,
         "is_carousel_item": "true",
         "access_token": token,
@@ -69,7 +80,8 @@ def create_image_container(ig_user_id: str, token: str, image_url: str) -> str:
     return r.json()["id"]
 
 def create_carousel(ig_user_id: str, token: str, children: list[str], caption: str) -> str:
-    r = requests.post(f"{GRAPH}/{ig_user_id}/media", data={
+    base = graph_base(token)
+    r = requests.post(f"{base}/{ig_user_id}/media", data={
         "media_type": "CAROUSEL",
         "children": ",".join(children),
         "caption": caption,
@@ -82,8 +94,9 @@ def create_carousel(ig_user_id: str, token: str, children: list[str], caption: s
 
 def publish(ig_user_id: str, token: str, creation_id: str) -> str:
     # Poll for finish — carousel needs ~5-10s
+    base = graph_base(token)
     for _ in range(12):
-        r = requests.post(f"{GRAPH}/{ig_user_id}/media_publish", data={
+        r = requests.post(f"{base}/{ig_user_id}/media_publish", data={
             "creation_id": creation_id,
             "access_token": token,
         }, timeout=30)
