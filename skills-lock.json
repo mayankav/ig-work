@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "beautiful-article": {
+      "source": "ConardLi/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/beautiful-article/SKILL.md",
+      "computedHash": "fe10753d840d0db3a35ede9673f104e2934ea9b0c926a095a64d17acf82dc481"
+    },
+    "gpt-image-2": {
+      "source": "ConardLi/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gpt-image-2/SKILL.md",
+      "computedHash": "ed104c6ec2b34ffcf1ac4005c3fb5466624eccc0cb60bc88170046aa36d2e4b1"
+    },
+    "kb-retriever": {
+      "source": "ConardLi/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/kb-retriever/SKILL.md",
+      "computedHash": "ac3bc385630155203fe0c6d83204ad6128f8db73599265847ab9d204d9840a21"
+    },
+    "web-design-engineer": {
+      "source": "ConardLi/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-engineer/SKILL.md",
+      "computedHash": "82e5bd4aec3752c4dd8d22939c46d24f2fa4b03e24088420dabcd4ada0ef6884"
+    },
+    "web-video-presentation": {
+      "source": "ConardLi/garden-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-video-presentation/SKILL.md",
+      "computedHash": "c8c5077774ff6795fa8400cd2b271cc1cd1eebb2d636b19d2e45f22b9cabfd2f"
+    }
+  }
+}

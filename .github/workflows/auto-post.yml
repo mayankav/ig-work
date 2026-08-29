@@ -1,0 +1,173 @@
+name: auto-post — lucky 2x/day
+
+on:
+  schedule:
+    # 08:00 IST = 02:30 UTC, 20:00 IST = 14:30 UTC
+    - cron: "30 2 * * *"
+    - cron: "30 14 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (build + email preview, do not publish to IG)"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+      intent:
+        description: "sends (share) or saves (reference)"
+        required: false
+        default: "sends"
+        type: choice
+        options: ["sends", "saves"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: auto-post
+  cancel-in-progress: false
+
+jobs:
+  lucky:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DRY_RUN: ${{ inputs.dry_run || 'true' }}
+      INTENT: ${{ inputs.intent || 'sends' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright + deps
+        run: |
+          .agents/skills/suresilly-carousel/.venv/bin/python -m pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt 2>/dev/null || pip install -r .agents/skills/suresilly-carousel/requirements.txt
+          python -m playwright install chromium --with-deps
+
+      - name: Lucky — suggest → audit → build (up to 3 picks)
+        id: lucky
+        env:
+          INTENT: ${{ env.INTENT }}
+        run: |
+          set -e
+          echo "INTENT=$INTENT DRY_RUN=$DRY_RUN"
+          # Try up to 3 topics, first that passes usefulness + truth gates
+          for TRY in 1 2 3; do
+            echo "--- Try $TRY ---"
+            TOPIC=$(python .agents/skills/suresilly-carousel/scripts/suggest_topics.py --pick --intent $INTENT | grep WINNER | sed 's/WINNER: //; s/ .*//')
+            echo "Picked topic: $TOPIC"
+            # Generate carousel.md via skill — uses the 10-step utility-first workflow
+            # The skill itself is invoked via python — we call a helper that writes carousels/<date>_<slug>/carousel.md
+            # For now we use the existing skill entry point: generate via build helper (dry generate)
+            # If generation fails audit, audit_copy.py will exit 1 and we retry with next best
+            SLUG=$(echo "$TOPIC" | tr '_' '-' | tr ' ' '-' | cut -c1-30)
+            DATE=$(date -u +"%Y%m%d")
+            OUT="carousels/${DATE}_${SLUG}/carousel.md"
+            mkdir -p "$(dirname "$OUT")"
+            # Call the skill's generator (if you have a generate.py, else this step is where your LLM call writes the md)
+            # Placeholder: fail if no generator — the workflow will still test audit/build on existing waiting-mode as dry-run example
+            if [ -f "$OUT" ]; then
+              echo "OUT exists: $OUT"
+            else
+              echo "No generator found — using existing 20260828_waiting-mode as dry-run fixture"
+              OUT="carousels/20260828_waiting-mode/carousel.md"
+              # For the very first dry runs before you wire the LLM generator, we reuse the fixture
+              # Replace the next line with your actual generation call:
+              # python scripts/generate_lucky.py --topic "$TOPIC" --intent "$INTENT" --out "$OUT"
+            fi
+            echo "OUT=$OUT" >> $GITHUB_ENV
+            if python .agents/skills/suresilly-carousel/scripts/audit_copy.py "$OUT"; then
+              echo "audit PASS on try $TRY"
+              echo "CAROUSEL_MD=$OUT" >> $GITHUB_ENV
+              exit 0
+            else
+              echo "audit FAIL on try $TRY — will re-pick"
+            fi
+          done
+          echo "All 3 picks failed audit"
+          echo "CAROUSEL_MD=" >> $GITHUB_ENV
+          exit 1
+
+      - name: Build PNGs
+        if: env.CAROUSEL_MD != ''
+        run: |
+          python .agents/skills/suresilly-carousel/scripts/build.py "$CAROUSEL_MD"
+          ls -lh "$(dirname "$CAROUSEL_MD")/slides/" | head -20
+          ls -lh "$(dirname "$CAROUSEL_MD")/contact_sheet.png"
+
+      - name: Push PNGs to gh-pages (for https://media.suresilly.com)
+        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'true'
+        run: |
+          echo "DRY_RUN=true — skipping gh-pages push, images stay local for email preview"
+
+      - name: Push PNGs to gh-pages
+        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./carousels
+          destination_dir: slides
+          cname: media.suresilly.com
+
+      - name: Post to Instagram (only if not dry run)
+        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          CAROUSEL_MD: ${{ env.CAROUSEL_MD }}
+        run: |
+          if [ -z "$IG_USER_ID" ] || [ -z "$IG_ACCESS_TOKEN" ]; then
+            echo "IG secrets not set — skipping publish (dry run)"
+            exit 0
+          fi
+          # Build caption + image URLs from gh-pages (media.suresilly.com)
+          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
+          # For minimal, we post via post_to_ig.py which creates 9 image containers then carousel
+          python scripts/post_to_ig.py --carousel "$CAROUSEL_MD" --base-url "https://media.suresilly.com/slides/$SLUG/slides"
+
+      - name: Commit ledger + history
+        if: env.CAROUSEL_MD != ''
+        run: |
+          git config user.name "suresilly-bot"
+          git config user.email "bot@suresilly.com"
+          git add carousels/HOOK_LEDGER.md .agents/skills/suresilly-carousel/references/topic-bank.md .agents/skills/suresilly-carousel/palette_history.json carousels/*/carousel.md || true
+          git commit -m "auto: $(basename "$(dirname "$CAROUSEL_MD")") $(date -u +%Y%m%d) [skip ci]" || echo "nothing to commit"
+          git push || echo "push failed — will retry next cron"
+
+      - name: Email — success
+        if: success() && env.CAROUSEL_MD != ''
+        env:
+          EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: mayankmacav@gmail.com
+        run: |
+          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
+          SUBJECT="[SILLY-SUCCESS] Posted $SLUG — $(date -u +%Y-%m-%d)"
+          # contact_sheet.png as preview
+          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" --body "Posted $SLUG
+
+          Hook: $(grep -m1 'H1:' "$CAROUSEL_MD" | sed 's/.*H1: //')
+          File: $CAROUSEL_MD
+          Dry run: $DRY_RUN
+
+          See contact_sheet.png attached." --attach "$(dirname "$CAROUSEL_MD")/contact_sheet.png" || echo "email failed — will try telegram fallback"
+
+      - name: Email — error (3 picks failed or build failed)
+        if: failure()
+        env:
+          EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: mayankmacav@gmail.com
+        run: |
+          SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d) lucky failed after 3 picks"
+          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" --body "All 3 topic picks failed audit or build. Check Actions logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          Last intent: $INTENT
+          Dry run: $DRY_RUN" || echo "error email failed"
