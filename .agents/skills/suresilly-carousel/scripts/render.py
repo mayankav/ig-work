@@ -382,6 +382,18 @@ def _least_recent(options: list[str], used: list[str]) -> str:
     return min(options, key=lambda o: (last_used(o), options.index(o)))
 
 
+def _random_palette(exclude_slug: str | None = None) -> tuple[str, str]:
+    """Random bleed/paper pair, avoiding immediate repeat of the last deck."""
+    import random
+    history = load_palette_history()
+    slugs = sorted(s for s in history if s != exclude_slug)
+    last_bleed = history[slugs[-1]][0] if slugs and history[slugs[-1]][0] in BLEED_THEMES else None
+    last_paper = history[slugs[-1]][1] if slugs and history[slugs[-1]][1] in PAPER_THEMES else None
+    bleeds = [b for b in BLEED_THEMES if b != last_bleed] or BLEED_THEMES
+    papers = [p for p in PAPER_THEMES if p != last_paper] or PAPER_THEMES
+    return random.choice(bleeds), random.choice(papers)
+
+
 def _round_robin_palette(exclude_slug: str | None) -> tuple[str, str]:
     """The bleed/paper pair least recently used across past decks, so a run
     of "I'm feeling lucky" decks visibly cycles instead of clumping on one
@@ -394,7 +406,7 @@ def _round_robin_palette(exclude_slug: str | None) -> tuple[str, str]:
             _least_recent(PAPER_THEMES, used_papers))
 
 
-def deck_palette(md_path, exclude_slug: str | None = None) -> tuple[str, str]:
+def deck_palette(md_path, exclude_slug: str | None = None, randomize: bool = False) -> tuple[str, str]:
     """ONE saturated colour and ONE paper for the whole carousel.
 
     Nine colours across nine slides read as noise, not as a brand. A deck now
@@ -472,6 +484,9 @@ def deck_palette(md_path, exclude_slug: str | None = None) -> tuple[str, str]:
 
     if bleed and paper:
         return bleed, paper
+    if randomize:
+        r_bleed, r_paper = _random_palette(exclude_slug)
+        return bleed or r_bleed, paper or r_paper
     rb_bleed, rb_paper = _round_robin_palette(exclude_slug)
     return bleed or rb_bleed, paper or rb_paper
 

@@ -69,6 +69,9 @@ def main() -> None:
                     help="OBSOLETE paid path — generate poses instead of using the "
                          "library. Needs a billed Gemini project; fails otherwise.")
     ap.add_argument("--model", choices=["pro", "flash", "empero"], default="flash")
+    ap.add_argument("--random-palette", action="store_true",
+                    help="Pick a random bleed/paper pair (avoids immediate repeat), "
+                         "instead of LRU round-robin. Use in CI for every-run variety.")
     ap.add_argument("--bootstrap", action="store_true")
     a = ap.parse_args()
 
@@ -155,9 +158,9 @@ def main() -> None:
     if chosen:
         library.record_usage(md.parent.name, chosen)
 
-    bleed, paper = render.deck_palette(md, exclude_slug=md.parent.name)
+    bleed, paper = render.deck_palette(md, exclude_slug=md.parent.name, randomize=a.random_palette)
     render.record_palette(md.parent.name, bleed, paper)
-    print(f"palette -> {bleed} / {paper}")
+    print(f"palette -> {bleed} / {paper}{' (random)' if a.random_palette else ''}")
 
 
 if __name__ == "__main__":

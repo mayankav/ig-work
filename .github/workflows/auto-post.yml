@@ -116,25 +116,7 @@ jobs:
               echo "CAROUSEL_MD=$OUT" >> "$GITHUB_ENV"
               PASSED=true
               # Mark topic as used in bank (Last used column) — committed in next step
-              python -c "
-from pathlib import Path
-import datetime
-p = Path('.agents/skills/suresilly-carousel/references/topic-bank.md')
-slug = '$TOPIC'
-d = datetime.datetime.utcnow().strftime('%Y%m%d')
-lines = p.read_text().splitlines()
-out = []
-for line in lines:
-    if line.startswith('|') and f'| {slug} |' in line:
-        parts = line.split('|')
-        # parts[9] is Last used (with leading space) — replace '-' with date
-        if len(parts) >= 10:
-            parts[9] = f' {d} '
-            line = '|'.join(parts)
-    out.append(line)
-p.write_text('\n'.join(out) + '\n')
-print(f'Marked {slug} as used {d}')
-"
+              TOPIC="$TOPIC" python scripts/mark_topic_used.py
               break
             else
               echo "audit FAIL on try $TRY — will try next rank"
@@ -149,7 +131,7 @@ print(f'Marked {slug} as used {d}')
       - name: Build PNGs
         if: env.CAROUSEL_MD != ''
         run: |
-          python .agents/skills/suresilly-carousel/scripts/build.py "$CAROUSEL_MD"
+          python .agents/skills/suresilly-carousel/scripts/build.py --random-palette "$CAROUSEL_MD"
           ls -lh "$(dirname "$CAROUSEL_MD")/slides/" | head -20
           ls -lh "$(dirname "$CAROUSEL_MD")/contact_sheet.png"
 
@@ -192,26 +174,7 @@ print(f'Marked {slug} as used {d}')
               fi
             fi
             # Optional API check (best-effort, ignore failures)
-            python -c "
-import os, requests
-tok=os.getenv('IG_ACCESS_TOKEN',''); uid=os.getenv('IG_USER_ID','')
-h1='''$H1'''
-if tok.startswith('IGAAP'):
-    base='https://graph.instagram.com/v21.0'
-else:
-    base='https://graph.facebook.com/v20.0'
-try:
-    r=requests.get(f'{base}/{uid}/media', params={'access_token':tok,'fields':'caption','limit':10}, timeout=15)
-    if r.status_code==200:
-        for item in r.json().get('data',[]):
-            if h1.strip('\"')[:30] in (item.get('caption') or ''):
-                print('Duplicate caption found on IG recent media — aborting')
-                raise SystemExit(1)
-except SystemExit:
-    raise
-except Exception as e:
-    print(f'IG duplicate check skipped: {e}')
-" || { echo "Duplicate IG caption detected — aborting to prevent double-post"; exit 1; }
+            H1="$H1" python scripts/check_ig_duplicate.py || { echo "Duplicate IG caption detected — aborting to prevent double-post"; exit 1; }
           fi
           python scripts/post_to_ig.py --carousel "$CAROUSEL_MD" --base-url "https://media.suresilly.com/slides/$SLUG/slides"
 
