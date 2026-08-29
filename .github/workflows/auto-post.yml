@@ -200,7 +200,7 @@ jobs:
           python scripts/post_to_ig.py --carousel "$CAROUSEL_MD" --base-url "https://media.suresilly.com/slides/$SLUG/slides"
 
       - name: Commit ledger + history
-        if: env.CAROUSEL_MD != ''
+        if: always() && env.CAROUSEL_MD != ''
         run: |
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"

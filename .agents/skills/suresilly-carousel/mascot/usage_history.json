@@ -284,5 +284,16 @@
     "steadying",
     "walking_away_m",
     "waving"
+  ],
+  "final_build": [
+    "phone_down",
+    "propped_up",
+    "reading",
+    "sitting_ledge",
+    "warm_mug",
+    "realising",
+    "crouched_tight",
+    "patient_one",
+    "sitting_ledge_m"
   ]
 }
