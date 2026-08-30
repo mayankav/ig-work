@@ -84,8 +84,30 @@ SHIPPED_BROKEN = """### Slide 1 · Hook
 """
 
 
+# Words that belong in a paper and not on a slide. The deck that shipped told a
+# reader that "appeasing is learned where it worked, which is why it arrives
+# before you have decided anything", and that sentence came from our own
+# citations file, not from a model. Half the claims in that file were over
+# twenty words with a clause hung off a clause.
+PAPER_WORDS = ("appeas", "residue", "rehearsal", "standby", "circuit", "salience",
+               "arousal", "latency", "schema", "mechanism", "attunement", "dysregulat",
+               "modality", "construct", "cognitive", "affective", "survival style")
+CLAIM_WORD_CAP = 18
+
+
 def run() -> int:
     failures = []
+
+    # Slide 3 is the one card a reader has to understand on the first read. It
+    # is code that puts these words there, so nothing downstream can fix them.
+    for citation in writer.load_citations().values():
+        for claim in citation.get("claims", []):
+            words = len(claim.split())
+            if words > CLAIM_WORD_CAP:
+                failures.append(f"CLAIM {words} words, cap {CLAIM_WORD_CAP}: {claim[:56]}")
+            found = [w for w in PAPER_WORDS if w in claim.lower()]
+            if found:
+                failures.append(f"CLAIM uses {', '.join(found)}, which nobody says: {claim[:48]}")
 
     # The three faults a reader could see on the deck that shipped. Slide 1 and
     # slide 2 printed one sentence twice, slide 3 printed another under two
@@ -252,7 +274,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 3 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 4 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:
