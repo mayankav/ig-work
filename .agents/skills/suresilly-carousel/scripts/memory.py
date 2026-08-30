@@ -162,12 +162,18 @@ def is_used(mid: str) -> bool:
     return mid in used_ids()
 
 
-def mark_used(moment: Moment, deck_slug: str, published: bool) -> None:
+def mark_used(moment: Moment, deck_slug: str, mode: str) -> None:
     """Retire a moment.
 
     Called when a deck is RENDERED, not when it is posted. A deck that was built
     and never published still consumes its moment — otherwise a manual build
     could be repeated later and nobody would notice.
+
+    The record stores the MODE the run was asked for, not whether a post exists.
+    It used to store "published", written here, one step before the post was
+    attempted — so a --publish run from a laptop, where the slides are not on
+    the public host yet and Instagram refuses, left a record claiming the deck
+    had gone out. Mode is the honest thing this line actually knows.
     """
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     record = {
@@ -177,7 +183,7 @@ def mark_used(moment: Moment, deck_slug: str, published: bool) -> None:
         "source": moment.source,
         "source_hash": moment.source_hash,
         "deck_slug": deck_slug,
-        "published": published,
+        "mode": mode,
         "used_at": _now(),
     }
     with USED_PATH.open("a", encoding="utf-8") as fh:

@@ -9,7 +9,8 @@ entry point; it points at the reference files you need.
 ## Run
 
 ```bash
-python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+.agents/skills/suresilly-carousel/.venv/bin/python \
+  .agents/skills/suresilly-carousel/scripts/run.py --no-post
 ```
 
 `run.py` is the whole pipeline and the only way a post is made. `--publish` posts, `--no-post`
@@ -83,9 +84,16 @@ Any agent working here must not violate these. They exist because each one was a
    comparison against fingerprints, never by reading past decks back in.
 11. **The rules decide, the model writes.** The pipeline chooses the moment, the angle and the
     citation, and decides whether a deck ships. A model may write copy and may veto a deck. It may
-    never approve one, pick its own angle, or name its own source.
-12. **Citations come from the allowlist.** The model returns a citation id; code substitutes the
-    verified string. A model must never be able to type an author, title or year.
+    never approve one, pick its own angle, or name an unproved source.
+12. **A citation is proved before it is printed.** Books are looked up fresh for every deck —
+    any book, any year — and every candidate must clear five gates in `scripts/bibliography.py`:
+    the book exists in Open Library, the claim carries no unverifiable statistic, the term of art
+    appears in scanned text, a model that did NOT propose it fails to refute it, and code
+    assembles the line from the catalogue's own spelling. A model may suggest a book. It may
+    never type an author, a title or a year onto a slide. Whatever survives is appended to
+    `references/citations.json` — a record of what has been proved, not a list anybody maintains,
+    and the fallback for when the catalogue is unreachable. Every gate fails closed: "we could
+    not check" must never come out the same as "we checked".
 13. **One entry point, one state.** A manual run and the scheduled run execute the same code
     against the same queue and fingerprints. Any run that produces a deck consumes its moment,
     whether or not it posts. Only `--dry-run` writes nothing, and it writes no deck either.

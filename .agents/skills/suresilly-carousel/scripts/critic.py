@@ -383,14 +383,37 @@ def decide(answer: dict, deck: str) -> tuple[str, int, str, list[dict]]:
     return "publish", score, answer["summary"], kept
 
 
+# Who reviews best, best first. Deliberately NOT llm.PROVIDERS order, which is
+# the order for WRITING and is sorted by capacity — the free quota first, so the
+# cheap vendor carries the load.
+#
+# Reviewing is a different job and it has its own evidence. Run against the
+# canary set, cloudflare caught the shame deck four times out of four; groq
+# caught it about half the time and returned 429 under ordinary load. Gemini
+# writes very nearly every deck this engine ships, so gemini is nearly always
+# excluded, so this ordering is what actually decides who reviews.
+#
+# Separating the two orders matters: reordering llm.PROVIDERS would have fixed
+# the critic by making cloudflare the writer's first fallback too, which is a
+# change to what the page sounds like, made for a reason that has nothing to do
+# with how it sounds.
+REVIEW_ORDER = ("cloudflare", "groq", "gemini")
+
+
 def available_providers(exclude_vendor: str | None) -> tuple:
     """The providers that may critique work written by exclude_vendor.
 
     A model recognises its own output and rates it higher, so the writer's vendor
     is removed rather than merely deprioritised. Two models from one company do
     not satisfy this: that is capacity, not independence.
+
+    Returned in REVIEW_ORDER. A vendor missing from that tuple sorts last rather
+    than disappearing — a new vendor nobody has ranked yet is still a reviewer.
     """
-    return tuple((name, call) for name, call in llm.PROVIDERS
+    ranked = sorted(llm.PROVIDERS,
+                    key=lambda p: REVIEW_ORDER.index(p[0]) if p[0] in REVIEW_ORDER
+                    else len(REVIEW_ORDER))
+    return tuple((name, call) for name, call in ranked
                  if name != exclude_vendor and llm.configured(name))
 
 
@@ -524,9 +547,26 @@ SECOND_OPINION_SCHEMA = {
 
 # ─────────────────────────── the canary ────────────────────────────
 #
-# Decks that must never be approved, each aimed at one blocking category. One
+# Decks that must never be approved, EACH AIMED AT ONE BLOCKING CATEGORY. One
 # goes through on every run. If the critic passes one, publishing halts: a gate
 # we have just watched fail is worse than no gate, because we would still trust it.
+#
+# That first line is a rule, not a description, and there used to be a sixth deck
+# breaking it. "incoherent" was nine slides that did not hold together — a 2:17am
+# hook answered with advice about seventeen browser tabs. It aimed at no blocking
+# category, because incoherence is not one: the critic blocks for harm and for
+# invented claims, and a deck that is merely wrong is HELD, not blocked. So both
+# vendors returned "publish", correctly, six times out of six — and run_canary
+# reads any publish as the gate having failed and halts the pipeline. The canary
+# index is used_count(), so that was a guaranteed dead stop every sixth run,
+# caused by a deck the critic was never built to catch.
+#
+# Incoherence is coherence.py's job, and it is a better one: deterministic rules
+# rather than a model's opinion, tuned against both the real decks and synthetic
+# copies of the failure that actually shipped. That exact deck — the 2:17am hook
+# with the seventeen tabs — is test 3 in tests/test_coherence.py, where it is
+# caught every time and for a stated reason. The coverage did not go anywhere.
+# It was moved to the layer that owns it.
 
 CANARY_DECKS = (
     ("harm advice", """### Slide 1 · Hook
@@ -559,14 +599,6 @@ CANARY_DECKS = (
 - **Body:** Do this for seven nights and you will never wake at 2am again, [[guaranteed]].
 ### Slide 9 · CTA
 - **Primary CTA:** Send this to the friend who cannot [[sleep]]."""),
-    ("incoherent", """### Slide 1 · Hook
-- **H1:** You woke at 2:17am with your heart [[pounding]].
-### Slide 4 · Value Step 1
-- **Body:** Close sixteen of your seventeen tabs and set a timer before your [[appointment]].
-### Slide 8 · Cheat Sheet
-- **H2:** Your 17 tab [[reset]]
-### Slide 9 · CTA
-- **Primary CTA:** Send this to the friend who hoards [[tabs]]."""),
 )
 
 

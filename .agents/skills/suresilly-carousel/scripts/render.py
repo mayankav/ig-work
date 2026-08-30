@@ -746,6 +746,11 @@ h1 + h2{{font-family:'{BODY}',system-ui,sans-serif;font-weight:500;
   letter-spacing:{T['body'][2]};font-weight:500}}
 
 /* Before and after, unboxed. Weight and colour carry the contrast. */
+/* The heading and the body line share the script blocks' measure. The canvas
+   centres each child on its own width, so an h2 at full width, a body at 820
+   and a script block at 860 stacked at three different left edges — a visible
+   stair down the slide. Two selectors, so this beats .body-text's own width. */
+.canvas .script-measure{{max-width:860px;width:100%}}
 .script{{max-width:860px}}
 .script + .script{{margin-top:56px}}
 .script .tag{{font-size:{T['label'][0]}px;letter-spacing:{T['label'][2]};
@@ -884,6 +889,10 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
             if "source" in s:
                 body.append(f'<p class="credit">{plain(s["source"].lstrip("— ").strip())}</p>')
         elif is_dm:
+            if "h2" in s:
+                body.append(f'<h2>{fmt(s["h2"])}</h2>')
+            if "body" in s:
+                body.append(f'<p class="body-text">{fmt(s["body"])}</p>')
             body.append('<div class="dm-thread">')
             if "old_reaction" in s:
                 body.append(f'<p class="bubble was">{fmt(s["old_reaction"])}</p>')
@@ -911,6 +920,8 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
         elif is_myth:
             if "h2" in s:
                 body.append(f'<h2>{fmt(s["h2"])}</h2>')
+            if "body" in s:
+                body.append(f'<p class="body-text">{fmt(s["body"])}</p>')
             body.append('<div class="mythgrid">')
             if "myth" in s:
                 body.append('<section class="mythbox"><div class="tag">myth</div>'
@@ -932,6 +943,20 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
             # instead. The code never followed.
             #
             # "When" takes quotation marks off too. A condition is not speech.
+            #
+            # The heading and the body line are rendered here for the same
+            # reason every other structured template renders them: the writer
+            # produced them, the critic reviewed a deck containing them, and
+            # this branch was quietly throwing them away. Template C was the
+            # only one that did — grid, chain and myth all print both — so a
+            # script slide arrived with no headline at all while every other
+            # slide in the set had one, and a whole reviewed sentence went in
+            # the bin on the way to the PNG.
+            if "h2" in s:
+                body.append(f'<h2 class="script-measure">{fmt(s["h2"])}</h2>')
+            if "body" in s:
+                body.append('<p class="body-text script-measure">'
+                            f'{fmt(s["body"])}</p>')
             if "old_reaction" in s:
                 body.append('<div class="script was"><span class="tag">when</span>'
                             f'<p class="line">{plain(s["old_reaction"])}</p></div>')
@@ -949,7 +974,15 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
             if "bullets" in s:
                 body.append('<ul class="bullets">'
                             + "".join(f"<li>{fmt(b)}</li>" for b in s["bullets"]) + "</ul>")
-            if "callout" in s and idx == total:
+            # The guard used to be `and idx == total`, which could never be
+            # true here: the last slide is always the CTA and the CTA takes its
+            # own branch several elifs above. So the pill was unreachable, and
+            # the cheat sheet is the only slide that carries a callout — the
+            # writer's schema REQUIRES one there. Every deck this engine has
+            # made wrote a callout, had it reviewed, and dropped it on the way
+            # to the PNG. The playbook asks for it by name ("Bottom Callout")
+            # and the design system counts it as one of the rotated elements.
+            if "callout" in s:
                 body.append(f'<span class="pill">{plain(s["callout"])}</span>')
         # Mascot inside canvas as flex child — prevents absolute gap/cut and keeps text+donkey as one centered group
         if has_m:

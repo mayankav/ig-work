@@ -140,6 +140,45 @@ check("scale is a fixed table", isinstance(render.TYPE, dict) and len(render.TYP
       f"{len(render.TYPE)} levels")
 check("auto-fit is gone", not hasattr(render, "AUTOFIT"), "figure absorbs variation, not type")
 
+print("\n=== no template silently drops written copy ===")
+# Template C printed neither the H2 nor the Body. The writer produced both, the
+# critic reviewed a deck containing both, and they never reached the PNG — so a
+# script slide arrived with no headline while every other slide in the set had
+# one. Nothing could see it: the QA gates inspect cutouts, and the copy gates
+# read the markdown, which was correct. Only the render threw it away.
+#
+# Checked for every template rather than for C, because the next one added will
+# be written the same way, by copying a branch.
+import re as _re
+
+_TEMPLATES = {
+    "Template A": {},
+    "Template C": {"old_reaction": "You are asked at 4pm.", "new_reaction": "Let me check."},
+    "Template D": {"bullets": ["one", "two"]},
+    "Template G": {"old_reaction": "I said yes.", "new_reaction": "I said maybe."},
+    "Template H": {"bullets": ["a", "b", "c", "d"]},
+    "Template I": {"bullets": ["first", "second"]},
+    "Template J": {"myth": "Rest is earned.", "reality": "Rest is not earned."},
+}
+for _name, _extra in sorted(_TEMPLATES.items()):
+    _slide = {"role": "value", "layout": _name,
+              "h2": "The zebra heading.", "body": "A walrus explains the whole thing.", **_extra}
+    _html = render.slide_html(_slide, 5, 9, None, 5, ("indigo", "oatmeal"))
+    _text = " ".join(_re.sub(r"<[^>]+>", " ", _html).split())
+    _lost = [k for k in ("h2", "body") if " ".join(_slide[k].split()[:3]) not in _text]
+    check(f"{_name} keeps its h2 and body", not _lost,
+          "both printed" if not _lost else f"DROPPED {', '.join(_lost)}")
+
+# The cheat sheet's callout. Required by the writer's schema, asked for by name
+# in the playbook, and unreachable in the renderer for the life of the repo —
+# its guard was `idx == total`, and the last slide is always the CTA, which
+# never reaches that line. Seven decks wrote one and none of them printed it.
+_cheat = {"role": "cheat sheet", "layout": "Template D", "h2": "Your card.",
+          "bullets": ["one", "two"], "callout": "Screenshot this for later."}
+_cheat_html = render.slide_html(_cheat, 8, 9, None, 8, ("indigo", "oatmeal"))
+check("the cheat sheet prints its callout", "Screenshot this for later." in _cheat_html,
+      "pill rendered" if "Screenshot this for later." in _cheat_html else "DROPPED")
+
 print()
 if FAIL:
     raise SystemExit(f"FAILED: {', '.join(FAIL)}")

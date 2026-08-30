@@ -350,5 +350,38 @@
     "walking_m",
     "holding_board",
     "sitting"
+  ],
+  "20260830_bed-sat-on_ad2ba8": [
+    "face_down",
+    "curled_up",
+    "knees_hugged",
+    "leaning_on",
+    "cardigan_mug",
+    "thumbjack",
+    "crouched_tight",
+    "deadpan",
+    "winking"
+  ],
+  "tmpl_c": [
+    "face_down",
+    "curled_up",
+    "putting_down",
+    "serene",
+    "cardigan_mug",
+    "glancing_back",
+    "framing",
+    "deadpan",
+    "head_tilt"
+  ],
+  "tmpl_c2": [
+    "clutching",
+    "serene",
+    "sleepless",
+    "pondering",
+    "cardigan_mug",
+    "glancing_back_m",
+    "crouched_tight",
+    "deadpan",
+    "head_tilt"
   ]
 }

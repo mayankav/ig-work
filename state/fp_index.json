@@ -2,7 +2,8 @@
   "order": [
     "20260830_kitchen-at-11pm_800736",
     "20260830_bed-stood-outside_803474",
-    "20260830_bed-sat-on_4d84f6"
+    "20260830_bed-sat-on_4d84f6",
+    "20260830_bed-sat-on_ad2ba8"
   ],
   "anchors": {
     "action": [
@@ -19,6 +20,21 @@
       "20260830_kitchen-at-11pm_800736",
       "20260830_bed-stood-outside_803474",
       "20260830_bed-sat-on_4d84f6"
+    ],
+    "11:45pm": [
+      "20260830_bed-sat-on_ad2ba8"
+    ],
+    "bed": [
+      "20260830_bed-sat-on_ad2ba8"
+    ],
+    "hallway": [
+      "20260830_bed-sat-on_ad2ba8"
+    ],
+    "sat": [
+      "20260830_bed-sat-on_ad2ba8"
+    ],
+    "stared": [
+      "20260830_bed-sat-on_ad2ba8"
     ]
   }
 }

@@ -173,15 +173,38 @@ def run() -> int:
         if not llm.validate(answer, critic.SCHEMA):
             failures.append(f"schema accepted {description}")
 
+    # ── who reviews ──
+    #
+    # Order, not just membership. Gemini writes nearly every deck, so gemini is
+    # nearly always excluded, so whoever REVIEW_ORDER puts first is in practice
+    # the only critic this engine has. Against the canary set cloudflare caught
+    # the shame deck 4 times out of 4 and groq about half the time, so the order
+    # is a finding rather than a preference and it should not drift back.
+    if critic.REVIEW_ORDER.index("cloudflare") > critic.REVIEW_ORDER.index("groq"):
+        failures.append("REVIEW the weaker reviewer is preferred over the stronger one")
+    ranked = [name for name, _ in critic.available_providers("gemini")]
+    if "cloudflare" in ranked and "groq" in ranked and \
+            ranked.index("cloudflare") > ranked.index("groq"):
+        failures.append("REVIEW available_providers did not honour REVIEW_ORDER")
+
     # ── canaries ──
     labels = {label for label, _ in critic.CANARY_DECKS}
-    for needed in ("harm advice", "false claim", "diagnosis", "incoherent"):
+    for needed in ("harm advice", "false claim", "diagnosis", "shame", "promise"):
         if needed not in labels:
             failures.append(f"no canary covers {needed}")
     if len(critic.CANARY_DECKS) < 5:
         failures.append("too few canary decks to notice drift")
 
-    total = len(CASES) + 3 + 3 + 4 + 5 + len(critic.BLOCKS_WITHOUT_A_QUOTE) + 1
+    # Every canary must aim at something the critic BLOCKS for, or it is not a
+    # drift detector — it is a scheduled outage. "incoherent" aimed at nothing
+    # blockable, so both vendors passed it correctly, six times out of six, and
+    # run_canary read that as the gate failing and halted the pipeline. Since
+    # the canary index is used_count(), that was a guaranteed stop every sixth
+    # run. The deck now lives in test_coherence.py as test 3, caught by a rule.
+    if "incoherent" in labels:
+        failures.append("the incoherent canary is back; the critic does not block for that")
+
+    total = len(CASES) + 3 + 3 + 4 + 9 + len(critic.BLOCKS_WITHOUT_A_QUOTE) + 1
     if failures:
         print(f"critic: {len(failures)}/{total} failed")
         for line in failures:
@@ -189,7 +212,7 @@ def run() -> int:
         return 1
     print(f"critic: {total}/{total} passed "
           f"({len(CASES)} decision rules, unquotable objections, harm blocks without "
-          f"a quote, vendor separation, "
+          f"a quote, vendor separation and review order, "
           f"schema, {len(critic.CANARY_DECKS)} canary decks)")
     return 0
 

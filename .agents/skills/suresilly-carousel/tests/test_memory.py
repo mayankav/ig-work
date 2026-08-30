@@ -43,7 +43,7 @@ def run() -> int:
         if memory.is_used(wake.id):
             failures.append("a fresh moment reported as used")
 
-        memory.mark_used(wake, deck_slug="20260830_test", published=False)
+        memory.mark_used(wake, deck_slug="20260830_test", mode="no-post")
 
         # Built but never posted still counts. This is the rule that stops a
         # manual build being repeated later.

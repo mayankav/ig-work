@@ -19,7 +19,8 @@ is held** below. That is the only decision anybody is asked to make.
 ## The one command
 
 ```bash
-python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+.agents/skills/suresilly-carousel/.venv/bin/python \
+  .agents/skills/suresilly-carousel/scripts/run.py --no-post
 ```
 
 There is one entry point and one state. The scheduled job and a person at a
@@ -158,6 +159,24 @@ unless billing is on. Text generation is a different matter and is nearly free.
 
 ---
 
+## Running the gates
+
+```bash
+for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
+  .agents/skills/suresilly-carousel/.venv/bin/python "$t" || echo "FAILED $t"
+done
+```
+
+Every suite in the directory, which is exactly what CI does — a hand-kept list
+drifted once and left six suites nobody ran. `pytest` is not the runner: these
+are plain scripts with a `run()`, so pytest collects the files, finds no test
+functions, and reports success without having checked anything. That is worse
+than no test run, because it is believed.
+
+Needs no key and no network.
+
+---
+
 ## Layout
 
 ```
@@ -200,5 +219,5 @@ engine's copy rules came from them. Evidence that is real, with sources, is in
 They are in `AGENTS.md`, and each one is there because it was a shipped defect.
 The short version: no text inside mascot artwork, gates abort rather than warn,
 a harvested post is a seed and never a source, old decks are a blocklist and
-never material, citations come from an allowlist so a model cannot type an
-author's name, and there is one entry point with one state.
+never material, a citation is proved against a library catalogue before a model
+can put an author's name on a slide, and there is one entry point with one state.

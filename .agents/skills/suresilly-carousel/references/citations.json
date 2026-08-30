@@ -150,8 +150,16 @@
       ],
       "claims": [
         "Lerner found that if no needs a reason, a one word answer becomes a court case.",
-        "Lerner found that changing your part makes people push back. That is not proof you were wrong."
-      ]
+        "Lerner found that changing your part makes people push back. That is not proof you were wrong.",
+        "People who suffer from overfunctioning often sacrifice their own needs to manage the lives of others."
+      ],
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 2015,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-08-30T20:25:43Z"
+      }
     },
     {
       "id": "walker-2013",
@@ -162,8 +170,16 @@
       ],
       "claims": [
         "Walker found that some people learn to keep everyone happy first, before anything else.",
-        "Walker found that keeping the peace becomes automatic, and starts before you decide to."
-      ]
+        "Walker found that keeping the peace becomes automatic, and starts before you decide to.",
+        "People-pleasing behaviors often stem from an unconscious fawn response to avoid potential interpersonal conflict."
+      ],
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 11,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-08-30T20:21:50Z"
+      }
     },
     {
       "id": "neff-2011",
@@ -212,6 +228,42 @@
         "Porges found that people used to unpredictable moods read a flat tone as a warning.",
         "Porges found the body decides a room is safe before you have thought about it."
       ]
+    },
+    {
+      "id": "brown-2012",
+      "line": "— Brené Brown, *Daring Greatly* (2012)",
+      "pillars": [
+        "numbing"
+      ],
+      "claims": [
+        "We choose emotional numbing as a way to avoid the vulnerability of our daily lives."
+      ],
+      "phrase": "emotional numbing",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 3765,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-08-30T20:23:08Z"
+      }
+    },
+    {
+      "id": "beattie-1986",
+      "line": "— Melody Beattie, *Codependent No More* (1986)",
+      "pillars": [
+        "people_pleasing"
+      ],
+      "claims": [
+        "People struggling with codependency often prioritize others' needs while neglecting their own authentic desires."
+      ],
+      "phrase": "codependency",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 13777,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-08-30T20:25:31Z"
+      }
     }
   ]
 }

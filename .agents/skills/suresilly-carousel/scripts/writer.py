@@ -37,6 +37,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import bibliography  # noqa: E402
 import coherence  # noqa: E402
 import llm  # noqa: E402
 import safety  # noqa: E402
@@ -125,11 +126,23 @@ def load_citations() -> dict:
     return {c["id"]: c for c in data["citations"]}
 
 
-def citations_for(topic: str) -> list[dict]:
-    """The sources that fit this subject. The model only ever sees this list."""
-    everything = load_citations().values()
+def citations_for(topic: str, avoid: list[str] | None = None) -> list[dict]:
+    """The sources that fit this subject. The model only ever sees this list.
+
+    Recently used books drop out. Books were the one rotating thing here with no
+    memory — poses have one, palettes have one — and with four books fitting
+    people-pleasing and nothing recording what yesterday used, the same author
+    took three of the first seven decks.
+
+    Dropping out never empties the shelf: if avoiding everything recent would
+    leave nothing, the full set comes back. A repeat is a worse deck; no
+    citation at all is no deck.
+    """
+    skip = set(avoid or ())
+    everything = list(load_citations().values())
     fitting = [c for c in everything if topic in c["pillars"]]
-    return fitting or list(everything)
+    pool = fitting or everything
+    return [c for c in pool if c["id"] not in skip] or pool
 
 
 # ─────────────────────────── the plan ────────────────────────────
@@ -621,9 +634,29 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     the moment, not about the model, and the feed has thousands more moments.
     """
     axes = draw_axes(moment)
-    options = citations_for(topic)
+
+    # A book is looked up fresh for this deck, from any book of any year, and
+    # put through the five gates in bibliography.py before it can be offered.
+    # What survives is added to the pool, so tomorrow starts from a bigger
+    # library than today did. Nothing here can fail the run: when no suggestion
+    # survives — which is ordinary, the gates are strict — the deck is written
+    # from a book proved on an earlier day.
+    avoid = bibliography.recent()
+    found, refused = bibliography.discover(topic, moment, avoid)
+    if found:
+        bibliography.store(found)
+        print(f"    citation      {found['line']} "
+              f"(verified, {found['verified']['scanned_hits']} scanned hits, "
+              f"checked by {found['verified']['checked_by']})")
+    elif refused:
+        print(f"    citation      no new book survived: {refused[0][:88]}")
+
+    options = citations_for(topic, avoid)
+    if found:
+        options = [found] + [c for c in options if c["id"] != found["id"]]
     listing = "\n".join(
-        f"  {c['id']}\n      claim 0: {c['claims'][0]}\n      claim 1: {c['claims'][1]}"
+        f"  {c['id']}\n" + "\n".join(f"      claim {i}: {claim}"
+                                     for i, claim in enumerate(c["claims"]))
         for c in options
     )
     # The words the coherence gate will actually recognise, taken from the gate
@@ -654,6 +687,13 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     plan_schema["properties"]["citation_id"] = {
         "type": "string", "enum": [c["id"] for c in options],
         "description": "Exactly one of these, on its own. Not 'id=' and not the title."}
+    # Books used to carry exactly two claims each because a person typed two. A
+    # verified lookup arrives with one, and a book proved twice grows a third,
+    # so the ceiling is whatever is actually on the shelf today. validate_plan
+    # still checks the index against the ONE citation chosen.
+    plan_schema["properties"]["claim_index"] = {
+        "type": "integer", "minimum": 0,
+        "maximum": max(len(c["claims"]) for c in options) - 1}
 
     history: list[int] = []
     for attempt in range(4):

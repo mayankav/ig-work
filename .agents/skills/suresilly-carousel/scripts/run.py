@@ -37,6 +37,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import bibliography  # noqa: E402
 import compose  # noqa: E402
 import critic  # noqa: E402
 import novelty  # noqa: E402
@@ -57,7 +58,6 @@ HALT_FILE = REPO_ROOT / "state" / "HALT"
 MAX_ATTEMPTS = 5
 
 CAROUSELS = REPO_ROOT / "carousels"
-PREVIEW = REPO_ROOT / ".preview"
 MEDIA_BASE = "https://media.suresilly.com/slides"
 
 # The keys a slide carries, used when a gate needs the slide as plain text.
@@ -192,13 +192,6 @@ def invent(candidate: dict) -> tuple[memory.Moment, str]:
     """
     try:
         result = compose.invent(candidate["text"])
-    except critic.NoReview as why:
-        # No critic could be reached. Not the same as a deck being refused, and
-        # it was reaching the top of the program as a stack trace: in CI, one
-        # expired Groq key would have looked like the pipeline crashing.
-        print(f"\n  stopped: {why}")
-        print("  the deck was written but never reviewed, so it was not posted.")
-        return 1
     except llm.ModelRefused as refused:
         raise Skip(str(refused))
     shaped = screen.shape(result["moment"])
@@ -322,14 +315,15 @@ def deck_slug(moment: memory.Moment, token: str, when: str) -> str:
     return f"{when}_{stub}_{moment.id[2:8]}"
 
 
-def write_deck(markdown: str, slug: str, preview: bool) -> Path:
+def write_deck(markdown: str, slug: str) -> Path:
     """Put the deck where the renderer expects it.
 
-    A preview never touches carousels/. That directory is the published corpus,
-    and a deck sitting in it is a deck that happened.
+    carousels/ is the published corpus: a deck sitting in it is a deck that
+    happened, and every novelty check from here on compares against it. So this
+    is called once, after every gate has already said yes, and there is no
+    second destination to write to speculatively.
     """
-    root = PREVIEW if preview else CAROUSELS
-    folder = root / slug
+    folder = CAROUSELS / slug
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / "carousel.md"
     path.write_text(markdown, encoding="utf-8")
@@ -494,7 +488,7 @@ def run(mode: str) -> int:
 
         when = time.strftime("%Y%m%d", time.gmtime())
         slug = deck_slug(moment, plan["scene_token"], when)
-        path = write_deck(markdown, slug, preview=False)
+        path = write_deck(markdown, slug)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
         render_slides(path)
@@ -503,7 +497,13 @@ def run(mode: str) -> int:
         # Recorded at render, not at publish. A deck that was built and never
         # posted still counts as used, or a manual build could be repeated later.
         slides = render.parse_markdown(path)
-        fingerprint = novelty.fingerprint(slug, slides, sorted(moment.anchors), slide_text)
+        # anchor_words(), not moment.anchors. The anchors are {kind: [words]},
+        # so passing the dict passed "place" and "clock" — the same mistake this
+        # file already fixed once for the writer, made a second time here. Every
+        # deck then filed itself under the same three labels, which quietly cost
+        # the gate its ability to reach back past the recent window to an older
+        # deck set in the same kitchen.
+        fingerprint = novelty.fingerprint(slug, slides, sorted(anchor_words(moment)), slide_text)
 
         # The novelty gate runs here, after the deck exists and before it is
         # recorded. Unique moments are enforced upstream, so what this catches is
@@ -515,7 +515,8 @@ def run(mode: str) -> int:
         say("novelty", "clear of the last 30 decks and every scene match")
 
         novelty.record(fingerprint)
-        memory.mark_used(moment, slug, published=(mode == "publish"))
+        bibliography.remember(slug, plan["citation_id"])
+        memory.mark_used(moment, slug, mode=mode)
         say("recorded", "fingerprint written, moment retired")
 
         # The slug is handed to whatever runs next. In CI that is the step that

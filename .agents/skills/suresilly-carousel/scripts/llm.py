@@ -120,15 +120,62 @@ class RateLimited(ModelRefused):
 
 # ─────────────────────────── keys ────────────────────────────
 
+# Keys kept beside the repo rather than exported. .gitignore has documented this
+# file since the beginning — it even prints the exact line to write into it — and
+# nothing ever read it. So a laptop holding a perfectly good GROQ_API_KEY still
+# ran with one vendor configured, and one vendor means the critic has nobody who
+# did not write the deck. The run then died at the last gate with the deck
+# already written and paid for. Reading it here fixes that once, in the single
+# place every vendor already asks.
+ENV_FILE = Path(__file__).resolve().parents[4] / ".env.local"
+
+_dotenv_cache: dict[str, str] | None = None
+
+
+def _dotenv() -> dict[str, str]:
+    """The repo's .env.local, parsed once and remembered.
+
+    Hand-parsed on purpose. The format is KEY=value, optionally quoted, and a
+    package to read that would be the only third-party import in this file — on
+    a machine where a missing import is exactly the failure this is meant to
+    prevent. A missing or unreadable file is not an error: most machines that
+    run this have their keys in the environment instead.
+    """
+    global _dotenv_cache
+    if _dotenv_cache is not None:
+        return _dotenv_cache
+    found: dict[str, str] = {}
+    try:
+        lines = ENV_FILE.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        lines = []
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.removeprefix("export ").partition("=")
+        value = value.strip()
+        if len(value) > 1 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        found[key.strip()] = value
+    _dotenv_cache = found
+    return found
+
+
 def resolve_key(name: str) -> str | None:
     """Find a key without it having to be exported.
 
-    Order is environment, then the two config files this repo has historically
-    kept keys in. CI sets the environment; a laptop usually has one of the files.
+    Order is environment, then the repo's own .env.local, then the two config
+    files this repo has historically kept keys in. CI sets the environment and
+    keeps winning; a laptop usually has .env.local or one of the files.
     """
     from_env = os.environ.get(name)
     if from_env:
         return from_env.strip()
+
+    from_file = _dotenv().get(name)
+    if from_file:
+        return from_file.strip()
 
     for path in (Path.home() / ".claude.json", Path.home() / ".gemini/config/mcp_config.json"):
         if not path.is_file():

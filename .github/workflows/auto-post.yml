@@ -48,6 +48,16 @@ jobs:
       # account's own server answers instead.
       BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
       BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+      # On the JOB, not on the report step, because the build step sends a
+      # message too: a deck that scores below the bar is held, and run.py asks
+      # you there and then whether to publish it or build another. That message
+      # was the one thing in the pipeline a person is required to answer, and it
+      # was the one message with no credentials in scope — it printed "nothing
+      # configured" into the log and the deck waited in state/pending forever.
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
 
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +137,9 @@ jobs:
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
           git add state carousels .agents/skills/suresilly-carousel/mascot/usage_history.json \
-                  .agents/skills/suresilly-carousel/palette_history.json || true
+                  .agents/skills/suresilly-carousel/palette_history.json \
+                  .agents/skills/suresilly-carousel/citation_history.json \
+                  .agents/skills/suresilly-carousel/references/citations.json || true
           git commit -m "auto: ${{ steps.build.outputs.slug || 'no deck' }} [skip ci]" || echo "nothing to record"
           git pull --rebase --quiet || true
           git push || echo "push failed, next run will retry"
@@ -137,11 +149,6 @@ jobs:
       # only runs when the other has failed is a channel nobody notices is broken.
       - name: Report the result
         if: always()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
         run: |
           SLUG="${{ steps.build.outputs.slug }}"
           if [ -n "$SLUG" ]; then

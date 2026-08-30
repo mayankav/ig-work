@@ -36,7 +36,8 @@ Read these only when you need them — do not pull them all in up front.
 ## The one entry point
 
 ```bash
-python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+.agents/skills/suresilly-carousel/.venv/bin/python \
+  .agents/skills/suresilly-carousel/scripts/run.py --no-post
 ```
 
 `run.py` is the whole pipeline and the only way a post is made: harvest, compose, judge, write,

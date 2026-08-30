@@ -2,10 +2,8 @@ __pycache__/
 *.pyc
 .venv/
 
-# Previews from run.py --dry-run. Never part of the published corpus.
-.preview/
-
-# Local credentials for testing. Never committed. Create it yourself:
+# Local credentials. Never committed. Create it yourself:
 #   printf 'GROQ_API_KEY=gsk_...\n' > .env.local
+# llm.py reads this file directly, so nothing has to be exported first.
 .env.local
 .env

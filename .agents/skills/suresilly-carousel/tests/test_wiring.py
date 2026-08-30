@@ -64,17 +64,21 @@ def run() -> int:
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = pathlib.Path(tmpdir)
         runner.CAROUSELS = tmp / "carousels"
-        runner.PREVIEW = tmp / "preview"
 
-        published = runner.write_deck("# deck\n", "20260830_real", preview=False)
-        preview = runner.write_deck("# deck\n", "20260830_look", preview=True)
+        published = runner.write_deck("# deck\n", "20260830_real")
 
         if runner.CAROUSELS not in published.parents:
             failures.append("WRITE a real deck did not land in carousels/")
-        if runner.CAROUSELS in preview.parents:
-            failures.append("WRITE a preview landed in carousels/, the published corpus")
-        if published.name != "carousel.md" or preview.name != "carousel.md":
+        if published.name != "carousel.md":
             failures.append("WRITE the file is not named carousel.md")
+
+        # There was a second destination, .preview/, for a deck that had not
+        # really happened. Nothing ever wrote to it: --dry-run returns before a
+        # deck exists, and the only caller passed preview=False. A dead second
+        # place to put the published corpus is worth asserting gone, the same
+        # way the caption tag above is.
+        if hasattr(runner, "PREVIEW"):
+            failures.append("WRITE the preview destination is back, and nothing takes it")
 
     # ── telling the next step what was built ──
     with tempfile.TemporaryDirectory() as tmpdir:
