@@ -32,7 +32,7 @@ PER_MINUTE = "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
 PER_DAY = "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
 
 
-def drive(quota: str, logical_calls: int = 3) -> tuple[list[str], set[str]]:
+def drive(quota: str, logical_calls: int = 3, keycount: int = 1) -> tuple[list[str], set[str]]:
     """Make N Gemini calls against a server that only ever says 429."""
     asked: list[str] = []
 
@@ -42,10 +42,10 @@ def drive(quota: str, logical_calls: int = 3) -> tuple[list[str], set[str]]:
         raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", {},
                                      io.BytesIO(body))
 
-    real_urlopen, real_pace, real_key = urllib.request.urlopen, llm._pace, llm.resolve_key
+    real_urlopen, real_pace, real_keys = urllib.request.urlopen, llm._pace, llm.resolve_keys
     llm.urllib.request.urlopen = fake_urlopen
     llm._pace = lambda provider: None      # count requests, not seconds
-    llm.resolve_key = lambda name: "test-key"
+    llm.resolve_keys = lambda name: ["test-key"] * keycount
     llm._SPENT.clear()
     try:
         with contextlib.redirect_stdout(io.StringIO()):
@@ -57,7 +57,7 @@ def drive(quota: str, logical_calls: int = 3) -> tuple[list[str], set[str]]:
         return asked, set(llm._SPENT)
     finally:
         llm.urllib.request.urlopen = real_urlopen
-        llm._pace, llm.resolve_key = real_pace, real_key
+        llm._pace, llm.resolve_keys = real_pace, real_keys
         llm._SPENT.clear()
 
 
@@ -78,15 +78,37 @@ def run() -> int:
     if len(asked) != models:
         failures.append(f"DAY kept asking buckets it knew were empty: {len(asked)} requests, "
                         f"expected {models}")
-    if spent != set(llm.GEMINI_MODELS):
+    if spent != {f"0:{m}" for m in llm.GEMINI_MODELS}:
         failures.append(f"DAY did not record every empty bucket: {sorted(spent)}")
+
+    # A key from a second Google Cloud project is a second allowance, so two
+    # keys are ten buckets rather than five. This is the only lever that adds
+    # free capacity: quota is counted per project per model per day, so a second
+    # key from the SAME project would share the first one's and add nothing.
+    asked, spent = drive(PER_DAY, keycount=2)
+    if len(asked) != models * 2:
+        failures.append(f"KEYS a second key did not add its own buckets: {len(asked)} "
+                        f"requests, expected {models * 2}")
+    if len(spent) != models * 2:
+        failures.append(f"KEYS buckets were not tracked per key: {sorted(spent)}")
+    # The same key twice is one bucket, not two.
+    real_env = {n: os.environ.get(n) for n in ("GEMINI_API_KEY", "GEMINI_API_KEY_2")}
+    try:
+        os.environ["GEMINI_API_KEY"] = os.environ["GEMINI_API_KEY_2"] = "same-key"
+        if llm.resolve_keys("GEMINI_API_KEY") != ["same-key"]:
+            failures.append("KEYS the same key pasted twice counted as two allowances")
+    finally:
+        for n, v in real_env.items():
+            os.environ.pop(n, None)
+            if v is not None:
+                os.environ[n] = v
 
     # The memo must not swallow the failure. The caller still has to hear a
     # rate limit so it can fall through to Groq and Cloudflare, which is the
     # whole reason a second and third vendor are configured.
-    real_pace, real_key = llm._pace, llm.resolve_key
-    llm._pace, llm.resolve_key = (lambda p: None), (lambda n: "test-key")
-    llm._SPENT.update(llm.GEMINI_MODELS)
+    real_pace, real_keys = llm._pace, llm.resolve_keys
+    llm._pace, llm.resolve_keys = (lambda p: None), (lambda n: ["test-key"])
+    llm._SPENT.update(f"0:{m}" for m in llm.GEMINI_MODELS)
     try:
         llm.call_gemini("system", "user", 0.0)
         failures.append("EXHAUSTED returned instead of raising, so no fallback would happen")
@@ -97,7 +119,7 @@ def run() -> int:
         failures.append(f"EXHAUSTED raised {type(other).__name__}, which is not retryable")
     finally:
         llm._SPENT.clear()
-        llm._pace, llm.resolve_key = real_pace, real_key
+        llm._pace, llm.resolve_keys = real_pace, real_keys
 
     # Reading the quota out of the body is the only way the two are told apart.
     if llm.RateLimited("x", 30, PER_DAY).daily is not True:
@@ -129,14 +151,15 @@ def run() -> int:
         if real_env is not None:
             os.environ["SS_PROVIDERS"] = real_env
 
-    total = 14
+    total = 17
     if failures:
         print(f"llm: {len(failures)}/{total} failed")
         for line in failures:
             print(f"  {line}")
         return 1
     print(f"llm: {total}/{total} passed (minute limits retried, day limits remembered, "
-          f"exhaustion still falls through, chain can be pinned to one vendor)")
+          f"a second project doubles the buckets, exhaustion still falls "
+          f"through, chain can be pinned to one vendor)")
     return 0
 
 

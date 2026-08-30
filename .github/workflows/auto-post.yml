@@ -36,6 +36,10 @@ jobs:
       # because the usual reason to press the button is to look at something.
       MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      # Optional. A key from a SECOND Google Cloud project is a second daily
+      # allowance — quota is counted per project per model, so a second key
+      # from the same project shares the first one's and adds nothing.
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       # A third vendor, so the critic always has one that did not write the deck.
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

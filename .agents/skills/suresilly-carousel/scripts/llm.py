@@ -142,6 +142,30 @@ def resolve_key(name: str) -> str | None:
     return None
 
 
+# How many numbered keys to look for. Five is far past anything this repo needs
+# and costs nothing to check, since a missing name simply is not there.
+MAX_KEYS = 5
+
+
+def resolve_keys(name: str) -> list[str]:
+    """Every key configured for one vendor, in order.
+
+    GEMINI_API_KEY, then GEMINI_API_KEY_2, _3 and so on. Duplicates are dropped,
+    because the same key pasted into two names is one bucket, not two.
+
+    Worth being exact about what a second key buys: Gemini's free quota is per
+    PROJECT per model per day, not per key. A second key issued from the same
+    Google Cloud project shares the first one's allowance and adds nothing. A
+    key from a SEPARATE project is a separate allowance.
+    """
+    keys: list[str] = []
+    for suffix in ("", *(f"_{n}" for n in range(2, MAX_KEYS + 1))):
+        found = resolve_key(name + suffix)
+        if found and found not in keys:
+            keys.append(found)
+    return keys
+
+
 def _find_key(blob, name: str) -> str | None:
     if isinstance(blob, dict):
         for key, value in blob.items():
@@ -353,8 +377,8 @@ def _post(url: str, payload: dict, headers: dict) -> dict:
 
 
 def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
-    key = resolve_key("GEMINI_API_KEY") or resolve_key("GOOGLE_API_KEY")
-    if not key:
+    keys = resolve_keys("GEMINI_API_KEY") or resolve_keys("GOOGLE_API_KEY")
+    if not keys:
         raise ModelRefused("no Gemini key")
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
@@ -364,27 +388,33 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     if schema:
         payload["generationConfig"]["responseSchema"] = _gemini_schema(schema)
     trouble = []
-    live = [m for m in GEMINI_MODELS if m not in _SPENT]
+    # One bucket per key per model, because that is how the quota is counted.
+    # The best model on the first key is tried first and the order degrades from
+    # there, so a run only reaches the smaller models once the good ones are out.
+    buckets = [(n, model) for n in range(len(keys)) for model in GEMINI_MODELS]
+    live = [b for b in buckets if f"{b[0]}:{b[1]}" not in _SPENT]
     if not live:
         # Every bucket is gone for the day. Asking again costs four seconds of
         # pacing each and cannot succeed, and it was costing about twenty
         # seconds on every call in a run that had already exhausted Gemini.
-        raise RateLimited("every Gemini model is out of daily quota", RATE_LIMIT_PAUSE,
-                          "GenerateRequestsPerDayPerProjectPerModel-FreeTier")
-    for model in live:
+        raise RateLimited(f"all {len(buckets)} Gemini buckets are out of daily quota",
+                          RATE_LIMIT_PAUSE, "GenerateRequestsPerDayPerProjectPerModel-FreeTier")
+    for index, model in live:
         _pace("gemini")
+        label = model if len(keys) == 1 else f"key {index + 1} {model}"
         try:
-            data = _post(GEMINI_URL.format(model=model), payload, {"x-goog-api-key": key})
+            data = _post(GEMINI_URL.format(model=model), payload,
+                         {"x-goog-api-key": keys[index]})
             break
         except RateLimited as limited:
             if limited.daily:
-                _SPENT.add(model)
-            trouble.append(f"{model} {limited}")
+                _SPENT.add(f"{index}:{model}")
+            trouble.append(f"{label} {limited}")
         except ModelRefused as refused:
             # Any refusal moves to the next bucket, not just a rate limit. One
             # model rejecting a schema or disappearing should cost us that model,
             # not the whole call, and the earlier version aborted on both.
-            trouble.append(f"{model} {refused}")
+            trouble.append(f"{label} {refused}")
     else:
         raise RateLimited("; ".join(trouble)[:300], RATE_LIMIT_PAUSE)
 
