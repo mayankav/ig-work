@@ -589,13 +589,16 @@ Reword them only enough to fit the slide. Do not summarise them away.
 THE THREAD, slides 4 to 7. This is the rule drafts fail most often, and it is
 never obvious from a single slide.
 
-  Slide 3 names the mechanism, in wording that is fixed and given to you. Every
-  advice slide after it has to pick that thread up and use at least one of its
-  words again. If slide 3 says "checking the time turns a waking into a maths
-  problem", then slides 4 to 7 talk about the time, the waking, or the maths.
+  Slide 3 names the mechanism. EVERY ONE of slides 4, 5, 6 and 7 has to use at
+  least one word from THE THREAD WORDS listed below, or from your own slide 3
+  wording. One word is enough. All four slides need one, not three of them.
 
   Advice that never touches slide 3 is advice for a different deck. It reads
-  fine on its own, which is exactly why nobody notices, and it is checked.
+  fine on its own, which is exactly why nobody notices, and it is checked. This
+  is the rule that fails more often than every other rule put together, and it
+  fails on slides 6 and 7, because by then the advice has drifted into general
+  good habits. Before you finish, read slides 6 and 7 back and check each one
+  still says one of these words.
 
 THE CHEAT SHEET, slide 8, must name the scene token from the plan. The reader
 saves this slide on its own, so it has to say what moment it is for.
@@ -631,6 +634,10 @@ THE HOOK, already chosen. Use these two lines as slide 1, unchanged:
 
 THE SOURCE CLAIM for slide 3, use this wording, do not alter it:
   {claim}
+
+THE THREAD WORDS. Each of slides 4, 5, 6 and 7 must contain at least one of
+these, or a word you use in your own slide 3 lines:
+  {thread}
 
 HOW THIS DECK IS WRITTEN:
   explain through   {lens}
@@ -905,8 +912,12 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # rule the model was never shown, then repaired one stray word at a time
     # across three attempts. Saying it once up front is cheaper and it works.
     scene = ", ".join(sorted(moment_anchors)) if moment_anchors else "(none recorded)"
+    # The checker's own vocabulary, handed over rather than described. Telling a
+    # model to "connect back to slide 3" failed in every run; telling it which
+    # words count is the same fix that worked for the scene token.
+    thread = ", ".join(sorted(coherence.content(claim))[:24])
     user = DRAFT_USER.format(
-        plan=json.dumps(plan, indent=2), scene=scene,
+        plan=json.dumps(plan, indent=2), scene=scene, thread=thread,
         h1=hook["h1"], h2=hook["h2"], claim=claim,
         lens=AXES["lens"][axes["lens"]],
         rehook=AXES["rehook"][axes["rehook"]],
@@ -969,7 +980,8 @@ def check_mascots(briefs: list[str]) -> list[str]:
     for i, brief in enumerate(briefs, 1):
         found = MASCOT_TEXT.search(brief)
         if found:
-            problems.append(f"mascot {i} puts text or a number in the artwork: {found.group(0)!r}")
+            problems.append(f"mascot {i} puts text or a number in the artwork: "
+                            f"{found.group(0)!r} in {brief[:60]!r}")
         feeling = MASCOT_FEELING.search(brief)
         if feeling:
             problems.append(f"mascot {i} names a feeling instead of a posture: {feeling.group(0)!r}")

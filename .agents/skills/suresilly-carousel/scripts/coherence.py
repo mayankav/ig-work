@@ -66,6 +66,12 @@ DECORATIVE = {
     # cheat, and asking the model not to accent them never worked.
     "cheat", "script", "list", "summary", "recap", "steps", "step", "plan",
     "menu", "checklist", "notes", "note", "guide",
+    # Generic nouns. A label is a pattern the deck TEACHES — "waiting mode",
+    # "the countdown" — and accenting "fact" or "case" teaches nobody anything.
+    # They were being counted as new ideas arriving on the card.
+    "fact", "case", "reason", "reasons", "point", "answer", "way", "ways",
+    "thing", "things", "part", "line", "lines", "paragraph", "low", "path",
+    "body", "moment", "rule", "sequence", "order", "choice", "option",
 }
 
 

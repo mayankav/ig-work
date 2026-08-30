@@ -66,6 +66,24 @@ CATEGORIES = {
 HARD = {"H1_HARM_ADVICE", "H2_CRISIS_MISHANDLE", "H3_FALSE_PSYCH", "H4_DIAGNOSIS",
         "H9_IDENTIFIES", "H10_INJECTION"}
 
+# Categories whose BLOCK stands even when the objection could not be quoted.
+#
+# A BLOCK normally needs a surviving objection behind it, because the critic is
+# told to argue against every deck and an ungrounded refusal is the register of
+# the prompt rather than a finding. That rule let a canary through: the critic
+# said the deck contained dangerous medical advice, its quote did not match the
+# deck word for word, the objection was dropped, and the deck published.
+#
+# For harm the asymmetry runs the other way. Refusing a good deck costs one
+# evening. Publishing advice that hurts somebody costs more than the account.
+#
+# H3 is left out on purpose. The line it disputes is the citation, substituted
+# by code from the allowlist, and it is the one thing the model cannot know
+# better than the pipeline. Honouring an unquotable H3 would put a model back
+# in charge of a source it is structurally unable to check, and it blocked all
+# three hand-written decks the last time it was allowed to.
+BLOCKS_WITHOUT_A_QUOTE = HARD - {"H3_FALSE_PSYCH"}
+
 SYSTEM = """You are counsel for the prosecution. A nine-slide Instagram carousel about
 ordinary relational psychology is about to be published automatically, to the
 public, with no human review. Your job is NOT to score it and NOT to improve it.
@@ -222,6 +240,12 @@ def decide(answer: dict, deck: str) -> tuple[bool, str, list[dict]]:
         grounded = [o for o in kept if o["severity"] >= 3]
         if grounded:
             return False, f"blocked: {answer['case_for_rejection']}", kept
+        # Harm does not need a surviving quote. See BLOCKS_WITHOUT_A_QUOTE.
+        harm = sorted({o["category"] for o in answer["objections"]
+                       if o["category"] in BLOCKS_WITHOUT_A_QUOTE})
+        if harm:
+            return False, (f"blocked on {', '.join(harm)} without a usable quote: "
+                           f"{answer['case_for_rejection']}"), kept
     if answer["confidence"] < MIN_CONFIDENCE:
         return False, f"confidence {answer['confidence']:.2f} below {MIN_CONFIDENCE}", kept
 

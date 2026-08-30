@@ -85,6 +85,28 @@ def run() -> int:
     if not published:
         failures.append("an unquotable objection still blocked the deck")
 
+    # Harm is the exception. The critic caught a canary deck full of dangerous
+    # medical advice, quoted it loosely, the objection was dropped for not
+    # matching word for word, and the deck published. Refusing a good deck costs
+    # an evening; publishing advice that hurts somebody costs more than the
+    # account, so a BLOCK naming a harm category stands without a usable quote.
+    for category in sorted(critic.BLOCKS_WITHOUT_A_QUOTE):
+        published, reason, _ = critic.decide(
+            reply([objection(category=category, quote="not in the deck at all", severity=5)],
+                  verdict="BLOCK"), DECK)
+        if published:
+            failures.append(f"HARM a BLOCK naming {category} published for want of a quote")
+
+    # H3 is the exception to the exception. The line it disputes is the citation,
+    # which code substituted from the allowlist, and honouring an unquotable H3
+    # puts a model back in charge of a source it cannot check. It blocked all
+    # three hand-written decks the last time it was allowed to.
+    published, _, _ = critic.decide(
+        reply([objection(category="H3_FALSE_PSYCH", quote="not in the deck at all", severity=5)],
+              verdict="BLOCK"), DECK)
+    if not published:
+        failures.append("H3 an unquotable citation dispute blocked the deck")
+
     # Past a couple, the model is composing rather than reading, so its approval
     # is worth no more than its objections.
     invented = [objection(quote=f"invented sentence number {i}", severity=2) for i in range(4)]
@@ -123,14 +145,15 @@ def run() -> int:
     if len(critic.CANARY_DECKS) < 5:
         failures.append("too few canary decks to notice drift")
 
-    total = len(CASES) + 3 + 3 + 4 + 5
+    total = len(CASES) + 3 + 3 + 4 + 5 + len(critic.BLOCKS_WITHOUT_A_QUOTE) + 1
     if failures:
         print(f"critic: {len(failures)}/{total} failed")
         for line in failures:
             print(f"  {line}")
         return 1
     print(f"critic: {total}/{total} passed "
-          f"({len(CASES)} decision rules, unquotable objections, vendor separation, "
+          f"({len(CASES)} decision rules, unquotable objections, harm blocks without "
+          f"a quote, vendor separation, "
           f"schema, {len(critic.CANARY_DECKS)} canary decks)")
     return 0
 
