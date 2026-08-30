@@ -99,7 +99,8 @@ def pick(per_query: int = 25, want: int = 5) -> dict:
     return {
         "ok": bool(kept),
         "route": "live",
-        "note": f"{len(failed)}/{harvested['attempted']} phrases failed" if failed else None,
+        "note": (f"{len(failed)}/{harvested['attempted']} phrases failed: "
+                 + " | ".join(harvested.get("why", []))[:200]) if failed else None,
         "candidates": kept[:want],
         "tally": tally,
         "fetched": len(raw),

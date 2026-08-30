@@ -37,9 +37,15 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-# The unauthenticated read endpoint. Note the host: public.api.bsky.app refuses
-# search, api.bsky.app serves it.
-SEARCH_URL = "https://api.bsky.app/xrpc/app.bsky.feed.searchPosts"
+# Two hosts serve the same read endpoint and they do not fail together. From a
+# laptop, api.bsky.app answers search and public.api.bsky.app refuses it. From a
+# GitHub runner the first run found every request failing, which is the case
+# this fallback exists for: a data-centre address can be treated differently
+# from a home one, and the second host is worth a try before giving up on a run.
+SEARCH_HOSTS = (
+    "https://api.bsky.app/xrpc/app.bsky.feed.searchPosts",
+    "https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts",
+)
 
 USER_AGENT = "suresilly-carousel/3.0 (+https://instagram.com/suresilly)"
 TIMEOUT = 20
@@ -103,7 +109,15 @@ def search(phrase: str, limit: int = 25, lang: str = "en") -> list[dict]:
     reference we hash rather than store. Author handles, display names, avatars,
     counts and thread context are dropped here and never enter the pipeline.
     """
-    payload = _get(SEARCH_URL, {"q": phrase, "limit": limit, "lang": lang})
+    trouble = []
+    for url in SEARCH_HOSTS:
+        try:
+            payload = _get(url, {"q": phrase, "limit": limit, "lang": lang})
+            break
+        except SourceUnavailable as exc:
+            trouble.append(str(exc)[-90:])
+    else:
+        raise SourceUnavailable(" | ".join(trouble))
     out = []
     for post in payload.get("posts", []):
         text = (post.get("record") or {}).get("text", "").strip()
@@ -130,14 +144,20 @@ def harvest(queries=QUERIES, per_query: int = 25, limit: int | None = None) -> d
     seen: set[str] = set()
     out: list[dict] = []
     failed: list[str] = []
+    # Keep why it failed, not just that it did. A harvest that reports
+    # "14/14 failed" and nothing else cannot be diagnosed from a CI log, which
+    # is the only place this ever runs unattended.
+    why: list[str] = []
 
     for index, phrase in enumerate(phrases):
         if index:
             time.sleep(PAUSE_SECONDS)
         try:
             results = search(phrase, limit=per_query)
-        except SourceUnavailable:
+        except SourceUnavailable as exc:
             failed.append(phrase)
+            if len(why) < 3:
+                why.append(str(exc)[-160:])
             continue
         for item in results:
             key = item["text"].lower().strip()
@@ -149,8 +169,9 @@ def harvest(queries=QUERIES, per_query: int = 25, limit: int | None = None) -> d
             break
 
     if not out:
-        raise SourceUnavailable(f"every phrase failed ({len(failed)}/{len(phrases)})")
-    return {"items": out, "attempted": len(phrases), "failed": failed}
+        raise SourceUnavailable(
+            f"every phrase failed ({len(failed)}/{len(phrases)}). " + " | ".join(why))
+    return {"items": out, "attempted": len(phrases), "failed": failed, "why": why}
 
 
 if __name__ == "__main__":
