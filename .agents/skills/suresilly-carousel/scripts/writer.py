@@ -436,7 +436,7 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
 
     trouble: list[str] = []
     attempt_user = user
-    for attempt in range(3):
+    for attempt in range(2):
         plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, PLAN_SCHEMA,
                                  temperature=1.0 if attempt == 0 else 0.7)
         problems = validate_plan(plan, moment, topic)

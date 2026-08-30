@@ -280,7 +280,13 @@ def _post(url: str, payload: dict, headers: dict) -> dict:
     except urllib.error.HTTPError as exc:
         if exc.code in (429, 503):
             raise RateLimited(f"HTTP {exc.code}", _retry_after(exc)) from exc
-        raise
+        # Everything else carries the provider's own complaint in the body, and
+        # without it a 400 is undiagnosable from a CI log.
+        try:
+            detail = exc.read().decode("utf-8", "replace")[:400]
+        except Exception:
+            detail = ""
+        raise ModelRefused(f"HTTP {exc.code}: {detail}") from exc
 
 
 def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
@@ -316,6 +322,22 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     return text
 
 
+def _field_note(schema: dict | None) -> str:
+    """A compact statement of what the reply must contain.
+
+    The whole nested schema used to be dumped into the prompt, which is large
+    and is the most likely thing a 400 Bad Request is objecting to. The model
+    only needs to know the field names; our own validator does the checking.
+    """
+    if not schema:
+        return ""
+    required = schema.get("required") or list((schema.get("properties") or {}))
+    if not required:
+        return ""
+    return ("\n\nReturn one JSON object with exactly these top level fields: "
+            + ", ".join(required) + ".")
+
+
 def call_groq(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
     key = resolve_key("GROQ_API_KEY")
     if not key:
@@ -325,8 +347,7 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
         "temperature": temperature,
         "response_format": {"type": "json_object"},
         "messages": [
-            {"role": "system", "content": system + (
-                f"\n\nReturn JSON matching exactly this shape:\n{json.dumps(schema)}" if schema else "")},
+            {"role": "system", "content": system + _field_note(schema)},
             {"role": "user", "content": user},
         ],
     }
@@ -366,8 +387,13 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
                     raise SchemaMismatch("; ".join(problems[:4]))
                 return answer, name
             except RateLimited as limited:
-                pause = limited.wait
+                # No retry here on purpose. A per-minute quota does not clear
+                # inside a run, and the old behaviour turned one logical call
+                # into as many as six requests: two models, twice each, then the
+                # fallback twice. Six calls a run became thirty six, which is
+                # how the free tier was being exhausted mid-job.
                 trouble.append(f"{name}: {limited}")
+                break
             except SchemaMismatch as mismatch:
                 trouble.append(f"{name}: {mismatch}")
                 # Retrying blind asks the same question and gets the same answer.
