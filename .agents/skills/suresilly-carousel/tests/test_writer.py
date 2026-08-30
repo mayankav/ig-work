@@ -319,6 +319,33 @@ def run() -> int:
             len(writer.pick_hashtags("not_a_subject_we_have", "x")) > 1:
         failures.append("TAGS an unknown subject produced subject tags")
 
+    # Slides 5 and 6 print under WHAT YOU SAY and TRY THIS INSTEAD, so both
+    # lines have to be things a person says. A deck that posted put "You stand
+    # up and walk to the hallway." under WHAT YOU SAY, which nobody said, and
+    # stapled a coaching question to the end of a script.
+    said = """### Slide 5 · Value Step 2
+- **\u274c Old Reaction:** "You stand up and walk to the [[hallway]]."
+- **\u2705 Regulated Response:** "I will move the cup at 11:45pm. What is the smallest action you can take?"
+"""
+    faults = writer.check_spoken(said)
+    if not any("not a thing they say" in f for f in faults):
+        failures.append(f"SPOKEN a stage direction under WHAT YOU SAY was accepted: {faults}")
+    if not any("coaching" in f for f in faults):
+        failures.append(f"SPOKEN a coaching question inside a script was accepted: {faults}")
+
+    # Both shapes the hand-written decks use have to stay clean: a quoted line
+    # in the reader's voice, and an unquoted behaviour. And an old reaction may
+    # ask somebody a question — that reflex is the thing being named.
+    fine = """### Slide 5 · Value Step 2
+- **\u274c Old Reaction:** Sending three rapid follow-up messages to fix the [[vibe]].
+- **\u2705 Regulated Response:** "I love you, and I am stepping outside for a [[walk]]."
+### Slide 6 · Value Step 3
+- **\u274c Old Reaction:** "Did I do something to upset you? Are you [[mad]]?"
+- **\u2705 Regulated Response:** "Hey, my brain is inventing a story. Are we [[good]]?"
+"""
+    if writer.check_spoken(fine):
+        failures.append(f"SPOKEN a good deck's lines were refused: {writer.check_spoken(fine)}")
+
     # ── mascots ──
     for briefs, why in [
         (["a donkey looking at a clock that reads 2:17am"] + ["a donkey sitting"] * 8, "text in the artwork"),
@@ -389,7 +416,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 19 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

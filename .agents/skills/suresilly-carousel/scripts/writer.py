@@ -177,7 +177,20 @@ THE NINE BEATS, in order, each one earning the next:
              that posted led with "Execution freeze" and then invented "the
              traction gap" here, so a reader was handed two names and carried
              away neither. One deck, one name; this is where it is unpacked.
-  5 script   the words to say, copy-paste, with a [bracket] to fill in
+  5 script   the words to say, copy-paste, with a [bracket] to fill in.
+
+             These two lines print under WHAT YOU SAY and TRY THIS INSTEAD, so
+             they have to be things a person says. Two shapes work: a quoted
+             line in the reader's own voice — "Yes of course! So excited!" — or
+             an unquoted behaviour — "Sending three rapid follow-up messages to
+             fix the vibe." Neither begins by telling the reader what they are
+             doing. A deck that posted put "You stand up and walk to the
+             hallway." under WHAT YOU SAY, which nobody said.
+
+             And the response is one thing somebody says. Do not append a
+             question to it: "I will move the cup to the sink at 11:45pm. What
+             is the smallest action you can take?" is a script with a coach
+             stapled to the end.
   6 action   one move, with a time and a place named
   7 sustain  what makes it survive tomorrow
   8 cheat    the card they save. It recaps slides 4 to 7 and adds nothing new.
@@ -377,10 +390,14 @@ def pick_hashtags(topic: str, seed: str) -> list[str]:
     if not subject and not broad:
         return []
     roll = int(hashlib.sha256(seed.encode()).hexdigest(), 16)
-    chosen = [subject[(roll + i) % len(subject)] for i in range(min(3, len(subject)))]
+    # Five, which is the cap Instagram set in December 2025. They cost nothing
+    # and they are how a post is filed, so there is no reason to leave room
+    # unused — four from the subject so it is findable by people browsing that,
+    # one broad so it is findable by people browsing the category.
+    chosen = [subject[(roll + i) % len(subject)] for i in range(min(4, len(subject)))]
     if broad:
         chosen.append(broad[roll % len(broad)])
-    return list(dict.fromkeys(chosen))
+    return list(dict.fromkeys(chosen))[:5]
 
 
 def hook_faults(hook: dict, name: str = "") -> list[str]:
@@ -1099,6 +1116,38 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
     return "\n".join(out)
 
 
+SPOKEN = re.compile(r"(?m)^- \*\*(❌ Old Reaction|✅ Regulated Response):\*\* (.+)$")
+ASKS_THE_READER = re.compile(r"[^.!?]*\byou(?:r|rself)?\b[^.!?]*\?")
+
+
+def check_spoken(markdown: str) -> list[str]:
+    """Slides 5 and 6 print these under "WHAT YOU SAY" and "TRY THIS INSTEAD".
+
+    So they have to be things a person says. A deck that posted put
+    "You stand up and walk to the hallway." under WHAT YOU SAY, which is not
+    something the reader said — it is a stage direction about them, in quotes.
+    Another said "You stare at the ceiling and wait for a feeling that will not
+    come."
+
+    The hand-written decks show the two shapes that work: a quoted line in the
+    reader's own voice ("Yes of course! So excited!") or an unquoted behaviour
+    ("Sending three rapid follow-up messages to fix the vibe."). Neither starts
+    by telling the reader what they are doing.
+    """
+    problems = []
+    for label, line in SPOKEN.findall(markdown):
+        plain = re.sub(r"\[\[|\]\]", "", line).strip().strip('"“”')
+        if re.match(r"(?i)^you\b", plain):
+            problems.append(f"{label} starts \"You...\", so it is a description of the "
+                            f"reader and not a thing they say: {plain[:56]!r}")
+        # Only the response. An old reaction may well ask somebody a question —
+        # "Did I do something to upset you?" is exactly the reflex being named.
+        if "Regulated" in label and ASKS_THE_READER.search(plain):
+            problems.append(f"the response asks the reader a question, so it is coaching "
+                            f"and not a line anybody says out loud: {plain[:56]!r}")
+    return problems
+
+
 def check_repeats(markdown: str) -> list[str]:
     """No line of copy may be written twice, and no researcher may be quoted
     into the advice.
@@ -1249,6 +1298,7 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
 
     problems = check_accents(markdown)
     problems += check_repeats(markdown)
+    problems += check_spoken(markdown)
     problems += check_spelling(markdown)
     explains = re.search(r"(?m)^- \*\*What This Explains Here:\*\* (.+)$", markdown)
     if explains and pattern_name and pattern_name.lower() not in explains.group(1).lower():

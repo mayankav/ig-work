@@ -19,43 +19,89 @@
     "",
     "Edit this file rather than the code. Lower case, no # and no spaces."
   ],
-
   "always": [
     "relationshipadvice",
     "emotionalintelligence",
     "mentalhealthmatters"
   ],
-
   "anxiety": [
-    "anxietyrelief", "overthinking", "anxiousattachment", "intrusivethoughts",
-    "nervoussystemregulation", "anxietysupport"
+    "anxietyrelief",
+    "overthinking",
+    "anxiousattachment",
+    "intrusivethoughts",
+    "nervoussystemregulation",
+    "anxietysupport",
+    "worryloop",
+    "anxiousthoughts"
   ],
   "burnout": [
-    "burnoutrecovery", "restisproductive", "workstress", "compassionfatigue",
-    "emotionalexhaustion"
+    "burnoutrecovery",
+    "restisproductive",
+    "workstress",
+    "compassionfatigue",
+    "emotionalexhaustion",
+    "chronicstress",
+    "restisresistance",
+    "workplaceburnout"
   ],
   "sleep": [
-    "sleephygiene", "cantsleep", "nightanxiety", "insomniaproblems",
-    "revengebedtimeprocrastination"
+    "sleephygiene",
+    "cantsleep",
+    "nightanxiety",
+    "insomniaproblems",
+    "revengebedtimeprocrastination",
+    "sleepproblems",
+    "sleepanxiety",
+    "tiredbutwired"
   ],
   "executive_dysfunction": [
-    "executivedysfunction", "adhdadults", "taskparalysis", "adhdinwomen",
-    "neurodivergent", "adhdproblems"
+    "executivedysfunction",
+    "adhdadults",
+    "taskparalysis",
+    "adhdinwomen",
+    "neurodivergent",
+    "adhdproblems",
+    "adhdbrain",
+    "procrastinationhelp"
   ],
   "self_worth": [
-    "selfworth", "selfcompassion", "innercritic", "impostersyndrome",
-    "selfesteemjourney"
+    "selfworth",
+    "selfcompassion",
+    "innercritic",
+    "impostersyndrome",
+    "selfesteemjourney",
+    "selfacceptance",
+    "negativeselftalk",
+    "innerchildwork"
   ],
   "boundaries": [
-    "healthyboundaries", "settingboundaries", "emotionalsafety",
-    "boundariesarehealthy", "relationshipboundaries"
+    "healthyboundaries",
+    "settingboundaries",
+    "emotionalsafety",
+    "boundariesarehealthy",
+    "relationshipboundaries",
+    "assertivenesstraining",
+    "communicationskills",
+    "boundariesmatter"
   ],
   "people_pleasing": [
-    "peoplepleaser", "peoplepleasing", "fawnresponse", "codependencyrecovery",
-    "learningtosayno"
+    "peoplepleaser",
+    "peoplepleasing",
+    "fawnresponse",
+    "codependencyrecovery",
+    "learningtosayno",
+    "overgiving",
+    "approvalseeking",
+    "conflictavoidance"
   ],
   "numbing": [
-    "doomscrolling", "emotionalavoidance", "screentimeproblems",
-    "numbingout", "avoidancecoping"
+    "doomscrolling",
+    "emotionalavoidance",
+    "screentimeproblems",
+    "numbingout",
+    "avoidancecoping",
+    "digitaldetox",
+    "distractionaddiction",
+    "scrollingproblem"
   ]
 }
