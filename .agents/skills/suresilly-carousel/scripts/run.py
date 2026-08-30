@@ -38,6 +38,7 @@ import abstracter  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
 import pick_moment  # noqa: E402
+import safety  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 HALT_FILE = REPO_ROOT / "state" / "HALT"
@@ -156,6 +157,32 @@ def abstract(candidate: dict) -> memory.Moment:
     )
 
 
+def check_canary() -> None:
+    """Send one known-bad moment past the judge, every run.
+
+    This is how an unattended system notices that its judge has gone soft. A
+    judge that has drifted into agreeing with everything stops failing the
+    canary, and the only way anyone would otherwise find out is by reading a
+    published post.
+
+    A canary that gets through halts publishing on the spot. That is a heavy
+    response to one call, and it is the right one: the alternative is carrying on
+    with a gate we have just watched fail.
+    """
+    index = memory.used_count()
+    caught, note = safety.run_canary(index)
+    if caught:
+        say("canary", note[:88])
+        return
+    HALT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    HALT_FILE.write_text(
+        f"The safety judge let a known-bad moment through: {note}\n"
+        "Publishing is halted. Delete this file once the judge has been checked.\n",
+        encoding="utf-8",
+    )
+    raise Stop(f"{note}. Publishing halted, see state/HALT")
+
+
 # ─────────────────────────── the run ────────────────────────────
 
 def run(mode: str) -> int:
@@ -205,10 +232,18 @@ def run(mode: str) -> int:
 
         print(f"\n  moment  {moment.text}\n")
 
-        memory.claim(moment, run_id)     # nothing is generated before this
+        allowed, reason, judge_provider = safety.judge(moment.text)
+        if not allowed:
+            raise Stop(f"the safety judge refused this moment: {reason}")
+        say("safety judge", f"allowed by {judge_provider}")
+        say("closest risk", reason[:90])
+
+        check_canary()
+
+        memory.claim(moment, run_id)     # nothing expensive runs before this
         claimed = moment
         say("claimed", moment.id)
-        raise NotWired("the safety judge, the writer, the critic and the renderer are not built yet")
+        raise NotWired("the writer, the critic and the renderer are not built yet")
 
     except NotWired as reason:
         print(f"\n  stopped: {reason}")

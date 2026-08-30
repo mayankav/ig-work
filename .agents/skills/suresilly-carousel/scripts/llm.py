@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -40,9 +41,24 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 TIMEOUT = 45
 RETRIES = 1
 
+# A rate limit is not a failure, it is a queue. The free tiers cap by the minute,
+# so the two-second pause that suits a transient error is useless here — it has
+# to be long enough to cross into the next window. The provider's own
+# Retry-After is used when it sends one.
+RATE_LIMIT_PAUSE = 25
+RETRY_PAUSE = 2
+
 
 class ModelRefused(Exception):
     """No usable answer. The reason is written for whoever reads the alert."""
+
+
+class RateLimited(ModelRefused):
+    """The provider is throttling. Worth waiting for, unlike everything else."""
+
+    def __init__(self, message: str, wait: int):
+        super().__init__(message)
+        self.wait = wait
 
 
 # ─────────────────────────── keys ────────────────────────────
@@ -201,12 +217,37 @@ def _gemini_schema(schema: dict) -> dict:
     return out
 
 
+# Google does not send a Retry-After header on a 429. It puts the wait in the
+# error message as "Please retry in 54.6s", so that is where we look before
+# falling back to a fixed pause.
+_RETRY_HINT = re.compile(r"retry in ([\d.]+)s", re.I)
+
+
+def _retry_after(exc: urllib.error.HTTPError) -> int:
+    header = exc.headers.get("Retry-After") if exc.headers else None
+    if header and header.strip().isdigit():
+        return int(header)
+    try:
+        match = _RETRY_HINT.search(exc.read().decode("utf-8", "replace"))
+    except Exception:
+        match = None
+    if match:
+        # A second of slack, so we are not racing the edge of the window.
+        return min(90, int(float(match.group(1))) + 1)
+    return RATE_LIMIT_PAUSE
+
+
 def _post(url: str, payload: dict, headers: dict) -> dict:
     body = json.dumps(payload).encode()
     request = urllib.request.Request(url, data=body, headers={
         "Content-Type": "application/json", **headers})
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        if exc.code in (429, 503):
+            raise RateLimited(f"HTTP {exc.code}", _retry_after(exc)) from exc
+        raise
 
 
 def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
@@ -269,9 +310,10 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
     """
     trouble: list[str] = []
     for name, call in providers:
+        pause = RETRY_PAUSE
         for attempt in range(RETRIES + 1):
             if attempt:
-                time.sleep(2)
+                time.sleep(pause)
             try:
                 reply = call(system, user, temperature, schema)
                 answer = extract_json(reply)
@@ -279,6 +321,9 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
                 if problems:
                     raise ModelRefused("; ".join(problems[:3]))
                 return answer, name
+            except RateLimited as limited:
+                pause = limited.wait
+                trouble.append(f"{name}: {limited}")
             except ModelRefused as refused:
                 trouble.append(f"{name}: {refused}")
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as exc:
