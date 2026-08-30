@@ -49,9 +49,10 @@ import writer  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 HALT_FILE = REPO_ROOT / "state" / "HALT"
 
-# How many moments to try before giving up on the run. Small on purpose: past
-# three, the problem is not the moment.
-MAX_ATTEMPTS = 3
+# How many moments to try before giving up. The harvest returns about five
+# usable candidates and it costs nothing to use them all: a refusal here is one
+# cheap call, and stopping early throws away the run for no reason.
+MAX_ATTEMPTS = 5
 
 CAROUSELS = REPO_ROOT / "carousels"
 PREVIEW = REPO_ROOT / ".preview"

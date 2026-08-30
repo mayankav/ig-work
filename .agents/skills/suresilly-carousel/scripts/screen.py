@@ -193,6 +193,22 @@ ANCHORS = {
     ),
 }
 
+# A felt state, which is not the same thing as a diagnosis. "Tired", "guilty"
+# and "dreading" are things a person notices in themselves; "anxiety" and
+# "burnout" are labels for a category, and those are penalised below.
+#
+# This exists because the screen and the safety judge were pulling in different
+# directions. The screen scored filmability, so a note left in a car park scored
+# six for a place, an object and an action, and the judge then refused it as a
+# trivial logistical mishap with nothing psychological in it. Three runs died
+# that way. Filmable and worth reading are different axes and both need scoring.
+FEELING = re.compile(
+    r"\b(tired|exhausted|drained|guilty|ashamed|embarrassed|awkward|dread|"
+    r"dreading|worried|scared|afraid|angry|furious|lonely|numb|restless|tense|"
+    r"panicking|nervous|cried|crying|upset|hurt|resent|regret|avoided|avoiding|"
+    r"ignored|ignoring|pretended|forced|couldn'?t stop|kept thinking|"
+    r"overthinking|second guess|beat myself|hate myself|felt like)\b")
+
 ABSTRACT = re.compile(
     r"\b(anxiety|depression|burnout|trauma|healing|journey|motivation|energy|"
     r"boundaries|self[\s-]?worth|mindset|growth|toxic|validation|closure)\b"
@@ -254,6 +270,12 @@ def shape(text: str) -> dict:
     score += 2 if "object" in found else 0
     score += 2 if "action" in found else 0
     score += 1 if "number" in found else 0
+    # A felt state is worth as much as a room. A moment can be perfectly
+    # filmable and still be about nothing, and that is what the judge refuses.
+    # A body sensation counts twice on purpose: once as something a camera can
+    # see, and once as the feeling it is evidence of. A pounding heart is both,
+    # and without this an empty note left in a car park outranked it.
+    score += 2 if (FEELING.search(t) or "body" in found) else 0
 
     abstracts = ABSTRACT.findall(t)
     score -= 2 * len(abstracts)
@@ -266,6 +288,13 @@ def shape(text: str) -> dict:
         reasons.append("no time, body or place to film")
     if score < PASS_SCORE:
         reasons.append(f"score {score} below {PASS_SCORE}")
+
+    if not FEELING.search(t) and not found.get("body"):
+        # Not a rejection. Plenty of good moments show the feeling rather than
+        # naming it, and the judge is the one qualified to decide. But between
+        # two equally filmable candidates, the one with a felt state in it is
+        # the one worth spending a rewrite on.
+        pass
 
     return {
         "ok": not reasons,

@@ -73,7 +73,7 @@ def screen_all(candidates: list[dict]) -> tuple[list[dict], dict[str, int]]:
     return kept, tally
 
 
-def pick(per_query: int = 25, want: int = 5) -> dict:
+def pick(per_query: int = 25, want: int = 8) -> dict:
     """Return the best candidates, or fall back to the reserve.
 
     Never raises on an empty feed — the caller needs to distinguish "nothing
@@ -110,7 +110,7 @@ def pick(per_query: int = 25, want: int = 5) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     ap.add_argument("--per-query", type=int, default=25, help="posts to pull per search phrase")
-    ap.add_argument("--want", type=int, default=5, help="how many survivors to return")
+    ap.add_argument("--want", type=int, default=8, help="how many survivors to return")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     args = ap.parse_args()
 
