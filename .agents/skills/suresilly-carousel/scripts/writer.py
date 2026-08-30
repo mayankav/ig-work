@@ -565,15 +565,22 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
         if best_problems is None or len(problems) < len(best_problems):
             best_plan, best_problems = plan, problems
         plan, problems = best_plan, best_problems
-        # Retrying blind asks the same model the same question and tends to get
-        # the same answer. The complaints are literal, so hand them back and
-        # lower the temperature: this is no longer a search for an angle, it is
-        # a correction to one.
+        # The plan goes back with the complaints, and it is the BEST plan, not
+        # the last one. Retrying blind asks the same model the same question and
+        # gets the same answer; retrying from a worse plan loses ground already
+        # won. Temperature drops too: this is no longer a search for an angle,
+        # it is a correction to one.
         attempt_user = user + (
-            "\n\nYour previous plan was rejected for these exact reasons. Fix each one "
-            "and keep everything else:\n  " + "\n  ".join(dict.fromkeys(problems))
+            "\n\nTHE BEST PLAN SO FAR, which is nearly right:\n"
+            + json.dumps(plan, indent=2)
+            + f"\n\nOnly these {len(problems)} things are wrong with it:\n  "
+            + "\n  ".join(dict.fromkeys(problems))
+            + "\n\nReturn that plan again with exactly those fixed and everything else "
+              "left as it is."
         )
-    raise llm.ModelRefused("; ".join(dict.fromkeys(trouble))[:400])
+    raise llm.ModelRefused(
+        f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
+        f"[faults per attempt: {', '.join(str(n) for n in history)}]")
 
 
 # ─────────────────────────── the draft ────────────────────────────
@@ -771,7 +778,12 @@ DRAFT_SCHEMA = {
     "properties": {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 140},
-                                "body": {"type": "string", "maxLength": 280}}},
+                                # 200, not 280. The editorial cap on slide 2 is
+                                # 35 words and the schema allowed comfortably
+                                # more, so the model wrote to the schema and the
+                                # gate refused it — 43 words, seven attempts
+                                # running, one fault away from a finished deck.
+                                "body": {"type": "string", "maxLength": 200}}},
         # The description is rewritten per deck in write_deck() with the real
         # name in it. A rule stated once in the system prompt was missed seven
         # attempts running: the model is filling in a field called "explains"
@@ -1122,7 +1134,8 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
             f"Slide 2. Instagram re-serves a carousel starting HERE to anyone who did not "
             f"swipe, so it is a second cover and has to work with slide 1 unseen. It MUST "
             f"name one of these out loud: {scene}. A slide 2 with no thing in it is a "
-            f"caption, and it is checked.")
+            f"caption, and it is checked. Under 35 WORDS, and shorter is better: it is a "
+            f"cover, not a paragraph.")
     if thread:
         for field, slide in (("name", 4), ("script", 5), ("action", 6), ("sustain", 7)):
             spec = schema["properties"].get(field, {})

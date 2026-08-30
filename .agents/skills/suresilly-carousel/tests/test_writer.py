@@ -99,6 +99,27 @@ CLAIM_WORD_CAP = 18
 def run() -> int:
     failures = []
 
+    # Both loops must be able to REACH their own failure. plan_deck raised a
+    # NameError on the line that reports a refusal, because a variable was
+    # removed when the loop learned to keep its best attempt and one reference
+    # to it survived. Every test passed; the fault only appears on the path
+    # where a plan cannot be fixed, which is the path CI takes on a bad night.
+    import llm as _llm
+    for name, fn in (("plan_deck", lambda: writer.plan_deck("a moment", "sleep")),
+                     ("write_deck", lambda: writer.write_deck(
+                         "a moment", "sleep", title="t", pattern="p", pillar="P"))):
+        real = _llm.ask
+        _llm.ask = lambda *a, **k: (_ for _ in ()).throw(_llm.ModelRefused("no vendor"))
+        try:
+            fn()
+            failures.append(f"REFUSAL {name} returned instead of refusing")
+        except _llm.ModelRefused:
+            pass
+        except Exception as other:                          # noqa: BLE001
+            failures.append(f"REFUSAL {name} raised {type(other).__name__}: {other}")
+        finally:
+            _llm.ask = real
+
     # Slide 3 is the one card a reader has to understand on the first read. It
     # is code that puts these words there, so nothing downstream can fix them.
     for citation in writer.load_citations().values():
@@ -281,7 +302,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 4 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 6 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

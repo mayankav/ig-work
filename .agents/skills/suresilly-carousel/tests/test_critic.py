@@ -51,7 +51,15 @@ CASES = [
     ("something a reader could be harmed by", reply([objection(severity=5)]), False),
     ("something that would be screenshotted to mock", reply([objection(severity=4)]), False),
     ("a hard category at severity three",
-     reply([objection(category="H1_HARM_ADVICE", severity=3)]), False),
+     reply([objection(category="H3_FALSE_PSYCH", severity=3)]), False),
+    # H1 needs a 4. "Dangerous" is the strongest-sounding word a critic asked
+    # for the strongest case can reach for, and it spent three decks on a
+    # hallway light, a delayed reply and an unspoken flatmate. Real harm advice
+    # does not come back at a 3.
+    ("harm advice at severity three, which is the stretch",
+     reply([objection(category="H1_HARM_ADVICE", severity=3)]), True),
+    ("harm advice at severity four, which is the real thing",
+     reply([objection(category="H1_HARM_ADVICE", severity=4)]), False),
     # A soft category at three is a real note, not a reason to spike a deck.
     ("a soft category at severity three", reply([objection(severity=3)]), True),
     ("three separate small defects",
@@ -97,15 +105,30 @@ def run() -> int:
         if published:
             failures.append(f"HARM a BLOCK naming {category} published for want of a quote")
 
-    # H3 is the exception to the exception. The line it disputes is the citation,
-    # which code substituted from the allowlist, and honouring an unquotable H3
-    # puts a model back in charge of a source it cannot check. It blocked all
-    # three hand-written decks the last time it was allowed to.
+    # H3 was exempted from this for a while, so the critic could not dispute the
+    # citation — the one line code writes, from a verified allowlist, which a
+    # model cannot check against the book it names. Live canaries showed that
+    # exemption cost more than it saved: a deck carrying "studies show 94
+    # percent of night waking is caused by cortisol" walked through, because
+    # this critic quotes loosely and its objection was dropped for not matching
+    # word for word. A fabricated statistic is a real harm. A citation dispute
+    # costs a run.
     published, _, _ = critic.decide(
         reply([objection(category="H3_FALSE_PSYCH", quote="not in the deck at all", severity=5)],
               verdict="BLOCK"), DECK)
-    if not published:
-        failures.append("H3 an unquotable citation dispute blocked the deck")
+    if published:
+        failures.append("H3 an unquotable false-claim block was ignored")
+
+    # The citation is protected one level down instead, which is where the
+    # disputes actually appeared: an H3 objection quoting the Source Claim line
+    # is dropped before any decision is made about it.
+    cited = DECK + "\n- **Source Claim:** Espie found that checking the clock turns a waking into a sum.\n"
+    published, _, kept = critic.decide(
+        reply([objection(category="H3_FALSE_PSYCH", severity=5,
+                         quote="Espie found that checking the clock turns a waking into a sum")],
+              verdict="BLOCK"), cited)
+    if any(o["category"] == "H3_FALSE_PSYCH" for o in kept):
+        failures.append("H3 an objection to the vetted citation line was kept")
 
     # Past a couple, the model is composing rather than reading, so its approval
     # is worth no more than its objections.
