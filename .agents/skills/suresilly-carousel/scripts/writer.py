@@ -368,8 +368,12 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
 
     # Slide 8 may only recap. A card that adds an idea is a new argument
     # arriving after the reader has stopped reading for one.
+    # Every slide before the cheat sheet, not only the three just before it. A
+    # recap that reaches back to the mechanism on slide 4 or the problem on
+    # slide 2 is doing exactly what a recap is for, and counting that as a new
+    # idea refused decks for being well made.
     earlier = set()
-    for beat in beats[4:7]:
+    for beat in beats[:7]:
         earlier |= {w.lower() for w in _words(beat["beat"])} | {e.lower() for e in beat["exports"]}
     new_on_cheat = {e.lower() for e in beats[7]["exports"]} - earlier
     if new_on_cheat:
@@ -528,6 +532,11 @@ MASCOT BRIEFS
   from that slide's own beat so no two could be swapped. Posture and expression,
   one prop at most. Describe what the body is doing, never an emotion word.
   No text, letters, numbers, signs, screens or labels anywhere in the artwork.
+  This is refused more often than any other rule, and always the same way: the
+  moment involves a phone, so the brief says "looking at the screen". A picture
+  of a screen is a picture of writing. Show the phone face down on the duvet, or
+  held against the chest, or being pushed away — the object, never its display.
+  Same for a clock: the donkey turns it to the wall, it never shows a time.
 
 Return only a JSON object with the fields you are asked for."""
 
@@ -545,6 +554,18 @@ HOW THIS DECK IS WRITTEN:
   explain through   {lens}
   middle slides     {rehook}
   saved card is     {cheat_shape}
+
+THE SCENE. These are the only concrete things in this person's evening:
+  {scene}
+
+Every slide, the advice included, stays inside that scene. Do not put them at a
+desk, in a kitchen, on a sofa, or reaching for a phone unless the words above
+say so. If the advice needs somewhere to happen, it happens here.
+
+This is the rule most drafts break. A deck about waking at 2:17am once shipped
+with "17 tabs open" in its advice, because the advice was written for a
+different evening and dropped in. Advice you could paste into any deck is the
+wrong advice for this one.
 
 Write the copy and return the JSON object."""
 
@@ -797,8 +818,13 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     claim = citation["claims"][plan["claim_index"]]
     hook = best_hook(plan, plan["scene_token"])
 
+    # The scene is handed to the model because a gate has always enforced it and
+    # nothing ever stated it. The draft was rejected for naming a kitchen by a
+    # rule the model was never shown, then repaired one stray word at a time
+    # across three attempts. Saying it once up front is cheaper and it works.
+    scene = ", ".join(sorted(moment_anchors)) if moment_anchors else "(none recorded)"
     user = DRAFT_USER.format(
-        plan=json.dumps(plan, indent=2),
+        plan=json.dumps(plan, indent=2), scene=scene,
         h1=hook["h1"], h2=hook["h2"], claim=claim,
         lens=AXES["lens"][axes["lens"]],
         rehook=AXES["rehook"][axes["rehook"]],

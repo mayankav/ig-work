@@ -24,6 +24,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
 import coherence  # noqa: E402
+import screen  # noqa: E402
 import render  # noqa: E402
 
 CAROUSELS = pathlib.Path(__file__).resolve().parent.parent.parent.parent.parent / "carousels"
@@ -78,8 +79,32 @@ def run() -> int:
     contaminated = coherent_deck()
     contaminated[5] = fake(6, body="If you are hovering at your desk with 17 tabs open, then set a 10 minute [[timer]].")
     problems = coherence.check(contaminated, text_of, moment_anchors={"clock", "2:17am", "bed"})
-    if not any("not part of this moment" in p for p in problems):
+    # Caught by the thread check, not by counting nouns. Advice about tabs stops
+    # explaining a slide about sleep cycles, and that is the real complaint —
+    # "desk" is not, because good decks say "desk" too.
+    if not any("does not connect back to the explanation" in p for p in problems):
         failures.append("FOREIGN a waiting-mode slide inside a 2:17am deck was not caught")
+
+    # A different evening, which is what the foreign-scene gate is now for. The
+    # deck that shipped broken opened at 2:17am and gave its advice at 2:47pm.
+    wrong_time = coherent_deck()
+    wrong_time[5] = fake(6, body="If you wake and reach for the clock at 2:47pm, then leave it turned [[away]].")
+    if not any("not when this moment happened" in p
+               for p in coherence.check(wrong_time, text_of, moment_anchors={"2:17am"})):
+        failures.append("FOREIGN a deck giving 2:17am advice at 2:47pm was not caught")
+
+    # The test whose absence let all of this ship. Every gate above was checked
+    # against decks that must FAIL and never against one that must PASS, so the
+    # foreign-scene gate ran for months rejecting all four decks we know to be
+    # good — a deck about watching the clock was refused for saying "clock".
+    # Any gate keyed on moment_anchors must clear the real decks first.
+    for path in sorted(CAROUSELS.glob("*/carousel.md")):
+        slides = render.parse_markdown(path)
+        hook_words = {w.lower() for values in
+                      screen.screen(text_of(slides[0]))["anchors"].values() for w in values}
+        blocked = coherence.check(slides, text_of, moment_anchors=hook_words)
+        if blocked:
+            failures.append(f"REAL {path.parent.name} blocked by a moment-anchor gate: {blocked[0]}")
 
     # 4. A cheat sheet that abandons the moment.
     drifted = coherent_deck()
@@ -107,14 +132,15 @@ def run() -> int:
     if not any("introduces" in p for p in coherence.check(invented, text_of)):
         failures.append("NEW-IDEA a cheat sheet inventing a new named pattern was not caught")
 
-    checks = len(decks) + 6
+    checks = len(decks) * 2 + 7
     if failures:
         print(f"coherence: {len(failures)}/{checks} failed")
         for line in failures:
             print(f"  {line}")
         return 1
     print(f"coherence: {checks}/{checks} passed "
-          f"({len(decks)} real decks clean, foreign scene, drifted cheat, broken thread, "
+          f"({len(decks)} real decks clean, and clean again against their own "
+          f"anchors, wrong time, foreign scene, drifted cheat, broken thread, "
           f"weak second cover and invented idea all caught)")
     return 0
 

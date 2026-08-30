@@ -160,18 +160,32 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
                 f"neither the cost slide nor the CTA comes back to the moment on slide 1 ({named})"
             )
 
-    # ── nothing from another deck's moment wandered in ──
+    # ── nothing from another deck's evening wandered in ──
+    #
+    # This once refused any noun the moment did not literally contain, which
+    # sounds right and is not. Measured against the only decks known to be good
+    # — the three hand-written ones and the fixture above — it refused all four:
+    # a deck about watching the clock may not say "clock", a deck about being
+    # let in may not say "door". A moment is one sentence and a deck is nine
+    # slides, so the deck will always name more of the evening than the sentence
+    # did. What it must not do is move to a DIFFERENT evening.
+    #
+    # A second clock time is that, and nothing else is. The deck that shipped
+    # broken opened at 2:17am and gave advice at 2:47pm; the wrong time is what
+    # a reader would notice, and it is the one detail that cannot be explained
+    # by a deck simply saying more than its source. Advice that belongs to
+    # somebody else's evening is caught below, by the thread check, on the
+    # stronger ground that it stopped explaining what slide 3 named.
     if moment_anchors is not None:
-        allowed = {a.lower() for a in moment_anchors} | hook_anchors
-        for i, text in enumerate(texts, 1):
-            strays = anchors_in(text) - allowed
-            # A bare number is usually a count inside the advice, not a scene
-            # detail, so only wordy anchors count as foreign.
-            strays = {s for s in strays if not s.replace(":", "").isdigit()}
-            if strays:
-                problems.append(
-                    f"slide {i} names {', '.join(sorted(strays))}, which is not part of this moment"
-                )
+        clocks = {a for a in {x.lower() for x in moment_anchors} if ":" in a or a.isdigit()}
+        if clocks:
+            for i, text in enumerate(texts, 1):
+                other = {a for a in anchors_in(text) if ":" in a} - clocks
+                if other:
+                    problems.append(
+                        f"slide {i} is set at {', '.join(sorted(other))}, "
+                        f"which is not when this moment happened"
+                    )
 
     # ── the advice still belongs to the mechanism ──
     source_terms = content(source)
@@ -188,7 +202,7 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
     # So this counts new IDEAS, not new words: a concrete detail or a named
     # label that appears nowhere in the advice it claims to summarise.
     earlier_anchors, earlier_labels = set(), set()
-    for i in range(3, 7):
+    for i in range(0, 7):
         if i < len(texts):
             earlier_anchors |= anchors_in(texts[i])
             earlier_labels |= _labels(texts[i])
@@ -202,8 +216,17 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
     cheat_anchors = anchors_in(cheat) - scene_anchors
     cheat_labels = _labels(cheat)
 
+    # A label is only new if the deck has not said it before IN ANY FORM. The
+    # [[brackets]] are a typographic accent, so the same idea is routinely
+    # plain on slide 5 and accented on the card, and comparing accent to accent
+    # called that a new idea. Compare against the words instead.
+    earlier_words = set()
+    for i in range(0, 7):
+        if i < len(texts):
+            earlier_words |= {w.lower() for w in _words(texts[i])}
     stray_anchors = {a for a in cheat_anchors - earlier_anchors if not a.replace(":", "").isdigit()}
-    stray_labels = cheat_labels - earlier_labels - _labels(hook) - _labels(cost)
+    stray_labels = {label for label in cheat_labels - earlier_labels
+                    if not {w.lower() for w in _words(label)} <= earlier_words}
     if stray_anchors or stray_labels:
         introduced = ", ".join(sorted(stray_anchors | stray_labels))
         problems.append(

@@ -100,7 +100,17 @@ def run() -> int:
     if runner.plan_token(empty) != "":
         failures.append("ANCHOR a moment with no anchors returned something")
 
-    total = 5 + 3 + 3 + 2 + 2
+    # The set handed to the writer must be the words, not the kinds. This line
+    # sent {"clock", "place"} for months. The coherence gate reads it as the
+    # only scene the deck is allowed to mention, so every real word — the bed,
+    # the text, the door — came back as invented, and no deck ever passed.
+    words = runner.anchor_words(one)
+    if words != {"2:17am", "bed"}:
+        failures.append(f"ANCHOR expected the words the moment is made of, got {words}")
+    if runner.anchor_words(empty) != set():
+        failures.append("ANCHOR a moment with no anchors produced words")
+
+    total = 5 + 3 + 3 + 2 + 4
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:

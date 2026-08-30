@@ -153,6 +153,17 @@ def plan_token(moment: memory.Moment) -> str:
     return ""
 
 
+def anchor_words(moment: memory.Moment) -> set[str]:
+    """The concrete words the moment is made of.
+
+    `moment.anchors` is {kind: [words]}, so iterating it yields "place" and
+    "object" rather than "bed" and "text". The coherence gate treats anything
+    outside this set as a scene the deck invented, so handing it the kind names
+    told it that every real word in the deck was foreign, and no deck could pass.
+    """
+    return {str(word).lower() for words in moment.anchors.values() for word in words if word}
+
+
 def draw() -> dict:
     """Fetch live, screen, drop what we have used, and take the best."""
     result = pick_moment.pick()
@@ -366,16 +377,25 @@ def run(mode: str) -> int:
         # refusals are about the moment, not the deck. A moment with no feeling
         # in it is the next moment's problem to solve, not this run's.
         moment = topic = judge_provider = reason = None
+        refusals: list[str] = []
         for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
             try:
                 candidate_moment = abstract(candidate)
             except Skip as why:
                 say(f"attempt {attempt}", f"rewrite refused: {str(why)[:70]}")
+                refusals.append("rewrite")
                 continue
 
             allowed, why, judge_provider, topic = safety.judge(candidate_moment.text)
             if not allowed:
-                say(f"attempt {attempt}", f"judge refused: {str(why)[:70]}")
+                # The rewritten text is printed because the refusal is about it
+                # and not about the moment shown at the top of the run. Reading
+                # five refusals without seeing what was judged is guesswork, and
+                # it cost several evenings.
+                say(f"attempt {attempt}", f"judge refused ({judge_provider}, topic {topic})")
+                print(f"      judged: {candidate_moment.text[:104]}")
+                print(f"      reason: {str(why)[:104]}")
+                refusals.append("judge")
                 continue
 
             moment, reason = candidate_moment, why
@@ -384,7 +404,12 @@ def run(mode: str) -> int:
 
         if moment is None:
             tried = min(MAX_ATTEMPTS, len(candidates))
-            raise Stop(f"no moment survived the rewrite and the judge in {tried} attempts")
+            # Which gate did the refusing matters for what to do next. All five
+            # at the rewrite is a firewall or a model problem; all five at the
+            # judge is the harvest, or a judge that has gone strict.
+            where = ", ".join(f"{refusals.count(k)} at the {k}"
+                              for k in ("rewrite", "judge") if refusals.count(k))
+            raise Stop(f"no moment survived {tried} attempts ({where})")
 
         print(f"\n  moment  {moment.text}\n")
         say("safety judge", f"allowed by {judge_provider}, subject {topic}")
@@ -399,7 +424,7 @@ def run(mode: str) -> int:
         markdown, plan, axes, wrote_by = writer.write_deck(
             moment.text, topic, title=moment.text[:40].rstrip(" .,"),
             pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
-            moment_anchors=set(moment.anchors) | {plan_token(moment)},
+            moment_anchors=anchor_words(moment) | {plan_token(moment)},
         )
         say("written", f"by {wrote_by}, {', '.join(axes.values())}")
 
