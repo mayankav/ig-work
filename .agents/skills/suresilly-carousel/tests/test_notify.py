@@ -53,7 +53,8 @@ def run() -> int:
 
         def with_env(**env):
             import os
-            for key in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "EMAIL_API_KEY", "EMAIL_FROM"):
+            for key in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "RESEND_API_KEY",
+                        "EMAIL_API_KEY", "EMAIL_FROM"):
                 os.environ.pop(key, None)
             os.environ.update({k: v for k, v in env.items() if v})
 
@@ -99,7 +100,7 @@ def run() -> int:
             failures.append("the part of a long body past the caption limit was dropped")
 
         # ── email ──
-        with_env(EMAIL_API_KEY="re_test", EMAIL_FROM="onboarding@resend.dev")
+        with_env(RESEND_API_KEY="re_test", EMAIL_FROM="onboarding@resend.dev")
         notify.requests = Stub(lambda url: Response(True))
         notify.notify("subject", "body", sheet, "someone@example.com")
         sent = [kwargs for url, kwargs in notify.requests.calls if "resend" in url]
@@ -111,14 +112,29 @@ def run() -> int:
         # A key for a provider we do not speak to is refused rather than
         # attempted, because the old code posted a Cloudflare token at a
         # non-existent endpoint and called that success.
-        with_env(EMAIL_API_KEY="cloudflare-token-shaped")
+        with_env(RESEND_API_KEY="cloudflare-token-shaped")
         notify.requests = Stub(lambda url: Response(True))
         notify.notify("subject", "body", None, "someone@example.com")
         if notify.requests.calls:
             failures.append("a key that is not a Resend key was still used to send")
 
+        # A secret the workflow references but nobody created arrives as an
+        # empty string. Without treating that as unset, the sender address
+        # becomes "" and the API fails with an error that looks nothing like
+        # the missing secret it actually is.
+        with_env(RESEND_API_KEY="re_test")
+        import os
+        os.environ["EMAIL_FROM"] = ""
+        notify.requests = Stub(lambda url: Response(True))
+        notify.notify("subject", "body", None, "someone@example.com")
+        sent = [kwargs for url, kwargs in notify.requests.calls if "resend" in url]
+        if not sent:
+            failures.append("an empty EMAIL_FROM stopped the email being sent at all")
+        elif not sent[0]["json"]["from"]:
+            failures.append("an empty EMAIL_FROM was used as the sender address")
+
         # ── both configured, both attempted ──
-        with_env(TELEGRAM_BOT_TOKEN="t", TELEGRAM_CHAT_ID="c", EMAIL_API_KEY="re_test")
+        with_env(TELEGRAM_BOT_TOKEN="t", TELEGRAM_CHAT_ID="c", RESEND_API_KEY="re_test")
         notify.requests = Stub(lambda url: Response(True))
         notify.notify("subject", "body", sheet, "someone@example.com")
         urls = " ".join(u for u, _ in notify.requests.calls)
@@ -145,7 +161,7 @@ def run() -> int:
 
     notify.requests = real
 
-    total = 16
+    total = 18
     if failures:
         print(f"notify: {len(failures)}/{total} failed")
         for line in failures:

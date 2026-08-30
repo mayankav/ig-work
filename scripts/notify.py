@@ -47,14 +47,25 @@ TIMEOUT = 30
 CAPTION_LIMIT = 1000
 
 
+def _env(name: str) -> str:
+    """Read a variable, treating empty as unset.
+
+    A workflow that passes a secret which was never created sets the variable to
+    an empty string rather than leaving it out. Without this, an unset EMAIL_FROM
+    becomes a sender address of "", which the API rejects with an error that
+    looks nothing like the missing secret it actually is.
+    """
+    return os.environ.get(name, "").strip()
+
+
 def _telegram(subject: str, body: str, attach: Path | None) -> tuple[bool, str]:
     """Send via a bot.
 
     sendDocument, not sendPhoto. sendPhoto recompresses, and the contact sheet is
     the thing you squint at to decide whether nine slides read as one deck.
     """
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
-    chat = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    token = _env("TELEGRAM_BOT_TOKEN")
+    chat = _env("TELEGRAM_CHAT_ID")
     if not (token and chat):
         return False, "not configured"
 
@@ -90,14 +101,16 @@ def _resend(subject: str, body: str, attach: Path | None, to: str) -> tuple[bool
     the account owner. That is normally a limitation and here it is exactly the
     shape of the job: one recipient, who owns the account.
     """
-    key = os.getenv("EMAIL_API_KEY", "").strip()
+    key = _env("RESEND_API_KEY") or _env("EMAIL_API_KEY")
     if not key:
         return False, "not configured"
     if not key.startswith("re_"):
-        return False, "EMAIL_API_KEY is not a Resend key, which is the only email path"
+        return False, "the key is not a Resend key, which is the only email path"
 
     payload = {
-        "from": os.getenv("EMAIL_FROM", "onboarding@resend.dev"),
+        # The default sender needs no domain and no DNS. It only delivers to the
+        # account owner, which is exactly the shape of this job.
+        "from": _env("EMAIL_FROM") or "onboarding@resend.dev",
         "to": [to],
         "subject": subject,
         "text": body,
@@ -156,7 +169,7 @@ def main() -> None:
     ap.add_argument("--subject", required=True)
     ap.add_argument("--body", default="")
     ap.add_argument("--attach", help="usually the contact sheet")
-    ap.add_argument("--to", default=os.getenv("EMAIL_TO", "mayankmacav@gmail.com"))
+    ap.add_argument("--to", default=_env("EMAIL_TO") or "mayankmacav@gmail.com")
     args = ap.parse_args()
 
     body = args.body
