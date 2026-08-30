@@ -83,6 +83,13 @@ def run() -> int:
         if fresh:
             failures.append(f"REAL {names[-1]} was blocked: {fresh[0]}")
 
+        # Rebuilding a deck is ordinary: a render fails, someone runs it again.
+        # Without excluding a deck's own record it would be caught plagiarising
+        # itself the second time, and the run would refuse for the rest of time.
+        rebuilt = novelty.check(prints[names[0]])
+        if rebuilt:
+            failures.append(f"REBUILD a deck was caught plagiarising itself: {rebuilt[0]}")
+
         # Recycle: take a published deck's slides and call it a new deck.
         source = prints[names[0]]
         recycled = json.loads(json.dumps(source))
@@ -113,7 +120,7 @@ def run() -> int:
         return 1
     pairs = len(list(itertools.combinations(prints, 2)))
     print(f"novelty: passed ({len(prints)} real decks, {pairs} pairs clear of the limits, "
-          f"recycled and half-recycled decks both blocked)")
+          f"rebuild allowed, recycled and half-recycled decks both blocked)")
     return 0
 
 

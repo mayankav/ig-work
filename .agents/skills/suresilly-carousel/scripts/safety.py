@@ -164,8 +164,12 @@ def decide(answer: dict, moment: str) -> tuple[bool, str]:
     return True, answer["strongest_reason_to_block"]
 
 
-def judge(moment: str) -> tuple[bool, str, str]:
-    """Judge one moment. Returns (allowed, reason, provider).
+def judge(moment: str) -> tuple[bool, str, str, str]:
+    """Judge one moment. Returns (allowed, reason, provider, topic).
+
+    The topic comes back because this is the only step that decides which of the
+    eight subjects a moment belongs to, and the writer needs it to know which
+    citations it may choose from. Deciding it twice would be two answers.
 
     Any failure to get a usable answer is a block, not a retry-until-yes.
     """
@@ -175,9 +179,9 @@ def judge(moment: str) -> tuple[bool, str, str]:
         answer, provider = llm.ask(SYSTEM, USER.format(nonce=nonce, text=clean), SCHEMA,
                                    temperature=0.0)
     except llm.ModelRefused as refused:
-        return False, f"no usable judgement ({refused})", "none"
+        return False, f"no usable judgement ({refused})", "none", "none"
     allowed, reason = decide(answer, moment)
-    return allowed, reason, provider
+    return allowed, reason, provider, answer["topic"]
 
 
 # ─────────────────────────── canaries ────────────────────────────
@@ -202,7 +206,7 @@ CANARIES = (
 def run_canary(index: int) -> tuple[bool, str]:
     """Send one known-bad moment. Returns (caught, description)."""
     label, text = CANARIES[index % len(CANARIES)]
-    allowed, reason, _ = judge(text)
+    allowed, reason, _, _ = judge(text)
     return (not allowed), f"canary {label}: {'caught' if not allowed else 'PASSED THROUGH'} ({reason})"
 
 
@@ -220,7 +224,7 @@ if __name__ == "__main__":
         "I read the message four times and checked when they were last online.",
         "I closed my laptop at half past eight and kept refreshing my inbox from the sofa.",
     ):
-        allowed, reason, _ = judge(text)
+        allowed, reason, _, _ = judge(text)
         print(f"  {'ok  ' if allowed else 'BLOCKED'} {text[:70]}")
         if not allowed:
             print(f"       {reason[:110]}")

@@ -244,13 +244,20 @@ def check(fp: dict) -> list[str]:
     problems: list[str] = []
     corpus = _load(PHRASES_PATH, {"slides": [], "runs": []})
 
+    # A deck is never compared against its own record. Rebuilding a deck is an
+    # ordinary thing to do, and without this it would be caught plagiarising
+    # itself the second time.
+    mine_already = load_fingerprint(fp["slug"])
+    own_slides = {s["hash"] for s in mine_already["slides"]} if mine_already else set()
+    own_runs = set(mine_already["runs"]) if mine_already else set()
+
     # 1 and 2 — exact reuse, checked against all of history at constant cost.
-    seen_slides = set(corpus["slides"])
+    seen_slides = set(corpus["slides"]) - own_slides
     for i, slide in enumerate(fp["slides"], 1):
         if slide["hash"] in seen_slides:
             problems.append(f"slide {i} is word-for-word a slide we already published")
 
-    repeated_runs = set(fp["runs"]) & set(corpus["runs"])
+    repeated_runs = set(fp["runs"]) & (set(corpus["runs"]) - own_runs)
     if repeated_runs:
         problems.append(
             f"{len(repeated_runs)} run(s) of {SHARED_RUN_MAX}+ words appear in an earlier deck"

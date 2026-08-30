@@ -1,24 +1,19 @@
-name: auto-post — lucky 2x/day
+name: auto-post
 
+# Twice a day, spaced far apart. Instagram balances how much it shows from one
+# account, so two posts close together compete with each other.
 on:
   schedule:
-    # 08:00 IST = 02:30 UTC, 20:00 IST = 14:30 UTC
-    - cron: "30 2 * * *"
-    - cron: "30 14 * * *"
+    - cron: "30 2 * * *"    # 08:00 IST
+    - cron: "30 14 * * *"   # 20:00 IST
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: "Dry run (build + email preview, do not publish to IG)"
+      mode:
+        description: "publish, or build only"
         required: false
-        default: "false"
+        default: "build"
         type: choice
-        options: ["true", "false"]
-      intent:
-        description: "sends (share) or saves (reference)"
-        required: false
-        default: "sends"
-        type: choice
-        options: ["sends", "saves"]
+        options: ["build", "publish"]
 
 permissions:
   contents: write
@@ -30,13 +25,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  lucky:
+  post:
+    # The kill switch. A repository variable, so it can be thrown from a phone
+    # and takes effect even while a run is queued.
+    if: vars.SS_HALT != '1'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
-      # Auto 2x/day via schedule must publish (false). Manual dispatch defaults to dry_run true (safe preview).
-      DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run || 'true' }}
-      INTENT: ${{ inputs.intent || 'sends' }}
+      # A scheduled run publishes. A manual run builds unless you say otherwise,
+      # because the usual reason to press the button is to look at something.
+      MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -47,200 +47,93 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python deps + Playwright
+      - name: Install
         run: |
           pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
-          pip install --quiet requests   # needed by post_to_ig.py and send_email.py
+          pip install --quiet requests
           python -m playwright install chromium --with-deps
 
-      - name: Lucky — suggest → audit → build (up to 3 picks)
-        id: lucky
-        env:
-          INTENT: ${{ env.INTENT }}
+      # Every gate runs before anything is generated. A broken gate must never
+      # be discovered by a published post.
+      - name: Check the gates still work
         run: |
-          set -e
-          echo "INTENT=$INTENT DRY_RUN=$DRY_RUN"
-          # Suggest top 5 once, then pick TRY-th winner — deterministic, no repeats without generation
-          SUGGEST_RAW=$(python .agents/skills/suresilly-carousel/scripts/suggest_topics.py --suggest 5 --intent "$INTENT")
-          echo "$SUGGEST_RAW"
-          PASSED=false
-          for TRY in 1 2 3; do
-            echo "--- Try $TRY ---"
-            TOPIC=$(echo "$SUGGEST_RAW" | awk -v n=$TRY 'NR==n{print $2}')
-            if [ -z "$TOPIC" ]; then
-              echo "No topic at rank $TRY"
-              continue
-            fi
-            echo "Picked topic rank $TRY: $TOPIC"
-            SLUG=$(echo "$TOPIC" | tr '_' '-' | tr ' ' '-' | cut -c1-30)
-            DATE=$(date -u +"%Y%m%d")
-            STAMP=$(date -u +"%H%M%S")
-            OUT="carousels/${DATE}_${SLUG}/carousel.md"
-            mkdir -p "$(dirname "$OUT")"
-            # DUPLICATE GUARD 1: folder/caption already exists -> refuse to reuse
-            if [ -f "$OUT" ]; then
-              # Same slug+date collision from re-run within same day — make unique, but still need fresh content
-              echo "OUT exists ($OUT) — adding timestamp to avoid overwrite"
-              OUT="carousels/${DATE}_${STAMP}_${SLUG}/carousel.md"
-              mkdir -p "$(dirname "$OUT")"
-            fi
-            # If generator not yet wired, FAIL instead of reusing old deck (prevents duplicate posts)
-            if [ ! -f "$OUT" ]; then
-              # Try LLM generator if present, else abort (do NOT fallback to EXISTING fixture)
-              if [ -f "scripts/generate_lucky.py" ]; then
-                echo "Generating $OUT via generate_lucky.py..."
-                python scripts/generate_lucky.py --topic "$TOPIC" --intent "$INTENT" --out "$OUT"
-              else
-                echo "::error::No generator at scripts/generate_lucky.py and $OUT does not exist."
-                echo "This is the stub that caused duplicate posts (it reused $EXISTING). Wire the generator per SKILL.md 10-step protocol or run locally."
-                echo "Aborting instead of posting duplicate."
-                exit 1
-              fi
-            fi
-            # DUPLICATE GUARD 2: H1 hook already in ledger -> skip this topic
-            H1=$(grep -m1 'H1:' "$OUT" | sed 's/.*H1: //' || true)
-            if [ -n "$H1" ] && grep -Fq "$H1" carousels/HOOK_LEDGER.md; then
-              echo "Hook already in HOOK_LEDGER.md — duplicate topic, trying next rank"
-              continue
-            fi
-            # DUPLICATE GUARD 3: gh-pages already has this slug (published before) -> skip
-            if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
-              if git ls-tree -r --name-only origin/gh-pages 2>/dev/null | grep -q "slides/${DATE}_${SLUG}/" || git ls-tree -r --name-only origin/gh-pages 2>/dev/null | grep -q "slides/${STAMP}_${SLUG}/"; then
-                echo "gh-pages already contains slides for $SLUG on $DATE — skipping to avoid re-publish"
-                continue
-              fi
-            fi
-            echo "OUT=$OUT" >> "$GITHUB_ENV"
-            if python .agents/skills/suresilly-carousel/scripts/audit_copy.py "$OUT"; then
-              echo "audit PASS on try $TRY"
-              echo "CAROUSEL_MD=$OUT" >> "$GITHUB_ENV"
-              PASSED=true
-              # Mark topic as used in bank (Last used column) — committed in next step
-              TOPIC="$TOPIC" python scripts/mark_topic_used.py
-              break
-            else
-              echo "audit FAIL on try $TRY — will try next rank"
-            fi
+          for t in screen memory novelty coherence abstract safety writer critic run_guards; do
+            python .agents/skills/suresilly-carousel/tests/test_$t.py
           done
-          if [ "$PASSED" != "true" ]; then
-            echo "All 3 picks failed audit or were duplicates"
-            echo "CAROUSEL_MD=" >> "$GITHUB_ENV"
-            exit 1
-          fi
 
-      - name: Build PNGs
-        if: env.CAROUSEL_MD != ''
+      - name: Build the deck
+        id: build
         run: |
-          python .agents/skills/suresilly-carousel/scripts/build.py --random-palette "$CAROUSEL_MD"
-          ls -lh "$(dirname "$CAROUSEL_MD")/slides/" | head -20
-          ls -lh "$(dirname "$CAROUSEL_MD")/contact_sheet.png"
+          python .agents/skills/suresilly-carousel/scripts/run.py --no-post
 
-      - name: Push PNGs to gh-pages (for https://media.suresilly.com)
-        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'true'
-        run: |
-          echo "DRY_RUN=true — skipping gh-pages push, images stay local for email preview"
-
-      - name: Push PNGs to gh-pages
-        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+      # Instagram fetches the images itself, so they have to be public before
+      # the post exists. This is why building and posting are separate steps
+      # rather than one --publish run.
+      - name: Publish the slides
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./carousels
-          destination_dir: slides
-          keep_files: true     # preserve previous carousel images across runs
+          publish_dir: ./carousels/${{ steps.build.outputs.slug }}
+          destination_dir: slides/${{ steps.build.outputs.slug }}
+          keep_files: true
           cname: media.suresilly.com
 
-      - name: Wait for Pages deploy (Instagram fetcher needs 200)
-        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+      - name: Wait for the slides to be reachable
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         run: |
-          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
-          URL="https://media.suresilly.com/slides/$SLUG/slides/01_slide_1_hook.png"
-          echo "Waiting for $URL to return 200 (Pages deploy)..."
-          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+          URL="https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides/01_slide_1_hook.png"
+          for i in $(seq 1 12); do
             CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo 000)
-            if [ "$CODE" = "200" ]; then
-              echo "Pages live on try $i: $URL -> $CODE"
-              curl -I -s "$URL" | head -n 5
-              break
-            fi
-            echo "Try $i/12: $CODE — not yet, sleeping 10s..."
+            [ "$CODE" = "200" ] && { echo "live on try $i"; exit 0; }
+            echo "try $i: $CODE"
             sleep 10
           done
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo 000)
-          if [ "$CODE" != "200" ]; then
-            echo "::warning::Pages not 200 after 120s: $URL -> $CODE (Instagram will fail)"
-          fi
+          echo "::error::slides never became reachable at $URL"
+          exit 1
 
-      - name: Post to Instagram (only if not dry run)
-        if: env.CAROUSEL_MD != '' && env.DRY_RUN == 'false'
+      - name: Post to Instagram
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          CAROUSEL_MD: ${{ env.CAROUSEL_MD }}
         run: |
-          if [ -z "$IG_USER_ID" ] || [ -z "$IG_ACCESS_TOKEN" ]; then
-            echo "IG secrets not set — skipping publish (dry run)"
-            exit 0
-          fi
-          # FINAL duplicate guard: abort if same H1 already on IG grid (prevents double-post from re-runs)
-          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
-          H1=$(grep -m1 'H1:' "$CAROUSEL_MD" | sed 's/.*H1: //' || true)
-          if [ -n "$H1" ] && [ -n "$IG_ACCESS_TOKEN" ]; then
-            # Check ledger duplicate (fast, no API)
-            if grep -Fq "$H1" carousels/HOOK_LEDGER.md 2>/dev/null; then
-              COUNT=$(grep -Fc "$H1" carousels/HOOK_LEDGER.md || true)
-              if [ "$COUNT" -gt 1 ]; then
-                echo "::error::Duplicate hook detected in ledger: $H1 (count $COUNT) — aborting IG post"
-                exit 1
-              fi
-            fi
-            # Optional API check (best-effort, ignore failures)
-            H1="$H1" python scripts/check_ig_duplicate.py || { echo "Duplicate IG caption detected — aborting to prevent double-post"; exit 1; }
-          fi
-          python scripts/post_to_ig.py --carousel "$CAROUSEL_MD" --base-url "https://media.suresilly.com/slides/$SLUG/slides"
+          python scripts/post_to_ig.py \
+            --carousel "${{ steps.build.outputs.deck }}" \
+            --base-url "https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides"
 
-      - name: Commit ledger + history
-        if: always() && env.CAROUSEL_MD != ''
+      # Committed whatever happened. The used list and the fingerprints are how
+      # the next run knows what has already been done, and a run that built a
+      # deck and failed to record it would let that moment come round again.
+      - name: Record what happened
+        if: always()
         run: |
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
-          git add carousels/HOOK_LEDGER.md .agents/skills/suresilly-carousel/references/topic-bank.md .agents/skills/suresilly-carousel/palette_history.json carousels/*/carousel.md || true
-          git commit -m "auto: $(basename "$(dirname "$CAROUSEL_MD")") $(date -u +%Y%m%d) [skip ci]" || echo "nothing to commit"
-          git push || echo "push failed — will retry next cron"
+          git add state carousels .agents/skills/suresilly-carousel/mascot/usage_history.json \
+                  .agents/skills/suresilly-carousel/palette_history.json || true
+          git commit -m "auto: ${{ steps.build.outputs.slug || 'no deck' }} [skip ci]" || echo "nothing to record"
+          git pull --rebase --quiet || true
+          git push || echo "push failed, next run will retry"
 
-      - name: Email — success
-        if: success() && env.CAROUSEL_MD != ''
+      - name: Email the result
+        if: always()
         env:
           EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO: mayankmacav@gmail.com
         run: |
-          SLUG=$(basename "$(dirname "$CAROUSEL_MD")")
-          SUBJECT="[SILLY-SUCCESS] Posted $SLUG — $(date -u +%Y-%m-%d)"
-          HOOK=$(grep -m1 'H1:' "$CAROUSEL_MD" | sed 's/.*H1: //' || echo "(no hook found)")
-          BODY=$(cat <<EOF
-          Posted $SLUG
-          Hook: $HOOK
-          File: $CAROUSEL_MD
-          Dry run: $DRY_RUN
-
-          See contact_sheet.png attached.
-          EOF
-          )
-          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" \
-            --body "$BODY" \
-            --attach "$(dirname "$CAROUSEL_MD")/contact_sheet.png" \
-            || echo "email failed — will try telegram fallback"
-
-      - name: Email — error (3 picks failed or build failed)
-        if: failure()
-        env:
-          EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO: mayankmacav@gmail.com
-        run: |
-          SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d) lucky failed after 3 picks"
-          python scripts/send_email.py --subject "$SUBJECT" --to "$EMAIL_TO" --body "All 3 topic picks failed audit or build. Check Actions logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
-
-          Last intent: $INTENT
-          Dry run: $DRY_RUN" || echo "error email failed"
+          SLUG="${{ steps.build.outputs.slug }}"
+          if [ -n "$SLUG" ]; then
+            SUBJECT="[SILLY-OK] $SLUG"
+            BODY="Built $SLUG in mode $MODE. See the contact sheet attached."
+            ATTACH="carousels/$SLUG/contact_sheet.png"
+          else
+            SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
+            BODY="No deck was built. This is usually a gate refusing, which is the system working. Logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            ATTACH=""
+          fi
+          if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
+            python scripts/send_email.py --subject "$SUBJECT" --to mayankmacav@gmail.com --body "$BODY" --attach "$ATTACH" || true
+          else
+            python scripts/send_email.py --subject "$SUBJECT" --to mayankmacav@gmail.com --body "$BODY" || true
+          fi

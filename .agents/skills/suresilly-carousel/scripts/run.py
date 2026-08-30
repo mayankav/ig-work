@@ -27,6 +27,8 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
+import shutil
 import subprocess
 import sys
 import time
@@ -36,10 +38,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import abstracter  # noqa: E402
 import critic  # noqa: E402
+import novelty  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
 import pick_moment  # noqa: E402
+import render  # noqa: E402
 import safety  # noqa: E402
+import writer  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 HALT_FILE = REPO_ROOT / "state" / "HALT"
@@ -47,6 +52,18 @@ HALT_FILE = REPO_ROOT / "state" / "HALT"
 # How many moments to try before giving up on the run. Small on purpose: past
 # three, the problem is not the moment.
 MAX_ATTEMPTS = 3
+
+CAROUSELS = REPO_ROOT / "carousels"
+PREVIEW = REPO_ROOT / ".preview"
+MEDIA_BASE = "https://media.suresilly.com/slides"
+
+# The keys a slide carries, used when a gate needs the slide as plain text.
+TEXT_KEYS = ("h1", "h2", "body", "source_claim", "source_translation", "source_explains",
+             "old_reaction", "new_reaction", "closing", "cta1", "callout")
+
+
+def slide_text(slide: dict) -> str:
+    return " ".join([str(slide[k]) for k in TEXT_KEYS if k in slide] + slide.get("bullets", []))
 
 
 class Stop(Exception):
@@ -125,6 +142,15 @@ def check_state_is_current(strict: bool) -> str:
 
 
 # ─────────────────────────── step 2 ────────────────────────────
+
+def plan_token(moment: memory.Moment) -> str:
+    """A concrete word from the moment, for the coherence gate's allowed set."""
+    for kind in ("clock", "place", "object"):
+        values = moment.anchors.get(kind) or []
+        if values:
+            return str(values[0])
+    return ""
+
 
 def draw() -> dict:
     """Fetch live, screen, drop what we have used, and take the best."""
@@ -205,6 +231,95 @@ def check_canary() -> None:
     raise Stop(f"{note}. Publishing halted, see state/HALT")
 
 
+# ─────────────────────────── steps 10 and 11 ────────────────────────────
+
+def deck_slug(moment: memory.Moment, token: str, when: str) -> str:
+    """A folder name that is readable and cannot collide.
+
+    Readable because a person reading an alert should recognise the deck, and
+    unique because two decks about a similar evening on the same day would
+    otherwise land in the same folder and one would overwrite the other.
+    """
+    words = re.findall(r"[a-z0-9]+", f"{token} {moment.text}".lower())[:4]
+    stub = "-".join(w for w in words if len(w) > 1)[:32].strip("-") or "moment"
+    return f"{when}_{stub}_{moment.id[2:8]}"
+
+
+def write_deck(markdown: str, slug: str, preview: bool) -> Path:
+    """Put the deck where the renderer expects it.
+
+    A preview never touches carousels/. That directory is the published corpus,
+    and a deck sitting in it is a deck that happened.
+    """
+    root = PREVIEW if preview else CAROUSELS
+    folder = root / slug
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / "carousel.md"
+    path.write_text(markdown, encoding="utf-8")
+    return path
+
+
+def render_slides(path: Path) -> None:
+    """Render the PNGs with the existing builder.
+
+    Called as a subprocess rather than imported: build.py owns argument parsing,
+    palette rotation and its own QA gates, and running it the way a person would
+    keeps one code path instead of two.
+    """
+    done = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parent / "build.py"),
+         "--random-palette", str(path)],
+        cwd=REPO_ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        tail = (done.stdout + done.stderr).strip().splitlines()[-4:]
+        raise Stop("the renderer refused this deck: " + " | ".join(tail))
+
+
+def publish(path: Path, slug: str) -> None:
+    """Hand the deck to Instagram.
+
+    The slides have to be publicly reachable first, which is the workflow's job,
+    so this only runs where that has happened.
+    """
+    done = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "post_to_ig.py"),
+         "--carousel", str(path), "--base-url", f"{MEDIA_BASE}/{slug}/slides"],
+        cwd=REPO_ROOT, capture_output=True, text=True)
+    if done.returncode != 0:
+        tail = (done.stdout + done.stderr).strip().splitlines()[-4:]
+        raise Stop("Instagram refused the post: " + " | ".join(tail))
+
+
+def emit_slug(slug: str, path: Path) -> None:
+    """Tell the caller what was built.
+
+    Printed for a person and written to the workflow's output file for CI, so a
+    later step can find the deck without guessing at the folder name.
+    """
+    print(f"\n  slug: {slug}")
+    output = os.environ.get("GITHUB_OUTPUT")
+    if output:
+        with open(output, "a", encoding="utf-8") as handle:
+            handle.write(f"slug={slug}\n")
+            handle.write(f"deck={path.relative_to(REPO_ROOT)}\n")
+
+
+def tag_caption(markdown: str, moment_id: str) -> str:
+    """Hide the moment id in the caption as a short tag.
+
+    It is the idempotency key at the sink: after a run dies between posting and
+    recording, the next one can ask Instagram whether this moment already went
+    out instead of guessing.
+    """
+    tag = f"#ss{moment_id[2:8]}"
+    lines = markdown.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith("#") and " #" in line:
+            lines[i] = f"{line} {tag}"
+            return "\n".join(lines)
+    return markdown
+
+
 # ─────────────────────────── the run ────────────────────────────
 
 def run(mode: str) -> int:
@@ -254,10 +369,10 @@ def run(mode: str) -> int:
 
         print(f"\n  moment  {moment.text}\n")
 
-        allowed, reason, judge_provider = safety.judge(moment.text)
+        allowed, reason, judge_provider, topic = safety.judge(moment.text)
         if not allowed:
             raise Stop(f"the safety judge refused this moment: {reason}")
-        say("safety judge", f"allowed by {judge_provider}")
+        say("safety judge", f"allowed by {judge_provider}, subject {topic}")
         say("closest risk", reason[:90])
 
         check_canary()
@@ -265,7 +380,58 @@ def run(mode: str) -> int:
         memory.claim(moment, run_id)     # nothing expensive runs before this
         claimed = moment
         say("claimed", moment.id)
-        raise NotWired("the renderer and the publisher are not wired up yet")
+
+        markdown, plan, axes = writer.write_deck(
+            moment.text, topic, title=moment.text[:40].rstrip(" .,"),
+            pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
+            moment_anchors=set(moment.anchors) | {plan_token(moment)},
+        )
+        say("written", ", ".join(axes.values()))
+
+        published_ok, reason, objections = critic.review(markdown, moment.text, "gemini")
+        if not published_ok:
+            raise Stop(f"the critic refused this deck: {reason}")
+        say("critic", f"{len(objections)} objection(s), none disqualifying")
+        check_critic_canary(memory.used_count(), "gemini")
+
+        when = time.strftime("%Y%m%d", time.gmtime())
+        slug = deck_slug(moment, plan["scene_token"], when)
+        markdown = tag_caption(markdown, moment.id)
+        path = write_deck(markdown, slug, preview=False)
+        say("deck", str(path.relative_to(REPO_ROOT)))
+
+        render_slides(path)
+        say("rendered", "slides and contact sheet")
+
+        # Recorded at render, not at publish. A deck that was built and never
+        # posted still counts as used, or a manual build could be repeated later.
+        slides = render.parse_markdown(path)
+        fingerprint = novelty.fingerprint(slug, slides, sorted(moment.anchors), slide_text)
+
+        # The novelty gate runs here, after the deck exists and before it is
+        # recorded. Unique moments are enforced upstream, so what this catches is
+        # the other failure: the writer saying the same thing twice about two
+        # different evenings.
+        repeats = novelty.check(fingerprint)
+        if repeats:
+            raise Stop("this deck is too close to one we published: " + "; ".join(repeats[:3]))
+        say("novelty", "clear of the last 30 decks and every scene match")
+
+        novelty.record(fingerprint)
+        memory.mark_used(moment, slug, published=(mode == "publish"))
+        say("recorded", "fingerprint written, moment retired")
+
+        # The slug is handed to whatever runs next. In CI that is the step that
+        # pushes the slides to the public host and only then posts, because
+        # Instagram fetches the images itself and cannot see a local file.
+        emit_slug(slug, path)
+
+        if mode == "publish":
+            publish(path, slug)
+            say("posted", slug)
+        else:
+            say("not posted", "built only, and the moment is used up either way")
+        return 0
 
     except NotWired as reason:
         print(f"\n  stopped: {reason}")
