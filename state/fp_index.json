@@ -1,16 +1,20 @@
 {
   "order": [
-    "20260830_kitchen-at-11pm_800736"
+    "20260830_kitchen-at-11pm_800736",
+    "20260830_bed-stood-outside_803474"
   ],
   "anchors": {
     "action": [
-      "20260830_kitchen-at-11pm_800736"
+      "20260830_kitchen-at-11pm_800736",
+      "20260830_bed-stood-outside_803474"
     ],
     "clock": [
-      "20260830_kitchen-at-11pm_800736"
+      "20260830_kitchen-at-11pm_800736",
+      "20260830_bed-stood-outside_803474"
     ],
     "place": [
-      "20260830_kitchen-at-11pm_800736"
+      "20260830_kitchen-at-11pm_800736",
+      "20260830_bed-stood-outside_803474"
     ]
   }
 }
