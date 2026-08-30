@@ -1,0 +1,167 @@
+{
+  "_note": "The model never types an author, a title or a year. It returns an id and a claim index, and code substitutes the strings below. That makes a fabricated citation structurally impossible rather than merely unlikely, which matters because a made-up study on a psychology page is the one mistake there is no recovering from. Claims are pre-written for the same reason: a real source can still be misrepresented. Every line here must pass source_is_specific() in audit_copy.py, which the test suite asserts.",
+  "citations": [
+    {
+      "id": "barkley-2010",
+      "line": "— Russell Barkley, *Taking Charge of Adult ADHD* (2010)",
+      "pillars": ["executive_dysfunction"],
+      "claims": [
+        "Barkley found that a fuzzy sense of time parks people in standby, so the hours before something fixed get held rather than used.",
+        "Barkley describes starting as a separate skill from wanting to start, which is why intention alone does not move you."
+      ]
+    },
+    {
+      "id": "hallowell-1994",
+      "line": "— Edward Hallowell and John Ratey, *Driven to Distraction* (1994)",
+      "pillars": ["executive_dysfunction", "numbing"],
+      "claims": [
+        "Hallowell describes a mind holding every option open at once, which leaves you hovering rather than choosing one.",
+        "Hallowell found that interest, not importance, is what switches attention on, so the urgent task is often the one you cannot reach."
+      ]
+    },
+    {
+      "id": "cowan-2005",
+      "line": "— Nelson Cowan, *Working Memory Capacity* (2005)",
+      "pillars": ["executive_dysfunction"],
+      "claims": [
+        "Cowan measured working memory at about four items at once. Seventeen open loops do not fit, so the task itself falls out.",
+        "Cowan showed that holding more than a handful of things in mind pushes the earliest one out without you noticing it go."
+      ]
+    },
+    {
+      "id": "leroy-2009",
+      "line": "— Sophie Leroy, *Why Is It So Hard to Do My Work?* (2009)",
+      "pillars": ["executive_dysfunction", "burnout"],
+      "claims": [
+        "Leroy showed attention leaves a residue on every unfinished thing, so each open task keeps taking a small cut of your focus.",
+        "Leroy found that switching tasks before finishing leaves part of your attention behind on the one you left."
+      ]
+    },
+    {
+      "id": "walker-2017",
+      "line": "— Matthew Walker, *Why We Sleep* (2017)",
+      "pillars": ["sleep"],
+      "claims": [
+        "Walker describes brief wakings between sleep cycles as ordinary. What breaks a night is the alarm you sound about them.",
+        "Walker found that evening light and alertness push the sleep signal later, so the body waits for a gap that never opens."
+      ]
+    },
+    {
+      "id": "espie-2006",
+      "line": "— Colin Espie, *Overcoming Insomnia and Sleep Problems* (2006)",
+      "pillars": ["sleep", "anxiety"],
+      "claims": [
+        "Espie found that checking the time turns a normal waking into a maths problem, and the maths finishes waking you up.",
+        "Espie showed that trying harder to sleep makes sleep less likely, because effort is the opposite of what the state requires."
+      ]
+    },
+    {
+      "id": "ledoux-2015",
+      "line": "— Joseph LeDoux, *Anxious* (2015)",
+      "pillars": ["anxiety"],
+      "claims": [
+        "LeDoux showed the alarm circuit fires before you have read a single word, so the body is already braced by the time you look.",
+        "LeDoux found the brain runs threat rehearsals to prepare you, which is useful for predators and useless for a short email."
+      ]
+    },
+    {
+      "id": "nolen-hoeksema-2003",
+      "line": "— Susan Nolen-Hoeksema, *Women Who Think Too Much* (2003)",
+      "pillars": ["anxiety", "self_worth"],
+      "claims": [
+        "Nolen-Hoeksema found rehearsal feels like problem solving while producing no new information, so the loop keeps running.",
+        "Nolen-Hoeksema showed that going over a moment again lowers mood rather than resolving it, which then makes going over it easier."
+      ]
+    },
+    {
+      "id": "brewer-2017",
+      "line": "— Judson Brewer, *The Craving Mind* (2017)",
+      "pillars": ["numbing", "sleep"],
+      "claims": [
+        "Brewer showed a loop repeats when it reliably lowers discomfort, so the habit gets stronger every night it works.",
+        "Brewer found that naming what a habit actually gives you is what loosens it, more than deciding to stop."
+      ]
+    },
+    {
+      "id": "nagoski-2019",
+      "line": "— Emily Nagoski and Amelia Nagoski, *Burnout* (2019)",
+      "pillars": ["burnout"],
+      "claims": [
+        "The Nagoskis showed a stress cycle needs a clear ending signal. Without one the body stays braced long after the work stopped.",
+        "The Nagoskis found that removing the stressor is not the same as completing the stress, and the body only responds to the second."
+      ]
+    },
+    {
+      "id": "maslach-1997",
+      "line": "— Christina Maslach, *The Truth About Burnout* (1997)",
+      "pillars": ["burnout", "self_worth"],
+      "claims": [
+        "Maslach found that when worth is measured in output, stopping feels like losing standing rather than finishing the day.",
+        "Maslach showed burnout builds from a mismatch between a person and their workload, not from a weakness in the person."
+      ]
+    },
+    {
+      "id": "tawwab-2021",
+      "line": "— Nedra Glover Tawwab, *Set Boundaries, Find Peace* (2021)",
+      "pillars": ["boundaries", "people_pleasing"],
+      "claims": [
+        "Tawwab found that over explaining invites negotiation, because every reason you list becomes something to argue with.",
+        "Tawwab describes a boundary as information about you rather than a demand on someone else, which is why it needs no case."
+      ]
+    },
+    {
+      "id": "lerner-1985",
+      "line": "— Harriet Lerner, *The Dance of Anger* (1985)",
+      "pillars": ["boundaries", "people_pleasing", "self_worth"],
+      "claims": [
+        "Lerner describes learning that refusal is only safe when justified, which turns a short answer into a case.",
+        "Lerner showed that changing your part in a pattern reliably provokes a push to put it back, and that the push is not proof you were wrong."
+      ]
+    },
+    {
+      "id": "walker-2013",
+      "line": "— Pete Walker, *Complex PTSD: From Surviving to Thriving* (2013)",
+      "pillars": ["people_pleasing", "boundaries"],
+      "claims": [
+        "Walker describes a survival style built on smoothing things first, which turns an apology into the entry fee for taking up space.",
+        "Walker found that appeasing is learned where it worked, which is why it arrives before you have decided anything."
+      ]
+    },
+    {
+      "id": "neff-2011",
+      "line": "— Kristin Neff, *Self-Compassion* (2011)",
+      "pillars": ["self_worth"],
+      "claims": [
+        "Neff found that treating yourself as you would a friend improves follow through, while self criticism predicts giving up.",
+        "Neff showed that recognising a difficulty as ordinary and shared does more for recovery than judging yourself for having it."
+      ]
+    },
+    {
+      "id": "clear-2018",
+      "line": "— James Clear, *Atomic Habits* (2018)",
+      "pillars": ["self_worth", "executive_dysfunction"],
+      "claims": [
+        "Clear describes each action as a vote for an identity, which means two sentences still counts as a vote for the person who writes.",
+        "Clear found that making the first move smaller beats making the goal bigger, because starting is the part that fails."
+      ]
+    },
+    {
+      "id": "gollwitzer-1999",
+      "line": "— Peter Gollwitzer, *Implementation Intentions* (1999)",
+      "pillars": ["executive_dysfunction", "burnout", "boundaries"],
+      "claims": [
+        "Gollwitzer found that naming when and where you will act roughly doubles follow through compared with deciding to try.",
+        "Gollwitzer showed that an if then plan hands the decision to the situation, so you do not have to make it while under pressure."
+      ]
+    },
+    {
+      "id": "porges-2011",
+      "line": "— Stephen Porges, *The Polyvagal Theory* (2011)",
+      "pillars": ["anxiety", "people_pleasing"],
+      "claims": [
+        "Porges showed that people raised around unpredictable moods keep a background scanner running, so neutral tone reads as warning.",
+        "Porges found the body decides whether a situation is safe before you have consciously assessed it."
+      ]
+    }
+  ]
+}

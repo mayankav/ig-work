@@ -62,3 +62,16 @@ Any agent working here must not violate these. They exist because each one was a
    silently falling back to a system sans.
 8. **Judge the contact sheet, not the slide.** A deck is done when the nine tiles read as one
    body of work.
+9. **Old decks are a blocklist, never a source.** No text from a shipped deck is ever reused,
+   recombined, or shown to a model — not as material, not as an example. Novelty is enforced by
+   comparison against fingerprints, never by reading past decks back in.
+10. **The rules decide, the model writes.** The pipeline chooses the moment, the angle and the
+    citation, and decides whether a deck ships. A model may write copy and may veto a deck. It may
+    never approve one, pick its own angle, or name its own source.
+11. **Citations come from the allowlist.** The model returns a citation id; code substitutes the
+    verified string. A model must never be able to type an author, title or year.
+12. **One entry point, one state.** A manual run and the scheduled run execute the same code
+    against the same queue and fingerprints. Any run that produces a deck consumes its moment,
+    whether or not it posts. Only `--dry-run` writes nothing, and it writes no deck either.
+
+See `.agents/skills/suresilly-carousel/references/strategy.md` for the full layered design.

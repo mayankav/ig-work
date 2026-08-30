@@ -25,9 +25,10 @@ Read these only when you need them — do not pull them all in up front.
 
 | File | Read it when |
 |---|---|
+| `references/strategy.md` | **Read first for any pipeline work.** How a deck is chosen, written, checked and shipped. The eight layers, what the model may and may not decide, and why manual and scheduled runs behave identically. |
 | `references/brand-voice.md` | Writing any copy. Voice dials, positioning, audience, what we are not. |
 | `references/content-playbook.md` | Qualifying a topic, choosing a pattern, a hook, or the slide-3 source anchor — always, before writing a word. |
-| `references/topic-bank.md` | **Lucky mode only:** picking a topic from the VOC bank — Layer 1 + 2. |
+| `references/topic-bank.md` | **Superseded by `strategy.md`.** Kept as a record of the original VOC mining. Moments now come from the live queue, not this table. |
 | `references/design-system.md` | Changing layout, colour, type or mascot placement. |
 | `mascot/CHARACTER.md` | Writing mascot briefs, or if Silly looks off-model. |
 | `mascot/GENERATION_PROMPTS.md` | Adding poses — 24 sheet prompts, and the rules that keep Silly on-model. |

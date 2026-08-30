@@ -295,5 +295,16 @@
     "crouched_tight",
     "patient_one",
     "sitting_ledge_m"
+  ],
+  "20260830_render-check": [
+    "knees_hugged",
+    "side_eye",
+    "kneeling",
+    "sitting",
+    "framing_m",
+    "point_down",
+    "holding_board",
+    "standing_tall",
+    "waving"
   ]
 }

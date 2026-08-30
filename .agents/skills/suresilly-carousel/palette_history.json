@@ -42,5 +42,9 @@
   "20260829_over-explain-no": [
     "terracotta",
     "mist"
+  ],
+  "20260830_render-check": [
+    "midnight",
+    "mist"
   ]
 }
