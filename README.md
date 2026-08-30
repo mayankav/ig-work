@@ -4,11 +4,15 @@ This repository publishes to Instagram on its own.
 
 Once a day it reads a public feed, invents a small moment of its own from what it
 finds, writes a nine-slide carousel about it, checks the deck against about
-thirty rules, renders the slides, and posts them. Nobody approves anything in
-between. If you change something here and it is wrong, the mistake goes out.
+thirty rules, renders the slides, and posts them.
 
-That is the first thing to know, because this file used to say "nothing is
-posted for you", and that has not been true for some time.
+A deck that clears the bar goes out with nobody looking at it. If you change
+something here and it is wrong, the mistake goes out. That is the first thing to
+know, because this file used to say "nothing is posted for you", and that has
+not been true for a long time.
+
+One deck in some number is held back and sent to you instead — see **When a deck
+is held** below. That is the only decision anybody is asked to make.
 
 ---
 
@@ -163,7 +167,7 @@ unless billing is on. Text generation is a different matter and is nearly free.
 ├── references/                        voice, playbook, design system, citations
 ├── mascot/                            the poses and the character bible
 ├── scripts/                           run.py is the only entry point
-└── tests/                             15 suites. CI runs every one.
+└── tests/                             17 suites. CI runs every one.
 
 carousels/<date>_<slug>/               one published deck: script, slides, contact sheet
 state/                                 what has been used. Shared by every run.
