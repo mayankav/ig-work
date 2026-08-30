@@ -53,6 +53,13 @@ GEMINI_MODELS = (
 )
 GROQ_MODEL = "openai/gpt-oss-120b"
 
+# Gemini models whose DAILY quota is gone. Per-model and per-day, so one being
+# empty says nothing about the next; per-minute limits are not recorded here
+# because they clear inside a run. Process-local on purpose: it is a memo for
+# this run, not a fact about tomorrow, and the day rolls over at midnight
+# Pacific with nothing to tell us.
+_SPENT: set[str] = set()
+
 TIMEOUT = 45
 RETRIES = 1
 
@@ -98,9 +105,17 @@ class SchemaMismatch(ModelRefused):
 class RateLimited(ModelRefused):
     """The provider is throttling. Worth waiting for, unlike everything else."""
 
-    def __init__(self, message: str, wait: int):
+    def __init__(self, message: str, wait: int, quota: str = ""):
         super().__init__(message)
         self.wait = wait
+        # Which quota, verbatim from the body. A per-minute limit clears inside
+        # a run and a per-day one does not, and the two are worth opposite
+        # reactions: wait for the first, stop asking for the second.
+        self.quota = quota
+
+    @property
+    def daily(self) -> bool:
+        return "PerDay" in self.quota
 
 
 # ─────────────────────────── keys ────────────────────────────
@@ -288,10 +303,11 @@ _RETRY_HINT = re.compile(r"retry in ([\d.]+)s", re.I)
 _QUOTA_ID = re.compile(r'"quotaId":\s*"([^"]+)"')
 
 
-def _retry_after(exc: urllib.error.HTTPError) -> int:
+def _retry_after(exc: urllib.error.HTTPError) -> tuple[int, str]:
+    """How long to wait, and which quota was hit."""
     header = exc.headers.get("Retry-After") if exc.headers else None
     if header and header.strip().isdigit():
-        return int(header)
+        return int(header), ""
     body = ""
     try:
         body = exc.read().decode("utf-8", "replace")
@@ -301,13 +317,14 @@ def _retry_after(exc: urllib.error.HTTPError) -> int:
     # tell you: a per-day violation can arrive with an eleven second hint, so
     # tuning against the hint tunes against the wrong number.
     quota = _QUOTA_ID.search(body)
-    if quota:
-        print(f"    quota hit: {quota.group(1)}")
+    name = quota.group(1) if quota else ""
+    if name:
+        print(f"    quota hit: {name}")
     match = _RETRY_HINT.search(body)
     if match:
         # A second of slack, so we are not racing the edge of the window.
-        return min(90, int(float(match.group(1))) + 1)
-    return RATE_LIMIT_PAUSE
+        return min(90, int(float(match.group(1))) + 1), name
+    return RATE_LIMIT_PAUSE, name
 
 
 def _post(url: str, payload: dict, headers: dict) -> dict:
@@ -324,7 +341,8 @@ def _post(url: str, payload: dict, headers: dict) -> dict:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         if exc.code in (429, 503):
-            raise RateLimited(f"HTTP {exc.code}", _retry_after(exc)) from exc
+            wait, quota = _retry_after(exc)
+            raise RateLimited(f"HTTP {exc.code}", wait, quota) from exc
         # Everything else carries the provider's own complaint in the body, and
         # without it a 400 is undiagnosable from a CI log.
         try:
@@ -346,12 +364,21 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     if schema:
         payload["generationConfig"]["responseSchema"] = _gemini_schema(schema)
     trouble = []
-    for model in GEMINI_MODELS:
+    live = [m for m in GEMINI_MODELS if m not in _SPENT]
+    if not live:
+        # Every bucket is gone for the day. Asking again costs four seconds of
+        # pacing each and cannot succeed, and it was costing about twenty
+        # seconds on every call in a run that had already exhausted Gemini.
+        raise RateLimited("every Gemini model is out of daily quota", RATE_LIMIT_PAUSE,
+                          "GenerateRequestsPerDayPerProjectPerModel-FreeTier")
+    for model in live:
         _pace("gemini")
         try:
             data = _post(GEMINI_URL.format(model=model), payload, {"x-goog-api-key": key})
             break
         except RateLimited as limited:
+            if limited.daily:
+                _SPENT.add(model)
             trouble.append(f"{model} {limited}")
         except ModelRefused as refused:
             # Any refusal moves to the next bucket, not just a rate limit. One
@@ -496,6 +523,24 @@ def call_cloudflare(system: str, user: str, temperature: float,
 PROVIDERS = (("gemini", call_gemini), ("groq", call_groq), ("cloudflare", call_cloudflare))
 
 
+def chain(providers=PROVIDERS):
+    """The vendors to try, in order, honouring SS_PROVIDERS.
+
+    SS_PROVIDERS pins the chain to the vendors it names, comma separated. It
+    exists so the fallback can be PROVEN rather than assumed: Gemini has written
+    every deck that ever passed the gates, and a chain that keeps a run alive is
+    not the same as one that finishes it. Set it to "cloudflare" for one run and
+    you find out for certain.
+
+    A name that matches nothing leaves the chain alone. A typo in an environment
+    variable must not quietly turn the fallback off.
+    """
+    wanted = {n.strip().lower() for n in os.environ.get("SS_PROVIDERS", "").split(",") if n.strip()}
+    if not wanted:
+        return providers
+    return tuple(p for p in providers if p[0] in wanted) or providers
+
+
 def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
         providers=PROVIDERS) -> tuple[dict, str]:
     """Ask, validate, and return the answer with the name of who gave it.
@@ -503,6 +548,7 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
     Each provider gets one retry, then we move on. When every provider is
     exhausted the caller gets ModelRefused and the run ends without a post.
     """
+    providers = chain(providers)
     trouble: list[str] = []
     original_user = user
     for name, call in providers:

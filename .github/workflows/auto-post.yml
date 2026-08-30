@@ -64,9 +64,14 @@ jobs:
       # be discovered by a published post.
       - name: Check the gates still work
         run: |
-          for t in screen memory novelty coherence abstract safety writer critic run_guards; do
-            python .agents/skills/suresilly-carousel/tests/test_$t.py
+          # Every suite in the directory, not a hand-kept list. The list had
+          # drifted: six suites existed that CI never ran, including the ones
+          # covering the wiring between layers, which is where the bugs were.
+          failed=0
+          for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
+            python "$t" || failed=1
           done
+          exit $failed
 
       - name: Build the deck
         id: build
