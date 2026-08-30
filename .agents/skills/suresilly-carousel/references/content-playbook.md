@@ -94,7 +94,7 @@ same-y even when each post is individually fine. Before writing, check the last 
 `carousels/` and pick a pattern none of them used. Tier 1 is ~70% of output *spread across six
 patterns*, not 70% on one.
 
-### For "I'm feeling lucky" — use the bank, not your head
+### For "I'm feeling lucky" — superseded, kept for hand-written decks
 
 Do not invent a topic. Layer 1 Suggestion pulls from `references/topic-bank.md` (VOC-derived scenes),
 the VOC table, pattern gaps and trend. Layer 2 Selection scores 1-5 on Scene / Self-blame / Stealability / Freshness / Intent fit (25 total, ship ≥18). The winner must still pass the three questions below — they are the gate after scoring, not the search. See `SKILL.md` Lucky mode and `scripts/suggest_topics.py --suggest 8`. If the bank is stale (all <15), mine 10 new VOC before scoring.
@@ -612,7 +612,12 @@ When generating a carousel, the agent MUST format output following this exact Ma
 ```markdown
 #### Carousel Title: [Internal Name / Topic]
 **Target Audience:** [e.g. Anxious attachers, recovering people-pleasers, 25-38 adults]
-**Core Emotion Trigger:** [Relief / Validation / Curiosity / Revelation]
+**Core Emotion Trigger:** [Recognition / Curiosity / Revelation / Validation]
+
+> Not Relief. Berger and Milkman (JMR 2012, ~7,000 articles) found that
+> low-arousal deactivating states suppress sharing, and relief is one. Relief is
+> where a deck ENDS, on slide 9. What carries a post is the jolt earlier in it:
+> "there is a NAME for that", being caught out, mild indignation.
 **Visual Theme / Palette:** [e.g. Oatmeal background #F5F4F0, Charcoal text #1E1E1E, Terracotta accent #D96B43]
 
 ---

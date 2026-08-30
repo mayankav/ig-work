@@ -6,16 +6,27 @@ copy and renders publication-ready 1080×1350 slide PNGs with a recurring mascot
 Read `.agents/skills/suresilly-carousel/SKILL.md` before doing any carousel work. It is the
 entry point; it points at the reference files you need.
 
-## Build
+## Run
+
+```bash
+python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+```
+
+`run.py` is the whole pipeline and the only way a post is made. `--publish` posts, `--no-post`
+builds and still uses the moment up, `--dry-run` writes nothing. Kill switch: `SS_HALT=1` or a
+file at `state/HALT`.
+
+## Render only
 
 ```bash
 .agents/skills/suresilly-carousel/.venv/bin/python \
   .agents/skills/suresilly-carousel/scripts/build.py carousels/<YYYYMMDD>_<slug>/carousel.md
 ```
 
-First run on a machine: add `--bootstrap`. Needs `GEMINI_API_KEY` (env, `~/.claude.json`, or
-`~/.gemini/config/mcp_config.json`) **on a billed Google AI Studio project** — image generation
-has a hard quota of 0 on the free tier.
+First run on a machine: add `--bootstrap`. Needs no key and no network: the mascot comes from
+the pose library. Only `--generate`, the obsolete path, needs a billed Google project, because
+image generation has a hard quota of zero on the free tier. Text generation does not — a day of
+posting costs a few thousand tokens.
 
 ## Layout
 
@@ -24,7 +35,8 @@ has a hard quota of 0 on the free tier.
   SKILL.md            entry point
   references/         brand voice · content playbook · design system
   mascot/CHARACTER.md the character bible (identity invariants + variable slots)
-  scripts/            mascot.py · render.py · build.py
+  scripts/            run.py is the entry point · compose · safety · writer · critic
+                      · coherence · novelty · llm · render · build
   tests/              QA-gate regression suite
 .claude/skills/       symlink to the above, so Claude Code discovers it
 carousels/            one folder per deck: carousel.md, mascot/, slides/, contact_sheet.png

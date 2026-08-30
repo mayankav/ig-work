@@ -1,6 +1,9 @@
 # Topic Bank — @suresilly (General Psychology)
 
-Source for "I'm feeling lucky" — Layer 1 Suggestion. Do not pick from the hook list; pick from here, then run Layer 2 Selection.
+> **Superseded. No script reads this file.** Moments are invented from a harvested seed —
+> see `strategy.md`. Kept as a record of the original voice-of-customer mining.
+
+Was the source for "I'm feeling lucky" — Layer 1 Suggestion. Do not pick from the hook list; pick from here, then run Layer 2 Selection.
 
 Each topic is a **scene**, not a concept, with the three qualification questions pre-answered. All are VOC-derived (verbatim filmable behaviours) from research 2026-08-27/28. General psychology scope: anxiety, burnout, sleep, executive dysfunction, self-worth, boundaries, numbing.
 

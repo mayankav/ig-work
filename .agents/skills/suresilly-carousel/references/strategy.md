@@ -68,8 +68,8 @@ Cheap and exact first. Expensive and fuzzy last. Any layer stops the run. No lay
 | 2 | Shape filter, then composer | Rules, then a model | Is this a real moment a camera could film? Then use it as a SEED and invent our own. |
 | 3 | Shuffled queue | Rules | Deal the next moment. A dealt moment never returns. |
 | 4 | Safety judge | Gemini | May a public post be built on this moment at all? |
-| 5 | Writer | Gemini | Plan the argument, check the chain, then write nine slides. |
-| 6 | Adversarial critic | Groq | Build the strongest case against publishing. |
+| 5 | Writer | Gemini | Name the pattern, plan the argument, check the chain, write nine slides. |
+| 6 | Adversarial critic | Any vendor that did not write it | Build the strongest case against publishing. |
 | 7 | Rule gates | Rules | Is it new, does it hold together, is the source real. |
 
 Layers 4 and 6 use different companies on purpose. The writer never checks its own work.
@@ -136,6 +136,62 @@ both good:
 Reading their name is fine. The post is public and we are only looking at it. The rule is about
 what we WRITE: the published moment carries no name at all, whether copied or invented. That is
 one rule instead of two, and it is stronger than either.
+
+### What a deck is FOR, and the evidence behind it
+
+Added 2026-08-30, after the first live deck read as unshareable. Everything here
+has a source, because the repo's own `research/` folder turned out to be partly
+invented and some of the copy rules came from it.
+
+**Lead with the NAME, not the scene.** Orvell, Kross and Gelman, PNAS 2020:
+across 1,120 book passages matched against roughly 250,000 Kindle highlights,
+always-true "you" ("eventually you recover from heartbreak") appears in 26% of
+highlighted passages against 3% of controls — an odds ratio of 12.86. One
+person doing one thing at one time runs the other way, 29% against 44%, odds
+ratio 0.41. Packard and Berger, Psychological Science 2020, split the pronoun
+across 4,200 chart rankings: the "you" that works points at somebody in the
+reader's life, and the "you" cast as the actor in a scene was not significant
+once controlled (p = .142). Every hook this engine wrote was the losing variant.
+
+**A name is the sendable unit.** Mosseri says sends per reach is the ranking
+signal. The bird test spread where the Gottman research behind it did not,
+because "bird" survives a retelling and "verbal bid for emotional connection"
+does not. A name can be sent as an accusation, a confession, or a diagnosis of
+a third person; a stranger's Tuesday gives a sender nothing to point at.
+
+**Slide 2 is a second cover.** Mosseri, 17 October 2024: a carousel that nobody
+swipes is re-served starting from the second frame. So slide 2 is read cold, by
+people who have not seen slide 1, and boilerplate there throws away the
+platform's one structural gift to the format.
+
+**Concrete words, general claim.** Hu, Pilgrim, Zhao and Hills, QJEP 2026: 15M
+tweets and 50,517 Reddit posts, concreteness predicts sharing. That is about
+imageable WORDS, not about a particular invented situation — the two get
+confused, and the difference is the whole argument. "Bowl washing" is concrete
+and general. "You stood in the kitchen at 11pm" is concrete and particular.
+
+**The saved card carries no clock.** Carousels are a saves format — Metricool,
+24M posts: nine times the saves of a single image — and the card is the slide
+with a second life. A step that says "start the timer at 2:50pm in the kitchen"
+is an instruction for a person who does not exist, and it destroys the one
+thing the slide is for.
+
+**Not relief.** Berger and Milkman, JMR 2012, roughly 7,000 articles:
+low-arousal deactivating states suppress sharing. Every deck this engine built
+declared its core emotion as Relief. Relief is where a deck ENDS.
+
+**Ask for the save, never for the like.** Metricool, 24.4M posts: asking for
+saves moves saves +92%, asking for comments +203%, and asking for likes moves
+likes −4.9%. One post gets roughly one action out of one person, so there are
+two asks in a deck and no more: send on slide 9, save in the caption.
+
+**Caption length is genuinely unsettled.** The study behind "under 30 words
+wins" (Socialinsider, 9.1M posts) measures likes and comments over followers
+and excludes saves and sends, which are the two behaviours this page is built
+for — and the largest accounts in this niche run captions of a couple of
+hundred words. So the schema allows a range and the prompt asks for a shape,
+rather than forcing either. What it no longer does is force a 200 character
+FLOOR, which is why the caption used to be the whole deck retold underneath it.
 
 ### Layer 3 — Shuffled queue
 

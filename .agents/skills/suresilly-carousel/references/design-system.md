@@ -74,7 +74,7 @@ carousel — never nine different colours. `scripts/render.py::deck_palette()` p
   base hue rather than failing, and hex codes in the line are ignored, so the legacy
   `**Palette:** Oatmeal #F5F4F0 / Charcoal #2B2B2B` form still parses.
 
-- **"I'm feeling lucky" or no colour named.** Round robin, not random-random: `deck_palette()`
+- **No colour named** (and what `--random-palette` does). Round robin, not random-random: `deck_palette()`
   reads `palette_history.json` (same pattern as `mascot/usage_history.json`) and picks whichever
   bleed/paper option was **least recently used across the whole history**, so a run of unprompted
   decks cycles through every theme before any colour repeats. `build.py` writes the chosen pair

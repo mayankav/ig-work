@@ -5,11 +5,9 @@ description: >
   playful, self-aware, group-chat voice. Writes the slide copy, caption, hashtags and alt text,
   then renders publication-ready 1080x1350 PNG slides with the Silly the Donkey mascot placed
   on every slide. Use when asked to create, write, draft or render a @suresilly carousel,
-  Instagram carousel, psychology carousel or slide deck for the page. Also use when the user
-  asks for a carousel without naming a topic — "I'm feeling lucky", "surprise me", "pick a
-  topic for me", "make me a post" — in which case pick the topic and build the deck without
-  asking what it should be about.
-version: "2.0.0"
+  Instagram carousel, psychology carousel or slide deck for the page, or to work on the
+  pipeline that publishes one every day.
+version: "3.0.0"
 author: "@suresilly"
 user-invocable: true
 ---
@@ -35,7 +33,20 @@ Read these only when you need them — do not pull them all in up front.
 
 ---
 
-## The one command
+## The one entry point
+
+```bash
+python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+```
+
+`run.py` is the whole pipeline and the only way a post is made: harvest, compose, judge, write,
+critique, render, publish, record. The scheduled job and a person at a laptop run this same
+script against the same state, so a manual build cannot repeat a moment the schedule spent.
+`--publish` posts, `--no-post` builds and still uses the moment up, `--dry-run` writes nothing.
+
+Read `references/strategy.md` before changing any of it.
+
+## Rendering a written deck
 
 ```bash
 .agents/skills/suresilly-carousel/.venv/bin/python \
@@ -43,7 +54,8 @@ Read these only when you need them — do not pull them all in up front.
 ```
 
 Parses the script, picks a mascot pose per slide from the library, renders the slides, and
-writes a `contact_sheet.png` for review.
+writes a `contact_sheet.png` for review. Needs no key and no network. `run.py` calls this
+itself; run it by hand only to re-render a deck you have edited.
 
 | Flag | Use |
 |---|---|
@@ -79,7 +91,13 @@ Why rearranged: Old was `Topic → Hook → Source → Value → Humanize → Ch
 
 ### Starting a deck: two modes
 
-**"I'm feeling lucky"** — pick via two scored layers, then run the full 10-step protocol. Do not ask what it should be about.
+> **The "I'm feeling lucky" mode below is superseded and no longer runs.** The pipeline picks
+> its own moment: it harvests a public post, uses it as a seed, and invents the moment itself.
+> See `references/strategy.md`. What follows is kept because the topic and pattern reasoning
+> is still sound if you are writing a deck BY HAND — but nothing here is executed by `run.py`,
+> and `topic-bank.md` is no longer read by any script.
+
+**"I'm feeling lucky" (superseded)** — pick via two scored layers, then run the full 10-step protocol.
 
 **Layer 1 — Suggestion — SURGE: 70%+ Relational / Attachment (for follower surge).** Per `brand-voice.md` niche #1 (9.8 shareability, 9.5 virality) + `topic-ranking.md`. Pull 12-15 candidates as:
 * **70% Relational / Attachment** — Bowlby/Ainsworth/Johnson/Tatkin/Gottman/Perel/Levine&Heller: `reread-okay` (scanning), `family-15-again` (reunion), `apologies-reflex`/`say-yes-resent` (fawn), `burden-feel`/`burden-boundaries`, `inbox-reread-boss` (bids) — all `sends` intent, `Visual Comparison` or `Script / Template` pattern, filmable domestic scene. This is the DM-share engine for surge.
