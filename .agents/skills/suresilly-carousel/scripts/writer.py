@@ -799,12 +799,22 @@ DRAFT_SCHEMA = {
     "properties": {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 140},
-                                # 200, not 280. The editorial cap on slide 2 is
-                                # 35 words and the schema allowed comfortably
-                                # more, so the model wrote to the schema and the
-                                # gate refused it — 43 words, seven attempts
-                                # running, one fault away from a finished deck.
-                                "body": {"type": "string", "maxLength": 200}}},
+                                # 185, and it is measured. The editorial cap on
+                                # slide 2 is 35 words, and this used to be 280
+                                # so the model wrote to the schema and the gate
+                                # refused it afterwards. Setting it to 200 was
+                                # not enough either: a live publish run came
+                                # back at 38 words in under 200 characters and
+                                # stalled there for three attempts, one fault
+                                # from a finished deck.
+                                #
+                                # A word on the decks we accept runs 5.5
+                                # characters including its space, so 35 words is
+                                # about 190. 185 leaves the gate a little room
+                                # to be the thing that refuses rather than the
+                                # schema, which gives a repair something to act
+                                # on instead of a silent truncation.
+                                "body": {"type": "string", "maxLength": 185}}},
         # The description is rewritten per deck in write_deck() with the real
         # name in it. A rule stated once in the system prompt was missed seven
         # attempts running: the model is filling in a field called "explains"
