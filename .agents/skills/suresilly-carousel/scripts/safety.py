@@ -74,9 +74,12 @@ B3_ABUSE        ongoing or recent violence, sexual violence, coercive control,
                 stalking, or a relationship described as frightening.
 B4_CLINICAL     psychosis, mania, dissociation, disordered eating, substance
                 withdrawal, medication changes, hospitalisation, pregnancy loss.
-B5_IDENTIFIABLE names or strongly implies a real person, employer, school or
-                town, or is specific enough that someone who knows the writer
-                would recognise them.
+B5_IDENTIFIABLE names a real person, employer, school or town, or gives enough
+                detail that somebody who knows the writer would pick them out.
+                A pronoun is not a name. "She", "my sister", "a friend" are how
+                everybody describes an ordinary evening and they identify
+                nobody. Block a NAME, never a relationship — a moment with the
+                other person taken out of it is not a moment.
 B6_ACUTE_GRIEF  a recent bereavement, a divorce in progress, a job lost this
                 week, a trauma being disclosed rather than recalled at distance.
 B7_OUT_OF_SCOPE the moment is about something this page does not touch:

@@ -76,6 +76,22 @@ MUST_ACCEPT_NAMED = [
     "A call came at 11pm and I sat tired in the car outside a shop until midnight.",
 ]
 
+# The other person is the moment. Told to remove anything identifying, a model
+# reaches past the name and deletes the person too: "she was locked out, I let
+# her in" comes back as "someone was locked out, I let them in". The judge then
+# refuses it for having no relational content, which is the correct reading of
+# what is left. A pronoun identifies nobody; only a name does.
+WITH_PERSON = ("so tired. she messaged at 11pm saying she was locked out again "
+               "so I let her in and went to bed")
+
+MUST_REJECT_PERSON = [
+    "Tired at 11pm, I read a note about someone shut out again, let them inside, then slept.",
+]
+MUST_ACCEPT_PERSON = [
+    "Tired at 11pm, I read a note about her being shut out again, let her inside, then slept.",
+    "Tired at 11pm, I read a note about my sister being shut out again, let her inside, then slept.",
+]
+
 MUST_ACCEPT = [
     "At 3:40 I opened my eyes, chest thumping, and stayed awake until six.",
     "My eyes opened at 3:40. I lay there with a loud chest and never dropped off.",
@@ -117,6 +133,20 @@ def run() -> int:
         if problems:
             failures.append(f"REFUSED a good rewrite: {problems} | {rewrite[:60]}")
 
+    for rewrite in MUST_REJECT_PERSON:
+        if not any("wrote the other person out" in p
+                   for p in abstract.verify(WITH_PERSON, rewrite)):
+            failures.append(f"PERSON an anonymised rewrite was accepted: {rewrite[:56]}")
+    for rewrite in MUST_ACCEPT_PERSON:
+        problems = abstract.verify(WITH_PERSON, rewrite)
+        if problems:
+            failures.append(f"PERSON refused a rewrite that kept the person: {problems}")
+
+    # A moment with nobody else in it must never be asked for a person.
+    alone = "I woke at 2:17am with my heart pounding and watched the clock until six."
+    if abstract.verify(alone, "At 2:17am my eyes opened, chest thumping, and I stayed awake until six."):
+        failures.append("PERSON asked for another person in a moment spent alone")
+
     # A weekday is not somebody's name, and neither is the first word of a
     # sentence. Both would otherwise be refused on every run.
     if abstract.proper_nouns("I woke on Tuesday. Nothing helped in March.") != set():
@@ -134,7 +164,7 @@ def run() -> int:
     if abstract.proper_nouns("Sarah rang me") != set():
         failures.append("NAMES the sentence-opener limit has changed, update the note")
 
-    total = 6 + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED) + len(MUST_ACCEPT_NAMED)
+    total = 7 + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED) + len(MUST_ACCEPT_NAMED)
     if failures:
         print(f"abstract: {len(failures)}/{total} failed")
         for line in failures:
@@ -142,7 +172,7 @@ def run() -> int:
         return 1
     print(f"abstract: {total}/{total} passed "
           f"(verbatim reuse, handles, invented place and clock, drift, lost moment, "
-          "lost feeling, names kept and invented)")
+          "lost feeling, names kept and invented, the other person kept)")
     return 0
 
 

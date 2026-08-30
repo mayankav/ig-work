@@ -41,6 +41,10 @@ would have seen. Drop how they said it.
 KEEP
   the time on the clock, the room, the object, the body sensation, the count
   the order things happened in
+  who the other person was to them: she, he, they, my sister, a friend, my
+  manager. A pronoun is not a name and a relationship is not an identity.
+  Turning "she" into "someone" deletes the only thing that made this a moment
+  between two people, and a moment between nobody is not publishable.
   the plain word they used for how they felt: tired, cried, dreading, guilty.
   A feeling is not theirs to own, and a moment with the feeling taken out is
   not publishable. If they said they were tired, your rewrite says so too.
@@ -48,7 +52,8 @@ KEEP
 
 REMOVE
   their phrasing. Not one distinctive sequence of words survives.
-  names, usernames, employers, schools, towns, ages, job titles
+  names, usernames, employers, schools, towns, ages. Keep the relationship,
+  drop the label: "my manager" stays, "my manager at Adobe" does not.
   anything that would let someone who knows them recognise them
   jokes, asides, greetings, sign-offs, anything addressed to their followers
   hashtags, links, emoji
@@ -149,6 +154,19 @@ def proper_nouns(text: str) -> set[str]:
 BODY_PART = re.compile(r"\b(chest|heart|stomach|gut|jaw|throat|shoulders?|breath|skin|teeth)\b")
 
 
+# Somebody specific in the moment. Deliberately NOT "someone", "somebody" or a
+# bare "them": those are what a model replaces a person WITH when it
+# over-anonymises. The rewrite that failed in CI said "a text about someone
+# locked out again, I let them in", so a list containing "them" would have
+# passed the very thing it exists to catch. A bare plural pronoun with no
+# relationship behind it names nobody.
+ANOTHER_PERSON = re.compile(
+    r"\b(she|her|hers|he|him|his|"
+    r"friend|sister|brother|mum|mom|dad|father|mother|partner|wife|husband|"
+    r"girlfriend|boyfriend|manager|boss|colleague|flatmate|roommate|neighbour|"
+    r"neighbor|therapist|landlord)\b")
+
+
 def _felt(text: str) -> bool:
     """Does this text still say how it felt?
 
@@ -211,6 +229,19 @@ def verify(original: str, rewritten: str) -> list[str]:
 
     if _felt(original) and not _felt(rewritten):
         problems.append("dropped how it felt; keep their plain word for it")
+
+    # The other person is the moment. A rewrite that turns "she was locked out,
+    # I let her in" into "someone was locked out, I let them in" has removed the
+    # relationship, and the judge then refuses it for having no relational
+    # content — correctly. A pronoun identifies nobody; only a name does.
+    # Handles come out first. "hope you all had a better one @friend" is a
+    # sign-off to followers, not somebody who was in the room, and counting it
+    # asked every rewrite of a solitary 3am to produce a companion.
+    def peopled(text: str) -> bool:
+        return bool(ANOTHER_PERSON.search(screen.normalise(IDENTIFYING.sub(" ", text))))
+
+    if peopled(original) and not peopled(rewritten):
+        problems.append("wrote the other person out; keep she, he, they or the relationship")
 
     shaped = screen.shape(rewritten)
     if not shaped["ok"]:
