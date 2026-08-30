@@ -113,6 +113,25 @@ def run() -> int:
     if not any("cheat sheet never comes back" in p for p in coherence.check(drifted, text_of)):
         failures.append("MOMENT a cheat sheet that dropped the moment was not caught")
 
+    # The card is the one slide with a second life. A step tied to an invented
+    # hour is a step nobody else can follow, and it is the defect that costs
+    # most: saves are what carousels are for.
+    contaminated_card = coherent_deck()
+    contaminated_card[7] = fake(8, h2="Your 2:17am [[card]].",
+                                bullets=["Start the 10 minute timer at 2:50pm in the [[kitchen]]",
+                                         "Turn the clock to the [[wall]]"])
+    if not any("nobody else can follow" in p
+               for p in coherence.check(contaminated_card, text_of)):
+        failures.append("CARD a step tied to an invented hour was accepted")
+    # The title may still name the moment. That is how a reader knows which
+    # deck they saved.
+    titled = coherent_deck()
+    titled[7] = fake(8, h2="Your 2:17am [[card]].",
+                     bullets=["Turn the clock to the [[wall]] before bed",
+                              "Say it out loud: waking is [[ordinary]]"])
+    if any("nobody else can follow" in p for p in coherence.check(titled, text_of)):
+        failures.append("CARD a title naming the moment was refused")
+
     # 5. Advice that has stopped explaining what slide 3 named.
     unthreaded = coherent_deck()
     unthreaded[4] = fake(5, old_reaction="Mornings are hard.", new_reaction="I will buy better [[curtains]].")
@@ -132,7 +151,7 @@ def run() -> int:
     if not any("introduces" in p for p in coherence.check(invented, text_of)):
         failures.append("NEW-IDEA a cheat sheet inventing a new named pattern was not caught")
 
-    checks = len(decks) * 2 + 7
+    checks = len(decks) * 2 + 9
     if failures:
         print(f"coherence: {len(failures)}/{checks} failed")
         for line in failures:

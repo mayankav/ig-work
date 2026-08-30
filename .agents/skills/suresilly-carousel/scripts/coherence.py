@@ -57,6 +57,10 @@ LABEL = re.compile(r"\[\[([a-z][a-z \-]{2,28})\]\]")
 
 # Accent words that carry emphasis rather than an idea. "Your 17 tab [[reset]]"
 # is a title, not a new concept, and the deck should not be blocked for it.
+# A time of day, not a count. "90 seconds" and "three times" are useful in a
+# step; "2:50pm" is somebody else's afternoon.
+CLOCK_TIME = re.compile(r"\b(?:[01]?\d|2[0-3]):[0-5]\d\s?(?:a\.?m\.?|p\.?m\.?)?\b|\b\d{1,2}\s?(?:am|pm)\b")
+
 DECORATIVE = {
     "kit", "card", "sheet", "reset", "now", "this", "next", "you", "yours",
     "here", "stop", "one", "two", "three", "again", "yet", "good", "enough",
@@ -157,10 +161,16 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
     if not hook_anchors:
         problems.append("slide 1 names nothing a camera could film")
     elif _wordy(hook_anchors):
-        # The cheat sheet is the slide people save, so it must name the same
-        # moment as the hook. Slide 2 and the CTA carry it too, but requiring
-        # all three means repeating a noun for its own sake — a real deck can
-        # pay off "stomach drops" without printing the word again.
+        # The cheat sheet is the slide people save, so it must be about the same
+        # thing as the hook. Slide 2 and the CTA carry it too, but requiring all
+        # three means repeating a noun for its own sake — a real deck can pay
+        # off "stomach drops" without printing the word again.
+        #
+        # WHAT IT MAY NOT CARRY is the invented hour. A card saying "at 11pm,
+        # in the kitchen" is a card that works for one imaginary person and
+        # nobody else, and the card is the whole reason anybody saves a
+        # carousel. The name ties it to this deck; the clock ties it to a
+        # stranger's Tuesday. That check is below.
         wanted = _wordy(hook_anchors)
         named = ", ".join(sorted(wanted))
         if not (wanted & anchors_in(cheat)):
@@ -197,6 +207,26 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
                         f"slide {i} is set at {', '.join(sorted(other))}, "
                         f"which is not when this moment happened"
                     )
+
+    # ── the saved card has to work for somebody else ──
+    #
+    # The one artefact a reader keeps. It carries the name so they remember
+    # which deck it came from, and no invented clock time, because "turn the
+    # light off at 11pm" is an instruction for a person who does not exist.
+    # A deck that put "start the 10 minute starter at 2:50pm in the kitchen" on
+    # its cheat sheet has thrown away the only slide with a second life.
+    # Only the instructions. The card's title may name the moment — "your 2:17am
+    # card" is what tells a reader which deck they saved — but a step that says
+    # "at 2:50pm, in the kitchen" is a step for a person who does not exist.
+    # Counts are fine and useful: "90 seconds", "three times". Times of day are
+    # not, so this looks for an hour and not for a number.
+    steps = " ".join(slides[7].get("bullets", []) + [str(slides[7].get("body", ""))])
+    hours = set(CLOCK_TIME.findall(steps))
+    if hours:
+        problems.append(
+            f"a step on the cheat sheet happens at {', '.join(sorted(hours))}. This is the "
+            f"slide people save, and a step tied to one invented hour is a step nobody else "
+            f"can follow. Name the moment in the title, never inside the instruction")
 
     # ── the advice still belongs to the mechanism ──
     source_terms = content(source)

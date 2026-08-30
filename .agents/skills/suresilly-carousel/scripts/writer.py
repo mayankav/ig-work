@@ -139,11 +139,35 @@ The page sounds like a smart friend who reads the textbooks. Never a therapist,
 never a guru, never a brand. Dry, warm, specific. A reader should want to send it
 to one person rather than agree with it in public.
 
+WHAT THE READER FEELS, and it is not relief. Relief is calm, and calm does not
+travel: the emotions that get a post sent are the ones with a jolt in them —
+recognition ("there is a NAME for that?"), being caught out, mild indignation.
+Relief is where the deck ENDS, on slide 9. It is not what the deck is built on.
+
+THE NAME IS THE POST. Before the beats, decide what this pattern is CALLED:
+a short noun phrase a reader can repeat, search for, and send to somebody with
+"this is you". Two or three words. "Waiting mode". "The bird test". "Bowl
+washing". Not a sentence, not a feeling, not a diagnosis.
+
+  This is the single biggest thing that decides whether a post travels. A name
+  can be looked up, argued with, and used as an accusation, a confession or a
+  diagnosis of somebody else. A scene cannot: nobody forwards a stranger's
+  evening. The named ideas that spread — waiting mode, the orange peel theory,
+  weaponised incompetence — are all somebody putting a handle on a thing
+  everybody already did.
+
 THE NINE BEATS, in order, each one earning the next:
-  1 hook     the moment, staged not explained. Nothing resolved.
+  1 hook     the NAME, then one line saying what it is. Not a staged scene.
   2 cost     what it costs. This is served on its own to people who did not
              swipe, so it must work with no slide 1 in front of it.
-  3 source   why it happens, in plain language, anchored to the citation you pick
+  3 source   the citation, then ONE sentence connecting it to the name.
+             The citation line is written for you and you do not touch it. Your
+             sentence starts from the NAME and uses the finding to explain it,
+             and it must not repeat the finding's wording:
+               claim    "Walker found that keeping the peace becomes automatic."
+               yours    "Peace keeping is why the sink still has you at 11pm."
+             Copying the claim under a second heading is the fastest way to
+             look broken, and it is checked.
   4 name     give the pattern a short name the reader can use
   5 script   the words to say, copy-paste, with a [bracket] to fill in
   6 action   one move, with a time and a place named
@@ -185,10 +209,21 @@ RULES
         word. Never open with Why, How to, The reason, What nobody, Most
         people, or Here is.
     h2  at most 7 words. No [[accent]] at all.
-    Stage the moment. Do not promise a result, do not sell a trick, do not
-    name a condition. "You will stop losing your keys tonight" is an
-    advertisement. "You looked for it for [[thirty]] minutes" is a hook.
-    e.g. the shape only:  You did [the thing] at [[the hour]].
+    h1 CONTAINS THE NAME, and one thing a camera could point at. Both. The
+    name is what gets sent on; the thing is what makes it a picture rather
+    than a slogan. "Peace keeping. You cannot leave the [[sink]] until every
+    cup is done" has the name and has the sink.
+    Write about what always happens, not about one evening that happened.
+    "You" means anybody, in the present. It does not mean one person doing one
+    thing at one hour.
+      Right:  Bowl washing. You cannot sit down until the counter is [[clear]].
+      Right:  Waiting mode. The whole day gets held for one [[appointment]].
+      Wrong:  You stood in the kitchen at 11pm washing bowls that were [[clean]].
+    The wrong one reads as somebody else's Tuesday. The reader has their own
+    kitchen and their own hour, and an invented one competes with the real
+    memory and loses. Say the thing that is always true and let them supply
+    the evening.
+    Do not promise a result, do not sell a trick, do not name a condition.
     No diagnosis word anywhere in a hook: nervous system, attachment,
     regulation, cortisol, polyvagal, somatic, trauma response, fawn response,
     hypervigilance, neuroception. Slide 1 is read by people who never asked
@@ -234,10 +269,13 @@ Plan the deck and return the JSON object."""
 PLAN_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["scene_token", "citation_id", "claim_index", "protocol", "beats",
+    "required": ["scene_token", "pattern_name", "citation_id", "claim_index", "protocol", "beats",
                  "hooks", "dm_share_hypothesis"],
     "properties": {
         "scene_token": {"type": "string", "maxLength": 30},
+        # The handle a reader repeats, searches for, and sends to somebody.
+        # Two or three words, a noun phrase, never a sentence.
+        "pattern_name": {"type": "string", "minLength": 3, "maxLength": 28},
         "citation_id": {"type": "string", "maxLength": 40},
         "claim_index": {"type": "integer", "minimum": 0, "maximum": 1},
         "protocol": {
@@ -360,6 +398,21 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
         problems.append(f"claim {plan['claim_index']} does not exist for {plan['citation_id']}")
     elif topic not in citation["pillars"]:
         problems.append(f"{plan['citation_id']} does not cover {topic}")
+
+    name = plan.get("pattern_name", "").strip()
+    if not 1 <= len(name.split()) <= 4:
+        problems.append(f"the pattern name is {len(name.split())} words. A handle a reader "
+                        f"repeats is two or three: 'waiting mode', 'bowl washing'")
+    elif name.rstrip(".").endswith((" is", " are", " you", " it")) or "." in name.rstrip("."):
+        problems.append(f"the pattern name {name!r} is a sentence. It has to be a thing "
+                        f"with a name, not a claim")
+    else:
+        # It has to be on slide 1. A name introduced later is a name nobody
+        # carries away, and slide 1 is the only slide most people see.
+        first = f"{beats[0]['beat']} {' '.join(h['h1'] for h in plan['hooks'])}".lower()
+        if name.lower() not in first:
+            problems.append(f"the pattern name {name!r} is missing from slide 1. Lead with "
+                            f"it: it is the thing a reader repeats and sends on")
 
     token = plan["scene_token"].lower().strip()
     allowed = coherence.anchors_in(moment)
@@ -611,6 +664,22 @@ never obvious from a single slide.
   good habits. Before you finish, read slides 6 and 7 back and check each one
   still says one of these words.
 
+THE CAPTION is NOT the deck written out again underneath itself. That is what
+it used to be and nobody reads it twice.
+
+  Line 1: the name, and what it costs. One sentence, and it has to work on its
+          own, because Instagram hides everything after about 125 characters.
+  Line 2: ask them to save it. "Save this for the next time it is 11pm and the
+          counter is still not clear."
+  Then stop, or add at most two sentences that say something the slides did
+  not. Never a summary.
+
+  Asking for a save moves saves by about 90 percent, and asking for a like
+  slightly lowers likes, so ask for the save and never for the like. Slide 9
+  already asks them to send it, and one post gets one action out of a person,
+  so there are exactly two asks in the whole deck: send on the slide, save in
+  the caption.
+
 THE CHEAT SHEET, slide 8, must name the scene token from the plan. The reader
 saves this slide on its own, so it has to say what moment it is for.
 
@@ -677,13 +746,12 @@ Write the copy and return the JSON object."""
 DRAFT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["cost", "translation", "explains", "name", "script", "action",
+    "required": ["cost", "explains", "name", "script", "action",
                  "sustain", "cheat", "cta", "caption", "hashtags", "alt", "mascots"],
     "properties": {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 140},
                                 "body": {"type": "string", "maxLength": 280}}},
-        "translation": {"type": "string", "maxLength": 280},
         "explains": {"type": "string", "maxLength": 280},
         "name": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 60},
@@ -713,8 +781,22 @@ DRAFT_SCHEMA = {
         "cta": {"type": "object", "additionalProperties": False, "required": ["cta1", "closing"],
                 "properties": {"cta1": {"type": "string", "maxLength": 150},
                                "closing": {"type": "string", "maxLength": 240}}},
-        "caption": {"type": "string", "minLength": 200, "maxLength": 2400},
-        "hashtags": {"type": "array", "minItems": 4, "maxItems": 6,
+        # There used to be a 200 character FLOOR here, which is why the caption
+        # was the whole deck retold as prose underneath itself. That is gone.
+        #
+        # It is NOT replaced with a hard short cap. The study behind "captions
+        # under 30 words win" (Socialinsider, 9.1M posts) measures likes and
+        # comments over followers and excludes saves and sends entirely — the
+        # two behaviours this page is built for — and the biggest accounts in
+        # this niche run captions of a couple of hundred words. So this is a
+        # range wide enough for either, and the prompt asks for the shape.
+        "caption": {"type": "string", "minLength": 40, "maxLength": 900},
+        # Down from a floor of four. Instagram capped hashtags at five in
+        # December 2025 and Mosseri says they do not lift reach; one 24M-post
+        # study found posts carrying any hashtag saw fewer views. That number is
+        # confounded — the accounts still stuffing tags in 2026 are the spammy
+        # ones — so this is not zero, it is "a couple, topical, expect nothing".
+        "hashtags": {"type": "array", "minItems": 0, "maxItems": 3,
                      "items": {"type": "string", "maxLength": 30}},
         "alt": {"type": "array", "minItems": 9, "maxItems": 9,
                 "items": {"type": "string", "maxLength": 260}},
@@ -781,7 +863,8 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
     out = [
         f"# Carousel: {title}",
         "",
-        f"**Pattern:** {pattern} · **Content Pillar:** {pillar} · **Core Emotion:** Relief",
+        f"**Pattern:** {pattern} · **Content Pillar:** {pillar} · "
+        f"**Core Emotion:** Recognition",
         f"**DM-Share Hypothesis:** {plan['dm_share_hypothesis']}",
         "",
         "### Slide 1 · Hook",
@@ -800,7 +883,6 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         f"- **Layout:** {LAYOUTS['source']}",
         f"- **Source:** {citation['line']}",
         f"- **Source Claim:** {claim}",
-        f"- **Plain-English Translation:** {ensure_accent(copy['translation'])}",
         f"- **What This Explains Here:** {ensure_accent(copy['explains'])}",
         f"- **Mascot:** {mascots[2]}",
         "",
@@ -880,7 +962,7 @@ def check_repeats(markdown: str) -> list[str]:
     thread is supposed to carry the IDEA forward, never the sentence.
     """
     problems = []
-    fields = re.findall(r"(?m)^- \*\*(?:H1|H2|Body|Source Claim|Plain-English Translation|"
+    fields = re.findall(r"(?m)^- \*\*(?:H1|H2|Body|Source Claim|"
                         r"What This Explains Here|❌ Old Reaction|✅ Regulated Response|"
                         r"Callout|Closing thought):\*\* (.+)$", markdown)
     seen: dict[str, int] = {}
@@ -911,7 +993,8 @@ def check_repeats(markdown: str) -> list[str]:
     return problems
 
 
-def verify_draft(markdown: str, moment_anchors: set[str] | None = None) -> list[str]:
+def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
+                 pattern_name: str = "") -> list[str]:
     """Every complaint about an assembled deck, from every gate that applies.
 
     Run together rather than one at a time because a repair call costs the same
@@ -926,6 +1009,11 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None) -> list[
 
     problems = check_accents(markdown)
     problems += check_repeats(markdown)
+    explains = re.search(r"(?m)^- \*\*What This Explains Here:\*\* (.+)$", markdown)
+    if explains and pattern_name and pattern_name.lower() not in explains.group(1).lower():
+        problems.append(f"slide 3's last line does not mention {pattern_name!r}. Its whole "
+                        f"job is to connect the finding to the name, and without the name "
+                        f"it can only repeat the finding")
     problems += check_mascots(re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown))
 
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as handle:
@@ -994,7 +1082,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
                               temperature=0.6 if attempt == 0 else 0.4)
         markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
                             title, pattern, pillar)
-        problems = verify_draft(markdown, moment_anchors)
+        problems = verify_draft(markdown, moment_anchors, plan.get("pattern_name", ""))
         if not problems:
             return markdown, plan, axes, wrote
         trouble.extend(problems)

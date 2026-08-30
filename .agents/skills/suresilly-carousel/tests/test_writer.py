@@ -31,7 +31,7 @@ MOMENT = "I woke at 2:17am with my heart pounding and watched the clock until si
 
 def good_plan() -> dict:
     beats = [
-        (1, "hook", "Stage 2:17am, the pounding heart, the clock. Explain nothing."),
+        (1, "hook", "Clock maths. You wake at 2:17am and start working out what is left."),
         (2, "cost", "What the watching costs the next morning."),
         (3, "source", "Checking the time turns a waking into a maths problem."),
         (4, "name", "Name the pattern: clock maths."),
@@ -43,6 +43,7 @@ def good_plan() -> dict:
     ]
     return {
         "scene_token": "2:17am",
+        "pattern_name": "clock maths",
         "citation_id": "espie-2006",
         "claim_index": 0,
         "protocol": {
@@ -155,6 +156,12 @@ def run() -> int:
         ("beats out of their fixed order", broken(beats=beats_wrong_order), "role order"),
         # A token this moment really does contain, which never reaches slide 1.
         ("a scene token missing from slide 1", broken(scene_token="body"), "missing from slide 1"),
+        # The name is the thing a reader repeats and sends on, so it has to be
+        # on the only slide most people see.
+        ("a pattern name that never reaches slide 1",
+         broken(pattern_name="the quiet tax"), "missing from slide 1"),
+        ("a pattern name that is a sentence, not a handle",
+         broken(pattern_name="you cannot sit down until it is clear"), "two or three"),
         # A token invented from the moment's wording rather than taken from the
         # list. This is what the plan actually did: "doorway" for a moment about
         # a door, and slide 1 was then refused by a checker reading a different

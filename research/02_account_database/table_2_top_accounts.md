@@ -1,3 +1,17 @@
+> **DO NOT BUILD ON THIS FILE. The numbers in it are invented.**
+>
+> Checked on 2026-08-30. `@theattachmentproject` is listed here as [VERIFIED] with
+> 1.4M followers; the real account is `@attachmentproject` and has 84K. `@mindfulmft`
+> is listed at 1.1M; the real figure is around 700K. The hook table attributes lines
+> to `@habit.hacker`, `@darkpsych` and `@shadow.work`, which are not real accounts,
+> and its "Engagement Indicator" column — "Extremely High Share", "High Save" — has
+> no data behind it. Instagram does not publish saves or shares publicly, so nobody
+> could have measured those columns.
+>
+> This was written by a model and labelled as verified. Some of the engine's copy
+> rules were derived from it. Evidence that IS real is in
+> `.agents/skills/suresilly-carousel/references/strategy.md`, with sources.
+
 # Table 2: Top Carousel Accounts by Niche (v2)
 
 **Data methodology:** All accounts below are documented using publicly observed data from 2024-2025. Handles marked `[VERIFIED]` are confirmed active accounts. Handles marked `[ARCHETYPE]` represent the observable creator profile at that follower tier but the specific handle may vary. Engagement rates are calibrated to 2025 Instagram norms (see Table 1 benchmarks). Carousel % is assessed from most recent 30 posts.
