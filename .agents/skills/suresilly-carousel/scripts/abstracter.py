@@ -41,6 +41,9 @@ would have seen. Drop how they said it.
 KEEP
   the time on the clock, the room, the object, the body sensation, the count
   the order things happened in
+  the plain word they used for how they felt: tired, cried, dreading, guilty.
+  A feeling is not theirs to own, and a moment with the feeling taken out is
+  not publishable. If they said they were tired, your rewrite says so too.
   first person, past tense
 
 REMOVE
@@ -52,12 +55,17 @@ REMOVE
 
 RULES
   8 to 30 words. One or two sentences. Plain past tense.
+  Write the time in digits, exactly as they did: 2:17am, 9pm, 4am. A time is a
+  fact, not phrasing, and "nine in the evening" throws it away. Same for counts:
+  "four times", not "several times".
   Never reuse more than six of their words in a row. Change the verbs, change
   the order, change the sentence shape. "I woke up at 3am with my heart
   pounding and could not sleep" reused wholesale is a failure even though the
   facts are right.
-  No advice. No diagnosis. No feeling words like anxious, burnt out, overwhelmed.
-  Say what happened, not what it meant.
+  No advice. No diagnosis. Say what happened, not what it meant.
+  Keep the plain feeling, drop the label. "I was tired" stays. "I was burnt
+  out", "my anxiety", "it was toxic", "I need boundaries" are labels: say the
+  plain thing that happened underneath instead.
   Never invent a detail that is not in the original. If the original does not
   say where they were, do not put them anywhere.
 
@@ -97,6 +105,62 @@ SCHEMA = {
 IDENTIFYING = re.compile(r"@\w+|https?://|#\w+")
 
 
+# Capitalised words that are not somebody's name, town or employer. Weekdays and
+# months earn their place because a moment is often anchored to one.
+NOT_A_NAME = {
+    "i", "im", "ive", "id", "ill", "a", "the", "my", "monday", "tuesday",
+    "wednesday", "thursday", "friday", "saturday", "sunday", "january",
+    "february", "march", "april", "may", "june", "july", "august", "september",
+    "october", "november", "december", "am", "pm", "ok", "okay", "tv", "gp",
+    "mum", "mom", "dad", "christmas", "google", "zoom", "slack",
+}
+SENTENCE_START = re.compile(r"(?:^|[.!?]\s+|\n\s*)$")
+
+
+def proper_nouns(text: str) -> set[str]:
+    """Words that look like a name, a town or an employer.
+
+    Capitalised, not at the start of a sentence, not on the short list above.
+    This is a second lock on a door the model was already told to close, so it
+    only has to catch the case where the model left it open.
+
+    The known limit: a name that opens a sentence cannot be told apart from an
+    ordinary capitalised opener without a dictionary, so this does not try.
+    Towns and employers arrive mid-sentence nearly every time ("in Canberra",
+    "at Aldi") and those are caught. A bare "Sarah rang me" is not, and the
+    safety judge's B5_IDENTIFIABLE is what stands behind it.
+    """
+    found = set()
+    for match in re.finditer(r"\b[A-Z][a-zA-Z']+\b", text):
+        word = match.group()
+        if word.lower().replace("'", "") in NOT_A_NAME:
+            continue
+        if SENTENCE_START.search(text[:match.start()]):
+            continue
+        found.add(word)
+    return found
+
+
+# Body parts that carry a feeling on their own. Deliberately not "eyes", "hands"
+# or "head": those appear in moments with nothing felt in them at all. Layer 1's
+# body anchor is stricter still — it wants a sensation, "chest tight" and not
+# "loud chest" — because it is scoring what a camera could see. This asks a
+# different question, so it uses a different list.
+BODY_PART = re.compile(r"\b(chest|heart|stomach|gut|jaw|throat|shoulders?|breath|skin|teeth)\b")
+
+
+def _felt(text: str) -> bool:
+    """Does this text still say how it felt?
+
+    A felt state is the one thing the rewrite must not lose. It is also the one
+    thing it cannot take from anybody: "tired" belongs to no one. Layer 1 scores
+    a moment two points for having it, and layer 4 blocks a moment for having
+    none, so a rewrite that drops it fails twice over.
+    """
+    plain = screen.normalise(text)
+    return bool(screen.FEELING.search(plain) or BODY_PART.search(plain))
+
+
 def _words(text: str) -> list[str]:
     return re.findall(r"[a-z0-9']+", text.lower())
 
@@ -129,9 +193,24 @@ def verify(original: str, rewritten: str) -> list[str]:
     if IDENTIFYING.search(rewritten):
         problems.append("still contains a handle, hashtag or link")
 
+    # A name the original carried and the rewrite kept, whatever case it is in
+    # now. This is the check that matters: the model was told to drop towns and
+    # employers, and until now nothing confirmed that it had.
+    plain = set(_words(rewritten))
+    kept_names = sorted(n for n in proper_nouns(original) if n.lower() in plain)
+    if kept_names:
+        problems.append(f"kept a name from the original: {', '.join(kept_names)}")
+
+    invented_names = sorted(proper_nouns(rewritten) - proper_nouns(original))
+    if invented_names:
+        problems.append(f"invented a name: {', '.join(invented_names)}")
+
     family = screen.banned_subject(rewritten)
     if family:
         problems.append(f"the rewrite reads as {family}")
+
+    if _felt(original) and not _felt(rewritten):
+        problems.append("dropped how it felt; keep their plain word for it")
 
     shaped = screen.shape(rewritten)
     if not shaped["ok"]:
@@ -158,9 +237,13 @@ def rewrite(text: str, nonce: str = "7f3a2c") -> dict:
     """
     trouble: list[str] = []
     clean = text.replace(nonce, " ")
+    complaint = ""
     for _ in range(2):
-        answer, provider = llm.ask(SYSTEM, USER.format(nonce=nonce, text=clean), SCHEMA,
-                                   temperature=0.4)
+        # The second attempt is only worth its quota if it is told what was
+        # wrong with the first. Asking the same question twice got the same
+        # answer twice, three runs in a row.
+        prompt = USER.format(nonce=nonce, text=clean) + complaint
+        answer, provider = llm.ask(SYSTEM, prompt, SCHEMA, temperature=0.4)
         if answer["injection"]:
             raise llm.ModelRefused("the source text tried to give instructions")
         problems = verify(text, answer["moment"])
@@ -168,6 +251,8 @@ def rewrite(text: str, nonce: str = "7f3a2c") -> dict:
             return {"moment": answer["moment"].strip(), "kept": answer["kept"],
                     "removed": answer["removed"], "provider": provider}
         trouble.extend(problems)
+        complaint = ("\n\nYour last attempt was rejected: " + "; ".join(problems) +
+                     "\nWrite a different rewrite that fixes this.")
     raise llm.ModelRefused("; ".join(dict.fromkeys(trouble))[:300])
 
 

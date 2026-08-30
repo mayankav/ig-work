@@ -67,9 +67,13 @@ def screen_all(candidates: list[dict]) -> tuple[list[dict], dict[str, int]]:
         # the author's wording, and the abstraction step replaces it before
         # anything reaches disk or a slide.
         kept.append({**item, "text": verdict["text"], "raw": item["text"],
-                     "score": verdict["score"], "anchors": verdict["anchors"]})
+                     "score": verdict["score"], "tension": verdict["tension"],
+                     "anchors": verdict["anchors"]})
 
-    kept.sort(key=lambda c: c["score"], reverse=True)
+    # Tension outranks the score on purpose. The score measures whether a moment
+    # can be filmed, and a thin one — tired, 9pm, a car — beats a real one on
+    # that every time. The judge then refuses it, two model calls too late.
+    kept.sort(key=lambda c: (c["tension"], c["score"]), reverse=True)
     return kept, tally
 
 
@@ -131,7 +135,8 @@ def main() -> None:
     print(f"kept      {len(result['candidates'])}")
     for cand in result["candidates"]:
         anchors = ",".join(cand.get("anchors", {}))
-        print(f"\n  score {cand['score']}  [{anchors}]")
+        print(f"\n  score {cand['score']}  "
+              f"{'tension' if cand['tension'] else 'no tension'}  [{anchors}]")
         print(f"  {cand['text'][:150]}")
     raise SystemExit(0 if result["ok"] else 1)
 

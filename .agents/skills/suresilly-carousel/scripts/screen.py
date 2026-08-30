@@ -168,7 +168,8 @@ def banned_subject(text: str) -> str | None:
 ANCHORS = {
     "clock": re.compile(r"\b([01]?\d|2[0-3]):[0-5]\d\s?(a\.?m\.?|p\.?m\.?)?\b|\b\d{1,2}\s?(am|pm)\b"),
     "body": re.compile(
-        r"\b(heart\s+(pounding|racing|sank)|chest\s+(tight|heavy)|jaw|throat|"
+        r"\b(heart\s+(pounding|racing|thumping|sank)|"
+        r"chest\s+(tight|tightened|heavy|thumping|pounding)|jaw|throat|"
         r"hands?\s+(shaking|shook)|stomach\s+(dropped|turned)|couldn'?t\s+breathe|"
         r"sweat\w*|nause\w+|shoulders|ears\s+rang)\b"
     ),
@@ -209,6 +210,21 @@ FEELING = re.compile(
     r"cried|crying|upset|hurt|resent|regret|avoided|avoiding|"
     r"ignored|ignoring|pretended|forced|couldn'?t stop|kept thinking|"
     r"overthinking|second guess|beat myself|hate myself|felt like)\b")
+
+# What makes a moment worth nine slides rather than merely filmable. Someone
+# else in the frame, or the same small act done again and counted: those are
+# where relational psychology actually lives. "I was tired so I slept" has a
+# feeling, an hour and a car in it and is still about nothing, and the judge
+# refuses it after two model calls have already been spent. Ranking on this
+# spends the run's five attempts on the moments that survive.
+TENSION = re.compile(
+    r"\b(her|him|them|she|he|they|someone|somebody|everyone|anyone|"
+    r"message|messaged|text|texted|reply|replied|answer|answered|call|called|"
+    r"dm|chat|email|emailed|sister|brother|friend|boss|manager|partner|"
+    r"flatmate|roommate|colleague|mum|mom|dad|"
+    r"again|twice|three\s+times|four\s+times|five\s+times|"
+    r"kept|checked|rechecked|re[\s-]?read|reread|refreshed|counted|"
+    r"stared|watched|scrolled|deleted|rewrote|retyped)\b")
 
 ABSTRACT = re.compile(
     r"\b(anxiety|depression|burnout|trauma|healing|journey|motivation|energy|"
@@ -300,6 +316,14 @@ def shape(text: str) -> dict:
     return {
         "ok": not reasons,
         "score": score,
+        # Reported, never scored. Adding it to the score would have put it in
+        # competition with filmability, and a clock plus a car park already
+        # outweighs it. It ranks candidates instead, ahead of the score, so the
+        # run's five attempts go to the moments that are about something.
+        # The body anchor counts as tension in its own right. A chest thumping
+        # at 3:40am is a person in conflict with themselves, which is the same
+        # thing the word list is looking for in the relational case.
+        "tension": bool(TENSION.search(t) or "body" in found),
         "anchors": {k: sorted({str(x) if isinstance(x, str) else x[0] for x in v}) for k, v in found.items()},
         "reasons": reasons,
     }
@@ -369,7 +393,7 @@ def screen(text: str, found_by: str = "") -> dict:
     family = banned_subject(text)
     if family:
         return {"ok": False, "stage": "banned", "reason": family,
-                "score": 0, "anchors": {}, "text": None}
+                "score": 0, "tension": False, "anchors": {}, "text": None}
     moment = extract(text, found_by)
     result = shape(moment)
     return {
@@ -377,6 +401,7 @@ def screen(text: str, found_by: str = "") -> dict:
         "stage": "shape",
         "reason": "; ".join(result["reasons"]) or None,
         "score": result["score"],
+        "tension": result["tension"],
         "anchors": result["anchors"],
         "text": moment if result["ok"] else None,
     }

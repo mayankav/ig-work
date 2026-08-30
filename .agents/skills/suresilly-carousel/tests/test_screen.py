@@ -99,7 +99,30 @@ def run() -> int:
         elif needle not in verdict["text"]:
             failures.append(f"EXTRACT missed {needle!r}, got: {verdict['text'][:70]}")
 
-    total = len(MUST_REJECT) + len(MUST_KEEP) + len(MUST_DROP_SHAPE) + len(EXTRACTION)
+    # Ranking. The score says whether a moment can be filmed; it does not say
+    # whether the moment is about anything. A thin one — tired, 9pm, a car —
+    # outscores a real one and the judge then refuses it, two model calls too
+    # late. Tension is what sorts them, so it is checked here.
+    THIN = "I was so tired. I fell asleep at 9pm after picking up the car and driving home from work."
+    REAL = "I read her message four times before answering, and checked twice when she was last online."
+    BODY = "At 3:40 I opened my eyes, chest thumping, and stayed awake until six in the morning."
+
+    thin, real, body = (screen.screen(t) for t in (THIN, REAL, BODY))
+    if thin["tension"]:
+        failures.append("TENSION a moment with nobody in it and nothing repeated read as tension")
+    if not real["tension"]:
+        failures.append("TENSION another person and a repeated check did not read as tension")
+    if not body["tension"]:
+        failures.append("TENSION a body sensation did not read as tension")
+    if thin["score"] <= real["score"]:
+        failures.append("TENSION the thin moment no longer outscores the real one, so this "
+                        "test has stopped proving that ranking on score alone is wrong")
+    order = sorted([("thin", thin), ("real", real), ("body", body)],
+                   key=lambda kv: (kv[1]["tension"], kv[1]["score"]), reverse=True)
+    if order[-1][0] != "thin":
+        failures.append(f"TENSION the thin moment was not tried last: {[n for n, _ in order]}")
+
+    total = 5 + len(MUST_REJECT) + len(MUST_KEEP) + len(MUST_DROP_SHAPE) + len(EXTRACTION)
     if failures:
         print(f"screen: {len(failures)}/{total} failed")
         for line in failures:
@@ -107,7 +130,7 @@ def run() -> int:
         return 1
     print(f"screen: {total}/{total} passed "
           f"({len(MUST_REJECT)} harm, {len(MUST_KEEP)} keep, "
-          f"{len(MUST_DROP_SHAPE)} shape, {len(EXTRACTION)} extraction)")
+          f"{len(MUST_DROP_SHAPE)} shape, {len(EXTRACTION)} extraction, 5 ranking)")
     return 0
 
 
