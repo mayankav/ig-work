@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Previews from run.py --dry-run. Never part of the published corpus.
+.preview/
