@@ -73,7 +73,13 @@ _last_call: dict[str, float] = {}
 
 
 def _pace(provider: str) -> None:
-    """Wait if the last call to this provider was too recent."""
+    """Wait if the last REQUEST to this provider was too recent.
+
+    On the request, not on the logical call. Gemini fires up to five requests
+    inside one call as it walks its model buckets, and pacing the call left
+    those five arriving inside a second, which is the burst this exists to
+    prevent.
+    """
     since = time.time() - _last_call.get(provider, 0.0)
     if since < MIN_GAP_SECONDS:
         time.sleep(MIN_GAP_SECONDS - since)
@@ -341,13 +347,19 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
         payload["generationConfig"]["responseSchema"] = _gemini_schema(schema)
     trouble = []
     for model in GEMINI_MODELS:
+        _pace("gemini")
         try:
             data = _post(GEMINI_URL.format(model=model), payload, {"x-goog-api-key": key})
             break
         except RateLimited as limited:
             trouble.append(f"{model} {limited}")
+        except ModelRefused as refused:
+            # Any refusal moves to the next bucket, not just a rate limit. One
+            # model rejecting a schema or disappearing should cost us that model,
+            # not the whole call, and the earlier version aborted on both.
+            trouble.append(f"{model} {refused}")
     else:
-        raise RateLimited("; ".join(trouble), RATE_LIMIT_PAUSE)
+        raise RateLimited("; ".join(trouble)[:300], RATE_LIMIT_PAUSE)
 
     candidates = data.get("candidates") or []
     if not candidates:
@@ -407,6 +419,7 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
     key = resolve_key("GROQ_API_KEY")
     if not key:
         raise ModelRefused("no Groq key")
+    _pace("groq")
     payload = {
         "model": GROQ_MODEL,
         "temperature": temperature,
@@ -456,6 +469,7 @@ def call_cloudflare(system: str, user: str, temperature: float,
     if not (account and token):
         raise ModelRefused("no Cloudflare credentials")
 
+    _pace("cloudflare")
     payload = {
         "messages": [{"role": "system", "content": system + _field_note(schema)},
                      {"role": "user", "content": user}],
@@ -498,7 +512,6 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
             if attempt:
                 time.sleep(pause)
             try:
-                _pace(name)
                 reply = call(system, user, temperature, schema)
                 answer = extract_json(reply)
                 problems = validate(answer, schema)
