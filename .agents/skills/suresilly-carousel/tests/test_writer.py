@@ -269,6 +269,30 @@ def run() -> int:
     if "2:17am" not in chosen["h1"]:
         failures.append("HOOK picked the vague hook over the one naming the moment")
 
+    # The subtitle on the only slide most people see. A deck that posted said
+    # "Execution freeze. You remain anchored to the bed even when awake." and
+    # then "Execution freeze. Anchored to the bed." underneath it.
+    repeated = {"h1": "Execution freeze. You remain anchored to the [[bed]] even when awake.",
+                "h2": "Execution freeze. Anchored to the bed."}
+    faults = writer.hook_faults(repeated, "Execution freeze")
+    if not any("only repeats h1" in f for f in faults):
+        failures.append(f"HOOK a subtitle repeating the headline was accepted: {faults}")
+    if not any("again" in f for f in faults):
+        failures.append(f"HOOK a subtitle repeating the name was accepted: {faults}")
+    adds = dict(repeated, h2="The morning goes while you stand.")
+    if writer.hook_faults(adds, "Execution freeze"):
+        failures.append(f"HOOK a subtitle that adds something was refused: "
+                        f"{writer.hook_faults(adds, 'Execution freeze')}")
+
+    # One deck, one name. The same deck led with "Execution freeze" and coined
+    # "the traction gap" on slide 4, so a reader had two handles and kept none.
+    two_names = broken(pattern_name="clock maths")
+    two_names["beats"][3]["beat"] = "Name the pattern: the traction gap."
+    two_names["beats"][3]["exports"] = ["the traction gap"]
+    if not any("invents a second one" in problem for problem in
+               writer.validate_plan(two_names, MOMENT, "sleep")):
+        failures.append("NAME slide 4 coining a second name was accepted")
+
     # ── mascots ──
     for briefs, why in [
         (["a donkey looking at a clock that reads 2:17am"] + ["a donkey sitting"] * 8, "text in the artwork"),
@@ -339,7 +363,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 10 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 14 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

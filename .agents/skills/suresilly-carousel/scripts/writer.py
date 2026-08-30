@@ -172,7 +172,10 @@ THE NINE BEATS, in order, each one earning the next:
                yours    "Peace keeping is why the sink still has you at 11pm."
              Copying the claim under a second heading is the fastest way to
              look broken, and it is checked.
-  4 name     give the pattern a short name the reader can use
+  4 name     EXPLAIN the name slide 1 gave. Never coin a second one. A deck
+             that posted led with "Execution freeze" and then invented "the
+             traction gap" here, so a reader was handed two names and carried
+             away neither. One deck, one name; this is where it is unpacked.
   5 script   the words to say, copy-paste, with a [bracket] to fill in
   6 action   one move, with a time and a place named
   7 sustain  what makes it survive tomorrow
@@ -212,7 +215,12 @@ RULES
     h1  at most 12 words. Exactly one [[accent]], wrapping the last stressed
         word. Never open with Why, How to, The reason, What nobody, Most
         people, or Here is.
-    h2  at most 7 words. No [[accent]] at all.
+    h2  at most 7 words. No [[accent]] at all. It says something the h1 did
+        NOT, and it never repeats the name — the headline already gave it. A
+        deck that posted opened "Execution freeze. You remain anchored to the
+        bed even when awake." and put "Execution freeze. Anchored to the bed."
+        underneath, which is the same words twice on the only slide most
+        people see. "The morning goes while you stand" is a subtitle.
     h1 CONTAINS THE NAME, and one thing a camera could point at. Both. The
     name is what gets sent on; the thing is what makes it a picture rather
     than a slogan. "Peace keeping. You cannot leave the [[sink]] until every
@@ -346,7 +354,7 @@ def _words(text: str) -> list[str]:
     return re.findall(r"[A-Za-z0-9']+", re.sub(r"\[\[|\]\]", " ", text))
 
 
-def hook_faults(hook: dict) -> list[str]:
+def hook_faults(hook: dict, name: str = "") -> list[str]:
     """Why this hook cannot be used. Empty means it can.
 
     Named rather than counted, because "not one hook is usable" told a repair
@@ -374,6 +382,16 @@ def hook_faults(hook: dict) -> list[str]:
         faults.append("em dash")
     if SEESAW.search(h1):
         faults.append('the "not X, it is Y" shape')
+
+    # The subtitle has to say something the headline did not. A deck that
+    # posted opened "Execution freeze. You remain anchored to the bed even when
+    # awake." and put "Execution freeze. Anchored to the bed." underneath it —
+    # the same words twice, on the only slide most people see.
+    if {w.lower() for w in _words(h2)} and \
+            {w.lower() for w in _words(h2)} <= {w.lower() for w in _words(h1)}:
+        faults.append("h2 only repeats h1. It has to add something")
+    if name and name.lower() in h2.lower():
+        faults.append(f"h2 says {name!r} again. The headline already named it")
     # Slide 1 is checked for a thing a camera could point at, and slide 1 IS
     # this hook, written on unchanged. Catching it here means the PLAN retries,
     # which can choose a different hook; catching it later meant the draft loop
@@ -384,14 +402,14 @@ def hook_faults(hook: dict) -> list[str]:
     return faults
 
 
-def hook_ok(hook: dict) -> bool:
+def hook_ok(hook: dict, name: str = "") -> bool:
     """One definition of a usable hook, used by the validator and the chooser.
 
     They disagreed once, so the validator accepted a deck whose only usable hook
     was then passed over for one that broke the subtitle limit. One function now,
     two callers.
     """
-    return not hook_faults(hook)
+    return not hook_faults(hook, name)
 
 
 def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
@@ -440,6 +458,16 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
         if name.lower() not in first:
             problems.append(f"the pattern name {name!r} is missing from slide 1. Lead with "
                             f"it: it is the thing a reader repeats and sends on")
+
+        # Slide 4's whole job is to explain the name slide 1 gave. A deck that
+        # posted led with "Execution freeze" and then coined "the traction gap"
+        # four slides later, so a reader was handed two handles and carried
+        # away neither. One deck, one name.
+        fourth = beats[3]["beat"] if len(beats) > 3 else ""
+        exported = " ".join(beats[3].get("exports", [])) if len(beats) > 3 else ""
+        if name.lower() not in f"{fourth} {exported}".lower():
+            problems.append(f"slide 4 does not name {name!r}. It is the slide that explains "
+                            f"the name, not the slide that invents a second one")
 
     token = plan["scene_token"].lower().strip()
     allowed = coherence.anchors_in(moment)
@@ -500,8 +528,8 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
         if term in early:
             problems.append(f"diagnosis word before slide 3: {term}")
 
-    if not any(hook_ok(h) for h in plan["hooks"]):
-        why = "; ".join(f"hook {i}: {', '.join(hook_faults(h))}"
+    if not any(hook_ok(h, name) for h in plan["hooks"]):
+        why = "; ".join(f"hook {i}: {', '.join(hook_faults(h, name))}"
                         for i, h in enumerate(plan["hooks"], 1))
         problems.append(f"not one hook is usable — {why}")
 
