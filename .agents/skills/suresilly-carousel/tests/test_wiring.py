@@ -21,6 +21,9 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts
 import memory  # noqa: E402
 import run as runner  # noqa: E402
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[4] / "scripts"))
+import post_to_ig  # noqa: E402
+
 
 def moment(text: str, ref: str) -> memory.Moment:
     return memory.Moment.make(text, source="bluesky", source_ref=ref,
@@ -100,6 +103,42 @@ def run() -> int:
     if runner.plan_token(empty) != "":
         failures.append("ANCHOR a moment with no anchors returned something")
 
+    # What Instagram is actually handed.
+    #
+    # The writer wrote the tags as bare words under a horizontal rule and
+    # post_to_ig.py looked for a "## Hashtags" heading. Two formats, two files,
+    # nothing comparing them — so every post this engine has ever published went
+    # out with the caption and no tags at all, and both files were individually
+    # correct. This is the only test that reads what one wrote with the other.
+    import writer
+    assembled = "\n".join([
+        "# Carousel: test", "",
+        "## Caption", "Execution freeze is the cost of waiting for readiness.", "",
+        "## Hashtags",
+        " ".join(f"#{t}" for t in ("executivedysfunction", "adhd", "burnout")), "",
+        "## Alt Text", "Slide 1: a donkey.", ""])
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,
+                                     encoding="utf-8") as handle:
+        handle.write(assembled)
+        deck_path = pathlib.Path(handle.name)
+    try:
+        posted = post_to_ig.parse_caption(deck_path)
+    finally:
+        deck_path.unlink(missing_ok=True)
+    for tag in ("#executivedysfunction", "#adhd", "#burnout"):
+        if tag not in posted:
+            failures.append(f"CAPTION {tag} never reached Instagram: {posted[:120]!r}")
+    if "Execution freeze" not in posted:
+        failures.append("CAPTION the caption itself did not reach Instagram")
+
+    # And the writer has to produce that shape. A hashtag without its # is a
+    # word, and the section heading is what the poster searches for.
+    body = writer.assemble.__doc__ or ""
+    if "## Hashtags" not in pathlib.Path(
+            pathlib.Path(__file__).resolve().parent.parent / "scripts" / "writer.py"
+    ).read_text(encoding="utf-8"):
+        failures.append("CAPTION the writer no longer emits a Hashtags heading")
+
     # The set handed to the writer must be the words, not the kinds. This line
     # sent {"clock", "place"} for months. The coherence gate reads it as the
     # only scene the deck is allowed to mention, so every real word — the bed,
@@ -110,14 +149,14 @@ def run() -> int:
     if runner.anchor_words(empty) != set():
         failures.append("ANCHOR a moment with no anchors produced words")
 
-    total = 5 + 3 + 3 + 2 + 4
+    total = 5 + 3 + 3 + 2 + 4 + 5
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:
             print(f"  {line}")
         return 1
     print(f"wiring: {total}/{total} passed (slugs, caption tag, file placement, "
-          f"workflow output, anchors)")
+          f"workflow output, anchors, what Instagram is handed)")
     return 0
 
 

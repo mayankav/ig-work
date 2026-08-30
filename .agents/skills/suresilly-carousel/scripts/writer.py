@@ -743,12 +743,31 @@ never obvious from a single slide.
 THE CAPTION is NOT the deck written out again underneath itself. That is what
 it used to be and nobody reads it twice.
 
-  Line 1: the name, and what it costs. One sentence, and it has to work on its
-          own, because Instagram hides everything after about 125 characters.
-  Line 2: ask them to save it. "Save this for the next time it is 11pm and the
-          counter is still not clear."
-  Then stop, or add at most two sentences that say something the slides did
-  not. Never a summary.
+  Four short paragraphs, 60 to 120 words. The last one that shipped was two
+  sentences and 151 characters, which reads like the post was abandoned.
+
+  1  The name, and what it costs. ONE sentence, and it has to work alone,
+     because Instagram hides everything after about 125 characters.
+  2  Two or three sentences saying something the slides did NOT say. Where
+     this shows up in an ordinary week, or what it is usually mistaken for.
+     This is the paragraph that earns the caption its space.
+  3  Who this is not about. One line that lets somebody off: "This is not a
+     discipline problem and it was never laziness."
+  4  Ask them to save it. "Save this for the next 6am you spend standing by
+     the bed."
+
+  Never a summary of the slides. Somebody reading the caption has already seen
+  them, or is deciding whether to.
+
+  Asking for a save moves saves by about 90 percent, and asking for a like
+  slightly lowers likes, so ask for the save and never for the like. Slide 9
+  already asks them to send it, and one post gets one action out of a person,
+  so there are exactly two asks in the whole deck: send on the slide, save in
+  the caption.
+
+HASHTAGS. Three to five, lower case, no spaces, no # — it is added for you.
+Topical and plain: the subject, the pattern, the feeling. Not #love, not
+#explorepage, not the handle.
 
   Asking for a save moves saves by about 90 percent, and asking for a like
   slightly lowers likes, so ask for the save and never for the like. Slide 9
@@ -889,13 +908,20 @@ DRAFT_SCHEMA = {
         # two behaviours this page is built for — and the biggest accounts in
         # this niche run captions of a couple of hundred words. So this is a
         # range wide enough for either, and the prompt asks for the shape.
-        "caption": {"type": "string", "minLength": 40, "maxLength": 900},
-        # Down from a floor of four. Instagram capped hashtags at five in
-        # December 2025 and Mosseri says they do not lift reach; one 24M-post
-        # study found posts carrying any hashtag saw fewer views. That number is
-        # confounded — the accounts still stuffing tags in 2026 are the spammy
-        # ones — so this is not zero, it is "a couple, topical, expect nothing".
-        "hashtags": {"type": "array", "minItems": 0, "maxItems": 3,
+        "caption": {"type": "string", "minLength": 300, "maxLength": 900,
+                    "description": "60 to 120 words in four short paragraphs: the name and "
+                                   "what it costs, then something the slides did not say, "
+                                   "then one line letting the reader off, then ask them to "
+                                   "save it. Never a summary of the slides."},
+        # Three to five, and the floor matters: at zero the model wrote two,
+        # they were formatted wrong, and every post went out bare.
+        #
+        # Instagram capped hashtags at five in December 2025 and Mosseri says
+        # they do not lift reach; one 24M-post study found posts carrying any
+        # hashtag saw fewer views, though that is confounded by the accounts
+        # still stuffing them. They are free, they are how a post is filed, and
+        # a page with none looks abandoned. Topical, at the cap, expect nothing.
+        "hashtags": {"type": "array", "minItems": 3, "maxItems": 5,
                      "items": {"type": "string", "maxLength": 30}},
         "alt": {"type": "array", "minItems": 9, "maxItems": 9,
                 "items": {"type": "string", "maxLength": 260}},
@@ -1035,8 +1061,15 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         "## Caption",
         copy["caption"].strip(),
         "",
-        "---",
-        " ".join(copy["hashtags"]),
+        # A heading, and a # on every tag.
+        #
+        # This wrote the tags as bare words under a horizontal rule, and
+        # post_to_ig.py looks for a "## Hashtags" section. It never found one,
+        # so every post went out with the caption and nothing else — no tags at
+        # all, on every deck this engine has ever published. Two formats that
+        # never agreed, in two files, and nothing compared them.
+        "## Hashtags",
+        " ".join(f"#{tag.lstrip('#').replace(' ', '').lower()}" for tag in copy["hashtags"]),
         "",
         "## Alt Text",
     ]
