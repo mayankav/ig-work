@@ -61,6 +61,22 @@ RETRIES = 1
 RATE_LIMIT_PAUSE = 25
 RETRY_PAUSE = 2
 
+# A minimum gap between calls to the same provider. Nine requests fired back to
+# back is what produces a burst 429, whichever model each one lands on: a
+# per-minute quota does not care that the work was spread across buckets if it
+# all arrived in the same ten seconds. Four seconds costs about half a minute
+# across a whole run and removes the burst entirely.
+MIN_GAP_SECONDS = 4.0
+_last_call: dict[str, float] = {}
+
+
+def _pace(provider: str) -> None:
+    """Wait if the last call to this provider was too recent."""
+    since = time.time() - _last_call.get(provider, 0.0)
+    if since < MIN_GAP_SECONDS:
+        time.sleep(MIN_GAP_SECONDS - since)
+    _last_call[provider] = time.time()
+
 
 class ModelRefused(Exception):
     """No usable answer. The reason is written for whoever reads the alert."""
@@ -440,6 +456,7 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
             if attempt:
                 time.sleep(pause)
             try:
+                _pace(name)
                 reply = call(system, user, temperature, schema)
                 answer = extract_json(reply)
                 problems = validate(answer, schema)
