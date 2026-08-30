@@ -116,9 +116,14 @@ jobs:
           git pull --rebase --quiet || true
           git push || echo "push failed, next run will retry"
 
-      - name: Email the result
+      # Two channels on purpose. Telegram is the alert that reaches a phone;
+      # email is the archive that is still searchable in a year. A channel that
+      # only runs when the other has failed is a channel nobody notices is broken.
+      - name: Report the result
         if: always()
         env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           EMAIL_API_KEY: ${{ secrets.EMAIL_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
         run: |
@@ -133,7 +138,7 @@ jobs:
             ATTACH=""
           fi
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
-            python scripts/send_email.py --subject "$SUBJECT" --to mayankmacav@gmail.com --body "$BODY" --attach "$ATTACH" || true
+            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --attach "$ATTACH"
           else
-            python scripts/send_email.py --subject "$SUBJECT" --to mayankmacav@gmail.com --body "$BODY" || true
+            python scripts/notify.py --subject "$SUBJECT" --body "$BODY"
           fi
