@@ -37,6 +37,10 @@ jobs:
       MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      # Anonymous search is refused from a data-centre address. Signed in, the
+      # account's own server answers instead.
+      BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4

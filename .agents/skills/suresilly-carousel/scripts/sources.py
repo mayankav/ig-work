@@ -31,6 +31,7 @@ Two things this module is careful about:
 from __future__ import annotations
 
 import json
+import os
 import random
 import time
 import urllib.error
@@ -46,6 +47,48 @@ SEARCH_HOSTS = (
     "https://api.bsky.app/xrpc/app.bsky.feed.searchPosts",
     "https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts",
 )
+
+# Anonymous search is refused outright from a data-centre address. Both public
+# hosts answer 403 from a GitHub runner while both answer normally from a
+# laptop, so it is a deliberate block rather than a rate limit and no amount of
+# backing off reaches it.
+#
+# Signing in is the way through. A session is made from a handle and an app
+# password, which is a revocable credential that cannot change the account's
+# real password, and authenticated reads go through the account's own server.
+SESSION_URL = "https://bsky.social/xrpc/com.atproto.server.createSession"
+AUTHED_SEARCH_URL = "https://bsky.social/xrpc/app.bsky.feed.searchPosts"
+
+_session: dict | None = None
+
+
+def _sign_in() -> dict | None:
+    """Return auth headers, or None when no credentials are set.
+
+    Cached for the process: a run makes fourteen searches and one session
+    serves all of them.
+    """
+    global _session
+    if _session is not None:
+        return _session or None
+
+    handle = os.environ.get("BLUESKY_HANDLE", "").strip()
+    password = os.environ.get("BLUESKY_APP_PASSWORD", "").strip()
+    if not (handle and password):
+        _session = {}
+        return None
+
+    body = json.dumps({"identifier": handle, "password": password}).encode()
+    request = urllib.request.Request(SESSION_URL, data=body, headers={
+        "Content-Type": "application/json", "User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            token = json.loads(response.read().decode())["accessJwt"]
+    except Exception as exc:
+        raise SourceUnavailable(f"could not sign in to Bluesky: {exc}") from exc
+
+    _session = {"Authorization": f"Bearer {token}"}
+    return _session
 
 USER_AGENT = "suresilly-carousel/3.0 (+https://instagram.com/suresilly)"
 TIMEOUT = 20
@@ -86,9 +129,10 @@ class SourceUnavailable(Exception):
     if that is empty, posts nothing."""
 
 
-def _get(url: str, params: dict, retries: int = 1) -> dict:
+def _get(url: str, params: dict, headers: dict | None = None, retries: int = 1) -> dict:
     query = urllib.parse.urlencode(params)
-    request = urllib.request.Request(f"{url}?{query}", headers={"User-Agent": USER_AGENT})
+    request = urllib.request.Request(
+        f"{url}?{query}", headers={"User-Agent": USER_AGENT, **(headers or {})})
     last: Exception | None = None
     for attempt in range(retries + 1):
         if attempt:
@@ -109,10 +153,15 @@ def search(phrase: str, limit: int = 25, lang: str = "en") -> list[dict]:
     reference we hash rather than store. Author handles, display names, avatars,
     counts and thread context are dropped here and never enter the pipeline.
     """
+    auth = _sign_in()
+    # Signed in, the account's own server answers and the public hosts are not
+    # needed. Anonymous, they are all there is.
+    hosts = (AUTHED_SEARCH_URL,) + SEARCH_HOSTS if auth else SEARCH_HOSTS
+
     trouble = []
-    for url in SEARCH_HOSTS:
+    for url in hosts:
         try:
-            payload = _get(url, {"q": phrase, "limit": limit, "lang": lang})
+            payload = _get(url, {"q": phrase, "limit": limit, "lang": lang}, auth)
             break
         except SourceUnavailable as exc:
             trouble.append(str(exc)[-90:])
