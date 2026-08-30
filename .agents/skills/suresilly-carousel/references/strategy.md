@@ -65,7 +65,7 @@ Cheap and exact first. Expensive and fuzzy last. Any layer stops the run. No lay
 |---|---|---|---|
 | 0 | Source list | Rules | Only read from allowed places. Crisis communities are never fetched, so their content never needs filtering. |
 | 1 | Banned subject filter | Rules | Nine word-pattern families that must never become a post. |
-| 2 | Shape filter | Rules | Is this a real moment a camera could film? Then rewrite it and discard the original. |
+| 2 | Shape filter, then composer | Rules, then a model | Is this a real moment a camera could film? Then use it as a SEED and invent our own. |
 | 3 | Shuffled queue | Rules | Deal the next moment. A dealt moment never returns. |
 | 4 | Safety judge | Gemini | May a public post be built on this moment at all? |
 | 5 | Writer | Gemini | Plan the argument, check the chain, then write nine slides. |
@@ -110,8 +110,32 @@ Llama Guard runs after the patterns, free on Groq, to catch meaning with no keyw
 | 8 to 30 words | A clinical label |
 | One clock time, body sensation, or place | More than one abstract word (burnout, healing, journey) |
 
-Score the anchors. Keep anything at 5 or above with at least one hard anchor. Then rewrite the
-moment and throw away the original.
+Score the anchors. Keep anything at 5 or above with at least one hard anchor. Rank on tension
+first, because the score measures whether a moment can be filmed and not whether it is about
+anything: "tired, 9pm, a car" scores 7 and the judge refuses it, "I read her message four times"
+scores 5 and the judge allows it.
+
+Then invent our own moment from it, and throw the post away.
+
+**The post is a seed, not a source.** This changed after the rewriting approach failed for a
+week. Rewriting somebody's sentence has to satisfy four demands at once — keep the evening, drop
+the words, drop the name, stay publishable — and they fight each other. The step that hid the
+name deleted the person with it, and what came out ("someone was locked out, I let them in") had
+nothing in it to write about. The judge refused it, correctly.
+
+So the post now supplies only the subject and the shape of the problem. We invent a different
+hour, a different room, a different sentence carrying the same ordinary trouble. Two consequences,
+both good:
+
+* Nothing of theirs is republished, because nothing of theirs is used. The privacy question stops
+  being a balancing act and becomes one mechanical check: no run of seven words survives.
+* The moment can be BUILT to fit. A harvested sentence either happened to contain a clock and a
+  feeling or it did not, and most did not — 7 of 8 candidates in the last live run were about
+  devices. An invented one is asked for both, so it clears the shape filter by construction.
+
+Reading their name is fine. The post is public and we are only looking at it. The rule is about
+what we WRITE: the published moment carries no name at all, whether copied or invented. That is
+one rule instead of two, and it is stronger than either.
 
 ### Layer 3 — Shuffled queue
 

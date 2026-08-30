@@ -342,8 +342,6 @@ def _retry_after(exc: urllib.error.HTTPError) -> tuple[int, str]:
     # tuning against the hint tunes against the wrong number.
     quota = _QUOTA_ID.search(body)
     name = quota.group(1) if quota else ""
-    if name:
-        print(f"    quota hit: {name}")
     match = _RETRY_HINT.search(body)
     if match:
         # A second of slack, so we are not racing the edge of the window.
@@ -409,6 +407,11 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
         except RateLimited as limited:
             if limited.daily:
                 _SPENT.add(f"{index}:{model}")
+                # Once per bucket, and worded so nobody reads it as the reason a
+                # run failed. It is not an error: the next model, and then the
+                # next vendor, carries on from here.
+                print(f"    note: {label} is out of free quota for today, "
+                      f"moving to the next model")
             trouble.append(f"{label} {limited}")
         except ModelRefused as refused:
             # Any refusal moves to the next bucket, not just a rate limit. One

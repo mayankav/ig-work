@@ -36,7 +36,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import abstracter  # noqa: E402
+import compose  # noqa: E402
 import critic  # noqa: E402
 import novelty  # noqa: E402
 import llm  # noqa: E402
@@ -44,6 +44,7 @@ import memory  # noqa: E402
 import pick_moment  # noqa: E402
 import render  # noqa: E402
 import safety  # noqa: E402
+import screen  # noqa: E402
 import writer  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -176,23 +177,29 @@ def draw() -> dict:
 
 # ─────────────────────────── steps 3 to 9 ────────────────────────────
 
-def abstract(candidate: dict) -> memory.Moment:
-    """Rewrite the moment so nobody's words are republished, then drop the original.
+def invent(candidate: dict) -> memory.Moment:
+    """Read the harvested post as a seed, then invent our own moment.
 
-    Load-bearing for more than tidiness: the observable fact is free to use, the
-    author's sentence is theirs, and this is the step that separates the two. The
-    original is not carried past this point and is never written to disk.
+    The post is never republished, quoted or rewritten. It supplies the subject
+    and the shape of the problem, and nothing else survives this step.
+
+    The anchors are recomputed from the invented moment, and that is not a
+    detail. They travel on to the writer as the only scene the deck may be set
+    in, and they used to be the SEED's anchors while the deck was built on a
+    different sentence entirely — the writer was told the scene was a bed and a
+    text when the moment said a phone and 11pm. Zero words in common.
     """
     try:
-        result = abstracter.rewrite(candidate["text"])
+        result = compose.invent(candidate["text"])
     except llm.ModelRefused as refused:
         raise Skip(str(refused))
+    shaped = screen.shape(result["moment"])
     return memory.Moment.make(
         text=result["moment"],
         source="bluesky",
         source_ref=candidate["ref"],
-        anchors=candidate.get("anchors", {}),
-        score=candidate.get("score", 0),
+        anchors=shaped["anchors"],
+        score=shaped["score"],
     )
 
 
@@ -380,10 +387,10 @@ def run(mode: str) -> int:
         refusals: list[str] = []
         for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
             try:
-                candidate_moment = abstract(candidate)
+                candidate_moment = invent(candidate)
             except Skip as why:
-                say(f"attempt {attempt}", f"rewrite refused: {str(why)[:70]}")
-                refusals.append("rewrite")
+                say(f"attempt {attempt}", f"could not compose a moment: {str(why)[:70]}")
+                refusals.append("compose")
                 continue
 
             allowed, why, judge_provider, topic = safety.judge(candidate_moment.text)
@@ -408,7 +415,7 @@ def run(mode: str) -> int:
             # at the rewrite is a firewall or a model problem; all five at the
             # judge is the harvest, or a judge that has gone strict.
             where = ", ".join(f"{refusals.count(k)} at the {k}"
-                              for k in ("rewrite", "judge") if refusals.count(k))
+                              for k in ("compose", "judge") if refusals.count(k))
             raise Stop(f"no moment survived {tried} attempts ({where})")
 
         print(f"\n  moment  {moment.text}\n")
@@ -480,6 +487,12 @@ def run(mode: str) -> int:
         print(f"\n  stopped: {reason}")
         print("  everything before this point ran. Nothing was posted and no moment was used.")
         return 0
+    except llm.ModelRefused as refused:
+        # A layer that could not get a usable answer out of any vendor. It is an
+        # ordinary no, the same as any other gate saying no, and it was reaching
+        # the top of the program as a stack trace that looked like a crash.
+        print(f"\n  stopped: {str(refused)[:400]}")
+        return 1
     except memory.ClaimHeld as reason:
         print(f"\n  stopped: {reason}")
         return 1
