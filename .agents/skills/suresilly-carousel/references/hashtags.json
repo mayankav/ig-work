@@ -1,0 +1,61 @@
+{
+  "_why": [
+    "Tags are chosen by code from this list, never written by a model.",
+    "",
+    "A deck went out tagged #transitionfreeze #psychology #habits #patterns. The",
+    "first is a name we coined an hour earlier and nobody has ever searched for.",
+    "#psychology is one of the largest tags on the platform and a page this size",
+    "will never surface in it. #habits and #patterns are words, not places people",
+    "look. Between them they reached nobody, which is the same problem the",
+    "citations had: a model asked to produce a label will produce something that",
+    "looks like one.",
+    "",
+    "So the same rule applies. The model decides nothing here. Code takes the",
+    "subject the composer chose and picks from the list below.",
+    "",
+    "Chosen for size as much as subject. A tag with tens of millions of posts is",
+    "a wall; a tag nobody uses is a room with no door. These are the ones people",
+    "in this niche actually browse and follow.",
+    "",
+    "Edit this file rather than the code. Lower case, no # and no spaces."
+  ],
+
+  "always": [
+    "relationshipadvice",
+    "emotionalintelligence",
+    "mentalhealthmatters"
+  ],
+
+  "anxiety": [
+    "anxietyrelief", "overthinking", "anxiousattachment", "intrusivethoughts",
+    "nervoussystemregulation", "anxietysupport"
+  ],
+  "burnout": [
+    "burnoutrecovery", "restisproductive", "workstress", "compassionfatigue",
+    "emotionalexhaustion"
+  ],
+  "sleep": [
+    "sleephygiene", "cantsleep", "nightanxiety", "insomniaproblems",
+    "revengebedtimeprocrastination"
+  ],
+  "executive_dysfunction": [
+    "executivedysfunction", "adhdadults", "taskparalysis", "adhdinwomen",
+    "neurodivergent", "adhdproblems"
+  ],
+  "self_worth": [
+    "selfworth", "selfcompassion", "innercritic", "impostersyndrome",
+    "selfesteemjourney"
+  ],
+  "boundaries": [
+    "healthyboundaries", "settingboundaries", "emotionalsafety",
+    "boundariesarehealthy", "relationshipboundaries"
+  ],
+  "people_pleasing": [
+    "peoplepleaser", "peoplepleasing", "fawnresponse", "codependencyrecovery",
+    "learningtosayno"
+  ],
+  "numbing": [
+    "doomscrolling", "emotionalavoidance", "screentimeproblems",
+    "numbingout", "avoidancecoping"
+  ]
+}

@@ -54,15 +54,11 @@ def run() -> int:
 
     # ── the caption tag ──
     markdown = ("## Caption\nSome caption text.\n\n---\n#insomnia #sleep #anxiety #suresilly\n")
-    tagged = runner.tag_caption(markdown, one.id)
-    expected = f"#ss{one.id[2:8]}"
-    if expected not in tagged:
-        failures.append("TAG the moment id never reached the caption")
-    if tagged.count("#insomnia") != 1:
-        failures.append("TAG the existing hashtags were disturbed")
-    # Nothing to tag is not a crash.
-    if runner.tag_caption("no hashtags here at all", one.id) != "no hashtags here at all":
-        failures.append("TAG a deck with no hashtag line was altered")
+    # The idempotency tag is gone. It printed "#ss4d84f6" on every published
+    # post — internal plumbing, publicly — and the only thing that would have
+    # read it back, check_ig_duplicate.py, was deleted a week before this.
+    if hasattr(runner, "tag_caption"):
+        failures.append("TAG the internal moment tag is back on public captions")
 
     # ── where files go ──
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -149,13 +145,13 @@ def run() -> int:
     if runner.anchor_words(empty) != set():
         failures.append("ANCHOR a moment with no anchors produced words")
 
-    total = 5 + 3 + 3 + 2 + 4 + 5
+    total = 3 + 3 + 3 + 2 + 4 + 5
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:
             print(f"  {line}")
         return 1
-    print(f"wiring: {total}/{total} passed (slugs, caption tag, file placement, "
+    print(f"wiring: {total}/{total} passed (slugs, file placement, "
           f"workflow output, anchors, what Instagram is handed)")
     return 0
 

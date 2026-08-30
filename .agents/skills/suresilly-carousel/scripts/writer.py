@@ -43,6 +43,7 @@ import safety  # noqa: E402
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CITATIONS_PATH = SKILL_DIR / "references" / "citations.json"
+HASHTAGS_PATH = SKILL_DIR / "references" / "hashtags.json"
 
 # ─────────────────────────── the angles ────────────────────────────
 #
@@ -352,6 +353,34 @@ SEESAW = re.compile(r"(?i)\b(it'?s|you'?re|you were|you weren'?t)\s+not\b.*\b(it
 
 def _words(text: str) -> list[str]:
     return re.findall(r"[A-Za-z0-9']+", re.sub(r"\[\[|\]\]", " ", text))
+
+
+def pick_hashtags(topic: str, seed: str) -> list[str]:
+    """The tags for one deck, chosen by code from a vetted list.
+
+    A model wrote these until now, and it produced #transitionfreeze — a name we
+    had coined an hour earlier, which nobody has ever searched for — alongside
+    #psychology, which a page this size will never surface in. The same failure
+    the citations had: asked for a label, a model makes something label-shaped.
+
+    Three from the subject and one broad, so a deck is findable by people
+    browsing its actual topic and not only by people browsing everything. The
+    choice is deterministic on the deck, so two decks on one subject do not
+    carry identical tags.
+    """
+    try:
+        bank = json.loads(HASHTAGS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    subject = bank.get(topic) or bank.get(topic.replace(" ", "_")) or []
+    broad = bank.get("always", [])
+    if not subject and not broad:
+        return []
+    roll = int(hashlib.sha256(seed.encode()).hexdigest(), 16)
+    chosen = [subject[(roll + i) % len(subject)] for i in range(min(3, len(subject)))]
+    if broad:
+        chosen.append(broad[roll % len(broad)])
+    return list(dict.fromkeys(chosen))
 
 
 def hook_faults(hook: dict, name: str = "") -> list[str]:
@@ -765,9 +794,10 @@ it used to be and nobody reads it twice.
   so there are exactly two asks in the whole deck: send on the slide, save in
   the caption.
 
-HASHTAGS. Three to five, lower case, no spaces, no # — it is added for you.
-Topical and plain: the subject, the pattern, the feeling. Not #love, not
-#explorepage, not the handle.
+You do not write hashtags. Code picks them from a vetted list, the same way it
+picks the citation, because a model asked for a label produces something
+label-shaped: a deck went out tagged #transitionfreeze, a name we had coined an
+hour earlier that nobody has ever searched for.
 
   Asking for a save moves saves by about 90 percent, and asking for a like
   slightly lowers likes, so ask for the save and never for the like. Slide 9
@@ -842,7 +872,7 @@ DRAFT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "required": ["cost", "explains", "name", "script", "action",
-                 "sustain", "cheat", "cta", "caption", "hashtags", "alt", "mascots"],
+                 "sustain", "cheat", "cta", "caption", "alt", "mascots"],
     "properties": {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 140},
@@ -913,16 +943,6 @@ DRAFT_SCHEMA = {
                                    "what it costs, then something the slides did not say, "
                                    "then one line letting the reader off, then ask them to "
                                    "save it. Never a summary of the slides."},
-        # Three to five, and the floor matters: at zero the model wrote two,
-        # they were formatted wrong, and every post went out bare.
-        #
-        # Instagram capped hashtags at five in December 2025 and Mosseri says
-        # they do not lift reach; one 24M-post study found posts carrying any
-        # hashtag saw fewer views, though that is confounded by the accounts
-        # still stuffing them. They are free, they are how a post is filed, and
-        # a page with none looks abandoned. Topical, at the cap, expect nothing.
-        "hashtags": {"type": "array", "minItems": 3, "maxItems": 5,
-                     "items": {"type": "string", "maxLength": 30}},
         "alt": {"type": "array", "minItems": 9, "maxItems": 9,
                 "items": {"type": "string", "maxLength": 260}},
         # Nine briefs, one per slide, each drawn from that slide's own beat so no
@@ -983,7 +1003,8 @@ LAYOUTS = {"hook": "Template A", "cost": "Template A", "source": "Template F",
 
 
 def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
-             mascots: list[str], title: str, pattern: str, pillar: str) -> str:
+             mascots: list[str], title: str, pattern: str, pillar: str,
+             tags: list[str] | None = None) -> str:
     """Build the markdown the renderer parses. Labels are fixed here, not asked for."""
     out = [
         f"# Carousel: {title}",
@@ -1069,7 +1090,7 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         # all, on every deck this engine has ever published. Two formats that
         # never agreed, in two files, and nothing compared them.
         "## Hashtags",
-        " ".join(f"#{tag.lstrip('#').replace(' ', '').lower()}" for tag in copy["hashtags"]),
+        " ".join(f"#{tag}" for tag in (tags or [])),
         "",
         "## Alt Text",
     ]
@@ -1349,7 +1370,8 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, schema,
                               temperature=0.6 if attempt == 0 else 0.4)
         markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
-                            title, pattern, pillar)
+                            title, pattern, pillar,
+                            pick_hashtags(topic, plan.get("pattern_name", "") + moment))
         problems = verify_draft(markdown, moment_anchors, plan.get("pattern_name", ""))
         if not problems:
             return markdown, plan, axes, wrote

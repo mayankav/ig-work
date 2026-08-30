@@ -293,6 +293,32 @@ def run() -> int:
                writer.validate_plan(two_names, MOMENT, "sleep")):
         failures.append("NAME slide 4 coining a second name was accepted")
 
+    # Tags are picked by code from a vetted list, the same as the citation. A
+    # deck went out tagged #transitionfreeze — a name we had coined an hour
+    # earlier that nobody has ever searched for — beside #psychology, which a
+    # page this size will never surface in.
+    tags = writer.pick_hashtags("people_pleasing", "some-deck")
+    if not 3 <= len(tags) <= 5:
+        failures.append(f"TAGS wrong number for a deck: {tags}")
+    if any("#" in t or " " in t or t != t.lower() for t in tags):
+        failures.append(f"TAGS malformed: {tags}")
+    if len(set(tags)) != len(tags):
+        failures.append(f"TAGS repeated: {tags}")
+    # Findable by people browsing the subject, not only by people browsing
+    # everything: most of them come from the subject's own list.
+    import json as _json
+    bank = _json.loads((pathlib.Path(__file__).resolve().parent.parent
+                        / "references" / "hashtags.json").read_text(encoding="utf-8"))
+    if sum(1 for t in tags if t in bank["people_pleasing"]) < 2:
+        failures.append(f"TAGS too few from the subject itself: {tags}")
+    # Two decks on one subject must not carry identical tags.
+    if len({tuple(writer.pick_hashtags("sleep", f"d{i}")) for i in range(12)}) < 4:
+        failures.append("TAGS every deck on a subject gets the same tags")
+    # A subject with no list is silence, not a crash.
+    if writer.pick_hashtags("not_a_subject_we_have", "x") != [bank["always"][0]] and \
+            len(writer.pick_hashtags("not_a_subject_we_have", "x")) > 1:
+        failures.append("TAGS an unknown subject produced subject tags")
+
     # ── mascots ──
     for briefs, why in [
         (["a donkey looking at a clock that reads 2:17am"] + ["a donkey sitting"] * 8, "text in the artwork"),
@@ -363,7 +389,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 14 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 19 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

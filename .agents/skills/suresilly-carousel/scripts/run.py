@@ -381,24 +381,6 @@ def emit_slug(slug: str, path: Path) -> None:
             handle.write(f"deck={path.relative_to(REPO_ROOT)}\n")
 
 
-def tag_caption(markdown: str, moment_id: str) -> str:
-    """Hide the moment id in the caption as a short tag.
-
-    It is the idempotency key at the sink: after a run dies between posting and
-    recording, the next one can ask Instagram whether this moment already went
-    out instead of guessing.
-    """
-    tag = f"#ss{moment_id[2:8]}"
-    lines = markdown.splitlines()
-    for i, line in enumerate(lines):
-        if line.startswith("#") and " #" in line:
-            lines[i] = f"{line} {tag}"
-            return "\n".join(lines)
-    return markdown
-
-
-# ─────────────────────────── the run ────────────────────────────
-
 def run(mode: str) -> int:
     run_id = os.environ.get("GITHUB_RUN_ID") or f"local-{int(time.time())}"
     print(f"\nrun {run_id}  mode {mode}\n")
@@ -512,7 +494,6 @@ def run(mode: str) -> int:
 
         when = time.strftime("%Y%m%d", time.gmtime())
         slug = deck_slug(moment, plan["scene_token"], when)
-        markdown = tag_caption(markdown, moment.id)
         path = write_deck(markdown, slug, preview=False)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
