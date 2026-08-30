@@ -328,5 +328,16 @@
     "knees_hugged",
     "curled_up",
     "point_left_m"
+  ],
+  "20260830_bed-sat-on_4d84f6": [
+    "face_down",
+    "floor_slumped",
+    "standing_tall",
+    "lantern_bearer",
+    "beckoning",
+    "holding_up",
+    "walking",
+    "holding_board",
+    "sitting"
   ]
 }
