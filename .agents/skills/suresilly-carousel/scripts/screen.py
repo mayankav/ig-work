@@ -205,7 +205,8 @@ ANCHORS = {
 FEELING = re.compile(
     r"\b(tired|exhausted|drained|guilty|ashamed|embarrassed|awkward|dread|"
     r"dreading|worried|scared|afraid|angry|furious|lonely|numb|restless|tense|"
-    r"panicking|nervous|cried|crying|upset|hurt|resent|regret|avoided|avoiding|"
+    r"panicking|panicked|nervous|anxious|overwhelmed|frazzled|wired|jittery|"
+    r"cried|crying|upset|hurt|resent|regret|avoided|avoiding|"
     r"ignored|ignoring|pretended|forced|couldn'?t stop|kept thinking|"
     r"overthinking|second guess|beat myself|hate myself|felt like)\b")
 

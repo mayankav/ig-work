@@ -121,6 +121,20 @@ QUERIES = (
     "apologised before",
     "put my phone face down",
     "opened the fridge",
+    # These carry a feeling as well as a behaviour, and that turned out to be
+    # the thing that mattered. The fourteen above search for actions and find
+    # people describing actions: of 344 posts fetched by them, seventeen
+    # contained any feeling word and none of those survived the shape filter.
+    # The safety judge then refused every candidate for having nothing felt in
+    # it, which is what killed several runs.
+    #
+    # Each of these was measured with probe_phrases.py and each returned at
+    # least one moment with a felt state in it. Yield is low, roughly one per
+    # fifty posts, which is why there are several rather than one.
+    "cried in the car",
+    "too tired to",
+    "dreading tomorrow",
+    "so tired i",
 )
 
 

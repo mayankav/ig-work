@@ -62,19 +62,28 @@ def probe(phrase: str, sample: int = SAMPLE) -> dict:
         return {"phrase": phrase, "error": str(exc)[:60], "found": 0, "kept": 0,
                 "rate": 0.0, "examples": []}
 
-    kept = []
+    kept, with_feeling = [], []
     for item in results:
         verdict = screen.screen(item["text"], phrase)
-        if verdict["ok"]:
-            kept.append(verdict["text"])
+        if not verdict["ok"]:
+            continue
+        kept.append(verdict["text"])
+        # The number that actually matters. A moment can pass every shape check
+        # and still be refused by the safety judge for having no feeling in it,
+        # and that is what happened to eight candidates in a row. Counting only
+        # what survives the shape filter measures the wrong thing.
+        if (screen.FEELING.search(screen.normalise(verdict["text"]))
+                or "body" in verdict["anchors"]):
+            with_feeling.append(verdict["text"])
 
     return {
         "phrase": phrase,
         "error": None,
         "found": len(results),
         "kept": len(kept),
+        "felt": len(with_feeling),
         "rate": len(kept) / len(results) if results else 0.0,
-        "examples": kept[:2],
+        "examples": (with_feeling or kept)[:2],
     }
 
 
@@ -89,8 +98,8 @@ def main() -> None:
     if not phrases:
         ap.error("give some phrases, or --current")
 
-    print(f"{'phrase':34} {'found':>6} {'kept':>5} {'rate':>7}")
-    print("-" * 56)
+    print(f"{'phrase':30} {'found':>6} {'kept':>5} {'felt':>5} {'rate':>7}")
+    print("-" * 58)
     results = []
     for index, phrase in enumerate(phrases):
         if index:
@@ -98,14 +107,15 @@ def main() -> None:
         result = probe(phrase, args.sample)
         results.append(result)
         if result["error"]:
-            print(f"{phrase[:34]:34} {'':>6} {'':>5} {result['error']}")
+            print(f"{phrase[:30]:30} {'':>6} {'':>5} {'':>5} {result['error'][:30]}")
         else:
             mark = " " if result["rate"] >= KEEP_THRESHOLD else "x"
-            print(f"{phrase[:34]:34} {result['found']:>6} {result['kept']:>5} "
-                  f"{result['rate']:>6.0%} {mark}")
+            print(f"{phrase[:30]:30} {result['found']:>6} {result['kept']:>5} "
+                  f"{result['felt']:>5} {result['rate']:>6.0%} {mark}")
 
-    good = [r for r in results if r["rate"] >= KEEP_THRESHOLD]
-    print(f"\n{len(good)} of {len(results)} phrases clear {KEEP_THRESHOLD:.0%}")
+    # Ranked on moments with feeling, not on moments that merely pass.
+    good = [r for r in results if r["felt"] > 0]
+    print(f"\n{len(good)} of {len(results)} phrases found a moment with feeling in it")
     for result in good[:6]:
         if result["examples"]:
             print(f"\n  {result['phrase']!r}")
