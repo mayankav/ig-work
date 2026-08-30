@@ -1064,6 +1064,83 @@ def check_repeats(markdown: str) -> list[str]:
     return problems
 
 
+# Words a dictionary will not know and we use on purpose: the handle, British
+# spellings, and the vocabulary of this particular subject. Grown by running the
+# check against decks we already accept, never by relaxing it.
+KNOWN_WORDS = {
+    "suresilly", "silly",
+    # British spellings. A US dictionary calls each of these a mistake.
+    "pyjamas", "neighbour", "neighbours", "colour", "colours", "realise",
+    "realised", "apologise", "apologised", "organise", "organised",
+    "recognise", "recognised", "practising", "travelling", "cancelled",
+    "favourite", "behaviour", "behaviours", "labelled", "modelling",
+    # The subject.
+    "overthinking", "overthink", "rehearsing", "reframe", "reframing",
+    "self", "worth", "bandwidth", "doomscroll", "doomscrolling", "hypervigilance",
+    "dysregulation", "co", "regulate", "regulating", "unspoken", "unfinished",
+    "unanswered", "unread", "unsent", "unmade", "unopened", "outsized",
+}
+WORD = re.compile(r"[A-Za-z][A-Za-z']{2,}")
+
+
+def check_spelling(markdown: str) -> list[str]:
+    """Words that are not words.
+
+    A deck that scored 82 and would have posted carried "you decid to open it"
+    and "pick your line befor the neighbor knocks". Two letters missing, on a
+    public account, and nothing in thirty-odd gates was looking.
+
+    Deliberately quiet about anything it is unsure of. The dictionary does not
+    know "pyjamas" either, and a speller that blocks a deck for British English
+    is worse than no speller. It reports a word only when the dictionary has a
+    correction one edit away, which is what a typo is.
+    """
+    try:
+        from spellchecker import SpellChecker
+    except ImportError:
+        return []                       # not installed here, and not worth failing over
+
+    text = "\n".join(re.findall(r"(?m)^- \*\*[^:]+:\*\* (.+)$", markdown))
+    text += "\n" + "\n".join(re.findall(r"(?m)^\s+[•·]\s+(.+)$", markdown))
+    text = re.sub(r"\[\[|\]\]|\[|\]", " ", text)
+
+    # The citation line is written by code, from a verified allowlist. Every
+    # word in it — Porges, Nolen-Hoeksema, the book title — is correct by
+    # construction, and a dictionary calls each one a mistake.
+    source = " ".join(re.findall(r"(?m)^- \*\*Source(?: Claim)?:\*\* (.+)$", markdown))
+    from_source = {w.lower() for w in WORD.findall(source)}
+
+    speller = SpellChecker()
+    seen, problems = set(), []
+    for word in WORD.findall(text):
+        low = word.lower().strip("'")
+        if low in KNOWN_WORDS or low in from_source or low in seen \
+                or not speller.unknown([low]):
+            continue
+        seen.add(low)
+        fix = speller.correction(low)
+        # One edit away means somebody dropped a letter. Further than that and
+        # it is a word this dictionary has not heard of, which is not our
+        # problem to solve at eight in the evening.
+        if fix and fix != low and _edits(low, fix) == 1:
+            problems.append(f"{word!r} is not a word. Did you mean {fix!r}?")
+    return problems
+
+
+def _edits(a: str, b: str) -> int:
+    """Levenshtein distance, capped where it stops mattering."""
+    if abs(len(a) - len(b)) > 2:
+        return 3
+    previous = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        current = [i]
+        for j, cb in enumerate(b, 1):
+            current.append(min(previous[j] + 1, current[j - 1] + 1,
+                               previous[j - 1] + (ca != cb)))
+        previous = current
+    return previous[-1]
+
+
 def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
                  pattern_name: str = "") -> list[str]:
     """Every complaint about an assembled deck, from every gate that applies.
@@ -1080,6 +1157,7 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
 
     problems = check_accents(markdown)
     problems += check_repeats(markdown)
+    problems += check_spelling(markdown)
     explains = re.search(r"(?m)^- \*\*What This Explains Here:\*\* (.+)$", markdown)
     if explains and pattern_name and pattern_name.lower() not in explains.group(1).lower():
         problems.append(f"slide 3's last line does not mention {pattern_name!r}. Its whole "

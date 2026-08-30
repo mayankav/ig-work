@@ -96,8 +96,40 @@ PAPER_WORDS = ("appeas", "residue", "rehearsal", "standby", "circuit", "salience
 CLAIM_WORD_CAP = 18
 
 
+TYPOS = """### Slide 5 · Value Step 2
+- **\u274c Old Reaction:** "You hear the sound and you [[decid]] to open it immediately."
+- **\u2705 Regulated Response:** "I will keep the [[peac]] until morning."
+### Slide 8 · Cheat Sheet
+- **Body:** Pick your line [[befor]] the neighbour knocks.
+"""
+
+CLEAN = """### Slide 3 \u00b7 Source Anchor
+- **Source:** \u2014 Stephen Porges, *The Polyvagal Theory* (2011)
+- **Source Claim:** Porges found the body decides a room is safe before you have thought.
+### Slide 5 · Value Step 2
+- **\u2705 Regulated Response:** "I am in my pyjamas and I am not answering tonight."
+"""
+
+
 def run() -> int:
     failures = []
+
+    # A deck that scored 82 and would have posted carried "you decid to open
+    # it", "keep the peac" and "your line befor the neighbour knocks". Two
+    # letters missing each, on a public account, and nothing in thirty-odd gates
+    # was looking at spelling at all.
+    found = writer.check_spelling(TYPOS)
+    for typo in ("decid", "peac", "befor"):
+        if not any(typo in f for f in found):
+            failures.append(f"SPELL {typo!r} was not caught: {found}")
+
+    # And it has to stay quiet about the things that are not mistakes. A speller
+    # that blocks a deck for British English, or for the surname of the
+    # researcher the citation names, is worse than no speller — the citation
+    # line is written by code from a verified allowlist and is correct by
+    # construction.
+    for note in writer.check_spelling(CLEAN):
+        failures.append(f"SPELL a correct deck was flagged: {note}")
 
     # Both loops must be able to REACH their own failure. plan_deck raised a
     # NameError on the line that reports a refusal, because a variable was
@@ -307,7 +339,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 6 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 10 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:
