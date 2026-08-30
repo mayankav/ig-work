@@ -75,6 +75,39 @@ hid the name deleted the person with it.
 
 ---
 
+## When a deck is held
+
+The reviewer scores every deck out of 100. Above the bar it posts on its own.
+Below it, the deck is finished — written, checked and rendered — and it waits
+for you. It arrives in Telegram with its score, the reviewer's notes and the
+contact sheet.
+
+Answer it either way. In the chat:
+
+```
+publish 79262b     post it as it is
+rerun 79262b       throw it away, tonight's run builds another
+list               what is waiting
+```
+
+The last six characters are enough. Or open the **Decide on a held deck**
+workflow in Actions and use the dropdown. Both call the same script, because two
+code paths that post to Instagram is how you end up with two different ideas of
+what has already gone out.
+
+Only the chat id in `TELEGRAM_CHAT_ID` is obeyed. Anybody can message a bot;
+every other message is ignored before its text is read. And the words are
+deliberately narrow — `ok`, `yes` and `sure` are not commands, because they turn
+up in an ordinary chat by accident and one of them would post to Instagram.
+
+**Harm never reaches you.** Advice that could hurt somebody, a fabricated
+statistic, a real person named: those stop the deck outright with no approval
+path. Not because your judgement is in doubt, but because that decision would
+arrive on a phone as one line among many with approve one tap away. Everything
+else — thin, preachy, flat, off-voice — is a number, and the number is yours.
+
+---
+
 ## What you need
 
 Everything here runs through plain Python command-line scripts, so the repo

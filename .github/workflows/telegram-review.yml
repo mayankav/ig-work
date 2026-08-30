@@ -1,0 +1,57 @@
+name: Read Telegram replies
+
+# The other half of the held-deck loop. A deck scored below the bar is sent to
+# Telegram; this reads the reply and does what it says.
+#
+# Every twenty minutes rather than every five. A held deck waits for a person,
+# and a person is not watching the chat — twenty minutes is invisible to them
+# and costs about a third of the Actions minutes of a five minute poll.
+#
+# The offset cursor is committed. Telegram never resends an acknowledged update,
+# so a schedule that forgets its place either replays a command or loses one.
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  # Never two readers at once. Both would fetch the same batch before either
+  # committed the cursor, and the same reply would be acted on twice.
+  group: telegram-review
+  cancel-in-progress: false
+
+jobs:
+  read:
+    if: vars.SS_HALT != '1'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Read the replies
+        run: python .agents/skills/suresilly-carousel/scripts/telegram_review.py
+
+      - name: Remember where we got to
+        run: |
+          git config user.name  "suresilly-bot"
+          git config user.email "bot@suresilly.local"
+          git add state/
+          git diff --staged --quiet && echo "nothing changed" && exit 0
+          git commit -m "telegram: replies read [skip ci]"
+          # Somebody else may have pushed while this ran. Rebase and try again
+          # rather than failing: losing the cursor means replaying a command.
+          for attempt in 1 2 3; do
+            git pull --rebase --quiet && git push --quiet && exit 0
+            sleep 5
+          done
+          echo "::warning::could not push the cursor, a reply may be read twice"
