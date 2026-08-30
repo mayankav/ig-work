@@ -61,6 +61,11 @@ DECORATIVE = {
     "kit", "card", "sheet", "reset", "now", "this", "next", "you", "yours",
     "here", "stop", "one", "two", "three", "again", "yet", "good", "enough",
     "later", "tonight", "today", "start", "first", "last", "back", "out",
+    # Words that name the artefact rather than an idea it carries. A card
+    # headed "your [[cheat]] sheet" is not teaching anybody a concept called
+    # cheat, and asking the model not to accent them never worked.
+    "cheat", "script", "list", "summary", "recap", "steps", "step", "plan",
+    "menu", "checklist", "notes", "note", "guide",
 }
 
 

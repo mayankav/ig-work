@@ -37,6 +37,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import coherence  # noqa: E402
 import llm  # noqa: E402
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
@@ -170,8 +171,14 @@ under two minutes, while anxious, with no app and no googling.
   though the shape is right.
 
 RULES
-  The scene token is one concrete word or number from the moment. Write it
-  literally into the beat for slide 1. Not a synonym, the same word.
+  The scene token MUST be one of the words listed under THE THINGS IN THIS
+  MOMENT below. Not a synonym, not a word from the same family, one of those
+  exact words. Write it literally into the beat for slide 1 and into the hook.
+
+  That list is not a suggestion. Slide 1 is checked for a thing a camera could
+  point at, and it recognises those words and no others. A hook built on
+  "doorway" when the list says "door" is refused, and so is a hook built on a
+  feeling.
   HOOKS. Give at least 4. Each is used on slide 1 exactly as written, so every
   rule here is checked and a hook that breaks one is thrown away.
     h1  at most 12 words. Exactly one [[accent]], wrapping the last stressed
@@ -182,8 +189,14 @@ RULES
     name a condition. "You will stop losing your keys tonight" is an
     advertisement. "You looked for it for [[thirty]] minutes" is a hook.
     e.g. the shape only:  You did [the thing] at [[the hour]].
+    No diagnosis word anywhere in a hook: nervous system, attachment,
+    regulation, cortisol, polyvagal, somatic, trauma response, fawn response,
+    hypervigilance, neuroception. Slide 1 is read by people who never asked
+    for a diagnosis.
   exports is what a slide hands on. depends_on is which earlier slides it needs.
-  Slide 8 exports nothing new: everything on it already exists in slides 5 to 7.
+  Slide 8 exports nothing new: everything on it already exists in slides 1 to 7.
+  Never export a word that names the card itself. "cheat", "sheet", "card",
+  "list" and "summary" describe the slide, they are not ideas it carries.
   Never name an author, a book or a year. Return the citation id you were given.
   Never write a diagnosis. Never tell the reader they have a condition.
   Do not use an em dash anywhere. Do not use the shape "it is not X, it is Y".
@@ -199,6 +212,9 @@ SUBJECT
 {topic}
 
 HOW THIS DECK IS BUILT, decided already, not yours to change:
+THE THINGS IN THIS MOMENT, and the only words that count as one:
+  {things}
+
   hook angle        {angle}
   explain through   {lens}
   advice leads with {protocol}
@@ -281,6 +297,37 @@ def _words(text: str) -> list[str]:
     return re.findall(r"[A-Za-z0-9']+", re.sub(r"\[\[|\]\]", " ", text))
 
 
+def hook_faults(hook: dict) -> list[str]:
+    """Why this hook cannot be used. Empty means it can.
+
+    Named rather than counted, because "not one hook is usable" told a repair
+    nothing and it produced four fresh hooks that broke the same rule.
+    """
+    h1, h2 = hook["h1"], hook["h2"]
+    faults = []
+    if BANNED_OPENERS.match(h1.strip()):
+        faults.append("opens with a banned word")
+    if len(_words(h1)) > 12:
+        faults.append(f"h1 is {len(_words(h1))} words, cap 12")
+    if len(_words(h2)) > 7:
+        faults.append(f"h2 is {len(_words(h2))} words, cap 7")
+    # assemble() writes the hook onto slide 1 unchanged, so an unaccented hook
+    # is a slide that renders flat and fails the accent gate every time.
+    accents = len(re.findall(r"\[\[.+?\]\]", h1))
+    if accents != 1:
+        faults.append(f"h1 has {accents} accents, needs exactly one")
+    if "[[" in h2:
+        faults.append("h2 has an accent and must have none")
+    jargon = [t for t in EARLY_JARGON if t in h1.lower() or t in h2.lower()]
+    if jargon:
+        faults.append(f"diagnosis word in the hook: {', '.join(jargon)}")
+    if "—" in h1 or "—" in h2:
+        faults.append("em dash")
+    if SEESAW.search(h1):
+        faults.append('the "not X, it is Y" shape')
+    return faults
+
+
 def hook_ok(hook: dict) -> bool:
     """One definition of a usable hook, used by the validator and the chooser.
 
@@ -288,22 +335,7 @@ def hook_ok(hook: dict) -> bool:
     was then passed over for one that broke the subtitle limit. One function now,
     two callers.
     """
-    h1, h2 = hook["h1"], hook["h2"]
-    if BANNED_OPENERS.match(h1.strip()):
-        return False
-    if len(_words(h1)) > 12 or len(_words(h2)) > 7:
-        return False
-    # assemble() writes the hook onto slide 1 unchanged, so an unaccented hook
-    # is a slide that renders flat and fails the accent gate every time.
-    if len(re.findall(r"\[\[.+?\]\]", h1)) != 1:
-        return False
-    if "[[" in h2:
-        return False
-    if any(term in h1.lower() or term in h2.lower() for term in EARLY_JARGON):
-        return False
-    if "—" in h1 or "—" in h2 or SEESAW.search(h1):
-        return False
-    return True
+    return not hook_faults(hook)
 
 
 def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
@@ -330,8 +362,12 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
         problems.append(f"{plan['citation_id']} does not cover {topic}")
 
     token = plan["scene_token"].lower().strip()
+    allowed = coherence.anchors_in(moment)
     if not token:
         problems.append("no scene token")
+    elif allowed and token not in allowed:
+        problems.append(f"the scene token {token!r} is not one of the things in this "
+                        f"moment: {', '.join(sorted(allowed))}")
     elif token not in beats[0]["beat"].lower():
         problems.append("the scene token is missing from slide 1")
     # The cheat sheet must carry the moment too, but a beat is a description of a
@@ -385,7 +421,9 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
             problems.append(f"diagnosis word before slide 3: {term}")
 
     if not any(hook_ok(h) for h in plan["hooks"]):
-        problems.append("not one hook is usable")
+        why = "; ".join(f"hook {i}: {', '.join(hook_faults(h))}"
+                        for i, h in enumerate(plan["hooks"], 1))
+        problems.append(f"not one hook is usable — {why}")
 
     for beat in beats:
         if "—" in beat["beat"]:
@@ -428,8 +466,15 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
         f"  id={c['id']}  claims: [0] {c['claims'][0]}  [1] {c['claims'][1]}"
         for c in options
     )
+    # The words the coherence gate will actually recognise, taken from the gate
+    # itself rather than guessed. The plan used to invent a scene token from the
+    # moment's wording — "doorway" for a moment about a door — and slide 1 was
+    # then refused for naming nothing filmable, by a check reading a different
+    # vocabulary. One list, taken from the checker, given to the writer.
+    things = sorted(coherence.anchors_in(moment))
     user = PLAN_USER.format(
         moment=moment, topic=topic.replace("_", " "),
+        things=", ".join(things) if things else "(nothing recognised)",
         angle=AXES["angle"][axes["angle"]],
         lens=AXES["lens"][axes["lens"]],
         protocol=AXES["protocol"][axes["protocol"]],
@@ -440,7 +485,7 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
 
     trouble: list[str] = []
     attempt_user = user
-    for attempt in range(2):
+    for attempt in range(3):
         plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, PLAN_SCHEMA,
                                  temperature=1.0 if attempt == 0 else 0.7)
         problems = validate_plan(plan, moment, topic)
@@ -519,8 +564,45 @@ THE CTA, slide 9. This exact shape, and nothing longer than 11 words:
   It must contain the word "send" or "share", and name who. Not "share if you
   relate", not "tag someone". A named kind of person.
 
+SLIDES 1 AND 2 EACH NAME A THING. Not a feeling, not a pattern — a thing in the
+room, or the hour on the clock. The moment hands you a door, a coat, a kettle,
+11pm: put one of them on slide 1 and one on slide 2.
+
+  Slide 1 without a thing is a caption, and it is checked.
+  Slide 2 is served on its own to people who never saw slide 1, so it has to
+  set its own scene rather than refer back to one.
+
+  Weak, and refused:  "You said yes when you meant no."
+  Right:              "You said it at the [[door]], still in your coat."
+
+THE PROTOCOL GOES ON THE SLIDES. The plan hands you an "intention" line and an
+"if_then" line, already written. One of slides 4 to 7 must carry the intention
+almost word for word, keeping its time and its place, and another must carry the
+if-then. A reader has to be able to do the thing tomorrow without looking
+anything up, and code checks that one of those two shapes survived:
+
+    I will [do the thing] at [time] in [place]
+    If [the trigger], then [the response]
+
+Reword them only enough to fit the slide. Do not summarise them away.
+
+THE THREAD, slides 4 to 7. This is the rule drafts fail most often, and it is
+never obvious from a single slide.
+
+  Slide 3 names the mechanism, in wording that is fixed and given to you. Every
+  advice slide after it has to pick that thread up and use at least one of its
+  words again. If slide 3 says "checking the time turns a waking into a maths
+  problem", then slides 4 to 7 talk about the time, the waking, or the maths.
+
+  Advice that never touches slide 3 is advice for a different deck. It reads
+  fine on its own, which is exactly why nobody notices, and it is checked.
+
 THE CHEAT SHEET, slide 8, must name the scene token from the plan. The reader
 saves this slide on its own, so it has to say what moment it is for.
+
+  Every [[accented]] word on slide 8 must already appear somewhere in slides 1
+  to 7. The card is a recap, so an accent on it is a reminder and never a new
+  idea. Do not accent the word "cheat", or any word describing the card itself.
 
 INVENT NOTHING. Every object, room and time you write must come from the
 moment or the plan. If the moment says a laptop and a remote, do not write
@@ -846,9 +928,17 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         if not problems:
             return markdown, plan, axes, wrote
         trouble.extend(problems)
+        # The draft itself goes back with the complaints. It said "your previous
+        # draft was rejected" and then did not include the draft, so the model
+        # wrote a fresh deck every attempt and arrived with a fresh set of
+        # faults. Three attempts fixed nothing and looked like bad luck.
         attempt_user = user + (
-            "\n\nYour previous draft was rejected for these exact reasons. Fix every one "
-            "and change nothing else:\n  " + "\n  ".join(list(dict.fromkeys(problems))[:12])
+            "\n\nYOUR PREVIOUS DRAFT, which was rejected:\n"
+            + json.dumps(copy, indent=2)
+            + "\n\nIt was rejected for these exact reasons:\n  "
+            + "\n  ".join(list(dict.fromkeys(problems))[:12])
+            + "\n\nReturn that same draft with these faults fixed. Change nothing else. "
+              "Every other line stays word for word as it is above."
         )
     raise llm.ModelRefused("; ".join(dict.fromkeys(trouble))[:400])
 

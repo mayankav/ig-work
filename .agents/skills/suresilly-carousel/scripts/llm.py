@@ -556,6 +556,23 @@ def call_cloudflare(system: str, user: str, temperature: float,
 PROVIDERS = (("gemini", call_gemini), ("groq", call_groq), ("cloudflare", call_cloudflare))
 
 
+def configured(name: str) -> bool:
+    """Does this vendor have credentials here?
+
+    Asked before a call, not discovered during one. The critic chooses a vendor
+    that did not write the deck, and it was choosing from vendors that were
+    merely named rather than reachable, so it reported "no usable review" when
+    the honest answer was "that vendor has no key on this machine".
+    """
+    if name == "gemini":
+        return bool(resolve_keys("GEMINI_API_KEY") or resolve_keys("GOOGLE_API_KEY"))
+    if name == "groq":
+        return bool(resolve_key("GROQ_API_KEY"))
+    if name == "cloudflare":
+        return bool(resolve_key("CLOUDFLARE_ACCOUNT_ID") and resolve_key("CLOUDFLARE_API_TOKEN"))
+    return False
+
+
 def chain(providers=PROVIDERS):
     """The vendors to try, in order, honouring SS_PROVIDERS.
 

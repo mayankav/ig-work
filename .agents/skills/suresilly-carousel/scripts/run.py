@@ -177,7 +177,7 @@ def draw() -> dict:
 
 # ─────────────────────────── steps 3 to 9 ────────────────────────────
 
-def invent(candidate: dict) -> memory.Moment:
+def invent(candidate: dict) -> tuple[memory.Moment, str]:
     """Read the harvested post as a seed, then invent our own moment.
 
     The post is never republished, quoted or rewritten. It supplies the subject
@@ -191,16 +191,29 @@ def invent(candidate: dict) -> memory.Moment:
     """
     try:
         result = compose.invent(candidate["text"])
+    except critic.NoReview as why:
+        # No critic could be reached. Not the same as a deck being refused, and
+        # it was reaching the top of the program as a stack trace: in CI, one
+        # expired Groq key would have looked like the pipeline crashing.
+        print(f"\n  stopped: {why}")
+        print("  the deck was written but never reviewed, so it was not posted.")
+        return 1
     except llm.ModelRefused as refused:
         raise Skip(str(refused))
     shaped = screen.shape(result["moment"])
-    return memory.Moment.make(
+    moment = memory.Moment.make(
         text=result["moment"],
         source="bluesky",
         source_ref=candidate["ref"],
         anchors=shaped["anchors"],
         score=shaped["score"],
     )
+    # The subject comes back with the moment. The composer chose it out of a
+    # closed list while inventing, which makes it a better answer than asking
+    # the judge to work it out afterwards from the finished sentence — and the
+    # judge sometimes left the field empty, which stopped runs on moments it had
+    # just allowed.
+    return moment, result["subject"]
 
 
 def check_critic_canary(index: int, written_by: str) -> None:
@@ -387,26 +400,29 @@ def run(mode: str) -> int:
         refusals: list[str] = []
         for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
             try:
-                candidate_moment = invent(candidate)
+                candidate_moment, candidate_topic = invent(candidate)
             except Skip as why:
                 say(f"attempt {attempt}", f"could not compose a moment: {str(why)[:70]}")
                 refusals.append("compose")
                 continue
 
-            allowed, why, judge_provider, topic = safety.judge(candidate_moment.text)
+            # The judge answers one question: may this be published. The subject
+            # is already decided, so its own guess at one is not read.
+            allowed, why, judge_provider, _ = safety.judge(candidate_moment.text)
             if not allowed:
                 # The rewritten text is printed because the refusal is about it
                 # and not about the moment shown at the top of the run. Reading
                 # five refusals without seeing what was judged is guesswork, and
                 # it cost several evenings.
-                say(f"attempt {attempt}", f"judge refused ({judge_provider}, topic {topic})")
+                say(f"attempt {attempt}", f"judge refused ({judge_provider}, "
+                                          f"subject {candidate_topic})")
                 print(f"      judged: {candidate_moment.text[:104]}")
                 print(f"      reason: {str(why)[:104]}")
                 refusals.append("judge")
                 continue
 
-            moment, reason = candidate_moment, why
-            say("rewritten", f"on attempt {attempt}, original discarded")
+            moment, reason, topic = candidate_moment, why, candidate_topic
+            say("composed", f"on attempt {attempt}, the seed discarded")
             break
 
         if moment is None:
@@ -487,6 +503,13 @@ def run(mode: str) -> int:
         print(f"\n  stopped: {reason}")
         print("  everything before this point ran. Nothing was posted and no moment was used.")
         return 0
+    except critic.NoReview as why:
+        # No critic could be reached. Not the same as a deck being refused, and
+        # it was reaching the top of the program as a stack trace: in CI, one
+        # expired Groq key would have looked like the pipeline crashing.
+        print(f"\n  stopped: {why}")
+        print("  the deck was written but never reviewed, so it was not posted.")
+        return 1
     except llm.ModelRefused as refused:
         # A layer that could not get a usable answer out of any vendor. It is an
         # ordinary no, the same as any other gate saying no, and it was reaching

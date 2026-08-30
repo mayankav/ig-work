@@ -54,7 +54,15 @@ MUST_REJECT = [
 MUST_ACCEPT = [
     # A different hour and a different room from the seed. That is the job.
     "At 1:20am I gave up, sat on the kitchen floor, and felt too tired to cry.",
-    "I lay there until 4am with a thumping chest, dreading the alarm at seven.",
+    "I lay in bed until 4am with a thumping chest, dreading the alarm at seven.",
+]
+
+# A clock and a feeling, but nothing in the room. It clears the shape filter on
+# its hour alone, and then nine slides have nothing to be about — the writer
+# fills the vacuum with therapy jargon and the critic refuses it, two expensive
+# calls later. A composed moment can be asked for a thing in shot, so it is.
+MUST_REJECT_EMPTY = [
+    "At 11pm I answered my manager because I felt guilty about it all evening.",
 ]
 
 # One rule, about the output. It does not matter whether a name was copied from
@@ -81,11 +89,11 @@ PEOPLED_SEED = ("so tired. she messaged at 11pm saying she was locked out again 
                 "so I let her in and went to bed")
 
 MUST_REJECT_PERSON = [
-    "Tired at 11pm, I read a note about someone shut out again, let them inside, then slept.",
+    "Tired at 11pm, I let someone in at the front door, then went back to bed and slept.",
 ]
 MUST_ACCEPT_PERSON = [
-    "Tired at 11pm, I read a note about her being shut out again, let her inside, then slept.",
-    "Tired at 11pm, my sister was shut out again, I let her inside, then went to sleep.",
+    "Tired at 11pm, I let her in at the front door, then went back to bed and slept.",
+    "Tired at 11pm, my sister was shut out again, I let her in and went back to bed.",
 ]
 
 
@@ -111,6 +119,10 @@ def run() -> int:
         problems = compose.verify(SEED, moment)
         if problems:
             failures.append(f"REFUSED a good moment: {problems} | {moment[:58]}")
+
+    for moment in MUST_REJECT_EMPTY:
+        if not any("nothing in the room" in p for p in compose.verify(SEED, moment)):
+            failures.append(f"EMPTY a moment with nothing in shot was accepted: {moment[:56]}")
 
     for moment in MUST_REJECT_NAMED:
         if not any("names somebody" in p for p in compose.verify(NAMED_SEED, moment)):
@@ -145,7 +157,7 @@ def run() -> int:
     if compose.proper_nouns("Sarah rang me") != set():
         failures.append("NAMES the sentence-opener limit has changed, update the note")
 
-    total = (7 + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
+    total = (7 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
              + len(MUST_ACCEPT_NAMED) + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON))
     if failures:
         print(f"compose: {len(failures)}/{total} failed")

@@ -93,9 +93,9 @@ def raw_hash(text: str) -> str:
 class Moment:
     """One screened moment, ready to build a deck from.
 
-    `text` is the rewritten, abstracted version. `source_hash` is a salted hash
-    of where it came from, so a removal request can be honoured without us
-    storing the URL or the original words.
+    `text` is the moment we invented, never the post it was seeded from.
+    `source_hash` is a salted hash of the seed, so a removal request can be
+    honoured without us storing the URL or anybody's words.
     """
     id: str
     text: str

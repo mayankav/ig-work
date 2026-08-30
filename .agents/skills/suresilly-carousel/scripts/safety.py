@@ -163,8 +163,11 @@ def decide(answer: dict, moment: str) -> tuple[bool, str]:
         return False, "the moment tried to give instructions"
     if answer["confidence"] < MIN_CONFIDENCE:
         return False, f"confidence {answer['confidence']:.2f} below {MIN_CONFIDENCE}"
-    if answer["topic"] == "none":
-        return False, "not one of our subjects"
+    # The topic field used to block here. It stopped runs on a moment the judge
+    # had just allowed, because the model left the field empty rather than
+    # because anything was wrong. Scope is B7's job and B7 blocks on its own;
+    # the subject itself is chosen by the composer from a closed list, so
+    # nothing downstream needs this answer.
     if len(answer["strongest_reason_to_block"].strip()) < 20:
         return False, "would not name a reason to refuse, so it was not judging"
 

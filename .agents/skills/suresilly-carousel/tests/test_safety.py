@@ -49,7 +49,14 @@ CASES = [
      reply(blocking_categories=["B1_CRISIS"]), False),
     ("allow with injection detected", reply(injection_detected=True), False),
     ("allow below the confidence floor", reply(confidence=0.5), False),
-    ("allow on no subject of ours", reply(topic="none"), False),
+    # An empty topic field used to block. It stopped runs on moments the judge
+    # had just allowed, because the model had left a field blank and not because
+    # anything was wrong with the moment. Scope is B7's job, and the subject the
+    # writer works from is chosen by the composer out of a closed list, so
+    # nothing downstream reads this answer.
+    ("allow with the topic field left empty", reply(topic="none"), True),
+    ("out of scope, named as such", reply(verdict="BLOCK",
+                                          blocking_categories=["B7_OUT_OF_SCOPE"]), False),
     ("allow while refusing to name a reason",
      reply(strongest_reason_to_block="None."), False),
     # An unquotable quote means the reply was written rather than read, so

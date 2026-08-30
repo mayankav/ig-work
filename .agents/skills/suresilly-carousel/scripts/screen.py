@@ -274,7 +274,13 @@ def shape(text: str) -> dict:
     if raw.count(".") + raw.count("!") + raw.count("?") > 2:
         reasons.append("more than two sentences")
 
-    found = {name: pat.findall(t) for name, pat in ANCHORS.items()}
+    # finditer, not findall. findall returns the capture GROUPS when a pattern
+    # has any, so the clock pattern reported "11" for 11:42pm and an empty
+    # string for 9pm — the second alternative has no group 1. Those fragments
+    # then travelled on as the scene the deck was allowed to be set in, and a
+    # slide saying 11:42pm was refused for being set at the wrong time.
+    found = {name: [m.group(0).strip() for m in pat.finditer(t)] for name, pat in ANCHORS.items()}
+    found = {k: [v for v in vs if v] for k, vs in found.items()}
     found = {k: v for k, v in found.items() if v}
 
     # A clock time is the strongest anchor there is, so it is worth more. The
@@ -324,7 +330,7 @@ def shape(text: str) -> dict:
         # at 3:40am is a person in conflict with themselves, which is the same
         # thing the word list is looking for in the relational case.
         "tension": bool(TENSION.search(t) or "body" in found),
-        "anchors": {k: sorted({str(x) if isinstance(x, str) else x[0] for x in v}) for k, v in found.items()},
+        "anchors": {k: sorted(set(v)) for k, v in found.items()},
         "reasons": reasons,
     }
 

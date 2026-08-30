@@ -95,7 +95,14 @@ def run() -> int:
         ("a citation that is not on the allowlist", broken(citation_id="freud-1899"), "allowlist"),
         ("a citation that does not cover the subject", broken(citation_id="tawwab-2021"), "does not cover"),
         ("beats out of their fixed order", broken(beats=beats_wrong_order), "role order"),
-        ("a scene token missing from slide 1", broken(scene_token="doorway"), "missing from slide 1"),
+        # A token this moment really does contain, which never reaches slide 1.
+        ("a scene token missing from slide 1", broken(scene_token="body"), "missing from slide 1"),
+        # A token invented from the moment's wording rather than taken from the
+        # list. This is what the plan actually did: "doorway" for a moment about
+        # a door, and slide 1 was then refused by a checker reading a different
+        # vocabulary.
+        ("a scene token that is not one of the moment's things",
+         broken(scene_token="doorway"), "not one of the things in this moment"),
         ("a script with no bracket to fill in",
          broken(**{"protocol.script": "The waking is here. I am not checking."}), "bracket"),
         ("an intention with no time or place",
