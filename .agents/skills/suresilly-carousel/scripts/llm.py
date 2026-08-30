@@ -56,6 +56,11 @@ class ModelRefused(Exception):
     """No usable answer. The reason is written for whoever reads the alert."""
 
 
+class SchemaMismatch(ModelRefused):
+    """The reply did not match its schema. Worth one corrected retry, unlike a
+    refusal or an outage."""
+
+
 class RateLimited(ModelRefused):
     """The provider is throttling. Worth waiting for, unlike everything else."""
 
@@ -204,6 +209,23 @@ _GEMINI_KEYS = {"type", "properties", "required", "items", "enum", "description"
                 "minItems", "maxItems", "nullable"}
 
 
+def _limit_note(schema: dict) -> str:
+    """Turn the limits Gemini's dialect drops into words it will read.
+
+    minLength, maxLength and minItems are not part of the OpenAPI subset Gemini
+    accepts, so they were being stripped on the way out and enforced on the way
+    back. The model was refused for breaking a rule nobody had told it.
+    """
+    bits = []
+    if "maxLength" in schema:
+        bits.append(f"at most {schema['maxLength']} characters")
+    if "minLength" in schema:
+        bits.append(f"at least {schema['minLength']} characters")
+    if "minItems" in schema:
+        bits.append(f"at least {schema['minItems']} items")
+    return ", ".join(bits)
+
+
 def _gemini_schema(schema: dict) -> dict:
     out = {}
     for key, value in schema.items():
@@ -215,6 +237,9 @@ def _gemini_schema(schema: dict) -> dict:
             out["items"] = _gemini_schema(value)
         elif key in _GEMINI_KEYS:
             out[key] = value
+    note = _limit_note(schema)
+    if note:
+        out["description"] = f"{out.get('description', '')} ({note})".strip()
     if out.get("type") == "string" and "enum" in out:
         out["format"] = "enum"
     return out
@@ -326,7 +351,9 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
     exhausted the caller gets ModelRefused and the run ends without a post.
     """
     trouble: list[str] = []
+    original_user = user
     for name, call in providers:
+        user = original_user
         pause = RETRY_PAUSE
         for attempt in range(RETRIES + 1):
             if attempt:
@@ -336,11 +363,17 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
                 answer = extract_json(reply)
                 problems = validate(answer, schema)
                 if problems:
-                    raise ModelRefused("; ".join(problems[:3]))
+                    raise SchemaMismatch("; ".join(problems[:4]))
                 return answer, name
             except RateLimited as limited:
                 pause = limited.wait
                 trouble.append(f"{name}: {limited}")
+            except SchemaMismatch as mismatch:
+                trouble.append(f"{name}: {mismatch}")
+                # Retrying blind asks the same question and gets the same answer.
+                # The complaints are literal, so hand them back.
+                user = (original_user + "\n\nYour previous reply was rejected. Fix "
+                        "exactly these and change nothing else:\n  " + str(mismatch))
             except ModelRefused as refused:
                 trouble.append(f"{name}: {refused}")
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as exc:

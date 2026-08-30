@@ -172,15 +172,23 @@ under two minutes, while anxious, with no app and no googling.
 RULES
   The scene token is one concrete word or number from the moment. Write it
   literally into the beat for slide 1. Not a synonym, the same word.
-  Every h1 you write MUST contain exactly one [[accent]], wrapping the last
-  stressed word of the line. The h1 is used on the slide exactly as you write
-  it, so an h1 without an accent renders flat.
+  HOOKS. Give at least 4. Each is used on slide 1 exactly as written, so every
+  rule here is checked and a hook that breaks one is thrown away.
+    h1  at most 12 words. Exactly one [[accent]], wrapping the last stressed
+        word. Never open with Why, How to, The reason, What nobody, Most
+        people, or Here is.
+    h2  at most 7 words. No [[accent]] at all.
+    Stage the moment. Do not promise a result, do not sell a trick, do not
+    name a condition. "You will stop losing your keys tonight" is an
+    advertisement. "You looked for it for [[thirty]] minutes" is a hook.
     e.g. the shape only:  You did [the thing] at [[the hour]].
   exports is what a slide hands on. depends_on is which earlier slides it needs.
   Slide 8 exports nothing new: everything on it already exists in slides 5 to 7.
   Never name an author, a book or a year. Return the citation id you were given.
   Never write a diagnosis. Never tell the reader they have a condition.
   Do not use an em dash anywhere. Do not use the shape "it is not X, it is Y".
+  Each beat is under 400 characters. Give at least 4 hooks, and every field
+  asked for must be present, dm_share_hypothesis included.
 
 Return only a JSON object with exactly the fields you are asked for."""
 
@@ -202,6 +210,11 @@ CITATIONS YOU MAY USE. Return one id and the index of the claim you want.
 
 Plan the deck and return the JSON object."""
 
+# A cap here is a hard failure, so caps sit only where a length genuinely breaks
+# something. The word limits that matter for a rendered slide are checked in
+# validate_plan, where a complaint can be fed back and fixed. A character cap on
+# a planning note only fails a good plan over a number nobody measures, and no
+# model counts characters reliably.
 PLAN_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -216,11 +229,11 @@ PLAN_SCHEMA = {
             "additionalProperties": False,
             "required": ["script", "intention", "if_then", "menu"],
             "properties": {
-                "script": {"type": "string", "minLength": 10, "maxLength": 200},
-                "intention": {"type": "string", "minLength": 10, "maxLength": 200},
-                "if_then": {"type": "string", "minLength": 10, "maxLength": 220},
+                "script": {"type": "string", "minLength": 10, "maxLength": 260},
+                "intention": {"type": "string", "minLength": 10, "maxLength": 260},
+                "if_then": {"type": "string", "minLength": 10, "maxLength": 280},
                 "menu": {"type": "array", "minItems": 3, "maxItems": 3,
-                         "items": {"type": "string", "maxLength": 120}},
+                         "items": {"type": "string", "maxLength": 240}},
             },
         },
         "beats": {
@@ -232,7 +245,7 @@ PLAN_SCHEMA = {
                 "properties": {
                     "n": {"type": "integer", "minimum": 1, "maximum": 9},
                     "role": {"type": "string", "enum": list(ROLES)},
-                    "beat": {"type": "string", "minLength": 10, "maxLength": 240},
+                    "beat": {"type": "string", "minLength": 10, "maxLength": 400},
                     "exports": {"type": "array", "maxItems": 5,
                                 "items": {"type": "string", "maxLength": 40}},
                     "depends_on": {"type": "array", "maxItems": 4,
@@ -248,12 +261,12 @@ PLAN_SCHEMA = {
                 "additionalProperties": False,
                 "required": ["h1", "h2"],
                 "properties": {
-                    "h1": {"type": "string", "minLength": 10, "maxLength": 90},
-                    "h2": {"type": "string", "minLength": 4, "maxLength": 60},
+                    "h1": {"type": "string", "minLength": 10, "maxLength": 130},
+                    "h2": {"type": "string", "minLength": 4, "maxLength": 140},
                 },
             },
         },
-        "dm_share_hypothesis": {"type": "string", "minLength": 20, "maxLength": 240},
+        "dm_share_hypothesis": {"type": "string", "minLength": 20, "maxLength": 400},
     },
 }
 
@@ -465,9 +478,22 @@ rhythm. Never copy the subject.
   "The library book is four weeks late. Returning it now feels like a confession,
    so you keep it, which is worse, which you know."
 
-MARKUP
-  [[word]] marks the one accent word per field. Exactly one. Never two.
-  [bracket] marks a blank the reader fills in, inside a script.
+MARKUP, the rule that gets broken most, so read it twice
+
+  EVERY line of copy you write needs exactly one [[accent]] around its most
+  important word. Not most lines. Every line. The renderer colours that word,
+  and a line without one prints flat and grey.
+
+  Right:  "You searched for it for [[thirty]] minutes."
+  Right:  "I am not looking again until [[morning]]."
+  Wrong:  "You searched for it for thirty minutes."      no accent
+  Wrong:  "You [[searched]] for it for [[thirty]] minutes."   two accents
+
+  This applies to every h2, every body, every old and new line, every bullet,
+  every callout, the CTA and the closing thought. Nine slides, every field.
+
+  [bracket] marks a blank the reader fills in, inside a script. Not the same
+  thing, and a field can carry both.
 
 HARD RULES, each one checked by code after you finish
   No em dash or en dash. Use a period or a comma.
@@ -482,6 +508,20 @@ HARD RULES, each one checked by code after you finish
   Slide 2 must work alone as a cover, for someone who never saw slide 1.
   Slide 8 adds nothing new. It recaps slides 4 to 7 only.
   Bodies stay under 220 characters. The closing thought stays under 180.
+
+THE CTA, slide 9. This exact shape, and nothing longer than 11 words:
+    Send this to the [kind of person] who [does the thing in the moment].
+  e.g.  Send this to the friend who loses their [[keys]] every morning.
+  It must contain the word "send" or "share", and name who. Not "share if you
+  relate", not "tag someone". A named kind of person.
+
+THE CHEAT SHEET, slide 8, must name the scene token from the plan. The reader
+saves this slide on its own, so it has to say what moment it is for.
+
+INVENT NOTHING. Every object, room and time you write must come from the
+moment or the plan. If the moment says a laptop and a remote, do not write
+about keys. A detail the moment did not contain is a different person's
+evening, and it is checked.
 
 MASCOT BRIEFS
   Nine plain English descriptions of a small donkey, one per slide, each drawn
@@ -508,6 +548,11 @@ HOW THIS DECK IS WRITTEN:
 
 Write the copy and return the JSON object."""
 
+# Same principle as the plan schema, and it matters more here because these
+# caps sit next to editorial limits that look identical. They are not: a schema
+# cap is a hard failure with no feedback, while audit_copy enforces the real
+# editorial limits and its complaints are handed back for repair. So the schema
+# is deliberately looser than the editorial rule, and the gate does the judging.
 DRAFT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -515,51 +560,94 @@ DRAFT_SCHEMA = {
                  "sustain", "cheat", "cta", "caption", "hashtags", "alt", "mascots"],
     "properties": {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
-                 "properties": {"h2": {"type": "string", "maxLength": 60},
-                                "body": {"type": "string", "maxLength": 220}}},
-        "translation": {"type": "string", "maxLength": 220},
-        "explains": {"type": "string", "maxLength": 220},
+                 "properties": {"h2": {"type": "string", "maxLength": 140},
+                                "body": {"type": "string", "maxLength": 280}}},
+        "translation": {"type": "string", "maxLength": 280},
+        "explains": {"type": "string", "maxLength": 280},
         "name": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 60},
                                 "body": {"type": "string", "maxLength": 220}}},
         "script": {"type": "object", "additionalProperties": False,
                    "required": ["h2", "old", "new"],
                    "properties": {"h2": {"type": "string", "maxLength": 60},
-                                  "old": {"type": "string", "maxLength": 160},
-                                  "new": {"type": "string", "maxLength": 160}}},
+                                  "old": {"type": "string", "maxLength": 220},
+                                  "new": {"type": "string", "maxLength": 220}}},
         "action": {"type": "object", "additionalProperties": False,
                    "required": ["h2", "old", "new", "body"],
                    "properties": {"h2": {"type": "string", "maxLength": 60},
-                                  "old": {"type": "string", "maxLength": 160},
-                                  "new": {"type": "string", "maxLength": 160},
+                                  "old": {"type": "string", "maxLength": 240},
+                                  "new": {"type": "string", "maxLength": 240},
                                   "body": {"type": "string", "maxLength": 220}}},
         "sustain": {"type": "object", "additionalProperties": False,
                     "required": ["h2", "bullets"],
                     "properties": {"h2": {"type": "string", "maxLength": 60},
                                    "bullets": {"type": "array", "minItems": 3, "maxItems": 3,
-                                               "items": {"type": "string", "maxLength": 120}}}},
+                                               "items": {"type": "string", "maxLength": 170}}}},
         "cheat": {"type": "object", "additionalProperties": False,
                   "required": ["h2", "callout", "bullets"],
                   "properties": {"h2": {"type": "string", "maxLength": 60},
-                                 "callout": {"type": "string", "maxLength": 60},
+                                 "callout": {"type": "string", "maxLength": 140},
                                  "bullets": {"type": "array", "minItems": 3, "maxItems": 4,
-                                             "items": {"type": "string", "maxLength": 120}}}},
+                                             "items": {"type": "string", "maxLength": 170}}}},
         "cta": {"type": "object", "additionalProperties": False, "required": ["cta1", "closing"],
-                "properties": {"cta1": {"type": "string", "maxLength": 110},
-                               "closing": {"type": "string", "maxLength": 180}}},
-        "caption": {"type": "string", "minLength": 200, "maxLength": 1400},
+                "properties": {"cta1": {"type": "string", "maxLength": 150},
+                               "closing": {"type": "string", "maxLength": 240}}},
+        "caption": {"type": "string", "minLength": 200, "maxLength": 2400},
         "hashtags": {"type": "array", "minItems": 4, "maxItems": 6,
                      "items": {"type": "string", "maxLength": 30}},
         "alt": {"type": "array", "minItems": 9, "maxItems": 9,
-                "items": {"type": "string", "maxLength": 200}},
+                "items": {"type": "string", "maxLength": 260}},
         # Nine briefs, one per slide, each drawn from that slide's own beat so no
         # two could be swapped. Never a letter or a number in the artwork: a
         # previous pipeline shipped slides with "2. Thinking" printed on the
         # donkey, which is why the renderer refuses text in a pose.
         "mascots": {"type": "array", "minItems": 9, "maxItems": 9,
-                    "items": {"type": "string", "minLength": 15, "maxLength": 140}},
+                    "items": {"type": "string", "minLength": 15, "maxLength": 240}},
     },
 }
+
+# Some fields come back without their accent however plainly the prompt asks,
+# and a deck should not die over markup we can add ourselves. This wraps the
+# last substantial word, which is where the stress usually falls anyway. The
+# critic still sees the result and can object if the choice is poor.
+_TRAILING = re.compile(r"[\s\"'.,!?;:)\]]+$")
+
+
+def ensure_accent(text: str) -> str:
+    """Give a line exactly one accent: add one if missing, keep the first if many."""
+    if not text or not text.strip():
+        return text
+    marks = re.findall(r"\[\[.+?\]\]", text)
+    if len(marks) == 1:
+        return text
+    if len(marks) > 1:
+        # Keep the first, unwrap the rest.
+        seen = False
+        def once(match):
+            nonlocal seen
+            if seen:
+                return match.group(0)[2:-2]
+            seen = True
+            return match.group(0)
+        return re.sub(r"\[\[.+?\]\]", once, text)
+
+    body = text.rstrip()
+    tail = text[len(body):]
+    trailing = _TRAILING.search(body)
+    punctuation = trailing.group(0) if trailing else ""
+    core = body[: len(body) - len(punctuation)]
+    words = core.split()
+    if not words:
+        return text
+    # Walk back to the last word worth colouring, skipping small connectives.
+    skip = {"the", "a", "an", "and", "or", "to", "in", "on", "at", "of", "it",
+            "is", "was", "for", "you", "your", "my", "me", "i", "that", "this"}
+    index = len(words) - 1
+    while index > 0 and words[index].lower().strip(".,!?") in skip:
+        index -= 1
+    words[index] = f"[[{words[index]}]]"
+    return " ".join(words) + punctuation + tail
+
 
 LAYOUTS = {"hook": "Template A", "cost": "Template A", "source": "Template F",
            "name": "Template B", "script": "Template C", "action": "Template C",
@@ -583,62 +671,62 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         "",
         "### Slide 2 · Agitation",
         f"- **Layout:** {LAYOUTS['cost']}",
-        f"- **H2:** {copy['cost']['h2']}",
-        f"- **Body:** {copy['cost']['body']}",
+        f"- **H2:** {ensure_accent(copy['cost']['h2'])}",
+        f"- **Body:** {ensure_accent(copy['cost']['body'])}",
         f"- **Mascot:** {mascots[1]}",
         "",
         "### Slide 3 · Source Anchor",
         f"- **Layout:** {LAYOUTS['source']}",
         f"- **Source:** {citation['line']}",
         f"- **Source Claim:** {claim}",
-        f"- **Plain-English Translation:** {copy['translation']}",
-        f"- **What This Explains Here:** {copy['explains']}",
+        f"- **Plain-English Translation:** {ensure_accent(copy['translation'])}",
+        f"- **What This Explains Here:** {ensure_accent(copy['explains'])}",
         f"- **Mascot:** {mascots[2]}",
         "",
         "### Slide 4 · Value Step 1",
         f"- **Layout:** {LAYOUTS['name']}",
         "- **Badge:** 01",
-        f"- **H2:** {copy['name']['h2']}",
-        f"- **Body:** {copy['name']['body']}",
+        f"- **H2:** {ensure_accent(copy['name']['h2'])}",
+        f"- **Body:** {ensure_accent(copy['name']['body'])}",
         f"- **Mascot:** {mascots[3]}",
         "",
         "### Slide 5 · Value Step 2",
         f"- **Layout:** {LAYOUTS['script']}",
-        f"- **H2:** {copy['script']['h2']}",
-        f"- **❌ Old Reaction:** \"{copy['script']['old']}\"",
-        f"- **✅ Regulated Response:** \"{copy['script']['new']}\"",
+        f"- **H2:** {ensure_accent(copy['script']['h2'])}",
+        f"- **❌ Old Reaction:** \"{ensure_accent(copy['script']['old'])}\"",
+        f"- **✅ Regulated Response:** \"{ensure_accent(copy['script']['new'])}\"",
         f"- **Mascot:** {mascots[4]}",
         "",
         "### Slide 6 · Value Step 3",
         f"- **Layout:** {LAYOUTS['action']}",
-        f"- **H2:** {copy['action']['h2']}",
-        f"- **❌ Old Reaction:** \"{copy['action']['old']}\"",
-        f"- **✅ Regulated Response:** \"{copy['action']['new']}\"",
-        f"- **Body:** {copy['action']['body']}",
+        f"- **H2:** {ensure_accent(copy['action']['h2'])}",
+        f"- **❌ Old Reaction:** \"{ensure_accent(copy['action']['old'])}\"",
+        f"- **✅ Regulated Response:** \"{ensure_accent(copy['action']['new'])}\"",
+        f"- **Body:** {ensure_accent(copy['action']['body'])}",
         f"- **Mascot:** {mascots[5]}",
         "",
         "### Slide 7 · Value Step 4",
         f"- **Layout:** {LAYOUTS['sustain']}",
-        f"- **H2:** {copy['sustain']['h2']}",
+        f"- **H2:** {ensure_accent(copy['sustain']['h2'])}",
     ]
-    out += [f"  • {b}" for b in copy["sustain"]["bullets"]]
+    out += [f"  • {ensure_accent(b)}" for b in copy["sustain"]["bullets"]]
     out += [
         f"- **Mascot:** {mascots[6]}",
         "",
         "### Slide 8 · Cheat Sheet",
         f"- **Layout:** {LAYOUTS['cheat']}",
-        f"- **H2:** {copy['cheat']['h2']}",
+        f"- **H2:** {ensure_accent(copy['cheat']['h2'])}",
         f"- **Callout:** {copy['cheat']['callout']}",
         "- **Bullets:**",
     ]
-    out += [f"  • {b}" for b in copy["cheat"]["bullets"]]
+    out += [f"  • {ensure_accent(b)}" for b in copy["cheat"]["bullets"]]
     out += [
         f"- **Mascot:** {mascots[7]}",
         "",
         "### Slide 9 · CTA",
         f"- **Layout:** {LAYOUTS['cta']}",
-        f"- **Primary CTA:** {copy['cta']['cta1']}",
-        f"- **Closing thought:** {copy['cta']['closing']}",
+        f"- **Primary CTA:** {ensure_accent(copy['cta']['cta1'])}",
+        f"- **Closing thought:** {ensure_accent(copy['cta']['closing'])}",
         "- **Handle:** @suresilly",
         f"- **Mascot:** {mascots[8]}",
         "",
@@ -740,7 +828,7 @@ MASCOT_TEXT = re.compile(
     r"word|letter|clock face showing|showing \d)\b|\d", re.I)
 MASCOT_FEELING = re.compile(
     r"\b(anxious|sad|happy|distressed|worried|calm|angry|upset|nervous|"
-    r"depressed|excited|relaxed|frustrated|lonely|scared|appears|looks|seems)\b", re.I)
+    r"depressed|excited|relaxed|frustrated|lonely|scared|ashamed|hopeful)\b", re.I)
 
 
 def check_mascots(briefs: list[str]) -> list[str]:
