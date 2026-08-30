@@ -71,8 +71,44 @@ def broken(**changes) -> dict:
     return plan
 
 
+SHIPPED_BROKEN = """### Slide 1 · Hook
+- **H1:** Cleaning up the kitchen while everyone else is [[asleep]].
+### Slide 2 · Agitation
+- **Body:** Cleaning up the kitchen while everyone else is [[asleep]].
+### Slide 3 · Source Anchor
+- **Source:** — Pete Walker, *Complex PTSD: From Surviving to Thriving* (2013)
+- **Source Claim:** Walker found that appeasing is learned where it worked, which is why it arrives.
+- **What This Explains Here:** Walker found that appeasing is learned where it worked, which is why it arrives.
+### Slide 5 · Value Step 2
+- **✅ Regulated Response:** "Say out loud: The bowl is [[done]]. Walker found that leaving is learned."
+"""
+
+
 def run() -> int:
     failures = []
+
+    # The three faults a reader could see on the deck that shipped. Slide 1 and
+    # slide 2 printed one sentence twice, slide 3 printed another under two
+    # different headings, and the script told the reader to say a citation out
+    # loud in their own kitchen — which this file caused, by telling slides 4 to
+    # 7 to reuse slide 3's words without saying to leave the sentence behind.
+    repeats = writer.check_repeats(SHIPPED_BROKEN)
+    if sum("printed 2 times" in p for p in repeats) != 2:
+        failures.append(f"REPEAT duplicated lines were not both caught: {repeats}")
+    if not any("out loud" in p for p in repeats):
+        failures.append("REPEAT a script quoting the researcher was accepted")
+
+    # And it must not fire on decks that name the researcher in the ordinary
+    # way, in the alt text or in passing. All three hand-written decks do.
+    import pathlib as _p
+    decks = sorted((_p.Path(__file__).resolve().parents[3] / "carousels").glob("*/carousel.md"))
+    for deck in decks:
+        text = deck.read_text(encoding="utf-8")
+        if "Slide 5" not in text:
+            continue
+        for fault in writer.check_repeats(text):
+            if "out loud" in fault:
+                failures.append(f"REPEAT {deck.parent.name} blocked for crediting a source: {fault}")
 
     # ── the angles ──
     if writer.combinations() != 2688:
@@ -216,7 +252,7 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 3 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

@@ -593,6 +593,17 @@ never obvious from a single slide.
   least one word from THE THREAD WORDS listed below, or from your own slide 3
   wording. One word is enough. All four slides need one, not three of them.
 
+  Carry the IDEA, never the sentence. Do not paste the claim into a slide and do
+  not name the researcher again — they are credited on slide 3 and nowhere else.
+  A deck once told its reader to stand in the kitchen and say "Walker found that
+  leaving is learned where it worked" out loud, which is not a thing a person
+  says. Take the word. Leave the citation.
+
+  Every field in the deck says something the deck has not said yet. The three
+  lines on slide 3 are three different sentences: what the source says, what
+  that means in plain words, and what it explains about this evening. Printing
+  one sentence under two of those headings is the fastest way to look broken.
+
   Advice that never touches slide 3 is advice for a different deck. It reads
   fine on its own, which is exactly why nobody notices, and it is checked. This
   is the rule that fails more often than every other rule put together, and it
@@ -853,6 +864,53 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
     return "\n".join(out)
 
 
+def check_repeats(markdown: str) -> list[str]:
+    """No line of copy may be written twice, and no researcher may be quoted
+    into the advice.
+
+    Both shipped. On the kitchen deck, slide 1's hook and slide 2's body were
+    the same sentence word for word, and slide 3 printed one sentence under
+    both "SOURCE SAYS" and "THIS EXPLAINS" — a reader sees the same line twice
+    on one card and stops trusting the page.
+
+    The second half is a fault this file caused. Slides 4 to 7 were told to
+    reuse slide 3's words, and the cheapest way to satisfy that is to paste the
+    citation, so the script slide told a reader to stand in their kitchen and
+    say "Walker found that leaving is learned where it worked" out loud. The
+    thread is supposed to carry the IDEA forward, never the sentence.
+    """
+    problems = []
+    fields = re.findall(r"(?m)^- \*\*(?:H1|H2|Body|Source Claim|Plain-English Translation|"
+                        r"What This Explains Here|❌ Old Reaction|✅ Regulated Response|"
+                        r"Callout|Closing thought):\*\* (.+)$", markdown)
+    seen: dict[str, int] = {}
+    for line in fields:
+        key = re.sub(r"[^a-z0-9 ]", "", line.lower()).strip()
+        if len(key.split()) < 4:
+            continue
+        seen[key] = seen.get(key, 0) + 1
+    for key, count in seen.items():
+        if count > 1:
+            problems.append(f"the same line is printed {count} times: {key[:60]!r}. "
+                            f"Every field says something the deck has not said yet")
+
+    # Only the lines a reader is told to SAY. Naming the researcher elsewhere is
+    # ordinary and every hand-written deck does it, in the alt text and in
+    # passing. Putting them inside a spoken script is not: "say out loud, Walker
+    # found that leaving is learned where it worked" is not a thing a person
+    # says in their own kitchen.
+    author = re.search(r"(?m)^- \*\*Source:\*\* — ([^,]+),", markdown)
+    if author:
+        surname = author.group(1).strip().split()[-1].lower()
+        spoken = re.findall(r"(?m)^- \*\*(?:❌ Old Reaction|✅ Regulated Response):\*\* (.+)$",
+                            markdown)
+        if any(surname in line.lower() for line in spoken):
+            problems.append(f"a script tells the reader to say {surname.title()}'s name out "
+                            f"loud. The researcher is credited on slide 3; the words a person "
+                            f"says are their own")
+    return problems
+
+
 def verify_draft(markdown: str, moment_anchors: set[str] | None = None) -> list[str]:
     """Every complaint about an assembled deck, from every gate that applies.
 
@@ -867,6 +925,7 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None) -> list[
     import render
 
     problems = check_accents(markdown)
+    problems += check_repeats(markdown)
     problems += check_mascots(re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown))
 
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as handle:
