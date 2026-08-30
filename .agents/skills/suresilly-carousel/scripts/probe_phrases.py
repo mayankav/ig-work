@@ -51,7 +51,7 @@ SAMPLE = 100
 KEEP_THRESHOLD = 0.02
 # Searches back to back get throttled, and a throttled phrase reports as an
 # error rather than as a bad phrase, which is a different thing.
-PAUSE = 2.5
+PAUSE = 7.0
 
 
 def probe(phrase: str, sample: int = SAMPLE) -> dict:
@@ -64,7 +64,7 @@ def probe(phrase: str, sample: int = SAMPLE) -> dict:
 
     kept = []
     for item in results:
-        verdict = screen.screen(item["text"])
+        verdict = screen.screen(item["text"], phrase)
         if verdict["ok"]:
             kept.append(verdict["text"])
 

@@ -278,7 +278,7 @@ def shape(text: str) -> dict:
 SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
 
 
-def extract(text: str) -> str:
+def extract(text: str, found_by: str = "") -> str:
     """Pull the one moment out of a longer post.
 
     People do not write moments on their own. They write a paragraph about their
@@ -287,8 +287,14 @@ def extract(text: str) -> str:
     everything the feed gives us.
 
     So: score every sentence, keep the best one, and add the neighbour before or
-    after it only if that neighbour improves the score. Anything longer than the
-    word cap is truncated back at a sentence boundary rather than mid-clause.
+    after it only if that neighbour improves the score.
+
+    `found_by` is the phrase that made us look at this post, and it decides ties
+    and near-ties. Without it the extractor picks whichever sentence has the most
+    clocks and rooms in it, which is often not the sentence the search matched: a
+    post found by "back to sleep" was being reduced to "talk about a jumbo sized
+    bed, it is like a hotel". The relevant sentence is the one that made the post
+    relevant, and we already know which that is.
 
     Safety is not affected by this. The banned-subject check always runs on the
     complete original, so a crisis sentence elsewhere in the post still rejects
@@ -298,7 +304,15 @@ def extract(text: str) -> str:
     if len(parts) <= 1:
         return text.strip()
 
-    scored = [(shape(part)["score"], index) for index, part in enumerate(parts)]
+    needle = found_by.lower().strip()
+    scored = []
+    for index, part in enumerate(parts):
+        score = shape(part)["score"]
+        # Enough to win a tie and to beat a slightly richer but unrelated
+        # sentence, not enough to rescue a sentence with nothing filmable in it.
+        if needle and needle in part.lower():
+            score += 3
+        scored.append((score, index))
     best_score, best = max(scored)
 
     # A neighbour earns its place only by raising the score of the pair.
@@ -315,7 +329,7 @@ def extract(text: str) -> str:
     return " ".join(parts[i] for i in sorted(chosen))
 
 
-def screen(text: str) -> dict:
+def screen(text: str, found_by: str = "") -> dict:
     """Run both layers. The first rejection wins and stops the work.
 
     On success `text` holds the extracted moment, which is what the rest of the
@@ -326,7 +340,7 @@ def screen(text: str) -> dict:
     if family:
         return {"ok": False, "stage": "banned", "reason": family,
                 "score": 0, "anchors": {}, "text": None}
-    moment = extract(text)
+    moment = extract(text, found_by)
     result = shape(moment)
     return {
         "ok": result["ok"],

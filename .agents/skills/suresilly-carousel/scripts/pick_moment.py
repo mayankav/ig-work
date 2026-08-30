@@ -58,7 +58,7 @@ def screen_all(candidates: list[dict]) -> tuple[list[dict], dict[str, int]]:
         if memory.raw_hash(item["text"]) in used_raw:
             tally["repost of a used moment"] = tally.get("repost of a used moment", 0) + 1
             continue
-        verdict = screen.screen(item["text"])
+        verdict = screen.screen(item["text"], item.get("query", ""))
         if not verdict["ok"]:
             key = verdict["reason"] if verdict["stage"] == "banned" else "shape"
             tally[key] = tally.get(key, 0) + 1
