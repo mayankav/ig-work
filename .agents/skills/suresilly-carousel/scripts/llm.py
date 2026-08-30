@@ -35,10 +35,20 @@ from pathlib import Path
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-# Each Gemini model has its own quota bucket, so a throttled flash does not mean
-# a throttled flash-lite. That is capacity, not independence: both are Google,
-# and neither may ever be used to check the other's work.
-GEMINI_MODELS = ("gemini-2.5-flash", "gemini-2.5-flash-lite")
+# Gemini's free quota is per project AND per model, so every model id is its own
+# bucket. Listing several is the cheapest capacity we have: nine calls spread
+# over five models is nine calls against five separate allowances.
+#
+# This is capacity, never independence. All of them are Google, and none may be
+# used to check another's work. Cross-vendor review is a separate rule and it
+# still holds.
+GEMINI_MODELS = (
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash",
+)
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 TIMEOUT = 45
@@ -251,14 +261,25 @@ def _gemini_schema(schema: dict) -> dict:
 _RETRY_HINT = re.compile(r"retry in ([\d.]+)s", re.I)
 
 
+_QUOTA_ID = re.compile(r'"quotaId":\s*"([^"]+)"')
+
+
 def _retry_after(exc: urllib.error.HTTPError) -> int:
     header = exc.headers.get("Retry-After") if exc.headers else None
     if header and header.strip().isdigit():
         return int(header)
+    body = ""
     try:
-        match = _RETRY_HINT.search(exc.read().decode("utf-8", "replace"))
+        body = exc.read().decode("utf-8", "replace")
     except Exception:
-        match = None
+        pass
+    # Which quota was hit is in quotaId, and only there. The retry hint does not
+    # tell you: a per-day violation can arrive with an eleven second hint, so
+    # tuning against the hint tunes against the wrong number.
+    quota = _QUOTA_ID.search(body)
+    if quota:
+        print(f"    quota hit: {quota.group(1)}")
+    match = _RETRY_HINT.search(body)
     if match:
         # A second of slack, so we are not racing the edge of the window.
         return min(90, int(float(match.group(1))) + 1)
@@ -338,6 +359,32 @@ def _field_note(schema: dict | None) -> str:
             + ", ".join(required) + ".")
 
 
+def _strict(schema: dict) -> dict:
+    """Make a schema acceptable to constrained decoding.
+
+    Strict mode wants every property listed as required and no extras, which our
+    schemas nearly satisfy already. Anything optional becomes required, because
+    a field we would have accepted as missing is one the model may as well fill.
+    """
+    out = dict(schema)
+    if out.get("type") == "object" and "properties" in out:
+        out["additionalProperties"] = False
+        out["required"] = list(out["properties"])
+        out["properties"] = {k: _strict(v) for k, v in out["properties"].items()}
+    elif out.get("type") == "array" and "items" in out:
+        out["items"] = _strict(out["items"])
+    return out
+
+
+def _groq_format(schema: dict | None, strict: bool = True) -> dict:
+    if not schema:
+        return {"type": "text"}
+    if not strict:
+        return {"type": "json_object"}
+    return {"type": "json_schema",
+            "json_schema": {"name": "reply", "strict": True, "schema": _strict(schema)}}
+
+
 def call_groq(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
     key = resolve_key("GROQ_API_KEY")
     if not key:
@@ -345,13 +392,26 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
     payload = {
         "model": GROQ_MODEL,
         "temperature": temperature,
-        "response_format": {"type": "json_object"},
+        # json_object generates freely and validates afterwards, returning 400
+        # when the model produced broken JSON. That is what our 400 was: not a
+        # quota error, which is always 429. Constrained decoding cannot produce
+        # invalid JSON in the first place, so it is tried first.
+        "response_format": _groq_format(schema),
         "messages": [
             {"role": "system", "content": system + _field_note(schema)},
             {"role": "user", "content": user},
         ],
     }
-    data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"})
+    try:
+        data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"})
+    except ModelRefused as refused:
+        # Strict mode has limited model support. If it is refused, fall back to
+        # the looser mode rather than losing the provider entirely.
+        if "400" not in str(refused):
+            raise
+        payload["response_format"] = _groq_format(schema, strict=False)
+        data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"})
+
     choices = data.get("choices") or []
     if not choices:
         raise ModelRefused("Groq returned no choices")
