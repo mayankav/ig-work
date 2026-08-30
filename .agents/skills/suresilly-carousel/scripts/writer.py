@@ -39,6 +39,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import coherence  # noqa: E402
 import llm  # noqa: E402
+import safety  # noqa: E402
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CITATIONS_PATH = SKILL_DIR / "references" / "citations.json"
@@ -282,6 +283,10 @@ PLAN_SCHEMA = {
         # The handle a reader repeats, searches for, and sends to somebody.
         # Two or three words, a noun phrase, never a sentence.
         "pattern_name": {"type": "string", "minLength": 3, "maxLength": 28},
+        # Replaced per deck in plan_deck() with an enum of the ids that actually
+        # cover this topic. A model cannot then return a citation we do not
+        # have — and one did: pinned to Cloudflare it copied the label out of
+        # the prompt listing and answered "id=tawwab-2021", which is not an id.
         "citation_id": {"type": "string", "maxLength": 40},
         "claim_index": {"type": "integer", "minimum": 0, "maximum": 1},
         "protocol": {
@@ -419,6 +424,15 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
     elif name.rstrip(".").endswith((" is", " are", " you", " it")) or "." in name.rstrip("."):
         problems.append(f"the pattern name {name!r} is a sentence. It has to be a thing "
                         f"with a name, not a claim")
+    elif name.lower().strip(" .") in {t.replace("_", " ") for t in safety.TOPICS} | \
+            {t.replace("_", "") for t in safety.TOPICS}:
+        # The pillar is the shelf this deck sits on, not the thing it names.
+        # A deck pinned to the weaker vendor came back with pattern_name
+        # "Boundaries" and slide 4 reading "the name of this pattern is
+        # boundaries", which teaches nobody anything and is not sendable.
+        problems.append(f"the pattern name {name!r} is just the subject. Coin a handle for "
+                        f"this particular pattern — 'peace keeping', 'bowl washing', "
+                        f"'waiting mode' — not the shelf it sits on")
     else:
         # It has to be on slide 1. A name introduced later is a name nobody
         # carries away, and slide 1 is the only slide most people see.
@@ -529,7 +543,7 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     axes = draw_axes(moment)
     options = citations_for(topic)
     listing = "\n".join(
-        f"  id={c['id']}  claims: [0] {c['claims'][0]}  [1] {c['claims'][1]}"
+        f"  {c['id']}\n      claim 0: {c['claims'][0]}\n      claim 1: {c['claims'][1]}"
         for c in options
     )
     # The words the coherence gate will actually recognise, taken from the gate
@@ -554,9 +568,16 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     attempt_user = user
     best_plan: dict | None = None
     best_problems: list[str] | None = None
+    # A closed list, not free text. The ids are known before the call, so there
+    # is no reason a model should be able to type one.
+    plan_schema = json.loads(json.dumps(PLAN_SCHEMA))
+    plan_schema["properties"]["citation_id"] = {
+        "type": "string", "enum": [c["id"] for c in options],
+        "description": "Exactly one of these, on its own. Not 'id=' and not the title."}
+
     history: list[int] = []
     for attempt in range(4):
-        plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, PLAN_SCHEMA,
+        plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, plan_schema,
                                  temperature=1.0 if attempt == 0 else 0.7)
         problems = validate_plan(plan, moment, topic)
         if not problems:

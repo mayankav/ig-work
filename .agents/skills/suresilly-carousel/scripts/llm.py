@@ -534,6 +534,14 @@ def call_cloudflare(system: str, user: str, temperature: float,
         "messages": [{"role": "system", "content": system + _field_note(schema)},
                      {"role": "user", "content": user}],
         "temperature": temperature,
+        # Workers AI defaults to a short answer, and it does not say so — it
+        # returns JSON cut off mid-object. Pinned to Cloudflare, the composer
+        # and the safety judge both worked and the writer failed twice with
+        # "Expecting ',' delimiter" about six hundred characters in, which is
+        # roughly where a 256 token default lands. A deck plan is several times
+        # that. This is the difference between a third vendor that exists and a
+        # third vendor that can do the work.
+        "max_tokens": 4096,
     }
     if schema:
         payload["response_format"] = {

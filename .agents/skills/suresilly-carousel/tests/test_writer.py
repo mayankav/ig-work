@@ -183,6 +183,11 @@ def run() -> int:
          broken(pattern_name="the quiet tax"), "missing from slide 1"),
         ("a pattern name that is a sentence, not a handle",
          broken(pattern_name="you cannot sit down until it is clear"), "two or three"),
+        # The pillar is the shelf, not the thing. A deck written by the weakest
+        # vendor came back naming its pattern "Boundaries", with slide 4 reading
+        # "the name of this pattern is boundaries".
+        ("a pattern name that is just the subject",
+         broken(pattern_name="boundaries"), "just the subject"),
         # A token invented from the moment's wording rather than taken from the
         # list. This is what the plan actually did: "doorway" for a moment about
         # a door, and slide 1 was then refused by a checker reading a different
