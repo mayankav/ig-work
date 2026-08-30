@@ -356,24 +356,38 @@ def run(mode: str) -> int:
         # feed has thousands more. Three refusals in a row is a different story:
         # that is the model or the source having a bad day, and it should show
         # up as an alert rather than as a quietly worse post.
-        moment = None
+        # One candidate refusing is not a failed run. The rewrite can come back
+        # too close to the original, and the judge can rule a moment too thin to
+        # build on, and both are the machinery working. The feed handed us five
+        # candidates; using one and giving up wasted the other four.
+        #
+        # The judge sits inside this loop rather than after it because its
+        # refusals are about the moment, not the deck. A moment with no feeling
+        # in it is the next moment's problem to solve, not this run's.
+        moment = topic = judge_provider = reason = None
         for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
             try:
-                moment = abstract(candidate)
-                say("rewritten", f"on attempt {attempt}, original discarded")
-                break
-            except Skip as reason:
-                say(f"attempt {attempt}", f"refused: {reason}")
+                candidate_moment = abstract(candidate)
+            except Skip as why:
+                say(f"attempt {attempt}", f"rewrite refused: {str(why)[:70]}")
+                continue
+
+            allowed, why, judge_provider, topic = safety.judge(candidate_moment.text)
+            if not allowed:
+                say(f"attempt {attempt}", f"judge refused: {str(why)[:70]}")
+                continue
+
+            moment, reason = candidate_moment, why
+            say("rewritten", f"on attempt {attempt}, original discarded")
+            break
+
         if moment is None:
-            raise Stop(f"no usable rewrite in {min(MAX_ATTEMPTS, len(candidates))} attempts")
+            tried = min(MAX_ATTEMPTS, len(candidates))
+            raise Stop(f"no moment survived the rewrite and the judge in {tried} attempts")
 
         print(f"\n  moment  {moment.text}\n")
-
-        allowed, reason, judge_provider, topic = safety.judge(moment.text)
-        if not allowed:
-            raise Stop(f"the safety judge refused this moment: {reason}")
         say("safety judge", f"allowed by {judge_provider}, subject {topic}")
-        say("closest risk", reason[:90])
+        say("closest risk", str(reason)[:90])
 
         check_canary()
 
