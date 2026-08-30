@@ -1075,9 +1075,21 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # guarantee that the deck still reads as one piece; at two posts a day the
     # tokens are not worth the risk. The plan does not change, so the argument
     # cannot drift between attempts.
+    # Repair from the BEST draft so far, never from the last one.
+    #
+    # A deck has to satisfy about thirty-five rules at once. A draft that breaks
+    # three of them is close, and the next attempt used to start from whatever
+    # came back last — so it fixed those three, broke two others, and the loop
+    # wandered instead of closing. Three attempts did one attempt's work, and
+    # from the outside it looked like bad luck.
+    #
+    # Keeping the best and always repairing from it makes the fault count go
+    # down or stay flat. It cannot go up.
     attempt_user = user
-    trouble: list[str] = []
-    for attempt in range(3):
+    best_copy: dict | None = None
+    best_problems: list[str] | None = None
+    history: list[int] = []
+    for attempt in range(5):
         copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, DRAFT_SCHEMA,
                               temperature=0.6 if attempt == 0 else 0.4)
         markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
@@ -1085,20 +1097,26 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         problems = verify_draft(markdown, moment_anchors, plan.get("pattern_name", ""))
         if not problems:
             return markdown, plan, axes, wrote
-        trouble.extend(problems)
+        history.append(len(problems))
+        if best_problems is None or len(problems) < len(best_problems):
+            best_copy, best_problems = copy, problems
+        copy, problems = best_copy, best_problems
         # The draft itself goes back with the complaints. It said "your previous
         # draft was rejected" and then did not include the draft, so the model
         # wrote a fresh deck every attempt and arrived with a fresh set of
         # faults. Three attempts fixed nothing and looked like bad luck.
         attempt_user = user + (
-            "\n\nYOUR PREVIOUS DRAFT, which was rejected:\n"
+            "\n\nTHE BEST DRAFT SO FAR, which is nearly right:\n"
             + json.dumps(copy, indent=2)
-            + "\n\nIt was rejected for these exact reasons:\n  "
+            + f"\n\nOnly these {len(problems)} things are wrong with it:\n  "
             + "\n  ".join(list(dict.fromkeys(problems))[:12])
-            + "\n\nReturn that same draft with these faults fixed. Change nothing else. "
-              "Every other line stays word for word as it is above."
+            + "\n\nReturn that draft again with exactly those fixed. Every other line "
+              "stays word for word as it is above. Do not improve anything you were not "
+              "asked about — a line you rewrite unasked is a new fault."
         )
-    raise llm.ModelRefused("; ".join(dict.fromkeys(trouble))[:400])
+    raise llm.ModelRefused(
+        f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
+        f"[faults per attempt: {', '.join(str(n) for n in history)}]")
 
 
 # ─────────────────────────── checking the draft ────────────────────────────

@@ -59,6 +59,32 @@ hour, different room, different words. If the seed is a flatmate let in at 1am,
 yours might be a message answered at 11pm. The same problem, never the same
 evening.
 
+HOW IT IS WRITTEN, and this matters as much as what is in it.
+
+  Plain. Flat. The way somebody tells a friend what happened, not the way a
+  novel describes it. Say what happened, in the order it happened, and stop.
+
+  A moment this engine produced and should not have:
+    "I paced the kitchen floor at 3:17am, the cold linoleum a shock, unable to
+     turn off my thoughts. I felt sick with dread."
+  Everything is wrong with it. "The cold linoleum a shock" is a fragment
+  nobody says. "Unable to turn off my thoughts" is a phrase from a book about
+  a person. "Sick with dread" is dialled up to ten for a moment that is
+  supposed to be small.
+
+  The same evening, written properly:
+    "I got up at 3:17am and stood in the kitchen with the light off, too tired
+     to go back to bed and too awake to stay there."
+
+  RULES
+    No fragments hung off a comma. Full sentences.
+    No word doing scenery: shock, ache, weight, hollow, heavy, sharp, cold
+    creeping, the dark pressing. If you would not say it out loud, cut it.
+    Ordinary words for feelings: tired, guilty, annoyed, embarrassed, dreading.
+    Not: sick with dread, consumed, overwhelmed, crushing, unbearable.
+    Small. This is a Tuesday, not a crisis. If it sounds like the worst night
+    of somebody's life, it is the wrong moment and the judge will refuse it.
+
 WHAT IT MUST CONTAIN
   first person, past tense, 12 to 30 words, one or two sentences
   a time in digits: 2:17am, 9pm, 6am. Not "late", not "nine in the evening"

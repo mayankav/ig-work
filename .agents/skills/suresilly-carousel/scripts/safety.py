@@ -148,17 +148,59 @@ def _normalise(text: str) -> str:
     return re.sub(r"[^a-z0-9 ]", " ", text.lower()).strip()
 
 
+# Categories that do not have to quote.
+#
+# Two reasons a refusal cannot point at a phrase. For crisis, for a writer who
+# might be a child, and for an injection attempt, an inference IS the finding —
+# being early matters more than being able to quote, and demanding a quote asks
+# the gate to wait for the explicit version. For out-of-scope and injection the
+# judgement is about the whole text rather than any part of it: a moment is not
+# off-subject at a particular word.
+#
+# Everywhere else — abuse, clinical, identifiable, grief, degrading — a refusal
+# has to point at something actually written. Those are the ones where a model
+# asked to imagine the worst reading will supply a threat the text does not
+# contain.
+HINT_IS_ENOUGH = {"B1_CRISIS", "B2_MINOR", "B7_OUT_OF_SCOPE", "B8_INJECTION"}
+
+# Marks a refusal that says nothing about the moment — the reply quoted a line
+# that is not in the text. That is a fact about the reply, not about what we
+# were asking, so it is worth one more ask before it stands.
+UNTRACEABLE = "untraceable refusal"
+
+
 def decide(answer: dict, moment: str) -> tuple[bool, str]:
     """Turn the model's reply into a decision. The model never decides.
 
     Its ALLOW only declines to veto; every condition below has to hold as well.
     A judge that has started rubber-stamping still cannot get a moment through
     without producing a reason and a quotable piece of evidence.
+
+    A BLOCK has to point at something in the moment too, and for a while it did
+    not. The judge refused a moment for "a potentially frightening and intrusive
+    experience with an unidentified" person, when what the text said was that a
+    doorbell rang at 1am. Asked to imagine the worst reading of a sentence, a
+    model will find one, and a refusal nobody can trace to the text is a refusal
+    about a moment we never wrote.
     """
+    named = set(answer["blocking_categories"])
+    quote = answer["evidence"].strip()
+    grounded = bool(quote) and _normalise(quote) in _normalise(moment)
+
     if answer["verdict"] != "ALLOW":
-        return False, f"blocked: {answer['strongest_reason_to_block']}"
-    if answer["blocking_categories"]:
-        return False, f"named {', '.join(answer['blocking_categories'])} while saying allow"
+        if grounded or (named & HINT_IS_ENOUGH) or not named:
+            return False, f"blocked: {answer['strongest_reason_to_block']}"
+        # Not honoured. It still has to clear everything an allow clears, so
+        # this is not a free pass — it only stops an imagined threat being
+        # decisive on its own.
+    elif named:
+        # ALLOW and a blocking category at once is a contradiction, not a
+        # finding. It is the model filling a field wrong, and it cost a
+        # candidate every time a reply came back saying a moment was fine and
+        # tagging it out of scope in the same breath. Asked again, once.
+        return False, (f"{UNTRACEABLE}: named {', '.join(sorted(named))} "
+                       f"while saying allow")
+
     if answer["injection_detected"]:
         return False, "the moment tried to give instructions"
     if answer["confidence"] < MIN_CONFIDENCE:
@@ -173,9 +215,8 @@ def decide(answer: dict, moment: str) -> tuple[bool, str]:
 
     # Evidence has to be real. An unquotable quote means the reply was written
     # rather than read, and nothing else in it can be trusted either.
-    evidence = answer["evidence"].strip()
-    if evidence and _normalise(evidence) not in _normalise(moment):
-        return False, "quoted something that is not in the moment"
+    if quote and not grounded:
+        return False, f"{UNTRACEABLE}: quoted something that is not in the moment"
 
     return True, answer["strongest_reason_to_block"]
 
@@ -191,13 +232,21 @@ def judge(moment: str) -> tuple[bool, str, str, str]:
     """
     nonce = secrets.token_hex(8)
     clean = moment.replace(nonce, " ")
-    try:
-        answer, provider = llm.ask(SYSTEM, USER.format(nonce=nonce, text=clean), SCHEMA,
-                                   temperature=0.0)
-    except llm.ModelRefused as refused:
-        return False, f"no usable judgement ({refused})", "none", "none"
-    allowed, reason = decide(answer, moment)
-    return allowed, reason, provider, answer["topic"]
+    # Two asks at most, and only when the first REPLY could not be traced to the
+    # moment. A real refusal is never retried: the judge gets to say no once and
+    # it stands. This is only for the case where it pointed at a line that is
+    # not there, which tells us about the reply and nothing about the moment.
+    answer = provider = None
+    for _ in range(2):
+        try:
+            answer, provider = llm.ask(SYSTEM, USER.format(nonce=nonce, text=clean), SCHEMA,
+                                       temperature=0.0)
+        except llm.ModelRefused as refused:
+            return False, f"no usable judgement ({refused})", "none", "none"
+        allowed, reason = decide(answer, moment)
+        if allowed or not reason.startswith(UNTRACEABLE):
+            return allowed, reason, provider, answer["topic"]
+    return False, reason, provider, answer["topic"]
 
 
 # ─────────────────────────── canaries ────────────────────────────

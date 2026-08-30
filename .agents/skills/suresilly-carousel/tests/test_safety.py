@@ -45,6 +45,9 @@ CASES = [
     ("approval quoting real evidence", reply(evidence="watched the clock"), True),
 
     ("an outright block", reply(verdict="BLOCK"), False),
+    # A contradiction, not a finding. Still refused, but judge() asks once more
+    # before it stands: a reply that says fine and tags it crisis in the same
+    # breath has told us about the reply, not about the moment.
     ("allow while naming a blocking category",
      reply(blocking_categories=["B1_CRISIS"]), False),
     ("allow with injection detected", reply(injection_detected=True), False),
@@ -57,6 +60,24 @@ CASES = [
     ("allow with the topic field left empty", reply(topic="none"), True),
     ("out of scope, named as such", reply(verdict="BLOCK",
                                           blocking_categories=["B7_OUT_OF_SCOPE"]), False),
+    # A refusal has to point at something in the moment. The judge blocked a
+    # moment for "a potentially frightening and intrusive experience with an
+    # unidentified" person when the text said a doorbell rang at 1am. Asked to
+    # imagine the worst reading, a model finds one.
+    # Blocked, but for the honest reason: the reply pointed at a line that is
+    # not in the moment, so it says nothing about the moment. judge() asks once
+    # more before that stands.
+    ("abuse quoting a line that is not there",
+     reply(verdict="BLOCK", blocking_categories=["B3_ABUSE"],
+           evidence="he shouted until I was afraid"), False),
+    ("abuse it can quote", reply(verdict="BLOCK", blocking_categories=["B3_ABUSE"],
+                                 evidence="watched the clock"), False),
+    # Crisis, a possible child, an injection: an inference is the finding, and
+    # waiting for the explicit version is what the gate exists to avoid.
+    ("crisis it cannot quote", reply(verdict="BLOCK", blocking_categories=["B1_CRISIS"],
+                                     evidence="nobody would miss me"), False),
+    ("a block naming nothing at all", reply(verdict="BLOCK", blocking_categories=[],
+                                            evidence=""), False),
     ("allow while refusing to name a reason",
      reply(strongest_reason_to_block="None."), False),
     # An unquotable quote means the reply was written rather than read, so

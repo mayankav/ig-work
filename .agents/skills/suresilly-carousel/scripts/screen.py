@@ -209,7 +209,13 @@ FEELING = re.compile(
     r"panicking|panicked|nervous|anxious|overwhelmed|frazzled|wired|jittery|"
     r"cried|crying|upset|hurt|resent|regret|avoided|avoiding|"
     r"ignored|ignoring|pretended|forced|couldn'?t stop|kept thinking|"
-    r"overthinking|second guess|beat myself|hate myself|felt like)\b")
+    r"overthinking|second guess|beat myself|hate myself|felt like|"
+    # The plain ones a person actually uses. The composer was told to write
+    # "annoyed" and "fed up" instead of "sick with dread", and was then refused
+    # for saying nothing about how it felt, by a list that had never heard of
+    # them. A rule the rest of the system cannot see is a trap.
+    r"annoyed|irritated|fed up|flat|snappy|rushed|useless|stupid|small|"
+    r"silly|wound up|on edge|sick of|bothered|caught out|sorry)\b")
 
 # What makes a moment worth nine slides rather than merely filmable. Someone
 # else in the frame, or the same small act done again and counted: those are
