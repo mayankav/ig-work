@@ -35,6 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import abstracter  # noqa: E402
+import critic  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
 import pick_moment  # noqa: E402
@@ -157,6 +158,27 @@ def abstract(candidate: dict) -> memory.Moment:
     )
 
 
+def check_critic_canary(index: int, written_by: str) -> None:
+    """Send one deliberately bad deck past the critic, every run.
+
+    Three outcomes, and only one of them halts. An unreachable critic says
+    nothing about whether the critic works, and must never be read as if it did.
+    """
+    status, note = critic.run_canary(index, written_by)
+    if status == "caught":
+        say("critic canary", note[:86])
+        return
+    if status == "inconclusive":
+        say("critic canary", note[:86])
+        return
+    HALT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    HALT_FILE.write_text(
+        f"The critic approved a known-bad deck: {note}\n"
+        "Publishing is halted. Delete this file once the critic has been checked.\n",
+        encoding="utf-8")
+    raise Stop(f"{note}. Publishing halted, see state/HALT")
+
+
 def check_canary() -> None:
     """Send one known-bad moment past the judge, every run.
 
@@ -243,7 +265,7 @@ def run(mode: str) -> int:
         memory.claim(moment, run_id)     # nothing expensive runs before this
         claimed = moment
         say("claimed", moment.id)
-        raise NotWired("the writer, the critic and the renderer are not built yet")
+        raise NotWired("the renderer and the publisher are not wired up yet")
 
     except NotWired as reason:
         print(f"\n  stopped: {reason}")

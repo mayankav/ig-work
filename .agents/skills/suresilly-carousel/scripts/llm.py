@@ -242,8 +242,13 @@ def _retry_after(exc: urllib.error.HTTPError) -> int:
 
 def _post(url: str, payload: dict, headers: dict) -> dict:
     body = json.dumps(payload).encode()
+    # A real User-Agent is not politeness. Groq sits behind Cloudflare, which
+    # blocks the default "Python-urllib" with a 403 that looks exactly like an
+    # auth failure and cost an hour to tell apart from one.
     request = urllib.request.Request(url, data=body, headers={
-        "Content-Type": "application/json", **headers})
+        "Content-Type": "application/json",
+        "User-Agent": "suresilly-carousel/3.0 (+https://instagram.com/suresilly)",
+        **headers})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             return json.loads(response.read().decode("utf-8"))
