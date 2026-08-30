@@ -778,8 +778,14 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None) -> list[
 
 
 def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
-               moment_anchors: set[str] | None = None) -> tuple[str, dict, dict]:
-    """Plan, draft, assemble. Returns (markdown, plan, axes).
+               moment_anchors: set[str] | None = None) -> tuple[str, dict, dict, str]:
+    """Plan, draft, assemble. Returns (markdown, plan, axes, who wrote it).
+
+    The provider is returned because the critic must not be the vendor that
+    wrote the deck, and until now the caller assumed Gemini always did. When
+    Gemini was exhausted and Groq wrote instead, the critic was told Gemini had
+    written it, chose Groq as the independent reviewer, and Groq reviewed its
+    own work. Silently, which is the worst way for that rule to fail.
 
     Two calls in the ordinary case. The plan is validated before the draft is
     paid for, and the citation line and claim are substituted here rather than
@@ -806,13 +812,13 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     attempt_user = user
     trouble: list[str] = []
     for attempt in range(3):
-        copy, _ = llm.ask(DRAFT_SYSTEM, attempt_user, DRAFT_SCHEMA,
-                          temperature=0.6 if attempt == 0 else 0.4)
+        copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, DRAFT_SCHEMA,
+                              temperature=0.6 if attempt == 0 else 0.4)
         markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
                             title, pattern, pillar)
         problems = verify_draft(markdown, moment_anchors)
         if not problems:
-            return markdown, plan, axes
+            return markdown, plan, axes, wrote
         trouble.extend(problems)
         attempt_user = user + (
             "\n\nYour previous draft was rejected for these exact reasons. Fix every one "

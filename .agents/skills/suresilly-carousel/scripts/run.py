@@ -396,18 +396,21 @@ def run(mode: str) -> int:
         claimed = moment
         say("claimed", moment.id)
 
-        markdown, plan, axes = writer.write_deck(
+        markdown, plan, axes, wrote_by = writer.write_deck(
             moment.text, topic, title=moment.text[:40].rstrip(" .,"),
             pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
             moment_anchors=set(moment.anchors) | {plan_token(moment)},
         )
-        say("written", ", ".join(axes.values()))
+        say("written", f"by {wrote_by}, {', '.join(axes.values())}")
 
-        published_ok, reason, objections = critic.review(markdown, moment.text, "gemini")
+        # The critic must not be the vendor that wrote this. Passing the real
+        # writer rather than assuming one is what keeps that true when a
+        # fallback did the writing.
+        published_ok, reason, objections = critic.review(markdown, moment.text, wrote_by)
         if not published_ok:
             raise Stop(f"the critic refused this deck: {reason}")
         say("critic", f"{len(objections)} objection(s), none disqualifying")
-        check_critic_canary(memory.used_count(), "gemini")
+        check_critic_canary(memory.used_count(), wrote_by)
 
         when = time.strftime("%Y%m%d", time.gmtime())
         slug = deck_slug(moment, plan["scene_token"], when)

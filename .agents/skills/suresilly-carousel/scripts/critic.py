@@ -247,10 +247,12 @@ def review(deck: str, source_moment: str, written_by: str) -> tuple[bool, str, l
     providers = available_providers(written_by)
     if not providers:
         if os.environ.get("SS_ALLOW_SELF_CRITIQUE", "").strip() not in ("1", "true", "yes"):
+            others = ", ".join(name for name, _ in llm.PROVIDERS if name != written_by)
             raise NoReview(
                 f"no critic available that did not write this deck. {written_by} wrote it, "
-                "and a model marking its own work is not a review. Set GROQ_API_KEY, or set "
-                "SS_ALLOW_SELF_CRITIQUE=1 to accept a self-review knowingly")
+                "and a model marking its own work is not a review. Configure one of: "
+                f"{others}. Or set SS_ALLOW_SELF_CRITIQUE=1 to accept a self-review "
+                "knowingly")
         providers = llm.PROVIDERS
 
     nonce = secrets.token_hex(8)

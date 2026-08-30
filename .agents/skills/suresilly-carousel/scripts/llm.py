@@ -34,6 +34,8 @@ from pathlib import Path
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+CLOUDFLARE_URL = "https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
+CLOUDFLARE_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
 
 # Gemini's free quota is per project AND per model, so every model id is its own
 # bucket. Listing several is the cheapest capacity we have: nine calls spread
@@ -437,7 +439,47 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
     return text
 
 
-PROVIDERS = (("gemini", call_gemini), ("groq", call_groq))
+def call_cloudflare(system: str, user: str, temperature: float,
+                    schema: dict | None = None) -> str:
+    """Workers AI, the third vendor.
+
+    Two vendors is one short. The critic may not be whoever wrote the deck, so
+    if the writer falls back to the second vendor there is nothing left to
+    review it with and the run ends having done all the work. A third means any
+    two can always cover both roles.
+
+    It also does not train on what it is sent, unlike the Gemini free tier, so
+    it is the one to prefer when that matters.
+    """
+    account = resolve_key("CLOUDFLARE_ACCOUNT_ID")
+    token = resolve_key("CLOUDFLARE_API_TOKEN")
+    if not (account and token):
+        raise ModelRefused("no Cloudflare credentials")
+
+    payload = {
+        "messages": [{"role": "system", "content": system + _field_note(schema)},
+                     {"role": "user", "content": user}],
+        "temperature": temperature,
+    }
+    if schema:
+        payload["response_format"] = {
+            "type": "json_schema", "json_schema": _strict(schema)}
+
+    data = _post(CLOUDFLARE_URL.format(account=account, model=CLOUDFLARE_MODEL),
+                 payload, {"Authorization": f"Bearer {token}"})
+    result = data.get("result") or {}
+    text = result.get("response")
+    if isinstance(text, dict):
+        # Structured mode hands back the object already parsed.
+        return json.dumps(text)
+    if not (text or "").strip():
+        raise ModelRefused(f"Cloudflare returned nothing: {str(data)[:160]}")
+    return text
+
+
+# Order matters only as a preference. What matters for correctness is that
+# there are three, so the critic always has a vendor that did not write the deck.
+PROVIDERS = (("gemini", call_gemini), ("groq", call_groq), ("cloudflare", call_cloudflare))
 
 
 def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
