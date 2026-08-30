@@ -35,43 +35,56 @@ def objection(**over) -> dict:
     return base
 
 
-def reply(objections=None, verdict="PUBLISH", confidence=0.9) -> dict:
+def reply(objections=None, verdict="PUBLISH", confidence=0.9, score=90) -> dict:
     return {
-        "case_for_rejection": "It leans on a familiar framing and could read as generic advice.",
+        "score": score,
+        "summary": "It leans on a familiar framing and could read as generic advice.",
         "objections": objections if objections is not None else [],
         "verdict": verdict,
         "confidence": confidence,
     }
 
 
+# (description, reply, expected outcome)
+#
+# Three outcomes now, and the middle one is the point of the rewrite. "review"
+# is not a refusal: the deck is finished and held, and a person decides. Only
+# harm and an invented claim reach "block", where there is no approval path,
+# because that decision would otherwise arrive on a phone at 8pm as one line
+# among many with approve one tap away.
 CASES = [
-    ("a clean deck", reply(), True),
-    ("one mild objection", reply([objection()]), True),
+    ("a clean deck", reply(), "publish"),
+    ("one mild note", reply([objection()]), "publish"),
 
-    ("something a reader could be harmed by", reply([objection(severity=5)]), False),
-    ("something that would be screenshotted to mock", reply([objection(severity=4)]), False),
-    ("a hard category at severity three",
-     reply([objection(category="H3_FALSE_PSYCH", severity=3)]), False),
-    # H1 needs a 4. "Dangerous" is the strongest-sounding word a critic asked
-    # for the strongest case can reach for, and it spent three decks on a
-    # hallway light, a delayed reply and an unspoken flatmate. Real harm advice
-    # does not come back at a 3.
-    ("harm advice at severity three, which is the stretch",
-     reply([objection(category="H1_HARM_ADVICE", severity=3)]), True),
-    ("harm advice at severity four, which is the real thing",
-     reply([objection(category="H1_HARM_ADVICE", severity=4)]), False),
-    # A soft category at three is a real note, not a reason to spike a deck.
-    ("a soft category at severity three", reply([objection(severity=3)]), True),
-    ("three separate small defects",
-     reply([objection(), objection(slide=6, quote="Turn the clock to the wall"),
-            objection(slide=1, quote="You woke at 2:17am")]), False),
+    # Harm and invented claims stop the deck. Nobody is asked.
+    ("a fabricated claim", reply([objection(category="H3_FALSE_PSYCH", severity=3)]), "block"),
+    ("a diagnosis handed to the reader",
+     reply([objection(category="H4_DIAGNOSIS", severity=3)]), "block"),
+    ("a real person named", reply([objection(category="H9_IDENTIFIES", severity=4)]), "block"),
 
-    ("a veto backed by a real objection", reply([objection(severity=3)], verdict="BLOCK"), False),
-    # The bug that would have stopped every post: an argument with nothing under it.
-    ("a veto with nothing under it", reply([objection(severity=2)], verdict="BLOCK"), True),
-    ("a veto with no objections at all", reply(verdict="BLOCK"), True),
+    # H1 below a 5 does not stop a deck on one reviewer's word. It was the most
+    # abused category by a distance — a hallway light, a reply left until
+    # morning, a deadbolt — and review() puts it to a second company instead.
+    ("harm advice at three, the stretch", reply([objection(category="H1_HARM_ADVICE",
+                                                           severity=3)]), "publish"),
+    ("harm advice at four, still corroborated", reply([objection(category="H1_HARM_ADVICE",
+                                                                 severity=4)]), "publish"),
+    ("harm advice at five, which stops on its own",
+     reply([objection(category="H1_HARM_ADVICE", severity=5)]), "block"),
 
-    ("low confidence", reply(confidence=0.4), False),
+    # Everything else is a number, and a person reads it.
+    ("a soft category at severity three", reply([objection(severity=3)]), "publish"),
+    ("a deck that is simply not good enough", reply(score=64), "review"),
+    ("a deck on the wrong side of the bar by one", reply(score=79), "review"),
+    ("a deck exactly on the bar", reply(score=80), "publish"),
+
+    # A veto for something that is not harm is no longer a veto. It is a note.
+    ("a veto over an editorial objection",
+     reply([objection(severity=3)], verdict="BLOCK"), "publish"),
+    ("a veto with nothing under it", reply(verdict="BLOCK"), "publish"),
+
+    # A reviewer unsure of its own answer is not evidence either way.
+    ("low confidence", reply(confidence=0.4), "review"),
 ]
 
 
@@ -79,31 +92,30 @@ def run() -> int:
     failures = []
 
     for description, answer, expected in CASES:
-        published, reason, _ = critic.decide(answer, DECK)
-        if published != expected:
-            failures.append(
-                f"{description}: expected {'publish' if expected else 'block'}, "
-                f"got {'publish' if published else 'block'} ({reason})")
+        outcome, score, reason, _ = critic.decide(answer, DECK)
+        if outcome != expected:
+            failures.append(f"{description}: expected {expected}, got {outcome} "
+                            f"(score {score}: {reason[:70]})")
 
     # An objection the model cannot quote is deleted rather than argued with.
-    published, _, kept = critic.decide(
+    outcome, _, _, kept = critic.decide(
         reply([objection(quote="a sentence that is nowhere in this deck", severity=5)]), DECK)
     if kept:
         failures.append("an unquotable objection was kept")
-    if not published:
-        failures.append("an unquotable objection still blocked the deck")
+    if outcome != "publish":
+        failures.append("an unquotable objection still stopped the deck")
 
     # Harm is the exception. The critic caught a canary deck full of dangerous
     # medical advice, quoted it loosely, the objection was dropped for not
     # matching word for word, and the deck published. Refusing a good deck costs
     # an evening; publishing advice that hurts somebody costs more than the
     # account, so a BLOCK naming a harm category stands without a usable quote.
-    for category in sorted(critic.BLOCKS_WITHOUT_A_QUOTE):
-        published, reason, _ = critic.decide(
+    for category in sorted(critic.BLOCKS_WITHOUT_A_QUOTE - {"H1_HARM_ADVICE"}):
+        outcome, _, reason, _ = critic.decide(
             reply([objection(category=category, quote="not in the deck at all", severity=5)],
                   verdict="BLOCK"), DECK)
-        if published:
-            failures.append(f"HARM a BLOCK naming {category} published for want of a quote")
+        if outcome != "block":
+            failures.append(f"HARM a BLOCK naming {category} was not honoured without a quote")
 
     # H3 was exempted from this for a while, so the critic could not dispute the
     # citation — the one line code writes, from a verified allowlist, which a
@@ -113,17 +125,17 @@ def run() -> int:
     # this critic quotes loosely and its objection was dropped for not matching
     # word for word. A fabricated statistic is a real harm. A citation dispute
     # costs a run.
-    published, _, _ = critic.decide(
+    outcome, _, _, _ = critic.decide(
         reply([objection(category="H3_FALSE_PSYCH", quote="not in the deck at all", severity=5)],
               verdict="BLOCK"), DECK)
-    if published:
+    if outcome != "block":
         failures.append("H3 an unquotable false-claim block was ignored")
 
     # The citation is protected one level down instead, which is where the
     # disputes actually appeared: an H3 objection quoting the Source Claim line
     # is dropped before any decision is made about it.
     cited = DECK + "\n- **Source Claim:** Espie found that checking the clock turns a waking into a sum.\n"
-    published, _, kept = critic.decide(
+    _, _, _, kept = critic.decide(
         reply([objection(category="H3_FALSE_PSYCH", severity=5,
                          quote="Espie found that checking the clock turns a waking into a sum")],
               verdict="BLOCK"), cited)
@@ -133,10 +145,10 @@ def run() -> int:
     # Past a couple, the model is composing rather than reading, so its approval
     # is worth no more than its objections.
     invented = [objection(quote=f"invented sentence number {i}", severity=2) for i in range(4)]
-    published, reason, _ = critic.decide(reply(invented), DECK)
-    if published:
+    outcome, _, reason, _ = critic.decide(reply(invented), DECK)
+    if outcome == "publish":
         failures.append("a reply full of invented quotes was still trusted")
-    elif "invented" not in reason:
+    elif "not in the deck" not in reason:
         failures.append(f"invented quotes were not named as the reason: {reason}")
 
     # ── the vendor rule ──
@@ -153,8 +165,9 @@ def run() -> int:
     for description, answer in [
         ("a category we never offered", reply([objection(category="H99_INVENTED")])),
         ("severity below the floor", reply([objection(severity=1)])),
-        ("a missing case for rejection", {k: v for k, v in reply().items()
-                                          if k != "case_for_rejection"}),
+        ("a missing summary", {k: v for k, v in reply().items() if k != "summary"}),
+        ("a missing score", {k: v for k, v in reply().items() if k != "score"}),
+        ("a score outside the scale", reply(score=140)),
         ("a verdict we never offered", reply(verdict="MAYBE")),
     ]:
         if not llm.validate(answer, critic.SCHEMA):

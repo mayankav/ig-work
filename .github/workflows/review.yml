@@ -1,0 +1,62 @@
+name: Decide on a held deck
+
+# A deck the reviewer scored below the bar is not thrown away and not posted. It
+# waits here. This is one of the two ways to say what happens to it — the button
+# path. The other is a reply in Telegram, and both call the same script, because
+# two code paths that post to Instagram is how you end up with two different
+# ideas of what has already gone out.
+
+on:
+  workflow_dispatch:
+    inputs:
+      decision:
+        description: "What to do with it"
+        required: true
+        default: list
+        type: choice
+        options: [list, publish, drop]
+      slug:
+        description: "Which deck. The last six characters are enough. Leave empty to list."
+        required: false
+        type: string
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: What is waiting
+        run: python .agents/skills/suresilly-carousel/scripts/release.py --list
+
+      - name: Do it
+        if: inputs.decision != 'list'
+        run: |
+          python .agents/skills/suresilly-carousel/scripts/release.py \
+            --${{ inputs.decision }} "${{ inputs.slug }}"
+
+      - name: Record the decision
+        if: inputs.decision != 'list'
+        run: |
+          git config user.name  "suresilly-bot"
+          git config user.email "bot@suresilly.local"
+          git add state/
+          git diff --staged --quiet || git commit -m "review: ${{ inputs.decision }} ${{ inputs.slug }} [skip ci]"
+          git push
+
+      - name: Say what happened
+        if: always() && inputs.decision != 'list'
+        run: |
+          python scripts/notify.py \
+            --subject "@suresilly ${{ inputs.decision }}: ${{ inputs.slug }}" \
+            --body "Decision recorded from GitHub Actions: ${{ inputs.decision }} ${{ inputs.slug }}. Job status ${{ job.status }}."

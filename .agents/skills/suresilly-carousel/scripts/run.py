@@ -26,6 +26,7 @@ that owns it, and this script only sequences them and stops on the first no.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -214,6 +215,50 @@ def invent(candidate: dict) -> tuple[memory.Moment, str]:
     # judge sometimes left the field empty, which stopped runs on moments it had
     # just allowed.
     return moment, result["subject"]
+
+
+PENDING = REPO_ROOT / "state" / "pending"
+
+
+def hold_for_review(slug: str, path: Path, score: int, reason: str,
+                    objections: list[dict]) -> None:
+    """Keep a deck back and tell the owner it is waiting.
+
+    A held deck is finished — written, checked and rendered — and it is not
+    posted. It sits here until somebody says publish or says build another. The
+    moment is used up either way, the same as any other run that produced a
+    deck, so a held deck can never come round again as a duplicate.
+
+    Nothing here decides anything. It writes a record and sends a message.
+    """
+    PENDING.mkdir(parents=True, exist_ok=True)
+    record = {
+        "slug": slug,
+        "deck": str(path.relative_to(REPO_ROOT)),
+        "score": score,
+        "reason": reason,
+        "notes": [f"{o['category']} slide {o['slide']} (severity {o['severity']}): {o['why']}"
+                  for o in objections],
+        "held_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    (PENDING / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n",
+                                          encoding="utf-8")
+
+    lines = [f"Held for you: {slug}",
+             f"Score {score} of 100, and the bar is {critic.PUBLISH_AT}.",
+             "", reason[:400], ""]
+    if record["notes"]:
+        lines += ["What the reviewer said:"] + [f"  {n}" for n in record["notes"][:6]] + [""]
+    lines += ["Reply to this message with:",
+              f"  publish {slug}    to post it as it is",
+              f"  rerun {slug}      to throw it away and build another"]
+    sheet = REPO_ROOT / path.parent / "contact_sheet.png"
+    subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "notify.py"),
+         "--subject", f"@suresilly held a deck: {slug} ({score}/100)",
+         "--body", "\n".join(lines)]
+        + (["--attach", str(sheet)] if sheet.is_file() else []),
+        cwd=REPO_ROOT, capture_output=True, text=True)
 
 
 def check_critic_canary(index: int, written_by: str) -> None:
@@ -454,10 +499,15 @@ def run(mode: str) -> int:
         # The critic must not be the vendor that wrote this. Passing the real
         # writer rather than assuming one is what keeps that true when a
         # fallback did the writing.
-        published_ok, reason, objections = critic.review(markdown, moment.text, wrote_by)
-        if not published_ok:
-            raise Stop(f"the critic refused this deck: {reason}")
-        say("critic", f"{len(objections)} objection(s), none disqualifying")
+        outcome, score, reason, objections = critic.review(markdown, moment.text, wrote_by)
+        # Three outcomes, not two. The reviewer stops a deck only for harm or a
+        # claim the deck invented; a deck that is merely not good enough is
+        # HELD, and a person decides what happens to it. That is the whole
+        # difference between a gate and a prosecutor.
+        if outcome == "block":
+            raise Stop(f"the reviewer stopped this deck: {reason}")
+        say("review", f"score {score}/100, {len(objections)} note(s), "
+                      f"{'ready' if outcome == 'publish' else 'holding for you'}")
         check_critic_canary(memory.used_count(), wrote_by)
 
         when = time.strftime("%Y%m%d", time.gmtime())
@@ -491,6 +541,11 @@ def run(mode: str) -> int:
         # pushes the slides to the public host and only then posts, because
         # Instagram fetches the images itself and cannot see a local file.
         emit_slug(slug, path)
+
+        if outcome == "review":
+            hold_for_review(slug, path, score, reason, objections)
+            say("held", f"scored {score}, below {critic.PUBLISH_AT}. Sent to you to decide")
+            return 0
 
         if mode == "publish":
             publish(path, slug)

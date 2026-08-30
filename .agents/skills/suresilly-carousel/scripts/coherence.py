@@ -267,8 +267,18 @@ def check(slides: list[dict], text_of, moment_anchors: set[str] | None = None) -
         if i < len(texts):
             earlier_words |= {w.lower() for w in _words(texts[i])}
     stray_anchors = {a for a in cheat_anchors - earlier_anchors if not a.replace(":", "").isdigit()}
+    # A taught idea has more than one word in it.
+    #
+    # This was a growing stoplist — cheat, script, protocol, fact, case, line,
+    # paragraph, clearly, rhythm — and every deck found another word for it. The
+    # stoplist was the wrong shape. What this check exists to catch is a card
+    # that introduces a NAMED PATTERN the advice never taught, and a name is a
+    # noun phrase: "sleep restriction", "waiting mode", "the countdown". A
+    # single accented word is emphasis, and the renderer colours one word per
+    # line whether or not it is an idea.
     stray_labels = {label for label in cheat_labels - earlier_labels
-                    if not {w.lower() for w in _words(label)} <= earlier_words}
+                    if len(label.split()) > 1
+                    and not {w.lower() for w in _words(label)} <= earlier_words}
     if stray_anchors or stray_labels:
         introduced = ", ".join(sorted(stray_anchors | stray_labels))
         problems.append(
