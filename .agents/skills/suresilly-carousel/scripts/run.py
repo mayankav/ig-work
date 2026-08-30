@@ -34,15 +34,26 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import abstracter  # noqa: E402
+import llm  # noqa: E402
 import memory  # noqa: E402
 import pick_moment  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 HALT_FILE = REPO_ROOT / "state" / "HALT"
 
+# How many moments to try before giving up on the run. Small on purpose: past
+# three, the problem is not the moment.
+MAX_ATTEMPTS = 3
+
 
 class Stop(Exception):
     """A layer said no. The reason is written for whoever reads the alert."""
+
+
+class Skip(Exception):
+    """This moment did not work out. There are thousands more, so the run moves
+    on rather than ending the day with nothing."""
 
 
 class NotWired(Stop):
@@ -126,14 +137,23 @@ def draw() -> dict:
 # ─────────────────────────── steps 3 to 9 ────────────────────────────
 
 def abstract(candidate: dict) -> memory.Moment:
-    """Rewrite the moment so nobody's words are republished, then discard the
-    original.
+    """Rewrite the moment so nobody's words are republished, then drop the original.
 
-    This is a model step and it is not built yet. It is also load-bearing for
-    more than tidiness: the observable fact is free to use, the author's
-    sentence is theirs, and this is the step that separates the two.
+    Load-bearing for more than tidiness: the observable fact is free to use, the
+    author's sentence is theirs, and this is the step that separates the two. The
+    original is not carried past this point and is never written to disk.
     """
-    raise NotWired("the abstraction step (layer 2, model half) is not built yet")
+    try:
+        result = abstracter.rewrite(candidate["text"])
+    except llm.ModelRefused as refused:
+        raise Skip(str(refused))
+    return memory.Moment.make(
+        text=result["moment"],
+        source="bluesky",
+        source_ref=candidate["ref"],
+        anchors=candidate.get("anchors", {}),
+        score=candidate.get("score", 0),
+    )
 
 
 # ─────────────────────────── the run ────────────────────────────
@@ -166,10 +186,29 @@ def run(mode: str) -> int:
             say("done", "looked only, nothing written or used")
             return 0
 
-        moment = abstract(best)          # raises NotWired today
+        # A moment that will not rewrite cleanly is not a failed run. The
+        # firewall refuses often and on purpose — a rewrite that keeps eight of
+        # the author's words in a row is the thing it exists to stop — and the
+        # feed has thousands more. Three refusals in a row is a different story:
+        # that is the model or the source having a bad day, and it should show
+        # up as an alert rather than as a quietly worse post.
+        moment = None
+        for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
+            try:
+                moment = abstract(candidate)
+                say("rewritten", f"on attempt {attempt}, original discarded")
+                break
+            except Skip as reason:
+                say(f"attempt {attempt}", f"refused: {reason}")
+        if moment is None:
+            raise Stop(f"no usable rewrite in {min(MAX_ATTEMPTS, len(candidates))} attempts")
+
+        print(f"\n  moment  {moment.text}\n")
+
         memory.claim(moment, run_id)     # nothing is generated before this
         claimed = moment
-        raise NotWired("the writer, the judges and the renderer are not built yet")
+        say("claimed", moment.id)
+        raise NotWired("the safety judge, the writer, the critic and the renderer are not built yet")
 
     except NotWired as reason:
         print(f"\n  stopped: {reason}")
