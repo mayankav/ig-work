@@ -582,6 +582,9 @@ FIELDS_MD = {
     "- **Plain-English Translation:**": "source_translation",
     "- **What This Explains Here:**": "source_explains",
     "- **Myth:**": "myth", "- **Reality:**": "reality",
+    # The playbook deprecated "WHAT YOU SAY" and asked for "When" and "Say".
+    # The old spellings stay so the decks already on disk still parse.
+    "- **When:**": "old_reaction", "- **Say:**": "new_reaction",
 }
 
 
@@ -603,7 +606,15 @@ def parse_markdown(path: Path) -> list[dict]:
             slides.append(cur); cur = None; continue
         for prefix, key in FIELDS_MD.items():
             if line.startswith(prefix):
-                cur[key] = line[len(prefix):].strip()
+                value = line[len(prefix):].strip()
+                # The renderer draws its own quotation marks around a spoken
+                # line, so a pair in the markdown becomes two pairs on the
+                # slide. The ❌/✅ branch below always stripped them; When and
+                # Say came in through this loop and did not, and printed
+                # ""You whisper: ..."" on a rendered slide.
+                if key in ("old_reaction", "new_reaction"):
+                    value = value.strip('"\u201c\u201d')
+                cur[key] = value
                 break
         else:
             if line.startswith("- **❌") or line.startswith("- **✗"):
@@ -909,11 +920,23 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
                             f'<p class="line">{fmt(s["reality"])}</p></section>')
             body.append("</div>")
         elif is_script:
+            # "when" and "say", not "what you say" and "try this instead".
+            #
+            # A deck went out with "You stand up and walk to the hallway."
+            # printed under WHAT YOU SAY, which is a stage direction about the
+            # reader in quotation marks under a label claiming they said it.
+            # Four more like it are on disk. The content playbook deprecated
+            # this pair years before I got here, in as many words: it "puts
+            # words in their mouth and leaks viewers who don't say that exact
+            # sentence", and it asked for a condition the reader can test
+            # instead. The code never followed.
+            #
+            # "When" takes quotation marks off too. A condition is not speech.
             if "old_reaction" in s:
-                body.append('<div class="script was"><span class="tag">what you say</span>'
-                            f'<p class="line">&ldquo;{plain(s["old_reaction"])}&rdquo;</p></div>')
+                body.append('<div class="script was"><span class="tag">when</span>'
+                            f'<p class="line">{plain(s["old_reaction"])}</p></div>')
             if "new_reaction" in s:
-                body.append('<div class="script now"><span class="tag">try this instead</span>'
+                body.append('<div class="script now"><span class="tag">say</span>'
                             f'<p class="line">&ldquo;{plain(s["new_reaction"])}&rdquo;</p></div>')
         else:
             if "h1" in s:

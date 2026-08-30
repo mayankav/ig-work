@@ -339,5 +339,16 @@
     "walking",
     "holding_board",
     "sitting"
+  ],
+  "labelcheck": [
+    "clutching",
+    "floor_slumped",
+    "standing_tall",
+    "lantern_bearer",
+    "welcoming",
+    "holding_up_m",
+    "walking_m",
+    "holding_board",
+    "sitting"
   ]
 }

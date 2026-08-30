@@ -319,32 +319,37 @@ def run() -> int:
             len(writer.pick_hashtags("not_a_subject_we_have", "x")) > 1:
         failures.append("TAGS an unknown subject produced subject tags")
 
-    # Slides 5 and 6 print under WHAT YOU SAY and TRY THIS INSTEAD, so both
-    # lines have to be things a person says. A deck that posted put "You stand
-    # up and walk to the hallway." under WHAT YOU SAY, which nobody said, and
-    # stapled a coaching question to the end of a script.
-    said = """### Slide 5 · Value Step 2
-- **\u274c Old Reaction:** "You stand up and walk to the [[hallway]]."
-- **\u2705 Regulated Response:** "I will move the cup at 11:45pm. What is the smallest action you can take?"
+    # Slides 5 and 6 print a condition and a line, under "when" and "say".
+    #
+    # They used to print under WHAT YOU SAY and TRY THIS INSTEAD, and a deck
+    # went out with "You stand up and walk to the hallway." under the first — a
+    # stage direction about the reader, in quotes, under a label saying they
+    # said it. The content playbook had already deprecated that pair in as many
+    # words. The code never followed.
+    wrong = """### Slide 5 · Value Step 2
+- **When:** "You stand up and walk to the [[hallway]]."
+- **Say:** "You whisper: the task is [[done]]. What is the smallest action you can take?"
 """
-    faults = writer.check_spoken(said)
-    if not any("not a thing they say" in f for f in faults):
-        failures.append(f"SPOKEN a stage direction under WHAT YOU SAY was accepted: {faults}")
+    faults = writer.check_spoken(wrong)
+    if not any("quotation marks" in f for f in faults):
+        failures.append(f"SPOKEN a quoted condition was accepted: {faults}")
+    if not any("narrates the reader" in f for f in faults):
+        failures.append(f"SPOKEN a Say line narrating the reader was accepted: {faults}")
     if not any("coaching" in f for f in faults):
         failures.append(f"SPOKEN a coaching question inside a script was accepted: {faults}")
 
-    # Both shapes the hand-written decks use have to stay clean: a quoted line
-    # in the reader's voice, and an unquoted behaviour. And an old reaction may
-    # ask somebody a question — that reflex is the thing being named.
-    fine = """### Slide 5 · Value Step 2
-- **\u274c Old Reaction:** Sending three rapid follow-up messages to fix the [[vibe]].
-- **\u2705 Regulated Response:** "I love you, and I am stepping outside for a [[walk]]."
+    # And the shape the playbook asked for has to stay clean. Second person is
+    # right in a condition — it is about them, and they can check it.
+    right = """### Slide 5 · Value Step 2
+- **When:** You are standing in the hallway with the cup still in your [[hand]].
+- **Say:** "I will move the cup to the [[sink]] before I sit down."
 ### Slide 6 · Value Step 3
-- **\u274c Old Reaction:** "Did I do something to upset you? Are you [[mad]]?"
-- **\u2705 Regulated Response:** "Hey, my brain is inventing a story. Are we [[good]]?"
+- **When:** The reply has been typed and not [[sent]] for ten minutes.
+- **Say:** "Hey, my brain is inventing a story. Are we [[good]]?"
 """
-    if writer.check_spoken(fine):
-        failures.append(f"SPOKEN a good deck's lines were refused: {writer.check_spoken(fine)}")
+    if writer.check_spoken(right):
+        failures.append(f"SPOKEN the shape the playbook asked for was refused: "
+                        f"{writer.check_spoken(right)}")
 
     # ── mascots ──
     for briefs, why in [

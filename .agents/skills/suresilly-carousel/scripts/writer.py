@@ -177,20 +177,26 @@ THE NINE BEATS, in order, each one earning the next:
              that posted led with "Execution freeze" and then invented "the
              traction gap" here, so a reader was handed two names and carried
              away neither. One deck, one name; this is where it is unpacked.
-  5 script   the words to say, copy-paste, with a [bracket] to fill in.
+  5 script   a condition, then the words. Two fields, two different jobs:
 
-             These two lines print under WHAT YOU SAY and TRY THIS INSTEAD, so
-             they have to be things a person says. Two shapes work: a quoted
-             line in the reader's own voice — "Yes of course! So excited!" — or
-             an unquoted behaviour — "Sending three rapid follow-up messages to
-             fix the vibe." Neither begins by telling the reader what they are
-             doing. A deck that posted put "You stand up and walk to the
-             hallway." under WHAT YOU SAY, which nobody said.
+               When: You are standing in the hallway, cup still in your hand.
+               Say:  "I will move the cup to the sink."
 
-             And the response is one thing somebody says. Do not append a
-             question to it: "I will move the cup to the sink at 11:45pm. What
-             is the smallest action you can take?" is a script with a coach
-             stapled to the end.
+             WHEN is something the reader can check against themselves right
+             now — am I doing that? It is not speech and it takes no quotation
+             marks. Second person is right here: it is about them.
+
+             SAY is a line they say out loud, in their own voice, with a
+             [bracket] to fill in. Never narrate them in it, and never ask them
+             a question: "What is the smallest action you can take?" is the page
+             talking, not the reader.
+
+             These printed under WHAT YOU SAY and TRY THIS INSTEAD until a deck
+             went out with "You stand up and walk to the hallway." in quotes
+             under a label saying the reader said it. The playbook had already
+             called that out: it puts words in their mouth and loses everybody
+             who does not happen to say that exact sentence.
+
   6 action   one move, with a time and a place named
   7 sustain  what makes it survive tomorrow
   8 cheat    the card they save. It recaps slides 4 to 7 and adds nothing new.
@@ -1059,15 +1065,15 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         "### Slide 5 · Value Step 2",
         f"- **Layout:** {LAYOUTS['script']}",
         f"- **H2:** {ensure_accent(copy['script']['h2'])}",
-        f"- **❌ Old Reaction:** \"{ensure_accent(copy['script']['old'])}\"",
-        f"- **✅ Regulated Response:** \"{ensure_accent(copy['script']['new'])}\"",
+        f"- **When:** {ensure_accent(copy['script']['old'])}",
+        f"- **Say:** \"{ensure_accent(copy['script']['new'])}\"",
         f"- **Mascot:** {mascots[4]}",
         "",
         "### Slide 6 · Value Step 3",
         f"- **Layout:** {LAYOUTS['action']}",
         f"- **H2:** {ensure_accent(copy['action']['h2'])}",
-        f"- **❌ Old Reaction:** \"{ensure_accent(copy['action']['old'])}\"",
-        f"- **✅ Regulated Response:** \"{ensure_accent(copy['action']['new'])}\"",
+        f"- **When:** {ensure_accent(copy['action']['old'])}",
+        f"- **Say:** \"{ensure_accent(copy['action']['new'])}\"",
         f"- **Body:** {ensure_accent(copy['action']['body'])}",
         f"- **Mascot:** {mascots[5]}",
         "",
@@ -1116,35 +1122,46 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
     return "\n".join(out)
 
 
-SPOKEN = re.compile(r"(?m)^- \*\*(❌ Old Reaction|✅ Regulated Response):\*\* (.+)$")
+SPOKEN = re.compile(r"(?m)^- \*\*(❌ Old Reaction|✅ Regulated Response|When|Say):\*\* (.+)$")
 ASKS_THE_READER = re.compile(r"[^.!?]*\byou(?:r|rself)?\b[^.!?]*\?")
 
 
 def check_spoken(markdown: str) -> list[str]:
-    """Slides 5 and 6 print these under "WHAT YOU SAY" and "TRY THIS INSTEAD".
+    """Slide 5 and 6 print a condition and a line. Each has to be its own thing.
 
-    So they have to be things a person says. A deck that posted put
-    "You stand up and walk to the hallway." under WHAT YOU SAY, which is not
-    something the reader said — it is a stage direction about them, in quotes.
-    Another said "You stare at the ceiling and wait for a feeling that will not
-    come."
+    These used to print under WHAT YOU SAY and TRY THIS INSTEAD, and a deck went
+    out with "You stand up and walk to the hallway." under the first — a stage
+    direction about the reader, in quotation marks, under a label claiming they
+    said it. Four more like it are on disk.
 
-    The hand-written decks show the two shapes that work: a quoted line in the
-    reader's own voice ("Yes of course! So excited!") or an unquoted behaviour
-    ("Sending three rapid follow-up messages to fix the vibe."). Neither starts
-    by telling the reader what they are doing.
+    The content playbook had already deprecated that pair, in as many words: it
+    "puts words in their mouth and leaks viewers who don't say that exact
+    sentence", and it asked for a condition the reader can test instead. So the
+    labels are "when" and "say" now, and this checks each against its own job.
+
+    WHEN is a condition. "You stand up and walk to the hallway" is a fine one —
+    the reader can ask whether they are doing that. It is not speech, so it
+    carries no quotation marks.
+
+    SAY is a line somebody says out loud. It may not begin by narrating the
+    reader, and it may not ask them a question, because a question is the page
+    talking and not the reader.
     """
     problems = []
     for label, line in SPOKEN.findall(markdown):
-        plain = re.sub(r"\[\[|\]\]", "", line).strip().strip('"“”')
-        if re.match(r"(?i)^you\b", plain):
-            problems.append(f"{label} starts \"You...\", so it is a description of the "
-                            f"reader and not a thing they say: {plain[:56]!r}")
-        # Only the response. An old reaction may well ask somebody a question —
-        # "Did I do something to upset you?" is exactly the reflex being named.
-        if "Regulated" in label and ASKS_THE_READER.search(plain):
-            problems.append(f"the response asks the reader a question, so it is coaching "
-                            f"and not a line anybody says out loud: {plain[:56]!r}")
+        plain = re.sub(r"\[\[|\]\]", "", line).strip()
+        says = label in ("Say", "✅ Regulated Response")
+        if says:
+            spoken = plain.strip('"“”')
+            if re.match(r"(?i)^you\b", spoken):
+                problems.append(f"the Say line starts \"You...\", so it narrates the reader "
+                                f"instead of giving them words: {spoken[:56]!r}")
+            if ASKS_THE_READER.search(spoken):
+                problems.append(f"the Say line asks the reader a question, which is coaching "
+                                f"and not a thing anybody says: {spoken[:56]!r}")
+        elif plain.startswith(('"', "\u201c")):
+            problems.append(f"the When line is in quotation marks, so it reads as something "
+                            f"the reader said. It is a condition they can test: {plain[:56]!r}")
     return problems
 
 
