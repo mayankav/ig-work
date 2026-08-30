@@ -35,7 +35,10 @@ from pathlib import Path
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-GEMINI_MODEL = "gemini-2.5-flash"
+# Each Gemini model has its own quota bucket, so a throttled flash does not mean
+# a throttled flash-lite. That is capacity, not independence: both are Google,
+# and neither may ever be used to check the other's work.
+GEMINI_MODELS = ("gemini-2.5-flash", "gemini-2.5-flash-lite")
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 TIMEOUT = 45
@@ -261,7 +264,16 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     }
     if schema:
         payload["generationConfig"]["responseSchema"] = _gemini_schema(schema)
-    data = _post(GEMINI_URL.format(model=GEMINI_MODEL), payload, {"x-goog-api-key": key})
+    trouble = []
+    for model in GEMINI_MODELS:
+        try:
+            data = _post(GEMINI_URL.format(model=model), payload, {"x-goog-api-key": key})
+            break
+        except RateLimited as limited:
+            trouble.append(f"{model} {limited}")
+    else:
+        raise RateLimited("; ".join(trouble), RATE_LIMIT_PAUSE)
+
     candidates = data.get("candidates") or []
     if not candidates:
         # An empty candidate list is a safety block, not an outage. It reads as
