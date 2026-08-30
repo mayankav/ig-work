@@ -27,11 +27,29 @@ gates, and records the same fingerprint as the twice-daily job. See section 7.
 |---|---|---|
 | Bluesky firehose and search | **Primary** | No key, no account, no card. About 1.8M posts a day, of which roughly 6,500 are usable first-person moments. We need 60. |
 | Our own Instagram comments | **Growing** | Lowest volume, highest quality, and the only source where people consented. Its share should rise as the page does. |
+| Bluesky firehose | **Measured and rejected** | Zero usable moments in 1,767 posts. See below. |
 | Reddit | **Not used** | Free tier is non-commercial only, and their terms ban automated access by any method, browser automation included. |
 | Everything else | **Not used** | Quora, X, YouTube comments, Tumblr, review sites and public datasets are each blocked by terms, licence, or ethics. See the source log at the end. |
 
 Bluesky's terms are silent on bulk reading. That is permission by omission, not permission.
 The source is a config value so it can be swapped without touching anything else.
+
+### Do not use the firehose
+
+Bluesky also publishes an open stream of everything posted, about 1.8 million a
+day. It looks like the better source: no phrases to guess, no assumption about
+what people are feeling this week, and the filters left to do the deciding.
+
+Measured, it produces nothing.
+
+| Source | Posts | Usable | Rate |
+|---|---|---|---|
+| Phrase search | 293 | 5 | 1.7% |
+| Firehose, 4 minutes | 1,767 | **0** | under 0.06% |
+
+An unbiased sample of the internet is bots, sport, links and other languages.
+**Bluesky's search index is doing the work, not our filters.** This was tried,
+measured and removed; do not try it again without a number that beats 1.7%.
 
 **We never publish anyone's words.** The fact of waking at 2:17am is free to use. The person's
 sentence is theirs. Every moment is rewritten before use and the original is discarded. Log that
@@ -59,6 +77,17 @@ Layers 4 and 6 use different companies on purpose. The writer never checks its o
 ### Layer 0 — Source list
 
 The deny list of crisis communities is checked **before** the request is made, not after.
+
+The search phrases decide the entire topical range of the account: every post we
+write comes from something one of them found. They are not chosen by taste.
+`scripts/probe_phrases.py` searches a candidate, runs the results through the
+same screen a real run uses, and reports the share that survives. A phrase that
+finds nothing is dropped whatever it sounded like.
+
+Two things to know when reading it. A sample of 25 cannot support a verdict, so
+it takes 100. And the screen measures shape, not subject: a post can be first
+person, filmable and about a browser tab. The rate filters, the printed examples
+decide. A phrase at 2% that finds real evenings beats one at 8% that finds noise.
 
 ### Layer 1 — Banned subject filter
 
