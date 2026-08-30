@@ -97,7 +97,7 @@ patterns*, not 70% on one.
 ### For "I'm feeling lucky" — superseded, kept for hand-written decks
 
 Do not invent a topic. Layer 1 Suggestion pulls from `references/topic-bank.md` (VOC-derived scenes),
-the VOC table, pattern gaps and trend. Layer 2 Selection scores 1-5 on Scene / Self-blame / Stealability / Freshness / Intent fit (25 total, ship ≥18). The winner must still pass the three questions below — they are the gate after scoring, not the search. See `SKILL.md` Lucky mode and `scripts/suggest_topics.py --suggest 8`. If the bank is stale (all <15), mine 10 new VOC before scoring.
+the VOC table, pattern gaps and trend. Layer 2 Selection scores 1-5 on Scene / Self-blame / Stealability / Freshness / Intent fit (25 total, ship ≥18). The winner must still pass the three questions below — they are the gate after scoring, not the search. Superseded: `run.py` chooses the moment and the angle, from the feed or from `references/concepts.json`. If the bank is stale (all <15), mine 10 new VOC before scoring.
 
 ---
 

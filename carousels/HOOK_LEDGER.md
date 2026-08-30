@@ -2,7 +2,7 @@
 
 Every deck logs its verbatims, checks and winner. No ledger entry → deck not done.
 Scoring rubric: Gap / Specificity / Relevance / Clarity / Trust = 10 each, 50 total. Ship only ≥32.
-Helper: `.agents/skills/suresilly-carousel/.venv/bin/python .agents/skills/suresilly-carousel/scripts/score_hook.py "Your hook here"`
+Hooks are checked by the hook gate in `scripts/audit_copy.py`, which `run.py` calls on every deck. (`score_hook.py` was deleted: nothing imported it.)
 
 Source of angles: `topic-bank.md` + `topic-ranking.md` (Popularity×Trust).
 Double-check required before build: audit_copy PASS + usefulness PASS + score sanity + 4 checks.

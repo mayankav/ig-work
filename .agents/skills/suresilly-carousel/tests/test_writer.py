@@ -422,6 +422,41 @@ def run() -> int:
         path.unlink(missing_ok=True)
 
     total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    # ── the field's name, on a concept deck ──
+    #
+    # A deck built from a proved concept carries a second name: the plain handle
+    # the writer coins for slide 1, and the word the field actually uses. That
+    # second word is the ONLY thing a concept deck has that a harvested one does
+    # not — without it the concept picks the subject and is then discarded, and
+    # the two channels produce identical decks.
+    #
+    # Both halves are checked, because they pull opposite ways. It has to be
+    # printed on slide 4, and it must not appear before slide 3: slide 1 is a
+    # scene in plain words, and a reader who meets a clinical term before they
+    # have recognised themselves stops reading.
+    plan = good_plan()
+    plan["beats"][3]["beat"] = "Name the pattern: clock maths. This has a name: akrasia."
+    if any("akrasia" in p for p in writer.validate_plan(plan, MOMENT, "sleep", term="akrasia")):
+        failures.append("TERM a plan that prints the term on slide 4 was refused")
+
+    # Missing from slide 4 — the concept was thrown away.
+    if not any("slide 4 does not print" in p
+               for p in writer.validate_plan(good_plan(), MOMENT, "sleep", term="akrasia")):
+        failures.append("TERM a plan that never prints the term was allowed")
+
+    # On slide 1, where the brand rule says plain words only.
+    early = good_plan()
+    early["beats"][3]["beat"] = "Name the pattern: clock maths. This has a name: akrasia."
+    early["beats"][0]["beat"] = "Akrasia. You wake at 2:17am and start working out what is left."
+    if not any("before slide 3" in p
+               for p in writer.validate_plan(early, MOMENT, "sleep", term="akrasia")):
+        failures.append("TERM the term reached slide 1 and was allowed")
+
+    # A feed deck passes no term, and nothing about it changes.
+    if writer.validate_plan(good_plan(), MOMENT, "sleep") != writer.validate_plan(
+            good_plan(), MOMENT, "sleep", term=""):
+        failures.append("TERM an empty term changed the verdict on a feed deck")
+
     if failures:
         print(f"writer: {len(failures)}/{total} failed")
         for line in failures:

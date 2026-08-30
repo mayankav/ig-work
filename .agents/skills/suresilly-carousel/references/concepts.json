@@ -28,19 +28,6 @@
       }
     },
     {
-      "id": "alice-in-wonderland-syndrome",
-      "term": "alice in wonderland syndrome",
-      "article": "Alice in Wonderland syndrome",
-      "demand": 22071,
-      "scanned_hits": 839,
-      "summary": "Alice in Wonderland Syndrome (AIWS), also known as Todd's syndrome or dysmetropsia, is a neurological disorder that distorts perception. People with this syndrome may experience distortions in their visual perception of objects, such as appearing smaller (micropsia) or larger (macropsia), or appearing to be closer (pelopsia) or farther (teleopsia) than they are. Distortion may also occur for senses other than vision. The cause of Alice in Wonderland Syndrome is unknown, but it is often associated with migraines, head trauma, or viral encephalitis caused by Epstein–Barr Virus Infection. It is a",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:24:19Z"
-      }
-    },
-    {
       "id": "classical-conditioning",
       "term": "classical conditioning",
       "article": "Classical conditioning",
@@ -77,19 +64,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:24:48Z"
-      }
-    },
-    {
-      "id": "interpersonal-relationship",
-      "term": "interpersonal relationship",
-      "article": "Interpersonal relationship",
-      "demand": 12759,
-      "scanned_hits": 32028,
-      "summary": "In social psychology, an interpersonal relation (or interpersonal relationship) describes a social association, connection, or affiliation between two or more people. It overlaps significantly with the concept of social relations, which are the fundamental unit of analysis within the social sciences. Relations vary in degrees of intimacy, self-disclosure, duration, reciprocity, and power distribution. The main themes or trends of the interpersonal relations are: family, kinship, friendship, love, marriage, business, employment, clubs, neighborhoods, ethical values, support, and solidarity. Int",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:24:59Z"
       }
     },
     {
@@ -142,19 +116,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:25:45Z"
-      }
-    },
-    {
-      "id": "hypochondria",
-      "term": "hypochondria",
-      "article": "Hypochondria",
-      "demand": 7965,
-      "scanned_hits": 67708,
-      "summary": "Hypochondriasis or hypochondria is a condition in which a person is excessively and unduly worried about having a serious illness. Hypochondria is an old concept whose meaning has repeatedly changed over its lifespan. It has been claimed that this debilitating condition results from an inaccurate perception of the condition of body or mind despite the absence of an actual medical diagnosis. An individual with hypochondriasis is known as a hypochondriac. Hypochondriacs become unduly alarmed about any physical or psychological symptoms they detect, no matter how minor the symptom may be, and are",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:25:55Z"
       }
     },
     {
@@ -223,58 +184,6 @@
       }
     },
     {
-      "id": "anosognosia",
-      "term": "anosognosia",
-      "article": "Anosognosia",
-      "demand": 5438,
-      "scanned_hits": 4900,
-      "summary": "Anosognosia is a condition in which a person with a disability is cognitively unaware of having it due to an underlying physical condition. It is one of the several types of agnosia. Anosognosia results from physiological damage to brain structures, typically to the parietal lobe or a diffuse lesion on the fronto-temporal-parietal area in the right hemisphere, and is thus a neuropsychiatric disorder. A deficit of self-awareness, the term was coined by the neurologist Joseph Babinski in 1914, in order to describe the unawareness of hemiplegia. Phenomenologically, anosognosia has similarities to",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:26:48Z"
-      }
-    },
-    {
-      "id": "attachment-disorder",
-      "term": "attachment disorder",
-      "article": "Attachment disorder",
-      "demand": 5166,
-      "scanned_hits": 5096,
-      "summary": "Attachment disorders are disorders of mood, behavior, and social relationships arising from unavailability of normal socializing care and attention from primary caregiving figures in early childhood. Such a failure would result from unusual early experiences of neglect, abuse, abrupt separation from caregivers between three months and three years of age, frequent change or excessive numbers of caregivers, or lack of caregiver responsiveness to child communicative efforts resulting in a lack of basic trust. A problematic history of social relationships occurring after about age three may be dis",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:26:59Z"
-      }
-    },
-    {
-      "id": "catfight",
-      "term": "catfight",
-      "article": "Catfight",
-      "demand": 5126,
-      "scanned_hits": 9479,
-      "summary": "Catfight (also girl fight) is a term for an altercation between two women, often characterized as involving scratching, shoving, slapping, choking, punching, kicking, wrestling, biting, spitting, hair-pulling, and clothing-shredding. It can also be used to describe women insulting each other verbally or engaged in an intense competition for men, power, or occupational success. The catfight has been a staple of American news media and popular culture since the 1940s, and use of the term is often considered derogatory or belittling. Some observers (e.g., Susan J. Douglas) argue that in its pures",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:27:03Z"
-      }
-    },
-    {
-      "id": "attachment-therapy",
-      "term": "attachment therapy",
-      "article": "Attachment therapy",
-      "demand": 4958,
-      "scanned_hits": 518,
-      "summary": "Attachment therapy (also called \"the Evergreen model\", \"holding time\", \"rage-reduction\", \"compression therapy\", \"rebirthing\", \"corrective attachment therapy\", \"coercive restraint therapy\", and \"holding therapy\") is a pseudoscientific mental health intervention intended to treat attachment disorders in children. During the height of its popularity, the practice was found primarily in the United States; much of it was centered in about a dozen locations in Evergreen, Colorado, where Foster Cline, one of its founders, established a clinic in the 1970s. The practice has resulted in adverse outcome",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:27:10Z"
-      }
-    },
-    {
       "id": "mobbing",
       "term": "mobbing",
       "article": "Mobbing",
@@ -285,19 +194,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:27:23Z"
-      }
-    },
-    {
-      "id": "homo-homini-lupus",
-      "term": "homo homini lupus",
-      "article": "Homo homini lupus",
-      "demand": 3942,
-      "scanned_hits": 7194,
-      "summary": "Homo homini lupus, or in its unabridged form Homo homini lupus est, is a Latin proverb meaning literally 'man is a wolf to man'. It is used to refer to situations where a person has behaved comparably to a wolf. In this case, the wolf represents predatory, cruel, and generally inhuman qualities.",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:27:36Z"
       }
     },
     {
@@ -327,19 +223,6 @@
       }
     },
     {
-      "id": "send-to-coventry",
-      "term": "send to coventry",
-      "article": "Send to Coventry",
-      "demand": 3524,
-      "scanned_hits": 1846,
-      "summary": "\"Send to Coventry\" is an idiom used in England meaning to deliberately ostracise someone. Typically, this is done by not talking to them, avoiding their company, and acting as if they no longer exist. Coventry is a historical cathedral city in the West Midlands county.",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:27:55Z"
-      }
-    },
-    {
       "id": "apeirophobia",
       "term": "apeirophobia",
       "article": "Apeirophobia",
@@ -350,19 +233,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:28:00Z"
-      }
-    },
-    {
-      "id": "altered-level-of-consciousness",
-      "term": "altered level of consciousness",
-      "article": "Altered level of consciousness",
-      "demand": 3302,
-      "scanned_hits": 6042,
-      "summary": "An altered level of consciousness is any measure of arousal other than normal. Level of consciousness (LOC) is a measurement of a person's arousability and responsiveness to stimuli from the environment. A mildly depressed level of consciousness or alertness may be classed as lethargy; someone in this state can be aroused with little difficulty. People who are obtunded have a more depressed level of consciousness and cannot be fully aroused. Those who are not able to be aroused from a sleep-like state are said to be stuporous. Coma is the inability to make any purposeful response. Scales such ",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:28:07Z"
       }
     },
     {
@@ -418,19 +288,6 @@
       }
     },
     {
-      "id": "bad-boy-archetype",
-      "term": "bad boy archetype",
-      "article": "Bad boy archetype",
-      "demand": 2817,
-      "scanned_hits": 12,
-      "summary": "The bad boy is a cultural archetype that is variously defined and often used synonymously with the historic terms rake or cad: a male who behaves badly, especially within societal norms. In films and other narratives, a bad boy is a type of antihero, sometimes a trickster. Such characters reject authority and traditional moral standards, following their own unique code of ethics that can unsettle those around them. Despite their often questionable or near-criminal habits, they are frequently depicted in a way that makes them relatable or even likable. \"Bad boys typically bring a lot of fire, d",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:28:39Z"
-      }
-    },
-    {
       "id": "emotional-contagion",
       "term": "emotional contagion",
       "article": "Emotional contagion",
@@ -441,32 +298,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:28:45Z"
-      }
-    },
-    {
-      "id": "amotivational-syndrome",
-      "term": "amotivational syndrome",
-      "article": "Amotivational syndrome",
-      "demand": 2652,
-      "scanned_hits": 2803,
-      "summary": "Amotivational syndrome is a chronic psychiatric disorder characterized by cognitive and emotional states such as detachment, blunted emotions and drives, deficits in executive functions like working memory and attention, disinterest, passivity, apathy, and a general lack of motivation. It is divided into two subtypes: marijuana amotivational syndrome (or cannabis-induced amotivational syndrome), caused by usage or dependency on that substance and is primarily associated with the long-term effects of cannabis use, and SSRI-induced amotivational syndrome (or SSRI-induced apathy), caused by the i",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:28:58Z"
-      }
-    },
-    {
-      "id": "co-sleeping",
-      "term": "co-sleeping",
-      "article": "Co-sleeping",
-      "demand": 2639,
-      "scanned_hits": 3238,
-      "summary": "Co-sleeping or bed sharing is a practice in which babies and young children sleep close to one or both parents, as opposed to in a separate room. Co-sleeping individuals sleep in sensory proximity to one another, where the individual senses the presence of others. This sensory proximity can either be triggered by touch, smell, taste, or noise. Therefore, the individuals can be a few centimeters away or on the other side of the room and still have an effect on the other. It is standard practice in many parts of the world, and is practiced by a significant minority in countries where cribs are a",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:29:03Z"
       }
     },
     {
@@ -493,19 +324,6 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:29:21Z"
-      }
-    },
-    {
-      "id": "autosuggestion",
-      "term": "autosuggestion",
-      "article": "Autosuggestion",
-      "demand": 2141,
-      "scanned_hits": 19130,
-      "summary": "Autosuggestion is a psychological technique related to the placebo effect, popularized internationally by pharmacist Émile Coué in the 1920s. It is a form of self-induced suggestion in which individuals guide their own thoughts, feelings, or behavior. The technique is often used in self-hypnosis. While Émile Coué created an autosuggestion craze in America in the 1920s, the technique had already been developed and widely taught by Dr. Herbert A. Parkyn through experimentation at his Chicago School of Psychology and in his 1906 book Auto-Suggestion: What It Is and How to Use It for Health, Happi",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:29:25Z"
       }
     },
     {
@@ -548,32 +366,6 @@
       }
     },
     {
-      "id": "atlas-personality",
-      "term": "atlas personality",
-      "article": "Atlas personality",
-      "demand": 1811,
-      "scanned_hits": 11,
-      "summary": "The Atlas personality, named after the story of the Titan Atlas from Greek mythology who is forced to hold up the sky, is someone obliged to take on adult responsibilities prematurely. They are as a result liable to develop a pattern of compulsive caregiving in later life.",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:29:56Z"
-      }
-    },
-    {
-      "id": "conatus",
-      "term": "conatus",
-      "article": "Conatus",
-      "demand": 1755,
-      "scanned_hits": 47328,
-      "summary": "In the philosophy of Baruch Spinoza, conatus (; Latin for \"effort; endeavor; impulse, inclination, tendency; undertaking; striving\") is an innate inclination of a thing to continue to exist and enhance itself. This thing may be mind, matter, or a combination of both, and is often associated with God's will in a pantheist view of nature. The conatus may refer to the instinctive will to live of living organisms or to various metaphysical theories of motion and inertia. Today, conatus is rarely used in the technical sense, since classical mechanics uses concepts such as inertia and conservation o",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:30:01Z"
-      }
-    },
-    {
       "id": "emotional-exhaustion",
       "term": "emotional exhaustion",
       "article": "Emotional exhaustion",
@@ -613,32 +405,6 @@
       }
     },
     {
-      "id": "disinhibited-social-engagement-disorder",
-      "term": "disinhibited social engagement disorder",
-      "article": "Disinhibited social engagement disorder",
-      "demand": 1648,
-      "scanned_hits": 125,
-      "summary": "Disinhibited social engagement disorder (DSED), also known as disinhibited attachment disorder, is an attachment disorder in which a child displays little to no fear of unfamiliar adults, and may actively approach them. The disorder can significantly impair a young child's ability to relate with adults and peers, and may put them in dangerous and potentially unsafe situations. Children with DSED may, for example, be unable to distinguish between a stranger and a parent or guardian, leaving them susceptible to abduction. DSED is exclusively classified as a childhood disorder, although some asso",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:30:32Z"
-      }
-    },
-    {
-      "id": "emotional-and-behavioral-disorders",
-      "term": "emotional and behavioral disorders",
-      "article": "Emotional and behavioral disorders",
-      "demand": 1628,
-      "scanned_hits": 5817,
-      "summary": "Emotional and behavioral disorders (EBD), also known as behavioral and emotional disorders, is a term used primarily in the United States that refers to a disability classification used in educational settings that allows educational institutions to provide special education and related services to students who have displayed poor social and/or academic progress. The classification is often given to students after conducting a Functional Behavior Analysis. These students need individualized behavior supports such as a Behavior Intervention Plan, to receive a free and appropriate public educati",
-      "verified": {
-        "terms_from": "wikipedia",
-        "phrase_checked_against": "openlibrary",
-        "at": "2026-08-30T22:30:44Z"
-      }
-    },
-    {
       "id": "allostasis",
       "term": "allostasis",
       "article": "Allostasis",
@@ -651,5 +417,25 @@
         "at": "2026-08-30T22:30:56Z"
       }
     }
-  ]
+  ],
+  "rejected": {
+    "alice in wonderland syndrome": "brain or body condition, not relational",
+    "anosognosia": "brain or body condition, not relational",
+    "altered level of consciousness": "brain or body condition, not relational",
+    "hypochondria": "brain or body condition, not relational",
+    "attachment disorder": "about children or babies",
+    "disinhibited social engagement disorder": "about children or babies",
+    "co-sleeping": "about children or babies",
+    "interpersonal relationship": "a category name, not an idea",
+    "emotional and behavioral disorders": "a category name, not an idea",
+    "conatus": "philosophy or a saying, not psychology",
+    "homo homini lupus": "philosophy or a saying, not psychology",
+    "send to coventry": "philosophy or a saying, not psychology",
+    "attachment therapy": "pseudoscience; the restraint forms have killed children",
+    "catfight": "wrong for this page",
+    "autosuggestion": "wrong for this page",
+    "amotivational syndrome": "wrong for this page",
+    "atlas personality": "too few books; not a term this field recognises",
+    "bad boy archetype": "too few books; not a term this field recognises"
+  }
 }

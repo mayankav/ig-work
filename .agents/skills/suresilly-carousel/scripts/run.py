@@ -508,6 +508,10 @@ def run(mode: str, source: str = "feed") -> int:
             moment.text, topic, title=moment.text[:40].rstrip(" .,"),
             pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
             moment_anchors=anchor_words(moment) | {plan_token(moment)},
+            # The field's name for the idea, on a concept run. It is what makes
+            # a concept deck different from a harvested one: without it the
+            # concept only picks the subject and is then thrown away.
+            term=best["term"] if source == "concept" else "",
         )
         say("written", f"by {wrote_by}, {', '.join(axes.values())}")
 

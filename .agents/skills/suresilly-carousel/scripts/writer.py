@@ -95,6 +95,32 @@ AXES = {
 
 ROLES = ("hook", "cost", "source", "name", "script", "action", "sustain", "cheat", "cta")
 
+# What a deck built on a proved concept is told about it.
+#
+# The term does NOT become the pattern name, and it must not reach slide 1.
+# Slide 1 is a scene in plain words — "bowl washing", "waiting mode" — and the
+# brand rule is that clinical vocabulary is translated, never printed raw. The
+# playbook says the same thing in its own words: recognition first, no diagnosis
+# before slide 3.
+#
+# So the reader recognises themselves first and learns the word afterwards,
+# which is also the order that makes the word stick. Slide 4 already exists to
+# explain the name slide 1 gave; this gives it a second, real name to hand over.
+TERM_BRIEF = """
+THE FIELD'S NAME FOR THIS, which is why this deck exists.
+
+  {term}
+
+Slide 4 MUST print that word and say it is what this is called. One sentence, in
+your own words, after the pattern has been explained. "This has a name:
+{term}." is enough.
+
+It must NOT appear on slide 1 or slide 2. Those are a scene in plain words, and
+a reader who meets a term before they have recognised themselves stops reading.
+You still coin your own plain handle for slide 1, exactly as always. The deck
+carries two names on purpose: yours, which they repeat, and this one, which
+they look up."""
+
 
 def draw_axes(seed: str) -> dict:
     """Pick one value per axis, deterministically from the moment.
@@ -306,7 +332,7 @@ THE THINGS IN THIS MOMENT, and the only words that count as one:
 
 CITATIONS YOU MAY USE. Return one id and the index of the claim you want.
 {citations}
-
+{term}
 Plan the deck and return the JSON object."""
 
 # A cap here is a hard failure, so caps sit only where a length genuinely breaks
@@ -477,7 +503,7 @@ def hook_ok(hook: dict, name: str = "") -> bool:
     return not hook_faults(hook, name)
 
 
-def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
+def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[str]:
     """Check the chain before any copy is written.
 
     A bad plan expanded into nine slides is nine bad slides, so this is the
@@ -589,9 +615,23 @@ def validate_plan(plan: dict, moment: str, topic: str) -> list[str]:
         problems.append(f"the cheat sheet exports something new: {', '.join(sorted(new_on_cheat))}")
 
     early = f"{beats[0]['beat']} {beats[1]['beat']}".lower()
-    for term in EARLY_JARGON:
-        if term in early:
-            problems.append(f"diagnosis word before slide 3: {term}")
+    for jargon in EARLY_JARGON:
+        if jargon in early:
+            problems.append(f"diagnosis word before slide 3: {jargon}")
+
+    # The field's name, when this deck was built on a proved concept. Both
+    # halves matter and they pull opposite ways: without the first the concept
+    # channel produces the same deck the feed does, and without the second it
+    # puts a clinical word on the only slide most people see.
+    if term:
+        wanted = term.lower()
+        if len(beats) > 3 and wanted not in beats[3]["beat"].lower():
+            problems.append(f"slide 4 does not print {term!r}. That word is the only "
+                            f"thing this deck has that a harvested one does not, and "
+                            f"slide 4 is where the name gets handed over")
+        if wanted in early:
+            problems.append(f"{term!r} appears before slide 3. The reader recognises "
+                            f"themselves first and learns the word afterwards")
 
     if not any(hook_ok(h, name) for h in plan["hooks"]):
         why = "; ".join(f"hook {i}: {', '.join(hook_faults(h, name))}"
@@ -627,8 +667,13 @@ def best_hook(plan: dict, token: str = "") -> dict:
     return sorted(usable or plan["hooks"], key=rank)[0]
 
 
-def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
+def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]:
     """Plan one deck. Returns (plan, axes, provider), or raises.
+
+    `term` is the field's name for the idea, when the deck was built from a
+    proved concept rather than from a harvested moment. It is the only thing a
+    concept deck has that a feed deck does not, and without it the two produce
+    the same deck: the concept picks the subject and is then thrown away.
 
     Two attempts. A plan that fails its own chain check twice is a signal about
     the moment, not about the model, and the feed has thousands more moments.
@@ -666,6 +711,7 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     # vocabulary. One list, taken from the checker, given to the writer.
     things = sorted(coherence.anchors_in(moment))
     user = PLAN_USER.format(
+        term=TERM_BRIEF.format(term=term) if term else "",
         moment=moment, topic=topic.replace("_", " "),
         things=", ".join(things) if things else "(nothing recognised)",
         angle=AXES["angle"][axes["angle"]],
@@ -699,7 +745,7 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
     for attempt in range(4):
         plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, plan_schema,
                                  temperature=1.0 if attempt == 0 else 0.7)
-        problems = validate_plan(plan, moment, topic)
+        problems = validate_plan(plan, moment, topic, term=term)
         if not problems:
             return plan, axes, provider
         history.append(len(problems))
@@ -1383,7 +1429,8 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
 
 
 def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
-               moment_anchors: set[str] | None = None) -> tuple[str, dict, dict, str]:
+               moment_anchors: set[str] | None = None,
+               term: str = "") -> tuple[str, dict, dict, str]:
     """Plan, draft, assemble. Returns (markdown, plan, axes, who wrote it).
 
     The provider is returned because the critic must not be the vendor that
@@ -1397,7 +1444,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     written, so the one thing this page cannot afford to get wrong is not
     something a model is able to get wrong.
     """
-    plan, axes, _ = plan_deck(moment, topic)
+    plan, axes, _ = plan_deck(moment, topic, term=term)
     citation = load_citations()[plan["citation_id"]]
     claim = citation["claims"][plan["claim_index"]]
     hook = best_hook(plan, plan["scene_token"])

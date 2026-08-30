@@ -104,7 +104,7 @@ Why rearranged: Old was `Topic → Hook → Source → Value → Humanize → Ch
 * **70% Relational / Attachment** — Bowlby/Ainsworth/Johnson/Tatkin/Gottman/Perel/Levine&Heller: `reread-okay` (scanning), `family-15-again` (reunion), `apologies-reflex`/`say-yes-resent` (fawn), `burden-feel`/`burden-boundaries`, `inbox-reread-boss` (bids) — all `sends` intent, `Visual Comparison` or `Script / Template` pattern, filmable domestic scene. This is the DM-share engine for surge.
 * **20% Emerging arbitrage** (functional freeze, waiting mode, RSD) — keep 1-2 max, not as lead, to avoid `brain did it` monotony.
 * **10% Community / Trend** — CPTSD, doomscroll only as support.
-Breakdown: 7-8 from `topic-bank.md` where `Niche pillar` contains `People-pleasing, Hypervigilance, Family, Boundaries, Self-worth` (filter `Last used == -`), 3 from VOC verbatims relational, 2 from pattern gaps. Run `suggest_topics.py --suggest 8 --intent sends` — now pillar+pattern rotation enforces no same pillar/pattern as last 2. No scene invented.
+Breakdown: 7-8 from `topic-bank.md` where `Niche pillar` contains `People-pleasing, Hypervigilance, Family, Boundaries, Self-worth` (filter `Last used == -`), 3 from VOC verbatims relational, 2 from pattern gaps. Superseded: `run.py` picks the moment and the angle. This step is a record of the manual process and the script it named has been deleted.
 
 **Layer 2 — Selection (score, then qualify).** 1-5 on: Scene filmable? / Self-blame invertibility? / Stealability? (one sentence survives DM) / Freshness (+1 emerging Rank 5-6, -1 oversaturated per HireInfluence) / Intent fit (sends ≤8w Unspoken Reality vs saves 9-12w Absolution per SocialInsider). Total 25, ship ≥18, <15 for all = bank stale → mine 10 new VOC. Winner goes through Step 0 three questions as final gate.
 
@@ -123,7 +123,7 @@ Breakdown: 7-8 from `topic-bank.md` where `Niche pillar` contains `People-pleasi
 7. **Retention Architecture.** Pace for watch time > sends > saves: Slide 1 Hook → 2 Validation (`if this is you`) → 3-4 Mechanism (one slide, not three) → 5-7 Tools (one script/pact per slide) → 8 If-Then for when it fails → 9 Loop back to slide 1 (sendable proof). Re-hooks on 4 & 6 (6-10w, body copy).
 8. **Anxious-State Stress Test.** Simulate using Protocol while dysregulated: <18w/slide, giant type, one action/slide, no calm required. Blurry vision test.
 9. **Usefulness Gate (Gate 1 of 2) — abort if fail.** PASS if 28yo could do it in next 24h without googling, <2 min, no new apps, while anxious. Checks: 24-hour without googling / Words not why (≥2 copy-paste slides) / One-moment (H1+7+8 same scene with body/number/place) / Screenshot save (slide 8 self-contained tool). Fail → back to 4.
-10. **Truth Gate (Gate 2 of 2) + Double-check.** Fact-check after usefulness: no overclaim, mechanism matches source, boundary stated, no diagnosing. Then run `audit_copy.py` (hook gate + No second-person DSM + sliding length + AI-pattern) + `score_hook.py` sanity + `HOOK_LEDGER.md` + second pair eyes (H1/H2+slide2). Only then save to `carousels/<YYYYMMDD>_<slug>/carousel.md` and `build.py`. Read contact sheet as set.
+10. **Truth Gate (Gate 2 of 2) + Double-check.** Fact-check after usefulness: no overclaim, mechanism matches source, boundary stated, no diagnosing. Then run `audit_copy.py` (hook gate + No second-person DSM + sliding length + AI-pattern) + `HOOK_LEDGER.md` + second pair eyes (H1/H2+slide2). Only then save to `carousels/<YYYYMMDD>_<slug>/carousel.md` and `build.py`. Read contact sheet as set.
 
 ### Slide arc — utility-first (ratio flipped)
 
@@ -228,7 +228,7 @@ H2 ≤7w · ≤220 characters per body slide · 8–10 slides · one `[[accent]]
 
 **DOUBLE-CHECK BEFORE BUILD — non-negotiable:**
 1. Content audit: `audit_copy.py` must pass (hook gate + no second-person diagnosis + sliding length).
-2. Hook audit: `score_hook.py` as sanity (but human > score — if screenshot test fails, rewrite even if ≥32).
+2. Hook audit: the hook gate in `audit_copy.py` (human > score — if the screenshot test fails, rewrite anyway).
 3. Ledger: `HOOK_LEDGER.md` entry with 10 mined verbatims, 3 variants, 4 checks, winner, intent, slide 2 second-cover line, re-hooks.
 4. Second pair of eyes: re-read H1/H2 + slide 2 alone — does H1 mirror a behavior you did this week, and does slide 2 pay it in one sentence? If no, do not run `build.py`.
 Only then: save to `carousels/<YYYYMMDD>_<slug>/carousel.md` and run build. A carousel that skipped the double-check is not done.

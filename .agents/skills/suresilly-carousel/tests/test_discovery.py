@@ -299,6 +299,71 @@ def run() -> int:
         finally:
             d.CONCEPTS_PATH, d.HISTORY_PATH = real_concepts, real_history
 
+    # ── a decision made by hand sticks ──
+    #
+    # Deleting a row is not enough. refresh() treats "not in the pool" as "new",
+    # so a deleted concept comes back on the very next sweep. Eighteen of the
+    # first fifty were rejected by a person, and every one of them would have
+    # returned.
+    real_concepts2, real_history2 = d.CONCEPTS_PATH, d.HISTORY_PATH
+    with tempfile.TemporaryDirectory() as tmp:
+        d.CONCEPTS_PATH = pathlib.Path(tmp) / "concepts.json"
+        d.HISTORY_PATH = pathlib.Path(tmp) / "history.json"
+        try:
+            full = {"article": "A", "verified": {}}
+            d.store([{"id": "catfight", "term": "catfight", "demand": 5126,
+                      "summary": "x", "scanned_hits": 9479, **full}])
+            if d.reject({"catfight": "wrong for this page"}) != 1:
+                failures.append("REJECT did not record a new decision")
+            if d.load_rejected().get("catfight") != "wrong for this page":
+                failures.append("REJECT did not keep the reason")
+            if any(c["term"] == "catfight" for c in d.load_pool()):
+                failures.append("REJECT left the concept in the pool")
+            # And it must not come back. refresh() filters candidates against
+            # the list, so a rejected term is never a candidate again.
+            if "catfight" not in d.load_rejected():
+                failures.append("REJECT the decision did not persist")
+            # prune drops a stored concept that has since been rejected.
+            d.store([{"id": "catfight", "term": "catfight", "demand": 5126,
+                      "summary": "x", "scanned_hits": 9479, **full}])
+            if dict(d.prune()).get("catfight") != "rejected by hand":
+                failures.append("PRUNE ignored a term rejected by hand")
+        finally:
+            d.CONCEPTS_PATH, d.HISTORY_PATH = real_concepts2, real_history2
+
+    # ── how common a term is, at both ends ──
+    #
+    # bibliography proves a term EXISTS with two hits. It says nothing about
+    # whether the term is distinctive, and once the book gates came out nothing
+    # else was asking: a sweep proved 70 of 70, including "attention".
+    if not d.MIN_INSIDE_HITS < 57:
+        failures.append(f"FLOOR MIN_INSIDE_HITS is {d.MIN_INSIDE_HITS}, which would "
+                        f"reject 'anxious-preoccupied attachment' at 57 books. A new "
+                        f"term has few books BECAUSE it is new, and those are the "
+                        f"most valuable concepts here")
+    if not 12 < d.MIN_INSIDE_HITS:
+        failures.append("FLOOR MIN_INSIDE_HITS would still admit 'bad boy archetype' "
+                        "at 12 books")
+    if not 67_708 < d.MAX_INSIDE_HITS < 243_445:
+        failures.append(f"CEILING MAX_INSIDE_HITS is {d.MAX_INSIDE_HITS}, outside the "
+                        f"measured gap between 'hypochondria' at 67,708 and "
+                        f"'altruism' at 243,445")
+
+    # ── the article says what it is ──
+    for meaning, caught in (
+        ("Attachment therapy is a pseudoscientific mental health intervention.", True),
+        ("Homo homini lupus is a Latin proverb meaning a man is a wolf.", True),
+        ("Send to Coventry is an idiom used in England meaning to ostracise.", True),
+        ("In the philosophy of Baruch Spinoza, conatus is an innate inclination.", True),
+        # And it must not reach the clinical terms it sits next to.
+        ("Alexithymia is a neuropsychological phenomenon characterized by "
+         "difficulties processing emotion.", False),
+        ("An amygdala hijack is an immediate and overwhelming emotional response.", False),
+    ):
+        if bool(d.NOT_PSYCHOLOGY.search(meaning)) != caught:
+            failures.append(f"TELL {'missed' if caught else 'wrongly caught'}: "
+                            f"{meaning[:56]!r}")
+
     # ── the veto may only ever remove ──
     #
     # A reply naming a term nobody asked about is answering a different question,

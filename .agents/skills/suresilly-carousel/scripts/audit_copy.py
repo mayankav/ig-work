@@ -143,7 +143,7 @@ def audit(path: Path) -> list[str]:
         # Soft warning, not abort, but flag so intent must be declared
         # Check ledger for intent — if deck declares saves intent, allow; otherwise warn
         # For now warn as issue but not abort? We keep as warning via print, but audit must still pass for saves.
-        # So we only abort >12; 9-12 is a soft check handled in score_hook / ledger.
+        # So we only abort >12; 9-12 is a soft check handled in the ledger.
         pass
     if hook.get("h2") and len(words(hook["h2"])) > 7:
         issues.append(f"slide 1 subtitle is {len(words(hook['h2']))} words; max is 7")

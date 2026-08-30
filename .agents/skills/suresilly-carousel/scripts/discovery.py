@@ -363,6 +363,15 @@ def demand(title: str, start: str, end: str) -> int:
 
 MIN_DEMAND = 200
 
+# What the article says it is, when that alone rules it out. Checked against
+# every concept kept in the first pool, and none of them match: "alexithymia" is
+# a "neuropsychological phenomenon" and survives, because this names the thing
+# the article calls it rather than any word containing "neuro".
+NOT_PSYCHOLOGY = re.compile(
+    r"\b(pseudoscientific|pseudoscience|latin proverb|proverb|"
+    r"is an idiom|is a idiom|idiom used|"
+    r"in the philosophy of|is a cultural archetype)\b", re.I)
+
 # How many scanned books a term may appear in before it stops being a term of
 # art and starts being an ordinary word.
 #
@@ -383,6 +392,16 @@ MIN_DEMAND = 200
 # makes at the bottom end — "a short common word proves nothing by appearing in
 # scanned books" — applied at the top.
 MAX_INSIDE_HITS = 100_000
+
+# And the floor, which bibliography sets at 2 for "does this exist at all".
+#
+# "Atlas personality" appears in 11 scanned books and "bad boy archetype" in 12.
+# Both proved cleanly and neither is a term anybody in this field would
+# recognise. The floor is deliberately low, because the most valuable concepts
+# here are the NEW ones and a new term has few books by definition: "bed
+# rotting" is 61 and "anxious-preoccupied attachment" is 57, and both are worth
+# more than most of the pool. So this sits below those and above the pair above.
+MIN_INSIDE_HITS = 40
 
 
 # ─────────────────────── the veto ───────────────────────
@@ -513,6 +532,9 @@ def prove(term: str, title: str, start: str, end: str) -> dict:
     # fail-closed behaviour: "we could not check" must never come out the same
     # as "we checked".
     hits = bibliography.verify_phrase(term)
+    if hits < MIN_INSIDE_HITS:
+        raise Unavailable(f"{term!r} appears in only {hits} scanned books, so it is "
+                          f"not a term this field would recognise")
     if hits > MAX_INSIDE_HITS:
         raise Unavailable(f"{term!r} appears in {hits:,} scanned books, which makes "
                           f"it an ordinary word rather than a term of art")
@@ -520,6 +542,14 @@ def prove(term: str, title: str, start: str, end: str) -> dict:
     meaning = summary(title)
     if len(meaning) < 80:
         raise Unavailable(f"no usable summary for {term!r}")
+    # The article usually says outright what kind of thing it is describing, and
+    # three of the eighteen hand-rejected concepts were caught by their own first
+    # sentence: "Attachment therapy is a pseudoscientific mental health
+    # intervention", "Homo homini lupus is a Latin proverb", "Send to Coventry is
+    # an idiom used in England". Cheaper to read that than to guess from the term.
+    tell = NOT_PSYCHOLOGY.search(meaning)
+    if tell:
+        raise Unavailable(f"the article calls {term!r} a {tell.group(0)}")
 
     views = demand(title, start, end)
     if views < MIN_DEMAND:
@@ -572,6 +602,38 @@ CONCEPT_FIELDS = ("id", "term", "article", "demand", "scanned_hits",
                   "summary", "verified")
 
 
+def load_rejected() -> dict[str, str]:
+    """Terms a person has decided against, and why.
+
+    A rule cannot catch everything, and it should not try. Of the first fifty
+    concepts proved, eighteen were rejected by hand: a pseudoscientific therapy,
+    a Latin proverb, an English idiom, a sexist trope, four brain conditions,
+    three about children, two category names. A few of those share a pattern
+    worth a rule. Most do not, and writing eighteen regexes to encode one
+    person's eighteen judgements is how a filter becomes unreadable.
+
+    So a decision is recorded instead of inferred. This is the difference
+    between deleting a row and rejecting a term: a deleted row comes back on the
+    next sweep, because refresh() skips only what is already in the pool and a
+    deleted concept is no longer in it.
+    """
+    return _read(CONCEPTS_PATH, {}).get("rejected", {})
+
+
+def reject(terms: dict[str, str]) -> int:
+    """Record a decision against these terms. Returns how many were new."""
+    data = _read(CONCEPTS_PATH, {"_note": NOTE, "concepts": []})
+    rejected = data.setdefault("rejected", {})
+    before = len(rejected)
+    for term, why in terms.items():
+        rejected[term.lower()] = why
+    data["concepts"] = [c for c in data.get("concepts", [])
+                        if c["term"].lower() not in rejected]
+    CONCEPTS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+    return len(rejected) - before
+
+
 def load_pool() -> list[dict]:
     return _read(CONCEPTS_PATH, {"concepts": []}).get("concepts", [])
 
@@ -613,8 +675,12 @@ def prune() -> list[tuple[str, str]]:
     whether we should be writing about it. Run it after any filter change.
     """
     pool = load_pool()
+    refused_before = load_rejected()
     kept, dropped = [], []
     for concept in pool:
+        if concept["term"].lower() in refused_before:
+            dropped.append((concept["term"], "rejected by hand"))
+            continue
         family = banned_concept(concept["term"])
         if family:
             dropped.append((concept["term"], family))
@@ -744,8 +810,14 @@ def refresh(start: str, end: str, limit: int = 40, scan: int = 250,
     again, and what is already proved is skipped on the way in.
     """
     known = {c["id"] for c in load_pool()}
+    # A term somebody has already decided against never comes back, however well
+    # it would score. Without this a rejected concept returns on the next sweep,
+    # because it is no longer in the pool and "not in the pool" is what makes a
+    # candidate look new.
+    refused_before = load_rejected()
     candidates = [(t, term) for t, term in titles(categories)
-                  if re.sub(r"[^a-z0-9]+", "-", term).strip("-") not in known]
+                  if re.sub(r"[^a-z0-9]+", "-", term).strip("-") not in known
+                  and term.lower() not in refused_before]
 
     batch = candidates[:scan]
     vetoed: set[str] = set()
@@ -783,6 +855,10 @@ def main() -> None:
     ap.add_argument("--refresh", action="store_true", help="sweep and prove new concepts")
     ap.add_argument("--list", action="store_true", help="show the pool")
     ap.add_argument("--pick", action="store_true", help="show the concept a run would use")
+    ap.add_argument("--reject", nargs="+", metavar="TERM",
+                    help="record a decision against these terms, permanently")
+    ap.add_argument("--why", default="rejected by hand",
+                    help="the reason to record with --reject")
     ap.add_argument("--prune", action="store_true",
                     help="re-check the stored pool against today's rules. No network")
     ap.add_argument("--limit", type=int, default=40,
@@ -808,6 +884,12 @@ def main() -> None:
             for reason, count in sorted(report["refused"].items(), key=lambda kv: -kv[1]):
                 print(f"  {str(count).rjust(4)}  {reason}")
         raise SystemExit(0 if report["added"] else 1)
+
+    if args.reject:
+        added = reject({t: args.why for t in args.reject})
+        print(f"rejected {added} new term(s), {len(load_rejected())} on the list, "
+              f"{len(load_pool())} concepts left")
+        raise SystemExit(0)
 
     if args.prune:
         dropped = prune()

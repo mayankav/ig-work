@@ -139,7 +139,8 @@ jobs:
           git add state carousels .agents/skills/suresilly-carousel/mascot/usage_history.json \
                   .agents/skills/suresilly-carousel/palette_history.json \
                   .agents/skills/suresilly-carousel/citation_history.json \
-                  .agents/skills/suresilly-carousel/references/citations.json || true
+                  .agents/skills/suresilly-carousel/references/citations.json \
+                  .agents/skills/suresilly-carousel/concept_history.json || true
           git commit -m "auto: ${{ steps.build.outputs.slug || 'no deck' }} [skip ci]" || echo "nothing to record"
           git pull --rebase --quiet || true
           git push || echo "push failed, next run will retry"
@@ -165,3 +166,75 @@ jobs:
           else
             python scripts/notify.py --subject "$SUBJECT" --body "$BODY"
           fi
+
+  # ── topping up the concept vocabulary ────────────────────────────────
+  #
+  # A separate job, and that is the whole point. Proving concepts takes about
+  # eight minutes and the post job is capped at 25, so doing this inline would
+  # eventually push a real post past the cap and lose it. Here it runs AFTER the
+  # post has gone out, so it cannot delay one and cannot fail one.
+  #
+  # Every fifth deck, because each deck spends a concept and nothing else
+  # replaces them. Left alone, 32 concepts is sixteen days and then
+  # `--source concept` returns nothing at all.
+  topup:
+    needs: post
+    if: always() && vars.SS_HALT != '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    steps:
+      # Checked out fresh, after the post job has pushed, so the deck it just
+      # built is counted.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
+
+      # Two conditions, and both have to hold. Every fifth deck is the schedule;
+      # the ceiling stops the pool growing without bound, because a top-up adds
+      # more than the five decks between top-ups spend.
+      - name: Is a top-up due?
+        id: due
+        run: |
+          python - <<'EOF' >> "$GITHUB_OUTPUT"
+          import sys
+          sys.path.insert(0, ".agents/skills/suresilly-carousel/scripts")
+          import discovery, memory
+          decks, pool = memory.used_count(), len(discovery.load_pool())
+          due = decks % 5 == 0 and pool < 60
+          print(f"due={'yes' if due else 'no'}")
+          print(f"note={decks} decks, {pool} concepts")
+          EOF
+
+      - name: Prove more concepts
+        if: steps.due.outputs.due == 'yes'
+        run: |
+          echo "${{ steps.due.outputs.note }}"
+          # Adding nothing is an ordinary outcome — the gates are strict — so a
+          # non-zero exit here is not a failure of the run.
+          python .agents/skills/suresilly-carousel/scripts/discovery.py \
+            --refresh --scan 250 --limit 25 || echo "nothing new survived the gates"
+
+      - name: Record what was proved
+        if: steps.due.outputs.due == 'yes'
+        run: |
+          git config user.name "suresilly-bot"
+          git config user.email "bot@suresilly.com"
+          git add .agents/skills/suresilly-carousel/references/concepts.json \
+                  .agents/skills/suresilly-carousel/concept_demand.json || true
+          git commit -m "auto: topped up the concept vocabulary [skip ci]" || echo "nothing to record"
+          git pull --rebase --quiet || true
+          git push || echo "push failed, next top-up will retry"

@@ -1,4 +1,8 @@
-# Topic Ranking — Popularity × Trust (2024-2026) — for Layer 1 Suggestion
+# Topic Ranking — Popularity × Trust (2024-2026)
+
+> **Superseded. No script reads this file.** Kept because the research behind it is
+> sound and informed how the engine was built. Topics are now chosen by the two live
+> channels — `sources.py` phrases and `references/concepts.json` — not from this table.
 
 Source synthesis from 3 research streams 2026-08-28. Ranked for @suresilly (general psychology carousel, 1080x1350, 7-10 slides).
 
