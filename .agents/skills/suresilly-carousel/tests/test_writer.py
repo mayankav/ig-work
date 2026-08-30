@@ -116,7 +116,7 @@ def run() -> int:
     # loud in their own kitchen — which this file caused, by telling slides 4 to
     # 7 to reuse slide 3's words without saying to leave the sentence behind.
     repeats = writer.check_repeats(SHIPPED_BROKEN)
-    if sum("printed 2 times" in p for p in repeats) != 2:
+    if sum("are the same line" in p for p in repeats) != 2:
         failures.append(f"REPEAT duplicated lines were not both caught: {repeats}")
     if not any("out loud" in p for p in repeats):
         failures.append("REPEAT a script quoting the researcher was accepted")

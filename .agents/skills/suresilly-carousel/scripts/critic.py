@@ -209,8 +209,21 @@ def decide(answer: dict, deck: str) -> tuple[bool, str, list[dict]]:
     Returns (publish, reason, the objections that survived).
     """
     flat_deck = _flat(deck)
+    # The one line in the deck that code wrote. It comes from a verified
+    # allowlist and a model cannot check it against the book it names, so its
+    # opinion of it is noise — and expensive noise: a cross-vendor critic
+    # refused a whole deck with "not supported by the book", which it has no
+    # way to know. The prompt says so in three places and it happened anyway,
+    # so it is enforced here instead of asked for.
+    claim_line = re.search(r"(?m)^- \*\*Source Claim:\*\* (.+)$", deck)
+    claim_flat = _flat(claim_line.group(1)) if claim_line else ""
+
     kept, dropped = [], 0
     for objection in answer["objections"]:
+        if objection["category"] == "H3_FALSE_PSYCH" and claim_flat:
+            quoted = _flat(objection["quote"]).strip()
+            if quoted and (quoted in claim_flat or claim_flat in quoted):
+                continue
         if _flat(objection["quote"]).strip() and _flat(objection["quote"]).strip() in flat_deck:
             kept.append(objection)
         else:

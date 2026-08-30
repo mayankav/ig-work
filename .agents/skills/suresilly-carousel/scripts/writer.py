@@ -161,9 +161,12 @@ THE NINE BEATS, in order, each one earning the next:
   2 cost     what it costs. This is served on its own to people who did not
              swipe, so it must work with no slide 1 in front of it.
   3 source   the citation, then ONE sentence connecting it to the name.
-             The citation line is written for you and you do not touch it. Your
-             sentence starts from the NAME and uses the finding to explain it,
-             and it must not repeat the finding's wording:
+             The citation line is written for you and you do not touch it.
+
+             YOUR SENTENCE BEGINS WITH THE NAME. Literally the first words.
+             Then say what the finding explains about it, in your own words.
+             This is the single fault that stalls more drafts than any other,
+             and it is the easiest to avoid: start typing the name.
                claim    "Walker found that keeping the peace becomes automatic."
                yours    "Peace keeping is why the sink still has you at 11pm."
              Copying the claim under a second heading is the fastest way to
@@ -217,7 +220,10 @@ RULES
     "You" means anybody, in the present. It does not mean one person doing one
     thing at one hour.
       Right:  Bowl washing. You cannot sit down until the counter is [[clear]].
+              (11 words. Count them before you return it — every hook in one
+               rejected plan ran to 14 and 15, and the cap is 12.)
       Right:  Waiting mode. The whole day gets held for one [[appointment]].
+              (11 words.)
       Wrong:  You stood in the kitchen at 11pm washing bowls that were [[clean]].
     The wrong one reads as somebody else's Tuesday. The reader has their own
     kitchen and their own hour, and an invented one competes with the real
@@ -363,6 +369,13 @@ def hook_faults(hook: dict) -> list[str]:
         faults.append("em dash")
     if SEESAW.search(h1):
         faults.append('the "not X, it is Y" shape')
+    # Slide 1 is checked for a thing a camera could point at, and slide 1 IS
+    # this hook, written on unchanged. Catching it here means the PLAN retries,
+    # which can choose a different hook; catching it later meant the draft loop
+    # was asked to repair a slide it does not write, and it plateaued at one
+    # remaining fault for seven attempts running.
+    if not coherence.anchors_in(h1):
+        faults.append("h1 names nothing a camera could point at")
     return faults
 
 
@@ -536,15 +549,22 @@ def plan_deck(moment: str, topic: str) -> tuple[dict, dict, str]:
         citations=listing,
     )
 
-    trouble: list[str] = []
+    # Repair from the BEST plan so far, the same as the draft loop. Starting
+    # each attempt from whatever came back last lets a fixed fault come back.
     attempt_user = user
-    for attempt in range(3):
+    best_plan: dict | None = None
+    best_problems: list[str] | None = None
+    history: list[int] = []
+    for attempt in range(4):
         plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, PLAN_SCHEMA,
                                  temperature=1.0 if attempt == 0 else 0.7)
         problems = validate_plan(plan, moment, topic)
         if not problems:
             return plan, axes, provider
-        trouble.extend(problems)
+        history.append(len(problems))
+        if best_problems is None or len(problems) < len(best_problems):
+            best_plan, best_problems = plan, problems
+        plan, problems = best_plan, best_problems
         # Retrying blind asks the same model the same question and tends to get
         # the same answer. The complaints are literal, so hand them back and
         # lower the temperature: this is no longer a search for an angle, it is
@@ -752,7 +772,15 @@ DRAFT_SCHEMA = {
         "cost": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 140},
                                 "body": {"type": "string", "maxLength": 280}}},
-        "explains": {"type": "string", "maxLength": 280},
+        # The description is rewritten per deck in write_deck() with the real
+        # name in it. A rule stated once in the system prompt was missed seven
+        # attempts running: the model is filling in a field called "explains"
+        # and the instruction was three hundred lines away talking about
+        # "slide 3's last line".
+        "explains": {"type": "string", "maxLength": 280,
+                     "description": "Slide 3's last line. MUST BEGIN with the pattern name "
+                                    "from the plan, word for word, then say what the finding "
+                                    "explains about it. Never restate the source claim."},
         "name": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 60},
                                 "body": {"type": "string", "maxLength": 220}}},
@@ -962,19 +990,29 @@ def check_repeats(markdown: str) -> list[str]:
     thread is supposed to carry the IDEA forward, never the sentence.
     """
     problems = []
-    fields = re.findall(r"(?m)^- \*\*(?:H1|H2|Body|Source Claim|"
-                        r"What This Explains Here|❌ Old Reaction|✅ Regulated Response|"
-                        r"Callout|Closing thought):\*\* (.+)$", markdown)
-    seen: dict[str, int] = {}
-    for line in fields:
-        key = re.sub(r"[^a-z0-9 ]", "", line.lower()).strip()
+    # Which SLIDE and which FIELD, both times. A run in CI went 6 faults, then
+    # 2, then 1, then stalled at 1 for three attempts: the model was told a line
+    # appeared twice and not where either copy was, so it had nowhere to look.
+    slide = 0
+    seen: dict[str, list[str]] = {}
+    for line in markdown.splitlines():
+        heading = re.match(r"^### Slide (\d+)", line)
+        if heading:
+            slide = int(heading.group(1))
+            continue
+        field = re.match(r"^- \*\*(H1|H2|Body|Source Claim|What This Explains Here|"
+                         r"❌ Old Reaction|✅ Regulated Response|Callout|Closing thought)"
+                         r":\*\* (.+)$", line)
+        if not field:
+            continue
+        key = re.sub(r"[^a-z0-9 ]", "", field.group(2).lower()).strip()
         if len(key.split()) < 4:
             continue
-        seen[key] = seen.get(key, 0) + 1
-    for key, count in seen.items():
-        if count > 1:
-            problems.append(f"the same line is printed {count} times: {key[:60]!r}. "
-                            f"Every field says something the deck has not said yet")
+        seen.setdefault(key, []).append(f"slide {slide}'s {field.group(1)}")
+    for key, places in seen.items():
+        if len(places) > 1:
+            problems.append(f"{' and '.join(places)} are the same line: {key[:52]!r}. "
+                            f"Keep one, and write the other from scratch")
 
     # Only the lines a reader is told to SAY. Naming the researcher elsewhere is
     # ordinary and every hand-written deck does it, in the alt text and in
@@ -1059,10 +1097,40 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # rule the model was never shown, then repaired one stray word at a time
     # across three attempts. Saying it once up front is cheaper and it works.
     scene = ", ".join(sorted(moment_anchors)) if moment_anchors else "(none recorded)"
+
     # The checker's own vocabulary, handed over rather than described. Telling a
     # model to "connect back to slide 3" failed in every run; telling it which
     # words count is the same fix that worked for the scene token.
     thread = ", ".join(sorted(coherence.content(claim))[:24])
+
+    # Put the deck's actual name into the field description, so the rule is
+    # sitting next to the box the model is filling in rather than in a wall of
+    # prose above it.
+    name = plan.get("pattern_name", "").strip()
+    schema = json.loads(json.dumps(DRAFT_SCHEMA))
+    if name:
+        schema["properties"]["explains"]["description"] = (
+            f'Slide 3\'s last line. MUST BEGIN with the exact words "{name}", then say what '
+            f'the finding explains about {name}. Never restate the source claim.')
+
+    # Same treatment for the other two rules that stall a draft. Both were
+    # stated in the system prompt and both were missed for five attempts
+    # running; put on the field, with this deck's own words in them, they are
+    # sitting next to the box being filled in.
+    if scene and moment_anchors:
+        schema["properties"]["cost"]["properties"]["body"]["description"] = (
+            f"Slide 2. Instagram re-serves a carousel starting HERE to anyone who did not "
+            f"swipe, so it is a second cover and has to work with slide 1 unseen. It MUST "
+            f"name one of these out loud: {scene}. A slide 2 with no thing in it is a "
+            f"caption, and it is checked.")
+    if thread:
+        for field, slide in (("name", 4), ("script", 5), ("action", 6), ("sustain", 7)):
+            spec = schema["properties"].get(field, {})
+            target = spec.get("properties", {}).get("body") or spec
+            target["description"] = (
+                f"Slide {slide}. MUST contain at least one of these words, which come from "
+                f"the finding on slide 3: {thread}. One is enough. A slide that shares no "
+                f"word with slide 3 is advice for a different deck, and it is checked.")
     user = DRAFT_USER.format(
         plan=json.dumps(plan, indent=2), scene=scene, thread=thread,
         h1=hook["h1"], h2=hook["h2"], claim=claim,
@@ -1088,9 +1156,14 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     attempt_user = user
     best_copy: dict | None = None
     best_problems: list[str] | None = None
+    # Seven, not five. With the best draft carried forward the fault count
+    # falls steadily — a CI run went 6, 2, 1 and a local one 4, 4, 4, 2, 1 —
+    # and both ran out of attempts one short of clean. Each attempt is one call
+    # against a hundred a day, and a run that stops at one remaining fault has
+    # already paid for the plan, the judge and the composer.
     history: list[int] = []
-    for attempt in range(5):
-        copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, DRAFT_SCHEMA,
+    for attempt in range(7):
+        copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, schema,
                               temperature=0.6 if attempt == 0 else 0.4)
         markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
                             title, pattern, pillar)
