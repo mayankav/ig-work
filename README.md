@@ -32,6 +32,8 @@ manual build cannot quietly repeat a moment the schedule already spent.
 | `--publish` | Build and post. This is what the schedule runs. |
 | `--no-post` | Build, render, keep the deck. **Still uses up the moment.** |
 | `--dry-run` | Look at the feed and stop. Writes nothing and builds nothing. |
+| `--source feed` | Where the idea comes from: a harvested post. The default. |
+| `--source concept` | Where the idea comes from: a proved concept from the vocabulary. |
 
 A run that produces a deck consumes its moment whether or not it posts. A deck
 sitting on your laptop is still a deck, and if it did not retire its moment the
@@ -40,16 +42,48 @@ same evening would come round again weeks later with nobody the wiser.
 To stop everything: set the repository variable `SS_HALT` to `1`, or commit a
 file at `state/HALT`. Either one refuses the next run before it does anything.
 
+### Two channels, one funnel
+
+An idea reaches a deck one of two ways, and both end in the same place: one
+invented moment with a subject from the closed list.
+
+**The feed** knows what people are actually doing this week and the words they
+use for it. It is 46 measured search phrases. It was 18, and those turned out
+to be the account's entire subject range — five about a phone, five about the
+night, and three of the first seven decks set on a bed. The 28 added on
+2026-08-31 were each measured with `probe_phrases.py` before being trusted.
+
+**The vocabulary** knows what any of it is called. `references/concepts.json`
+holds terms of art discovered from public category listings, each proved to
+appear in at least two scanned books, each ranked on measured demand. It names
+no book: `bibliography.py` finds and proves the citation for every deck, as it
+always has.
+
+```bash
+# grow the vocabulary — safe to stop and rerun, it saves as it goes
+.agents/skills/suresilly-carousel/.venv/bin/python \
+  .agents/skills/suresilly-carousel/scripts/discovery.py --refresh
+
+# see what is in it, and what the next concept run would use
+.agents/skills/suresilly-carousel/scripts/discovery.py --list
+.agents/skills/suresilly-carousel/scripts/discovery.py --pick
+```
+
+No condition is ever hardwired. There is no OCD topic and no ADHD topic. What
+there is, is a route by which such a term can arrive on its own, with measured
+demand behind it, and be ranked against everything else. The harm and scope
+families reject a concept exactly as they reject a moment.
+
 ---
 
 ## What a run actually does
 
 | # | Step | Decided by |
 |---|---|---|
-| 0 | Read a public feed for posts that carry a small, ordinary moment | rules |
+| 0 | Read a public feed, OR take the best unused concept from the vocabulary | rules |
 | 1 | Reject anything matching nine families of harm | rules |
 | 2 | Keep what is filmable, rank what has tension in it | rules |
-| 3 | Read the post as a SEED and invent our own moment from it | a model |
+| 3 | Invent our own moment — from the seed, or from what the concept means | a model |
 | 4 | Decide whether that moment may be published at all | a model, then rules |
 | 5 | Plan the argument, name the pattern, write nine slides | a model |
 | 6 | Argue against publishing it, from a different company's model | a model, then rules |

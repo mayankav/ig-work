@@ -303,6 +303,127 @@ def verify(seed: str, moment: str) -> list[str]:
     return problems
 
 
+CONCEPT_SYSTEM = SYSTEM.replace(
+    """You are given one real post from a public feed. You never quote it,
+repeat it or rewrite it. You read it to learn what KIND of evening somebody had,
+and then you invent a different one of your own.
+
+You may read the whole post, names and all. Nothing you read is secret. What
+matters is only what you WRITE, and what you write must name nobody.
+
+THE SEED gives you two things:
+  the subject      sleep, anxiety, burnout, executive dysfunction, self worth,
+                   boundaries, people pleasing, or numbing
+  the situation    the ordinary problem underneath, in one plain phrase
+
+INVENT A MOMENT that carries the same problem in a different scene. Different
+hour, different room, different words. If the seed is a flatmate let in at 1am,
+yours might be a message answered at 11pm. The same problem, never the same
+evening.""",
+    """You are given the name of one idea from psychology and a short
+description of what it means. You never quote the description, repeat it or
+rewrite it. You read it to understand what the idea IS, and then you invent an
+ordinary evening in which somebody is doing it without knowing its name.
+
+THE CONCEPT gives you two things:
+  the term         what the field calls this, which the reader has never heard
+  the meaning      a short description of what the term refers to
+
+INVENT A MOMENT in which this happens to somebody. Not an explanation of the
+idea and not an example of the idea: one evening, one person, one small thing
+they did. The reader must recognise themselves before anybody names anything.
+
+  term     "just-right feeling"
+  wrong    "I kept doing it until I got the just-right feeling."
+           That is the term wearing a costume. Nobody talks like that.
+  right    "I turned the light off and on again at 11pm because the first time
+            did not feel finished."
+
+The term itself must NOT appear in what you write. Neither must any part of the
+description. The moment is what the idea looks like from inside, before it has a
+name, and naming it is a job for a later slide.
+
+THE ONE MISTAKE TO AVOID, and working from an idea makes it almost automatic.
+
+You will want to write a moment that DEMONSTRATES the idea, so you will keep
+adding to it until every part of the idea is in there. That is how you get 35
+words with no room in it:
+
+  wrong  "At 8:15pm I stood by the desk and smiled at my manager, then sat back
+          down and opened the laptop again to finish the report even though I
+          was tired."
+
+Everything after the first comma is you explaining. It is one clause too many,
+it has no room in it and no feeling, and it was refused.
+
+  right  "At 8:15pm I said yes to the extra report and then sat in my car in the
+          dark for ten minutes."
+
+ONE thing happened. Under 30 words, and count them. A room or an object you
+could photograph. A plain word for how it felt. The idea does not need to be
+demonstrated, because eight more slides are coming — the moment only has to be
+the evening it happened on.""")
+
+# str.replace does nothing when it finds nothing, and it says nothing about it.
+# Editing one word of SYSTEM above would leave CONCEPT_SYSTEM holding the SEED
+# prompt in full, so every concept run would be handed a concept brief under
+# instructions that begin "You are given one real post from a public feed" — and
+# it would keep working, badly, with no error anywhere. Cheaper to refuse to
+# import than to find that out from the copy.
+if CONCEPT_SYSTEM == SYSTEM or "one real post from a public feed" in CONCEPT_SYSTEM:
+    raise RuntimeError(
+        "compose.CONCEPT_SYSTEM did not build: the block it replaces has been "
+        "edited in SYSTEM. Re-copy the seed paragraphs into the replace() above.")
+
+
+def from_concept(term: str, meaning: str, nonce: str = "7f3a2c") -> dict:
+    """Invent a moment that shows one concept happening. The other direction.
+
+    `invent` reads a stranger's evening and asks what it is about. This reads
+    what an idea IS and asks what an evening containing it looks like. Both end
+    in the same place — one filmable moment, a subject from the closed list —
+    so everything downstream is unchanged and does not need to know which
+    channel produced the deck.
+
+    Why the page needs both: the feed knows what people are actually doing this
+    week and the words they use for it, and the literature knows what any of it
+    is called. Eighteen search phrases turned out to BE the account's whole
+    subject range, and three of the first seven decks were set on a bed. A
+    channel that starts from an idea does not have that ceiling.
+
+    The description is checked exactly the way a harvested post is checked: no
+    run of seven words survives into what we publish. A reference work's
+    sentence is not more reusable than a stranger's.
+    """
+    trouble: list[str] = []
+    complaint = ""
+    brief = (f"CONCEPT-{nonce}-BEGIN\nterm: {term}\nmeaning: {meaning}\n"
+             f"CONCEPT-{nonce}-END\n\nInvent the moment and return the JSON.")
+    for _ in range(3):
+        answer, provider = llm.ask(CONCEPT_SYSTEM, brief + complaint, SCHEMA,
+                                   temperature=0.7)
+        if answer["injection"]:
+            raise llm.ModelRefused("the concept brief tried to give instructions")
+        moment = answer["moment"]
+        problems = verify(meaning, moment)
+        # The term is the one word the deck exists to teach, and a moment that
+        # already contains it has done the teaching on slide 1, before the
+        # reader has recognised anything. Slides 1 and 2 are a scene; the name
+        # arrives at slide 3 at the earliest. That rule already exists for the
+        # writer and it has to hold for the moment the writer is given.
+        if term.lower() in moment.lower():
+            problems.append(f"the moment says {term!r}. The reader meets the "
+                            f"behaviour first and the name later")
+        if not problems:
+            return {"moment": moment.strip(), "subject": answer["subject"],
+                    "situation": answer["situation"], "provider": provider}
+        trouble.extend(problems)
+        complaint = ("\n\nYOUR PREVIOUS MOMENT, which was rejected:\n  " + moment
+                     + "\n\nRejected because: " + "; ".join(problems)
+                     + "\n\nFix those faults. Keep everything else about it the same.")
+    raise llm.ModelRefused("; ".join(dict.fromkeys(trouble))[:300])
+
+
 def invent(seed: str, nonce: str = "7f3a2c") -> dict:
     """Invent one moment from a seed post, or refuse.
 

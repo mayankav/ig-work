@@ -59,8 +59,13 @@ def probe(phrase: str, sample: int = SAMPLE) -> dict:
     try:
         results = sources.search(phrase, limit=sample)
     except sources.SourceUnavailable as exc:
+        # "felt" belongs here too. Without it a single throttled phrase — which
+        # is the ordinary outcome when probing sixty at once — crashed the
+        # summary at the end with a KeyError, after every measurement had
+        # already been made and printed. The numbers were on screen and the run
+        # still exited non-zero.
         return {"phrase": phrase, "error": str(exc)[:60], "found": 0, "kept": 0,
-                "rate": 0.0, "examples": []}
+                "felt": 0, "rate": 0.0, "examples": []}
 
     kept, with_feeling = [], []
     for item in results:

@@ -40,6 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bibliography  # noqa: E402
 import compose  # noqa: E402
 import critic  # noqa: E402
+import discovery  # noqa: E402
 import novelty  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
@@ -176,6 +177,27 @@ def draw() -> dict:
     return result
 
 
+def draw_concept() -> dict:
+    """Take the best unused concept from the proved vocabulary.
+
+    The other channel. `draw` asks a public feed what somebody did tonight;
+    this asks the vocabulary what idea has not been written about yet, and the
+    moment is invented from that instead.
+
+    Both channels hand the same thing to the same code below, so nothing
+    downstream knows or cares which one produced the deck. The difference is
+    only in what each one can answer. A phrase finds what somebody DID; the
+    vocabulary knows what it is CALLED, which is the thing a harvested moment
+    never arrives with.
+    """
+    chosen = discovery.pick()
+    if not chosen:
+        raise Stop("no unused concept in the vocabulary. Run discovery.py "
+                   "--refresh to prove more, or use the feed for this run")
+    return {"candidates": [chosen], "route": "concept", "fetched": 1,
+            "tally": {}, "note": None}
+
+
 # ─────────────────────────── steps 3 to 9 ────────────────────────────
 
 def invent(candidate: dict) -> tuple[memory.Moment, str]:
@@ -190,15 +212,23 @@ def invent(candidate: dict) -> tuple[memory.Moment, str]:
     different sentence entirely — the writer was told the scene was a bed and a
     text when the moment said a phone and 11pm. Zero words in common.
     """
+    concept = "term" in candidate
     try:
-        result = compose.invent(candidate["text"])
+        if concept:
+            result = compose.from_concept(candidate["term"], candidate["summary"])
+        else:
+            result = compose.invent(candidate["text"])
     except llm.ModelRefused as refused:
         raise Skip(str(refused))
     shaped = screen.shape(result["moment"])
     moment = memory.Moment.make(
         text=result["moment"],
-        source="bluesky",
-        source_ref=candidate["ref"],
+        source="concept" if concept else "bluesky",
+        # A concept's id is stable, so the moment id derived from it is too, and
+        # used_ids() then refuses the same concept a second time on its own.
+        # That is a second lock on the door discovery.recent() already closes,
+        # and it is the one that survives somebody deleting the history file.
+        source_ref=f"concept:{candidate['id']}" if concept else candidate["ref"],
         anchors=shaped["anchors"],
         score=shaped["score"],
     )
@@ -375,9 +405,9 @@ def emit_slug(slug: str, path: Path) -> None:
             handle.write(f"deck={path.relative_to(REPO_ROOT)}\n")
 
 
-def run(mode: str) -> int:
+def run(mode: str, source: str = "feed") -> int:
     run_id = os.environ.get("GITHUB_RUN_ID") or f"local-{int(time.time())}"
-    print(f"\nrun {run_id}  mode {mode}\n")
+    print(f"\nrun {run_id}  mode {mode}  source {source}\n")
 
     claimed: memory.Moment | None = None
     try:
@@ -389,19 +419,28 @@ def run(mode: str) -> int:
         else:
             say("state check", check_state_is_current(strict=(mode == "publish")))
 
-        result = draw()
+        result = draw_concept() if source == "concept" else draw()
         candidates = result["candidates"]
         say("moment source", result["route"])
         say("fetched", str(result["fetched"]))
         say("usable", str(len(candidates)))
 
         best = candidates[0]
-        print(f"\n  moment  {best['text'][:150]}")
-        print(f"  anchors {', '.join(best.get('anchors', {}))}  score {best.get('score')}\n")
+        if source == "concept":
+            print(f"\n  concept {best['term']}  ({best['demand']}/month, "
+                  f"{best['scanned_hits']} scanned books)")
+            print(f"  means   {best['summary'][:150]}\n")
+        else:
+            print(f"\n  moment  {best['text'][:150]}")
+            print(f"  anchors {', '.join(best.get('anchors', {}))}  score {best.get('score')}\n")
 
         if mode == "dry-run":
             say("done", "looked only, nothing written or used")
             return 0
+
+        # One concept means one attempt. The feed hands over eight candidates
+        # and the loop below is built to spend up to five of them; a concept run
+        # has exactly one and must not report five failures after one.
 
         # A moment that will not rewrite cleanly is not a failed run. The
         # firewall refuses often and on purpose — a rewrite that keeps eight of
@@ -516,6 +555,8 @@ def run(mode: str) -> int:
 
         novelty.record(fingerprint)
         bibliography.remember(slug, plan["citation_id"])
+        if source == "concept":
+            discovery.remember(slug, best["id"])
         memory.mark_used(moment, slug, mode=mode)
         say("recorded", "fingerprint written, moment retired")
 
@@ -575,9 +616,16 @@ def main() -> None:
                        help="build but do not post. Still uses up the moment")
     group.add_argument("--dry-run", action="store_true",
                        help="look at what today would use. Writes nothing, uses nothing")
+    # Which channel the idea comes from. The feed is the default because it is
+    # what has been running, and switching what an unattended account posts
+    # about is a decision somebody makes on purpose rather than a default that
+    # changes underneath them.
+    ap.add_argument("--source", choices=("feed", "concept"), default="feed",
+                    help="feed: a moment harvested from Bluesky (default). "
+                         "concept: an idea from the proved vocabulary")
     args = ap.parse_args()
     mode = "publish" if args.publish else "no-post" if args.no_post else "dry-run"
-    raise SystemExit(run(mode))
+    raise SystemExit(run(mode, source=args.source))
 
 
 if __name__ == "__main__":

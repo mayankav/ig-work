@@ -35,9 +35,10 @@ posting costs a few thousand tokens.
 .agents/skills/suresilly-carousel/   the skill — canonical, both hosts read this
   SKILL.md            entry point
   references/         brand voice · content playbook · design system
+                      · concepts.json, the proved idea vocabulary
   mascot/CHARACTER.md the character bible (identity invariants + variable slots)
   scripts/            run.py is the entry point · compose · safety · writer · critic
-                      · coherence · novelty · llm · render · build
+                      · coherence · novelty · llm · render · build · discovery
   tests/              QA-gate regression suite
 .claude/skills/       symlink to the above, so Claude Code discovers it
 carousels/            one folder per deck: carousel.md, mascot/, slides/, contact_sheet.png
@@ -94,7 +95,30 @@ Any agent working here must not violate these. They exist because each one was a
     `references/citations.json` — a record of what has been proved, not a list anybody maintains,
     and the fallback for when the catalogue is unreachable. Every gate fails closed: "we could
     not check" must never come out the same as "we checked".
-13. **One entry point, one state.** A manual run and the scheduled run execute the same code
+13. **Two channels, one funnel.** An idea comes from a harvested post OR from a proved
+    concept, and both produce the same thing: one invented moment with a subject from the
+    closed list. `--source feed` is the default and `--source concept` is the other. The
+    feed knows what people are doing this week and the words they use; the literature knows
+    what any of it is called. Neither replaces the other. A phrase is never added on taste:
+    `probe_phrases.py` measures it against 100 live posts first, and of 110 candidates tested
+    on 2026-08-31 only 28 earned a place.
+14. **A concept is not a topic, and no condition is ever hardwired.** `references/concepts.json`
+    holds terms of art proved to appear in scanned books, discovered from public category
+    listings and ranked on measured demand. There is no OCD topic and no ADHD topic. What
+    there is, is a route by which such a term can arrive on its own and be ranked against
+    everything else. The harm families still reject a concept exactly as they reject a
+    moment — with one deliberate exception, `clinical`, which is switched off at this layer
+    and replaced by `SEVERE`, `LIFE_EVENT`, `IDENTITY_SPECIFIC` and `NOT_OUR_READER`, because
+    the whole point is to be able to hold a clinical term of art. `tests/test_discovery.py`
+    locks both directions.
+15. **discovery.py never names a book.** It proves a term is real and stops. `bibliography.py`
+    finds and proves the citation for every deck, from the moment, through five gates, and it
+    did that long before concepts existed. An earlier version fetched a sentence out of Open
+    Library's scanned text to quote on a slide; that one decision was most of the module's
+    size and every one of its defects, and it shipped a fantasy novel as the proof of "bed
+    rotting" because the sentence contained the word "bed". The Wikipedia summary a concept
+    carries is read to tell the composer what the term means and is never printed.
+16. **One entry point, one state.** A manual run and the scheduled run execute the same code
     against the same queue and fingerprints. Any run that produces a deck consumes its moment,
     whether or not it posts. Only `--dry-run` writes nothing, and it writes no deck either.
 

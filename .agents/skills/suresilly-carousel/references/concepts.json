@@ -1,0 +1,655 @@
+{
+  "_note": "A record of what has been proved, not a list anybody maintains. Every concept here came from a Wikipedia category listing, appears in at least two scanned books, and has measured demand behind it. The summary is read to tell the composer what the idea means and is never printed. No book is named here on purpose: bibliography.py finds and proves the citation for every deck. Run discovery.py --refresh to grow this; never edit it by hand.",
+  "concepts": [
+    {
+      "id": "alexithymia",
+      "term": "alexithymia",
+      "article": "Alexithymia",
+      "demand": 50524,
+      "scanned_hits": 4329,
+      "summary": "Alexithymia (, ə-LEK-sih-THY-mee-ə), also called emotional blindness, is a neuropsychological phenomenon characterized by difficulties processing or describing one's emotions. Alexithymia occurs in 5% of the general population, though it is more common for those with conditions such as autism (50%), post-traumatic stress disorder (PTSD; 42%), and cancer (37%). It is often associated with difficulties in attachment and interpersonal relations.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:07Z"
+      }
+    },
+    {
+      "id": "anhedonia",
+      "term": "anhedonia",
+      "article": "Anhedonia",
+      "demand": 38036,
+      "scanned_hits": 14514,
+      "summary": "Anhedonia is a diverse array of deficits in hedonic function, including reduced motivation or ability to experience pleasure. While earlier definitions emphasized the inability to experience pleasure, anhedonia is currently used by researchers to refer to reduced motivation, reduced anticipatory pleasure (wanting), reduced consummatory pleasure (liking), and deficits in reinforcement learning. In the Diagnostic and Statistical Manual of Mental Disorders, Fifth Edition (DSM-5), anhedonia is a component of depressive disorders, substance-related disorders, psychotic disorders, and personality di",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:13Z"
+      }
+    },
+    {
+      "id": "alice-in-wonderland-syndrome",
+      "term": "alice in wonderland syndrome",
+      "article": "Alice in Wonderland syndrome",
+      "demand": 22071,
+      "scanned_hits": 839,
+      "summary": "Alice in Wonderland Syndrome (AIWS), also known as Todd's syndrome or dysmetropsia, is a neurological disorder that distorts perception. People with this syndrome may experience distortions in their visual perception of objects, such as appearing smaller (micropsia) or larger (macropsia), or appearing to be closer (pelopsia) or farther (teleopsia) than they are. Distortion may also occur for senses other than vision. The cause of Alice in Wonderland Syndrome is unknown, but it is often associated with migraines, head trauma, or viral encephalitis caused by Epstein–Barr Virus Infection. It is a",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:19Z"
+      }
+    },
+    {
+      "id": "classical-conditioning",
+      "term": "classical conditioning",
+      "article": "Classical conditioning",
+      "demand": 19743,
+      "scanned_hits": 29841,
+      "summary": "Classical conditioning (also respondent conditioning and Pavlovian conditioning) is a behavioral procedure in which a biologically potent stimulus (e.g. food, a puff of air on the eye) is paired with a neutral stimulus (e.g. the sound of a musical triangle). The term classical conditioning refers to the process of an automatic, conditioned response that is paired with a specific stimulus. It is essentially equivalent to a signal. Ivan Pavlov, the Russian physiologist, studied classical conditioning with detailed experiments with dogs, and published the experimental results in 1897. In the stud",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:26Z"
+      }
+    },
+    {
+      "id": "apophenia",
+      "term": "apophenia",
+      "article": "Apophenia",
+      "demand": 18679,
+      "scanned_hits": 457,
+      "summary": "Apophenia () is the tendency to perceive meaningful connections between unrelated things. The term (German: Apophänie from the Greek verb: ἀποφαίνειν, romanized: apophaínein) was coined by psychiatrist Klaus Conrad in his 1958 publication on the beginning stages of schizophrenia. He defined it as \"unmotivated seeing of connections [accompanied by] a specific feeling of abnormal meaningfulness\". He described the early stages of delusional thought as self-referential over-interpretations of actual sensory perceptions, as opposed to hallucinations. Apophenia has also come to describe a human prop",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:31Z"
+      }
+    },
+    {
+      "id": "autodidacticism",
+      "term": "autodidacticism",
+      "article": "Autodidacticism",
+      "demand": 14804,
+      "scanned_hits": 1035,
+      "summary": "Autodidacticism (also autodidactism) or self-education (also self-learning, self-study, and self-teaching) is the practice of education without the guidance of teachers. Autodidacts are self-taught people who learn a subject through self-study. Autodidacticism may involve, complement, or be an alternative to formal education. Formal education itself may have a hidden curriculum that requires self-study for the uninitiated. Generally, autodidacts choose the subject they will study, their studying material, and the studying rhythm and time. Autodidacts may or may not have formal education, and t",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:48Z"
+      }
+    },
+    {
+      "id": "interpersonal-relationship",
+      "term": "interpersonal relationship",
+      "article": "Interpersonal relationship",
+      "demand": 12759,
+      "scanned_hits": 32028,
+      "summary": "In social psychology, an interpersonal relation (or interpersonal relationship) describes a social association, connection, or affiliation between two or more people. It overlaps significantly with the concept of social relations, which are the fundamental unit of analysis within the social sciences. Relations vary in degrees of intimacy, self-disclosure, duration, reciprocity, and power distribution. The main themes or trends of the interpersonal relations are: family, kinship, friendship, love, marriage, business, employment, clubs, neighborhoods, ethical values, support, and solidarity. Int",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:24:59Z"
+      }
+    },
+    {
+      "id": "akrasia",
+      "term": "akrasia",
+      "article": "Akrasia",
+      "demand": 12643,
+      "scanned_hits": 3183,
+      "summary": "Akrasia refers to the phenomenon of acting against one's better judgment—the state in which one intentionally performs an action while simultaneously believing that a different course of action would be better. Sometimes translated as \"weakness of will\" or \"incontinence,\" akrasia describes the paradoxical human experience of knowingly choosing what one judges to be the inferior option. The concept of akrasia raises philosophical questions regarding the connection between reason, desire, and action by challenging the intuitive assumption that rational judgment governs an agent's behavior. For e",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:25:05Z"
+      }
+    },
+    {
+      "id": "asociality",
+      "term": "asociality",
+      "article": "Asociality",
+      "demand": 9761,
+      "scanned_hits": 2047,
+      "summary": "Asociality is a lack of motivation to engage in social interaction, or a preference for solitary activities. Asociality may be associated with avolition, but it can, moreover, be a manifestation of limited opportunities for social relationships. Developmental psychologists use the synonyms nonsocial, unsocial, and social uninterest. Asociality is distinct from, but not mutually exclusive to, anti-social behavior. A degree of asociality is routinely observed in introverts, while extreme asociality is observed in people with a variety of clinical conditions. Asociality is not necessarily perceiv",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:25:09Z"
+      }
+    },
+    {
+      "id": "attachment-in-adults",
+      "term": "attachment in adults",
+      "article": "Attachment in adults",
+      "demand": 9670,
+      "scanned_hits": 533,
+      "summary": "In psychology, the theory of attachment in adults examines the way in which emotional connections are approached during adulthood across a spectrum of relationship types, which is posited to originate from the bonding experience received from caregivers as an infant. Attachment theory was initially studied in the 20th century to associate infant behaviors with the attachment they had to their caregivers. The working models of children found in John Bowlby’s attachment theory demonstrate a pattern of interaction which is likely to influence adult relationships.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:25:17Z"
+      }
+    },
+    {
+      "id": "bed-rotting",
+      "term": "bed rotting",
+      "article": "Bed rotting",
+      "demand": 8600,
+      "scanned_hits": 61,
+      "summary": "Bed rotting is the practice of voluntarily spending many hours a day in bed while awake. The term gained popularity among Generation Z users on TikTok. It has been discussed as a form of self-care, but has also been associated with depression and anxiety.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:25:45Z"
+      }
+    },
+    {
+      "id": "hypochondria",
+      "term": "hypochondria",
+      "article": "Hypochondria",
+      "demand": 7965,
+      "scanned_hits": 67708,
+      "summary": "Hypochondriasis or hypochondria is a condition in which a person is excessively and unduly worried about having a serious illness. Hypochondria is an old concept whose meaning has repeatedly changed over its lifespan. It has been claimed that this debilitating condition results from an inaccurate perception of the condition of body or mind despite the absence of an actual medical diagnosis. An individual with hypochondriasis is known as a hypochondriac. Hypochondriacs become unduly alarmed about any physical or psychological symptoms they detect, no matter how minor the symptom may be, and are",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:25:55Z"
+      }
+    },
+    {
+      "id": "sexual-frustration",
+      "term": "sexual frustration",
+      "article": "Sexual frustration",
+      "demand": 7767,
+      "scanned_hits": 25465,
+      "summary": "Sexual frustration is a sense of dissatisfaction stemming from a discrepancy between a person's desired and achieved sexual activity. It may result from physical, legal, mental, emotional, social, financial, religious or spiritual barriers. It can derive from displeasure during sex due to issues such as anorgasmia, anaphrodisia, premature ejaculation, delayed ejaculation or erectile dysfunction. A sense of incompatibility or discrepancy in libido between partners may be involved. It may also relate to broader existential frustration. Sexual frustration can potentially have a number of conseque",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:02Z"
+      }
+    },
+    {
+      "id": "defence-mechanism",
+      "term": "defence mechanism",
+      "article": "Defence mechanism",
+      "demand": 7412,
+      "scanned_hits": 28072,
+      "summary": "In psychoanalytic theory, defense mechanisms are unconscious psychological processes that protect the self from anxiety-producing thoughts and feelings related to internal conflicts and external stressors. Defences are automatically used to protect ourselves from threats and affects to maintain psychological balance and homeostasis. Defenses are automatic responses to external stressors or internal conflicts. Healthy people have a fully developed sense of \"object constancy\", knowing that bad and good can exist at the same time in the same person. A defense mechanism can become pathological whe",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:16Z"
+      }
+    },
+    {
+      "id": "delayed-gratification",
+      "term": "delayed gratification",
+      "article": "Delayed gratification",
+      "demand": 6235,
+      "scanned_hits": 15924,
+      "summary": "Delayed gratification, or deferred gratification, is the ability to resist the temptation of an immediate reward in favor of a more valuable and long-lasting reward later. It involves forgoing a smaller, immediate pleasure to achieve a larger or more enduring benefit in the future. A growing body of literature has linked the ability to delay gratification to a host of other positive outcomes, including academic success, physical health, psychological health, and social competence. A person's ability to delay gratification relates to other similar skills such as patience, impulse control, self-",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:21Z"
+      }
+    },
+    {
+      "id": "anchoring-effect",
+      "term": "anchoring effect",
+      "article": "Anchoring effect",
+      "demand": 5781,
+      "scanned_hits": 1911,
+      "summary": "The anchoring effect is a psychological phenomenon in which an individual's judgments or decisions are influenced by a reference point or \"anchor\" which can be completely irrelevant. The original description of the anchoring effect came from psychophysics. When judging stimuli along a continuum, it was noticed that the first and last stimuli were used to compare the other stimuli (this is also referred to as \"end anchoring\"). This concept was notably formalized in behavioral economics by Amos Tversky and Daniel Kahneman. In their seminal 1974 work, they described anchoring as a heuristic used ",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:32Z"
+      }
+    },
+    {
+      "id": "compartmentalization",
+      "term": "compartmentalization",
+      "article": "Compartmentalization (psychology)",
+      "demand": 5515,
+      "scanned_hits": 54407,
+      "summary": "Compartmentalization is a psychological defense mechanism in which thoughts and feelings that seem to conflict are kept separated or isolated from each other in the mind. Those with post-traumatic stress disorder may use compartmentalization to separate positive and negative self aspects. It may be a form of mild dissociation; example scenarios that suggest compartmentalization include acting in an isolated moment in a way that logically defies one's own moral code, or dividing one's unpleasant work duties from one's desires to relax. Its purpose is to avoid cognitive dissonance, or the mental",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:38Z"
+      }
+    },
+    {
+      "id": "anosognosia",
+      "term": "anosognosia",
+      "article": "Anosognosia",
+      "demand": 5438,
+      "scanned_hits": 4900,
+      "summary": "Anosognosia is a condition in which a person with a disability is cognitively unaware of having it due to an underlying physical condition. It is one of the several types of agnosia. Anosognosia results from physiological damage to brain structures, typically to the parietal lobe or a diffuse lesion on the fronto-temporal-parietal area in the right hemisphere, and is thus a neuropsychiatric disorder. A deficit of self-awareness, the term was coined by the neurologist Joseph Babinski in 1914, in order to describe the unawareness of hemiplegia. Phenomenologically, anosognosia has similarities to",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:48Z"
+      }
+    },
+    {
+      "id": "attachment-disorder",
+      "term": "attachment disorder",
+      "article": "Attachment disorder",
+      "demand": 5166,
+      "scanned_hits": 5096,
+      "summary": "Attachment disorders are disorders of mood, behavior, and social relationships arising from unavailability of normal socializing care and attention from primary caregiving figures in early childhood. Such a failure would result from unusual early experiences of neglect, abuse, abrupt separation from caregivers between three months and three years of age, frequent change or excessive numbers of caregivers, or lack of caregiver responsiveness to child communicative efforts resulting in a lack of basic trust. A problematic history of social relationships occurring after about age three may be dis",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:26:59Z"
+      }
+    },
+    {
+      "id": "catfight",
+      "term": "catfight",
+      "article": "Catfight",
+      "demand": 5126,
+      "scanned_hits": 9479,
+      "summary": "Catfight (also girl fight) is a term for an altercation between two women, often characterized as involving scratching, shoving, slapping, choking, punching, kicking, wrestling, biting, spitting, hair-pulling, and clothing-shredding. It can also be used to describe women insulting each other verbally or engaged in an intense competition for men, power, or occupational success. The catfight has been a staple of American news media and popular culture since the 1940s, and use of the term is often considered derogatory or belittling. Some observers (e.g., Susan J. Douglas) argue that in its pures",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:03Z"
+      }
+    },
+    {
+      "id": "attachment-therapy",
+      "term": "attachment therapy",
+      "article": "Attachment therapy",
+      "demand": 4958,
+      "scanned_hits": 518,
+      "summary": "Attachment therapy (also called \"the Evergreen model\", \"holding time\", \"rage-reduction\", \"compression therapy\", \"rebirthing\", \"corrective attachment therapy\", \"coercive restraint therapy\", and \"holding therapy\") is a pseudoscientific mental health intervention intended to treat attachment disorders in children. During the height of its popularity, the practice was found primarily in the United States; much of it was centered in about a dozen locations in Evergreen, Colorado, where Foster Cline, one of its founders, established a clinic in the 1970s. The practice has resulted in adverse outcome",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:10Z"
+      }
+    },
+    {
+      "id": "mobbing",
+      "term": "mobbing",
+      "article": "Mobbing",
+      "demand": 4596,
+      "scanned_hits": 29675,
+      "summary": "Mobbing, as a sociological term, refers either to bullying in any context, or specifically to that within the workplace, especially when perpetrated by a group rather than an individual.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:23Z"
+      }
+    },
+    {
+      "id": "homo-homini-lupus",
+      "term": "homo homini lupus",
+      "article": "Homo homini lupus",
+      "demand": 3942,
+      "scanned_hits": 7194,
+      "summary": "Homo homini lupus, or in its unabridged form Homo homini lupus est, is a Latin proverb meaning literally 'man is a wolf to man'. It is used to refer to situations where a person has behaved comparably to a wolf. In this case, the wolf represents predatory, cruel, and generally inhuman qualities.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:36Z"
+      }
+    },
+    {
+      "id": "emotional-blackmail",
+      "term": "emotional blackmail",
+      "article": "Emotional blackmail",
+      "demand": 3800,
+      "scanned_hits": 16775,
+      "summary": "The term emotional blackmail was popularized by clinical social worker Susan Forward about controlling people in relationships and the theory that fear, obligation and guilt (FOG) are the transactional dynamics at play between the controller and the person being controlled. Understanding these dynamics is useful to anyone trying to extricate themself from the controlling behavior of another person and deal with their own compulsions to do things that are uncomfortable, undesirable, burdensome, or self-sacrificing for others.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:45Z"
+      }
+    },
+    {
+      "id": "amygdala-hijack",
+      "term": "amygdala hijack",
+      "article": "Amygdala hijack",
+      "demand": 3687,
+      "scanned_hits": 220,
+      "summary": "An amygdala hijack is an immediate and overwhelming emotional response that is disproportionate to the actual stimulus because it has triggered a more significant perceived threat. The term was coined by Daniel Goleman in his 1995 book Emotional Intelligence: Why It Can Matter More Than IQ, and is recognized as a formal academic term within affective neuroscience. The brain consists of two hemispheres, each containing an amygdala—a small, almond-shaped structure located anterior to the hippocampus, near the temporal lobe. The amygdalae play a crucial role in detecting and learning which aspect",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:50Z"
+      }
+    },
+    {
+      "id": "send-to-coventry",
+      "term": "send to coventry",
+      "article": "Send to Coventry",
+      "demand": 3524,
+      "scanned_hits": 1846,
+      "summary": "\"Send to Coventry\" is an idiom used in England meaning to deliberately ostracise someone. Typically, this is done by not talking to them, avoiding their company, and acting as if they no longer exist. Coventry is a historical cathedral city in the West Midlands county.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:27:55Z"
+      }
+    },
+    {
+      "id": "apeirophobia",
+      "term": "apeirophobia",
+      "article": "Apeirophobia",
+      "demand": 3314,
+      "scanned_hits": 387,
+      "summary": "Apeirophobia ( ə-PEER-ə-FOH-BEE-ə; from Ancient Greek: ᾰ̓́πειρος, romanized: ápeiros, lit. 'infinite, boundless') is the specific phobia of infinity, eternity, endlessness, or the uncountable and is also known as the fear of infinity, the fear of eternity, or the fear of endlessness, causing discomfort and sometimes panic attacks from intrusive thoughts of the infinity. It normally starts in adolescence or earlier and it is currently not known how it normally develops over time. Apeirophobia may be caused by existential dread about eternal life or oblivion following death. Due to this, it is o",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:00Z"
+      }
+    },
+    {
+      "id": "altered-level-of-consciousness",
+      "term": "altered level of consciousness",
+      "article": "Altered level of consciousness",
+      "demand": 3302,
+      "scanned_hits": 6042,
+      "summary": "An altered level of consciousness is any measure of arousal other than normal. Level of consciousness (LOC) is a measurement of a person's arousability and responsiveness to stimuli from the environment. A mildly depressed level of consciousness or alertness may be classed as lethargy; someone in this state can be aroused with little difficulty. People who are obtunded have a more depressed level of consciousness and cannot be fully aroused. Those who are not able to be aroused from a sleep-like state are said to be stuporous. Coma is the inability to make any purposeful response. Scales such ",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:07Z"
+      }
+    },
+    {
+      "id": "anxious-preoccupied-attachment",
+      "term": "anxious-preoccupied attachment",
+      "article": "Anxious-preoccupied attachment",
+      "demand": 3092,
+      "scanned_hits": 57,
+      "summary": "Anxious-preoccupied attachment has been linked to various psychological and interpersonal difficulties. For example, research has suggested that anxious-preoccupied attachment may mediate the relationship between childhood emotional abuse and borderline personality disorder.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:18Z"
+      }
+    },
+    {
+      "id": "idealization-and-devaluation",
+      "term": "idealization and devaluation",
+      "article": "Idealization and devaluation",
+      "demand": 3018,
+      "scanned_hits": 1242,
+      "summary": "Psychoanalytic theory posits that an individual unable to integrate difficult feelings mobilizes specific defenses to overcome these feelings, which the individual perceives to be unbearable. The defense that effects (brings about) this process is called splitting. Splitting is the tendency to view events or people as either all bad or all good. When viewing people as all good, the individual is said to be using the defense mechanism idealization: a mental mechanism in which the person attributes exaggeratedly positive qualities to the self or others. When viewing people as all bad, the indivi",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:25Z"
+      }
+    },
+    {
+      "id": "butterflies-in-the-stomach",
+      "term": "butterflies in the stomach",
+      "article": "Butterflies in the stomach",
+      "demand": 2969,
+      "scanned_hits": 7436,
+      "summary": "Butterflies in the stomach is the physical sensation in humans of a \"fluttery\" feeling in the stomach, caused by a reduction of blood flow to the organ. This is as a result of the release of adrenaline and norepinephrine in the fight-or-flight response, which causes increased heart rate and blood pressure, consequently sending more blood to the muscles.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:32Z"
+      }
+    },
+    {
+      "id": "chronotype",
+      "term": "chronotype",
+      "article": "Chronotype",
+      "demand": 2916,
+      "scanned_hits": 2127,
+      "summary": "A chronotype is the behavioral manifestation of an underlying circadian rhythm's myriad physical processes. A person's chronotype is the propensity for the individual to sleep at a particular time during a 24-hour period. Eveningness (delayed sleep period; most active and alert in the evening) and morningness (advanced sleep period; most active and alert in the morning) are the two extremes with most individuals having some flexibility in the timing of their sleep period. However, across development there are changes in the propensity of the sleep period with pre-pubescent children preferring ",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:36Z"
+      }
+    },
+    {
+      "id": "bad-boy-archetype",
+      "term": "bad boy archetype",
+      "article": "Bad boy archetype",
+      "demand": 2817,
+      "scanned_hits": 12,
+      "summary": "The bad boy is a cultural archetype that is variously defined and often used synonymously with the historic terms rake or cad: a male who behaves badly, especially within societal norms. In films and other narratives, a bad boy is a type of antihero, sometimes a trickster. Such characters reject authority and traditional moral standards, following their own unique code of ethics that can unsettle those around them. Despite their often questionable or near-criminal habits, they are frequently depicted in a way that makes them relatable or even likable. \"Bad boys typically bring a lot of fire, d",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:39Z"
+      }
+    },
+    {
+      "id": "emotional-contagion",
+      "term": "emotional contagion",
+      "article": "Emotional contagion",
+      "demand": 2791,
+      "scanned_hits": 5734,
+      "summary": "Emotional contagion is a form of social contagion that involves the spontaneous spread of emotions and related behaviors. Such emotional convergence can happen from one person to another, or in a larger group. Emotions can be shared across individuals in many ways, both implicitly or explicitly. For instance, conscious reasoning, analysis, and imagination have all been found to contribute to the phenomenon. The behaviour has been found in humans, other primates, dogs, and chickens. Emotional contagion contributes to cognitive development initiated in pregnancy. According to a hypothesis of pre",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:45Z"
+      }
+    },
+    {
+      "id": "amotivational-syndrome",
+      "term": "amotivational syndrome",
+      "article": "Amotivational syndrome",
+      "demand": 2652,
+      "scanned_hits": 2803,
+      "summary": "Amotivational syndrome is a chronic psychiatric disorder characterized by cognitive and emotional states such as detachment, blunted emotions and drives, deficits in executive functions like working memory and attention, disinterest, passivity, apathy, and a general lack of motivation. It is divided into two subtypes: marijuana amotivational syndrome (or cannabis-induced amotivational syndrome), caused by usage or dependency on that substance and is primarily associated with the long-term effects of cannabis use, and SSRI-induced amotivational syndrome (or SSRI-induced apathy), caused by the i",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:28:58Z"
+      }
+    },
+    {
+      "id": "co-sleeping",
+      "term": "co-sleeping",
+      "article": "Co-sleeping",
+      "demand": 2639,
+      "scanned_hits": 3238,
+      "summary": "Co-sleeping or bed sharing is a practice in which babies and young children sleep close to one or both parents, as opposed to in a separate room. Co-sleeping individuals sleep in sensory proximity to one another, where the individual senses the presence of others. This sensory proximity can either be triggered by touch, smell, taste, or noise. Therefore, the individuals can be a few centimeters away or on the other side of the room and still have an effect on the other. It is standard practice in many parts of the world, and is practiced by a significant minority in countries where cribs are a",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:03Z"
+      }
+    },
+    {
+      "id": "chronic-stress",
+      "term": "chronic stress",
+      "article": "Chronic stress",
+      "demand": 2595,
+      "scanned_hits": 34205,
+      "summary": "Chronic stress is the physiological or psychological response induced by a long-term internal or external stressor. The stressor, either physically present or recollected, will produce the same effect and trigger a chronic stress response. There is a wide range of chronic stressors, but most entail relatively prolonged problems, conflicts and threats that people encounter on a daily basis. Several chronic stressors have been identified as associated with disease and mortality including \"neighbourhood environment, financial strain, interpersonal stress, work stress and caregiving.\" Stress respo",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:10Z"
+      }
+    },
+    {
+      "id": "belongingness",
+      "term": "belongingness",
+      "article": "Belongingness",
+      "demand": 2255,
+      "scanned_hits": 29596,
+      "summary": "Belongingness is the human emotional need to be an accepted member of a group. Whether it is family, friends, co-workers, a religion, or something else, some people tend to have an inherent desire to belong and be an important part of something greater than themselves. This implies a relationship that is greater than simple acquaintance or familiarity. Belonging is a strong feeling that exists in human nature. To belong or not to belong is a subjective experience that can be influenced by a number of factors within people and their surrounding environment. A person's sense of belonging can gre",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:21Z"
+      }
+    },
+    {
+      "id": "autosuggestion",
+      "term": "autosuggestion",
+      "article": "Autosuggestion",
+      "demand": 2141,
+      "scanned_hits": 19130,
+      "summary": "Autosuggestion is a psychological technique related to the placebo effect, popularized internationally by pharmacist Émile Coué in the 1920s. It is a form of self-induced suggestion in which individuals guide their own thoughts, feelings, or behavior. The technique is often used in self-hypnosis. While Émile Coué created an autosuggestion craze in America in the 1920s, the technique had already been developed and widely taught by Dr. Herbert A. Parkyn through experimentation at his Chicago School of Psychology and in his 1906 book Auto-Suggestion: What It Is and How to Use It for Health, Happi",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:25Z"
+      }
+    },
+    {
+      "id": "experiential-avoidance",
+      "term": "experiential avoidance",
+      "article": "Experiential avoidance",
+      "demand": 1935,
+      "scanned_hits": 660,
+      "summary": "Experiential avoidance (EA) has been broadly defined as attempts to avoid thoughts, feelings, memories, physical sensations, and other internal experiences – even when doing so creates harm in the long run. The process of EA is thought to be maintained through negative reinforcement – that is, short-term relief of discomfort is achieved through avoidance, thereby increasing the likelihood that the avoidance behavior will persist. Importantly, the current conceptualization of EA suggests that it is not negative thoughts, emotions, and sensations that are problematic, but how one responds to the",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:41Z"
+      }
+    },
+    {
+      "id": "counting-sheep",
+      "term": "counting sheep",
+      "article": "Counting sheep",
+      "demand": 1841,
+      "scanned_hits": 13764,
+      "summary": "Counting sheep is a brain training exercise used in some Western cultures as a means of putting oneself to sleep. In most depictions of the activity, the practitioner envisions an endless series of identical white sheep jumping over a fence, while counting them as they do so. The idea, presumably, is to induce boredom while occupying the mind with something simple, repetitive, and rhythmic, all of which are known to help humans sleep. Although the practice is largely a stereotype, and rarely used as a solution for insomnia, it has been so commonly referenced by cartoons, comic strips, and othe",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:46Z"
+      }
+    },
+    {
+      "id": "self-care",
+      "term": "self-care",
+      "article": "Self-care",
+      "demand": 1820,
+      "scanned_hits": 95918,
+      "summary": "Self-care is the process of establishing behaviors to ensure holistic well-being of oneself, to promote health, and actively manage illness when it occurs. Individuals engage in some form of self-care daily with food choices, exercise, sleep, and hygiene. Self-care is not only a solo activity, as the community—a group that supports the person performing self-care—overall plays a role in access to, implementation of, and success of self-care activities. Routine self-care is important when someone is not experiencing any symptoms of illness, but self-care becomes essential when illness occurs. G",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:50Z"
+      }
+    },
+    {
+      "id": "atlas-personality",
+      "term": "atlas personality",
+      "article": "Atlas personality",
+      "demand": 1811,
+      "scanned_hits": 11,
+      "summary": "The Atlas personality, named after the story of the Titan Atlas from Greek mythology who is forced to hold up the sky, is someone obliged to take on adult responsibilities prematurely. They are as a result liable to develop a pattern of compulsive caregiving in later life.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:29:56Z"
+      }
+    },
+    {
+      "id": "conatus",
+      "term": "conatus",
+      "article": "Conatus",
+      "demand": 1755,
+      "scanned_hits": 47328,
+      "summary": "In the philosophy of Baruch Spinoza, conatus (; Latin for \"effort; endeavor; impulse, inclination, tendency; undertaking; striving\") is an innate inclination of a thing to continue to exist and enhance itself. This thing may be mind, matter, or a combination of both, and is often associated with God's will in a pantheist view of nature. The conatus may refer to the instinctive will to live of living organisms or to various metaphysical theories of motion and inertia. Today, conatus is rarely used in the technical sense, since classical mechanics uses concepts such as inertia and conservation o",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:01Z"
+      }
+    },
+    {
+      "id": "emotional-exhaustion",
+      "term": "emotional exhaustion",
+      "article": "Emotional exhaustion",
+      "demand": 1753,
+      "scanned_hits": 17459,
+      "summary": "Emotional exhaustion is a symptom of burnout, a chronic state of physical and emotional depletion that results from excessive work or personal demands, or continuous stress. It describes a feeling of being emotionally overextended and exhausted by one's work. It is manifested by both physical fatigue and a sense of feeling psychologically and emotionally \"drained\". An emotional hangover refers to the symptoms associated with a prolonged state of emotional exhaustion, which might occur following a highly emotional event, traumatic event or a stressful conversation or situation due to cognitive ",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:09Z"
+      }
+    },
+    {
+      "id": "emotional-eating",
+      "term": "emotional eating",
+      "article": "Emotional eating",
+      "demand": 1707,
+      "scanned_hits": 4472,
+      "summary": "Emotional eating, also known as stress eating, comfort eating and emotional overeating, is defined as the \"propensity to eat in response to positive and negative emotions\". While the term commonly refers to eating as a means of coping with negative emotions, it sometimes includes eating for positive emotions, such as overeating when celebrating an event or to enhance an already good mood.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:15Z"
+      }
+    },
+    {
+      "id": "counterphobic-attitude",
+      "term": "counterphobic attitude",
+      "article": "Counterphobic attitude",
+      "demand": 1682,
+      "scanned_hits": 253,
+      "summary": "In psychology, a counterphobic attitude is a response to anxiety that, instead of fleeing the source of fear in the manner of a phobia, actively seeks it out, in the hope of overcoming the original anxiousness. Contrary to avoidant personality disorder, the counterphobic represents the less usual, but not totally uncommon, response of seeking out what is feared. Codependents may fall into a subcategory of this group, hiding their fears of attachment in over-dependency.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:21Z"
+      }
+    },
+    {
+      "id": "disinhibited-social-engagement-disorder",
+      "term": "disinhibited social engagement disorder",
+      "article": "Disinhibited social engagement disorder",
+      "demand": 1648,
+      "scanned_hits": 125,
+      "summary": "Disinhibited social engagement disorder (DSED), also known as disinhibited attachment disorder, is an attachment disorder in which a child displays little to no fear of unfamiliar adults, and may actively approach them. The disorder can significantly impair a young child's ability to relate with adults and peers, and may put them in dangerous and potentially unsafe situations. Children with DSED may, for example, be unable to distinguish between a stranger and a parent or guardian, leaving them susceptible to abduction. DSED is exclusively classified as a childhood disorder, although some asso",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:32Z"
+      }
+    },
+    {
+      "id": "emotional-and-behavioral-disorders",
+      "term": "emotional and behavioral disorders",
+      "article": "Emotional and behavioral disorders",
+      "demand": 1628,
+      "scanned_hits": 5817,
+      "summary": "Emotional and behavioral disorders (EBD), also known as behavioral and emotional disorders, is a term used primarily in the United States that refers to a disability classification used in educational settings that allows educational institutions to provide special education and related services to students who have displayed poor social and/or academic progress. The classification is often given to students after conducting a Functional Behavior Analysis. These students need individualized behavior supports such as a Behavior Intervention Plan, to receive a free and appropriate public educati",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:44Z"
+      }
+    },
+    {
+      "id": "allostasis",
+      "term": "allostasis",
+      "article": "Allostasis",
+      "demand": 1522,
+      "scanned_hits": 1871,
+      "summary": "Allostasis (/ˌɑːloʊˈsteɪsɪs/) is a physiological mechanism of regulation in which an organism anticipates and adjusts its energy use according to environmental demands. First proposed by Peter Sterling and Joseph Eyer in 1988, the concept of allostasis shifts the focus away from the body maintaining a rigid internal set-point, as in homeostasis, to the brain's ability and role to interpret environmental stress and coordinate changes in the body using neurotransmitters, hormones, and other signaling mechanisms. Allostasis is believed to be involved not only in the body's stress response and ada",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-08-30T22:30:56Z"
+      }
+    }
+  ]
+}

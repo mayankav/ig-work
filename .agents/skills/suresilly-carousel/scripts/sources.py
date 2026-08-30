@@ -65,7 +65,7 @@ _session: dict | None = None
 def _sign_in() -> dict | None:
     """Return auth headers, or None when no credentials are set.
 
-    Cached for the process: a run makes fourteen searches and one session
+    Cached for the process: a run makes one search per phrase and one session
     serves all of them.
     """
     global _session
@@ -135,6 +135,67 @@ QUERIES = (
     "too tired to",
     "dreading tomorrow",
     "so tired i",
+
+    # ── measured 2026-08-31, 110 candidates over 11,000 posts ──
+    #
+    # The eighteen above were the entire subject range of the account, and it
+    # showed: five are about a phone, five about the night, and of the first
+    # seven decks three were set on a bed and one in a kitchen at 11pm. These
+    # were added to widen it. Every one was measured; the percentage is the
+    # share of 100 fetched posts that survived the shape filter.
+    #
+    # The first batch tested the obvious missing subjects — mornings, money,
+    # family, chores, group chats — and 52 of 60 found NOTHING usable.
+    # "rang my mum" 0%. "in the group chat" 0%. "felt guilty about" 0%. That is
+    # the finding already written above, re-measured: a phrase describing an
+    # ACTION finds people describing actions, and those posts fail the shape
+    # filter. A phrase carrying a FEELING or a BODY finds people describing
+    # themselves.
+    #
+    # So the second batch was shaped from what won rather than from taste, and
+    # 24 of 50 cleared the bar. Guessing at subjects does not work here.
+    # Guessing at grammar does.
+
+    # Somebody stopped moving, somewhere specific. The strongest shape found.
+    "sat in the car park",      # 7%
+    "sat in the driveway",      # 6%
+    "sat on the stairs",        # 4%
+    "sat on the floor",         # 3%
+    "sat outside for",          # 3%
+    "sat there for",            # 3%
+    "came home and sat",        # 2%
+    "sat on the train",         # 2%
+    "sat in traffic",           # 2%
+
+    # Standing still is the same shape, and it reaches rooms the sitting
+    # phrases never do: a shower, a sink, a doorway.
+    "stood in the shower",      # 5%
+    "stood at the sink",        # 3%
+    "stood in the doorway",     # 3%
+    "stood outside the",        # 2%
+
+    # Crying, which is the single most reliable signal there is. Every one of
+    # these returned a moment with a felt state, which is the number that
+    # actually predicts surviving the safety judge.
+    "cried on the phone",       # 6%, 6 felt
+    "cried in the bathroom",    # 6%, 6 felt
+    "drove home crying",        # 6%, 5 felt
+    "cried at my desk",         # 4%, 4 felt
+
+    # Movement with nowhere to be, and the day that did not happen.
+    "walked home from",         # 3%
+    "walked around the block",  # 2%
+    "drove around for",         # 2%
+    "couldn't face going",      # 2%
+    "stayed in bed all",        # 2%
+    "lying in bed at",          # 3%
+    "stared at the wall",       # 2%
+    "stared at my phone",       # 11%, the highest of any phrase tested
+
+    # Work, which the original list only reached through a laptop.
+    "stayed late again",        # 2%
+    "ate lunch at my desk",     # 2%
+    "cancelled the appointment",  # 2%
 )
 
 
