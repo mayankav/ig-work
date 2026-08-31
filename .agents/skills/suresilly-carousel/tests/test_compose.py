@@ -191,8 +191,8 @@ def run() -> int:
         # The push, not just the refusal. It must name the posture to avoid and
         # must never quote the moment it learned that from — invariant 10.
         brief = compose.variety_brief([BED], 3)
-        if "sitting" not in brief:
-            failures.append("VARIETY the brief did not ban the posture just used")
+        if "sat" not in brief:
+            failures.append("VARIETY the brief did not ban the verb just used")
         if "bed" in brief or "11:45pm" in brief:
             failures.append("VARIETY the brief leaked a past moment into the prompt")
     finally:

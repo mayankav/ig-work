@@ -81,34 +81,52 @@ MOMENT_OVERLAP_LIMIT = 0.20
 MOMENT_SHINGLE = 3
 SHAPE_WINDOW = 8
 # How much of the sentence counts as "the opening". Four words reaches the main
-# verb of "I sat on the ..." and of "At 11pm I stood ...", and stops before a
-# posture that arrives in a later clause. Six was too many: it swept up "At
-# 1:20am I gave up, sat on the kitchen floor", whose subject is giving up.
-OPENING_WORDS = 4
-
-POSTURE = re.compile(r"\b(sat|stood|lay|lie|lying|paced|knelt|crouched|leaned|"
-                     r"sitting|standing|walked|drove|woke|stared)\b", re.I)
+# verb of the sentence, whatever it is. The words a moment opens with before the
+# verb are always the same handful — "I", "at 11pm", "the" — so skipping them
+# lands on the thing that actually varies.
+#
+# This was a closed list of postures (sat, stood, lay, paced ...) for about an
+# hour, and running the real composer five times showed why that could not work.
+# Not one of the five opened on a posture: they opened on went, ate, unlocked,
+# scrubbed, unlocked. All five collapsed to the same "none" bucket, so the FIRST
+# one to ship would have made the gate refuse every moment after it. A catch-all
+# value in a signature is not a signature.
+#
+# The open version separates 7 of the 11 real moments we have, and every
+# collision it does report is a true repeat: unlocked x2, stood x2, sat x3.
+OPENER_SKIP = frozenset({
+    "i", "at", "in", "on", "the", "a", "an", "my", "and", "then", "it", "was",
+    "were", "to", "of", "for", "with", "after", "before", "when", "while",
+    "that", "this", "am", "pm", "up", "out", "just", "had", "have", "been",
+    "so", "because", "his", "her", "their", "we", "she", "he", "they",
+})
 TOO_FRAME = re.compile(r"\btoo\s+\w+\s+to\s+\w+", re.I)
+
+
+def opening_verb(text: str) -> str:
+    """The first word that is not scaffolding. Usually the verb."""
+    for word in re.findall(r"[a-z']+", text.lower()):
+        if word not in OPENER_SKIP:
+            return word
+    return "none"
 
 
 def shape_signature(text: str) -> str:
     """The sentence's skeleton, as a short string.
 
-    Deliberately coarse in what it keeps: a richer signature would include the
-    object, and the object is exactly what changes when the same sentence is
-    written again about a car instead of a bed.
+    Two features: what the moment DOES first, and whether it uses the
+    "too ___ to ___" frame.
 
-    But the posture is read from the OPENING only, and that precision matters.
-    Reading it from anywhere in the sentence made this fire on moments that are
-    genuinely different — "At 1:20am I gave up, sat on the kitchen floor, and
-    felt ..." opens on giving up, not on sitting, and shares nothing with "I sat
-    on the edge of the bed" beyond a word further in. Two real test moments were
-    refused that way. What repeats is how a moment STARTS.
+    Deliberately does not include the object. The object is exactly what changes
+    when the same sentence is written again about a car instead of a bed, and
+    that repeat is the one a reader notices.
+
+    It reads the FIRST verb, not any verb. "At 1:20am I gave up, sat on the
+    kitchen floor" opens on giving up; matching "sat" anywhere in the sentence
+    refused it as a copy of "I sat on the edge of the bed", and two real test
+    moments were rejected that way.
     """
-    opening = " ".join(text.split()[:OPENING_WORDS])
-    found = POSTURE.search(opening)
-    opener = found.group(1).lower() if found else "none"
-    return f"{opener}|{'too' if TOO_FRAME.search(text) else 'plain'}"
+    return f"{opening_verb(text)}|{'too' if TOO_FRAME.search(text) else 'plain'}"
 
 
 def repetition_faults(moment: str, previous: list[str] | None = None) -> list[str]:
@@ -271,14 +289,6 @@ Read the seed between the markers. Invent your own moment and return the JSON.""
 # The verb as it appears in a moment, mapped to the words a prompt uses. Written
 # out rather than derived: "stood" does not start with "standing", and a clever
 # prefix rule silently matched nothing at all when this was first written.
-POSTURE_NAMES = {
-    "sat": "sitting", "sitting": "sitting",
-    "stood": "standing", "standing": "standing", "stared": "standing still",
-    "lay": "lying down", "lie": "lying down", "lying": "lying down",
-    "paced": "pacing", "walked": "walking", "drove": "driving",
-    "knelt": "kneeling", "crouched": "crouching", "leaned": "leaning",
-    "woke": "waking up",
-}
 HOUR_POOL = ("very early morning", "mid-morning", "the middle of the afternoon",
              "early evening", "late at night", "the small hours")
 
@@ -294,15 +304,23 @@ def variety_brief(previous: list[str], roll: int) -> str:
         return ""
     recent = previous[-SHAPE_WINDOW:]
     spent = {shape_signature(t).split("|")[0] for t in recent}
-    banned = sorted({POSTURE_NAMES[s] for s in spent if s in POSTURE_NAMES})
+    # The verbs themselves. A translation table was needed while these came from
+    # a closed list of postures; with the opener read straight off the sentence
+    # there is nothing to translate, and "do not start with sat, stood" is a
+    # clearer instruction than a category name anyway.
+    #
+    # A verb is not a past moment. This says which WORD not to open on, never
+    # what was done with it, where, or when — invariant 10.
+    banned = sorted(s for s in spent if s != "none")
     lines = []
     if banned:
-        lines.append("Do not open on somebody " + ", ".join(banned) + ".")
+        lines.append("Do not open the sentence with any of these verbs: "
+                     + ", ".join(banned) + ".")
     if sum("too" in shape_signature(t) for t in recent) >= 2:
         lines.append('Do not use the "too ___ to ___" construction.')
     # One nudge that is not a prohibition, so there is somewhere to go.
     lines.append(f"Set it in {HOUR_POOL[roll % len(HOUR_POOL)]}, "
-                 f"and open on the action, not on the posture.")
+                 f"and open on an action, not on a posture.")
     return "\nHOW THIS ONE MUST DIFFER (these are about SHAPE, not subject):\n  " \
            + "\n  ".join(lines) + "\n"
 
