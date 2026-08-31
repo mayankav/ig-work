@@ -64,7 +64,16 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cutout import QAFailure, auto_chroma_matte, detect_key_hue, qa  # noqa: E402
+# The character gates live in cutout.py, not here. They used to live in this
+# file, which meant the IMPORT path — the way every one of the 180 library poses
+# actually arrived — ran none of them. They are re-exported under their old
+# names so this module's callers and tests are unaffected by the move.
+from cutout import (  # noqa: E402
+    CREAM_MAX_S, CREAM_MIN_V, EYE_MAX_SAT, GREEN_HUE_RANGE, LIBRARY_CREAM_HUE,
+    LIBRARY_GREEN_SAT, QAFailure, assert_has_pupils, assert_no_text,
+    assert_on_palette, auto_chroma_matte, backdrop_mask, correct_palette,
+    detect_key_colour, glyph_runs, qa,
+)
 from imaging import drop_neighbour_bleed, tight_crop  # noqa: E402
 from llm import resolve_key  # noqa: E402
 
@@ -233,106 +242,6 @@ def _flatten_onto_key(rgba: np.ndarray, height: int = 512) -> np.ndarray:
     x = (side - flat.shape[1]) // 2
     canvas[y:y + flat.shape[0], x:x + flat.shape[1]] = flat
     return canvas
-
-
-def backdrop_mask(bgr: np.ndarray, tolerance: int = 44) -> np.ndarray:
-    """Pixels close to the frame's border colour — the flat backdrop.
-
-    Border median, the same trick cutout.py and import_poses.py both use, so it
-    works on the magenta key we ask for, on the cream of the old style sheets,
-    and on whatever a model hands back instead.
-    """
-    border = np.concatenate([bgr[0], bgr[-1], bgr[:, 0], bgr[:, -1]])
-    med = np.median(border, axis=0)
-    return (np.abs(bgr.astype(np.int16) - med).max(2) <= tolerance)
-
-
-def glyph_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
-    """Runs of small, similar-height marks sitting on one baseline, detached
-    from the figure: the shape of text. Each run is a list of bounding boxes.
-
-    Two conditions, and the second one is what makes this usable.
-
-    Size and alignment alone are not enough. Silly's mane is dense black
-    corkscrew curls, his hooves are four small black shapes and his ear insides
-    are two more — small dark blobs of near-identical height, and the hooves
-    genuinely do line up along the bottom of the frame. A detector that looks
-    only at shape calls 82 of the 181 poses in the library "text".
-
-    So a mark counts only if it is a SEPARATE PIECE OF PICTURE: its own
-    connected region of non-backdrop, not part of the main figure. A caption is
-    printed on the background with clear space round every letter. A hoof is
-    attached to a leg, and a mane curl to a head. That condition takes the
-    false-positive rate on the real 180-pose library to zero while still
-    catching every caption on the four old style sheets.
-
-    Working on non-backdrop regions rather than on dark pixels also means the
-    colour of the lettering does not matter. A pale watermark is as detectable
-    as a black caption.
-
-    cutout.qa() has a cousin of this that only looks BELOW 80% of the frame,
-    because that is where a sheet cell's caption lives and looking higher would
-    reject legitimate detached artwork in imported poses. Here the composition
-    came from a model we prompted, so the whole frame is fair game: a watermark
-    across the middle or a signature in a corner is just as fatal and cutout's
-    version would not see either. Superset, never a relaxation.
-    """
-    H, W = bgr.shape[:2]
-    total = float(H * W)
-    subject = (~backdrop_mask(bgr)).astype(np.uint8)
-    subject = cv2.morphologyEx(subject, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    n, _, stats, _ = cv2.connectedComponentsWithStats(subject, 8)
-    if n <= 2:
-        return []
-    main = max(range(1, n), key=lambda i: stats[i, cv2.CC_STAT_AREA])
-
-    glyphs = []
-    for i in range(1, n):
-        if i == main:
-            continue
-        area = stats[i, cv2.CC_STAT_AREA]
-        h, w = stats[i, cv2.CC_STAT_HEIGHT], stats[i, cv2.CC_STAT_WIDTH]
-        top, left = stats[i, cv2.CC_STAT_TOP], stats[i, cv2.CC_STAT_LEFT]
-        if not (0.00002 * total <= area <= 0.006 * total):
-            continue
-        if not (0.008 * H <= h <= 0.12 * H):
-            continue
-        if w > 0.25 * W or w > 6 * h:
-            continue
-        glyphs.append((top + h, h, left, (left, top, w, h)))
-
-    runs = []
-    used: set[tuple[int, int, int, int]] = set()
-    for base, h, _, box in sorted(glyphs):
-        if box in used:
-            continue
-        row = [g for g in glyphs if abs(g[0] - base) <= max(3, 0.5 * h)]
-        if len(row) < 3:
-            continue
-        heights = sorted(g[1] for g in row)
-        med = heights[len(heights) // 2]
-        similar = [g for g in row if med / 2.0 <= g[1] <= med * 2.0]
-        xs = sorted(g[2] for g in similar)          # spread across x, not a stack
-        if len(similar) >= 3 and (xs[-1] - xs[0]) >= 2 * med:
-            runs.append([g[3] for g in similar])
-            used.update(g[3] for g in similar)
-    return runs
-
-
-def assert_no_text(bgr: np.ndarray, what: str) -> None:
-    """Invariant 3. Raises QAFailure — it never warns.
-
-    Runs on the frame BEFORE matting, because matting a captioned image throws
-    the caption away and then the artwork looks clean. cutout.qa()'s component
-    gates are the net that catches text after matting. Both have to hold.
-    """
-    runs = glyph_runs(bgr)
-    if runs:
-        raise QAFailure(
-            f"no_text: {what} contains {len(runs)} run(s) of "
-            f"{sum(len(r) for r in runs)} detached, similar-height marks on a "
-            f"shared baseline — this is what lettering looks like, and no "
-            f"mascot artwork may carry any")
 
 
 def _library_poses(manifest: Path = MANIFEST) -> list[str]:
@@ -695,193 +604,6 @@ def backdrop_fraction(bgr: np.ndarray) -> float:
 MIN_BACKDROP = 0.25
 
 
-# ── palette correction ───────────────────────────────────────────────────────
-#
-# Measured, not guessed. Across the first four generated poses, against the four
-# library poses used as references:
-#
-#     body green     library saturation 49-52   generated 30-41
-#     muzzle/belly   library hue 38-40 deg      generated 22-28 deg
-#
-# So the model holds the SHAPES from the references and drifts the COLOUR: a
-# sage body instead of the brand green, and a blush muzzle instead of a buttery
-# one. Consistent in one direction, which is what makes it correctable.
-#
-# This is a colour correction and nothing more. It moves saturation and hue of
-# pixels already in the right family; it cannot repair a wrong shape and must
-# never be asked to. It runs BEFORE the gates, so what is judged and what is
-# written are the same picture.
-LIBRARY_GREEN_SAT = 0.51        # median of the library reference poses
-LIBRARY_CREAM_HUE = 39.0        # degrees, ditto
-GREEN_HUE_RANGE = (35, 95)      # OpenCV H is 0-179, so this is 70-190 deg
-CREAM_MIN_V, CREAM_MAX_S = 180, 120
-EYE_MAX_SAT = 45          # an eye white is white; the cream muzzle is 73-94
-
-
-def correct_palette(bgr: np.ndarray) -> np.ndarray:
-    """Pull the body green and the cream back onto the brand palette.
-
-    Returns a new frame. The magenta key is untouched on purpose — everything
-    downstream mattes against it and shifting it would break the one thing that
-    is already right.
-    """
-    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV).astype(np.float32)
-    h, sat, val = hsv[..., 0], hsv[..., 1], hsv[..., 2]
-
-    green = (h > GREEN_HUE_RANGE[0]) & (h < GREEN_HUE_RANGE[1]) & (sat > 25)
-    if green.sum() <= 500:
-        green = np.zeros_like(green)
-    else:
-        current = float(np.median(sat[green])) / 255.0
-        if current > 0.01:
-            sat[green] = np.clip(sat[green] * (LIBRARY_GREEN_SAT / current), 0, 255)
-
-    # The cream is pale and barely saturated, which is what separates it from
-    # both the green and the magenta without needing a mask from anywhere else.
-    cream = (val > CREAM_MIN_V) & (sat < CREAM_MAX_S) & (sat > 12) & (h < 45)
-    if cream.sum() <= 500:
-        cream = np.zeros_like(cream)
-    else:
-        h[cream] += (LIBRARY_CREAM_HUE / 2.0) - float(np.median(h[cream]))
-        h[cream] = np.clip(h[cream], 0, 179)
-
-    fixed = cv2.cvtColor(np.stack([h, sat, val], -1).astype(np.uint8),
-                         cv2.COLOR_HSV2BGR)
-
-    # Write back ONLY the pixels we meant to change. A BGR->HSV->BGR round trip
-    # is not lossless — it moved the magenta key from 255 to 254 — and while one
-    # level is nothing to the eye, cutout.py's key_residue gate measures exactly
-    # that kind of thing. Compositing on the masks keeps every untouched pixel
-    # byte-identical, so the correction cannot cost us an import rejection.
-    touched = (green | cream)[..., None]
-    return np.where(touched, fixed, bgr).astype(np.uint8)
-
-
-def _eye_candidates(rgba: np.ndarray) -> list[tuple[int, int, int, int, int]]:
-    """White blobs that could be an eye. Returns (x, y, w, h, area), largest first."""
-    solid = rgba[..., 3] > 200
-    bgr = rgba[..., :3]
-    grey = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
-    sat = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 1]
-    height, _ = grey.shape
-    upper = np.zeros_like(solid)
-    upper[: int(height * 0.62)] = True
-
-    whites = ((grey > 200) & (sat < EYE_MAX_SAT) & solid & upper).astype(np.uint8)
-    count, _, stats, _ = cv2.connectedComponentsWithStats(whites, 8)
-    figure_area = max(int(solid.sum()), 1)
-
-    out = []
-    for i in range(1, count):
-        x, y, w, h, area = (int(v) for v in stats[i])
-        if not (0.0008 * figure_area < area < 0.06 * figure_area):
-            continue
-        if w < 5 or h < 5 or not (0.45 < w / h < 2.2):
-            continue
-        out.append((x, y, w, h, area))
-    return sorted(out, key=lambda b: -b[4])
-
-
-def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
-    """Centre of the dark core inside one eye white, or None if there isn't one."""
-    x, y, w, h, _ = box
-    patch = grey[y:y + h, x:x + w]
-    inset_y, inset_x = max(1, h // 7), max(1, w // 7)
-    inner = patch[inset_y:h - inset_y, inset_x:w - inset_x]
-    if inner.size == 0:
-        return None
-    dark = (inner < 110).astype(np.uint8)
-    if dark.sum() < max(6, int(0.05 * inner.size)):
-        return None
-    ys, xs = np.nonzero(dark)
-    return (x + inset_x + float(xs.mean()), y + inset_y + float(ys.mean()))
-
-
-def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
-    """Refuse a pose whose eyes came back blank, mismatched or crooked.
-
-    Written twice, and the first version is why this docstring is long.
-
-    Draft one asked "is there a bright blob, and does one of them contain
-    something dark". It refused five real library poses, because the cream
-    muzzle is bright. Measured, the library cream sits at saturation 73-94 and
-    an eye white is near zero, so the mask now demands that white be white.
-
-    Draft two still passed a train-window scene with two blank eyes. The reason
-    is the useful one: the picture contained a WINDOW, 135x279 of pale glass,
-    which is blob-shaped, white, and in the upper half of the frame. It was
-    counted as an eye, something dark inside it satisfied "at least one has a
-    pupil", and a prop rescued a face that had none. A fridge, a sink, a plate
-    and a laptop screen do the same thing.
-
-    So the unit here is the PAIR, not the blob. Two whites of similar size,
-    sitting side by side at the same height, is a shape a prop does not
-    accidentally make, and it is what a face actually looks like. Both must
-    carry a pupil, and the two pupils must sit at roughly the same height —
-    crooked pupils are the other way a generated face reads as wrong, and
-    draft two could not see them at all.
-
-    When no pair is found the gate passes. That is deliberate and it is the
-    limit of what this can honestly claim: a closed-eye pose, a wink and a
-    profile all legitimately show no pair, and refusing them would refuse good
-    art to catch bad art. The gate's promise is narrow and complete — IF a pair
-    of eye whites is visible, THEN both are correct.
-    """
-    if rgba.shape[2] < 4:
-        return
-    grey = cv2.cvtColor(rgba[..., :3], cv2.COLOR_BGR2GRAY)
-    boxes = _eye_candidates(rgba)
-
-    pair = None
-    for i, a in enumerate(boxes):
-        for b in boxes[i + 1:]:
-            ax, ay, aw, ah, _ = a
-            bx, by, bw, bh, _ = b
-            tall = max(ah, bh)
-            if abs(ah - bh) > 0.40 * tall or abs(aw - bw) > 0.40 * max(aw, bw):
-                continue                       # eyes are a matched pair
-            if abs(ay - by) > 0.60 * tall:
-                continue                       # and sit at the same height
-            gap = max(ax, bx) - min(ax + aw, bx + bw)
-            if not (-0.20 * max(aw, bw) < gap < 2.6 * max(aw, bw)):
-                continue                       # side by side, not stacked or far apart
-            pair = (a, b) if ax < bx else (b, a)
-            break
-        if pair:
-            break
-
-    if pair is None:
-        return                                  # closed, winking or in profile
-
-    left, right = pair
-    pupils = [_pupil_centre(grey, box) for box in pair]
-    blank = [side for side, p in zip(("left", "right"), pupils) if p is None]
-    if blank:
-        raise QAFailure(
-            f"pupils: {what} has a pair of eye whites and the {' and '.join(blank)} "
-            f"one is blank. Both eyes must carry a pupil. Re-roll with another seed.")
-
-    # Crookedness is measured INSIDE each eye, not against the horizon.
-    #
-    # The first attempt compared the two pupils' absolute heights and refused 11
-    # real library poses: jumping, leaping, falling, chasing, on_back — every
-    # pose where the head is tilted. A tilted head has its eyes at different
-    # heights and its pupils with them, and that is correct drawing, not a
-    # defect. What is a defect is one pupil sitting high in its own white while
-    # the other sits low, which is what a model produces and an illustrator does
-    # not. So each pupil is expressed as a fraction of its own eye box, and the
-    # two fractions are compared.
-    offsets = []
-    for (px, py), (bx, by, bw, bh, _) in zip(pupils, (left, right)):
-        offsets.append(((px - bx) / bw, (py - by) / bh))
-    (lu, lv), (ru, rv) = offsets
-    if abs(lv - rv) > 0.30:
-        raise QAFailure(
-            f"pupils: {what} has one pupil high in its eye and the other low "
-            f"({lv:.0%} against {rv:.0%} of the way down). A crooked stare is the "
-            f"other way a generated face reads as wrong. Re-roll with another seed.")
-
-
 def check(png: bytes) -> tuple[np.ndarray, np.ndarray]:
     """Every gate a freshly generated pose has to pass. Raises QAFailure, and a
     caller that catches it must write nothing.
@@ -919,7 +641,7 @@ def check(png: bytes) -> tuple[np.ndarray, np.ndarray]:
     # means a clipped figure and a second blob means a second thing in the
     # picture. Same gates, tightened — never loosened.
     qa(rgba, src_shape=arr.shape[:2], allow_detached=False, strict_framing=True,
-       key_hue=detect_key_hue(arr))
+       key_bgr=detect_key_colour(arr))
     return arr, rgba
 
 

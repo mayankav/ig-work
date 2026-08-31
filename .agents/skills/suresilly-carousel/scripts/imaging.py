@@ -90,3 +90,111 @@ def contact_sheet(out: Path, cols: int = 6) -> Path:
     return dest
 
 
+
+
+# ── the judging sheet ────────────────────────────────────────────────────────
+#
+# contact_sheet() above answers "is the alpha clean" — it composites on a
+# checkerboard, which is the right ground for seeing a halo and the wrong one
+# for every other question. It also globs a whole directory and writes its
+# result back into it, so the only way to look at a new pose was to add it to
+# the library first.
+#
+# This one answers the question that actually decides an import: does this pose
+# belong beside the ones already there, on the grounds it will really be
+# printed on. Nothing here writes to the library.
+#
+# The grounds are lifted from render.py's THEMES. `forest` is in the list on
+# purpose and is the hard case: it is #2F6B4F, and Silly's body is #3C965A — a
+# green character on a green ground, which is where a drifted or muddy cutout
+# stops reading as a silhouette at feed size.
+JUDGING_GROUNDS = [
+    ("terracotta", "#D0522A"),
+    ("forest", "#2F6B4F"),
+    ("charcoal", "#1E1E1E"),
+]
+
+# Fixed, so two runs of the same sheet are comparable. These are the poses
+# poses.json names as role defaults — the closest thing the library has to a
+# statement of what "on-model" looks like.
+STYLE_ANCHORS = ["deadpan", "explaining", "welcoming"]
+
+
+def _hex_bgr(h: str) -> tuple[int, int, int]:
+    h = h.lstrip("#")
+    return (int(h[4:6], 16), int(h[2:4], 16), int(h[0:2], 16))
+
+
+def _on(rgba: np.ndarray, bgr: tuple[int, int, int], box: tuple[int, int]) -> np.ndarray:
+    """Composite a pose onto a solid ground, letterboxed into box (w, h)."""
+    bw, bh = box
+    tile = np.zeros((bh, bw, 3), np.uint8)
+    tile[:, :] = bgr
+    if rgba is None or rgba.size == 0:
+        return tile
+    s = min((bw - 12) / rgba.shape[1], (bh - 12) / rgba.shape[0])
+    w, h = max(1, int(rgba.shape[1] * s)), max(1, int(rgba.shape[0] * s))
+    r = cv2.resize(rgba, (w, h), interpolation=cv2.INTER_AREA)
+    a = r[:, :, 3:4].astype(np.float32) / 255.0
+    y, x = (bh - h) // 2, (bw - w) // 2
+    tile[y:y + h, x:x + w] = (r[:, :, :3] * a + tile[y:y + h, x:x + w] * (1 - a)).astype(np.uint8)
+    return tile
+
+
+def _label(w: int, text: str, h: int = 26, ink=(40, 40, 40), paper=250) -> np.ndarray:
+    strip = np.full((h, w, 3), paper, np.uint8)
+    cv2.putText(strip, text[:120], (6, h - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.45,
+                ink, 1, cv2.LINE_AA)
+    return strip
+
+
+def judging_sheet(entries: list[dict], library: Path, dest: Path) -> Path:
+    """One row per candidate: the pose on three real slide grounds, then the
+    style anchors on the same grounds for comparison, then the gate verdicts.
+
+    `entries` is a list of {name, rgba, verdicts: list[str], ok: bool}.
+    """
+    CW, CH = 240, 300
+    anchors = []
+    for a in STYLE_ANCHORS:
+        p = library / f"{a}.png"
+        if p.is_file():
+            anchors.append((a, cv2.imread(str(p), cv2.IMREAD_UNCHANGED)))
+
+    grounds = [(n, _hex_bgr(h)) for n, h in JUDGING_GROUNDS]
+    rows = []
+
+    # A library with no anchors in it is a real case — a fresh checkout, or a
+    # test with a tmp library — and a zero-width tile crashes cv2. The sheet is
+    # still worth writing without the comparison column.
+    header = [_label(CW * len(grounds), "NEW  —  " + " · ".join(n for n, _ in grounds), 30)]
+    if anchors:
+        header.append(np.full((30, 16, 3), 250, np.uint8))
+        header.append(_label(CW * len(anchors),
+                             "LIBRARY  —  " + " · ".join(n for n, _ in anchors), 30))
+    rows.append(np.hstack(header))
+
+    for e in entries:
+        cells = [_on(e["rgba"], g, (CW, CH)) for _, g in grounds]
+        if anchors:
+            gap = np.full((CH, 16, 3), 250, np.uint8)
+            # anchors are shown on the FIRST ground only, at the same box, so
+            # the comparison is like for like: same scale, same background,
+            # same crop.
+            cells += [gap] + [_on(img, grounds[0][1], (CW, CH)) for _, img in anchors]
+        rows.append(np.hstack(cells))
+        width = sum(c.shape[1] for c in cells)
+        verdict = ("PASS  " if e["ok"] else "REJECT  ") + e["name"]
+        ink = (30, 120, 30) if e["ok"] else (30, 30, 200)
+        rows.append(_label(width, verdict, 26, ink))
+        for line in e["verdicts"]:
+            rows.append(_label(width, "    " + line, 22, (90, 90, 90)))
+        rows.append(np.full((10, width, 3), 250, np.uint8))
+
+    width = max(r.shape[1] for r in rows)
+    rows = [r if r.shape[1] == width else
+            np.pad(r, ((0, 0), (0, width - r.shape[1]), (0, 0)), constant_values=250)
+            for r in rows]
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(dest), np.vstack(rows))
+    return dest

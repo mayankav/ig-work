@@ -24,6 +24,7 @@ The three things worth locking here, in order of what they would cost:
       credentials, which is not the machine anybody tests on.
 """
 import json
+import re
 import pathlib
 import sys
 
@@ -514,15 +515,31 @@ RENDER_PATH = ("build.py", "run.py", "render.py", "compose.py", "library.py",
                "mascot.py", "import_poses.py", "cutout.py")
 
 
+IMPORTS_FLUX = re.compile(
+    r"^\s*(?:import\s+poses_flux"
+    r"|from\s+poses_flux\s+import"
+    r"|.*\bimport_module\s*\(\s*[\"']poses_flux)",
+    re.MULTILINE)
+
+
 def test_nothing_on_the_render_path_imports_this_module():
     """build.py renders with no key and no network. An import here would break
-    that on exactly the machine nobody tests on."""
+    that on exactly the machine nobody tests on.
+
+    Matches IMPORT STATEMENTS, not the bare string. It used to match the string,
+    which was a fine proxy until the character gates moved into cutout.py and
+    cutout.py had to explain in a comment where they came from and why. A
+    sentence in a docstring cannot open a socket; only an import can, and the
+    three forms below are all of them. The guard is unchanged in strength — a
+    render-path file that actually pulls this module in still fails.
+    """
     for name in RENDER_PATH:
         path = ROOT / "scripts" / name
         if not path.is_file():
             continue
-        assert "poses_flux" not in path.read_text(encoding="utf-8"), \
-            f"{name} references poses_flux; this module is an offline tool"
+        hit = IMPORTS_FLUX.search(path.read_text(encoding="utf-8"))
+        assert not hit, \
+            f"{name} imports poses_flux ({hit.group(0).strip()!r}); it is an offline tool"
 
 
 def test_live_code_is_not_hiding_in_the_obsolete_file():
@@ -599,12 +616,17 @@ def test_the_pupil_gate_does_not_refuse_the_real_library():
     everything we already ship.
 
     Three poses are refused and all three are known: `guarded` (narrowed lids),
-    `chasing` and `lab_coat`. They are good poses. The gate never runs on the
-    library — only on freshly generated frames — so the cost of that strictness
-    is a re-roll, which is free, and the cost of loosening it is shipping a
-    blank-eyed or cross-eyed Silly beside a proper one. Refusing 1.7% is the
-    right side of that trade, and this test exists to make the number visible
-    rather than to bless it.
+    `chasing` and `lab_coat`. They are good poses. On THIS path the cost of that
+    strictness is a re-roll, which is free, and the cost of loosening it is
+    shipping a blank-eyed or cross-eyed Silly beside a proper one. Refusing 1.7%
+    is the right side of that trade, and this test exists to make the number
+    visible rather than to bless it.
+
+    The gate also runs on the import path now, where it REPORTS and does not
+    block — see import_poses.ADVISORY. That is the same 1.7% landing on artwork
+    a person chose and handed over, where re-rolling is not free and the picture
+    is right there to look at. Same gate, same strictness, different consequence,
+    because the cost of a false refusal is different on the two paths.
     """
     import cv2, glob
     from cutout import QAFailure

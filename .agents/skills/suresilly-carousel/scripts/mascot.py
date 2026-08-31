@@ -37,7 +37,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from cutout import QAFailure, auto_chroma_matte, detect_key_hue, qa
+from cutout import QAFailure, auto_chroma_matte, detect_key_colour, qa
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CHARACTER_MD = SKILL_DIR / "mascot" / "CHARACTER.md"
@@ -240,7 +240,7 @@ def render_pose(brief: str, out_path: Path, *, model: str = MODEL_FLASH,
         src = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
         rgba = chroma_cutout(raw)
         try:
-            qa(rgba, src_shape=src.shape[:2], key_hue=detect_key_hue(src))
+            qa(rgba, src_shape=src.shape[:2], key_bgr=detect_key_colour(src))
         except QAFailure as e:
             failures.append(f"attempt {attempt + 1}: {e}")
             if verbose:

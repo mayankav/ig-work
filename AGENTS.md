@@ -77,11 +77,18 @@ Any agent working here must not violate these. They exist because each one was a
    code — edit `mascot/poses.json`.
 3. **No text inside mascot artwork.** Not a letter, not a number. The previous pipeline sliced a
    labelled sprite sheet and shipped nine slides with captions like "2. Thinking" printed on the
-   donkey. `scripts/cutout.py` enforces this on the import path, and `poses_flux.assert_no_text`
-   enforces it on generated frames BEFORE matting — matting throws a caption away and then the
-   artwork looks clean. It counts a mark only if it is its own detached region, because Silly's
-   mane is dozens of small dark curls and a naive check called 82 of the 180 real library poses
-   "text".
+   donkey. `cutout.assert_no_text` enforces this on BOTH paths, always BEFORE matting — matting
+   throws a caption away and then the artwork looks clean. It counts a mark only if it is its own
+   detached region, because Silly's mane is dozens of small dark curls and a naive check called 82
+   of the 180 real library poses "text".
+
+   It lived in `poses_flux.py` until it was moved, and for as long as it did this invariant was
+   not true. `import_poses.py` does not import that module, so the strict detector had never run
+   on a single imported pose — which is every pose in the library. Three character gates now live
+   in `cutout.py`, the module both paths import: `assert_no_text`, `assert_on_palette` (the body
+   is made of `#3C965A`, calibrated so all 180 real poses clear it) and `assert_has_pupils`.
+   A gate belongs in the module the ENTRY POINTS share, not in whichever one happened to need it
+   first.
 4. **QA gates abort, they do not warn.** If a gate fails, nothing is written. Never relax a gate
    to make a build pass — reword the brief instead.
 5. **No MCP dependency.** Everything runs through plain Python CLIs so the repo behaves the same
