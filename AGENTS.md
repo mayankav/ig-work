@@ -161,7 +161,7 @@ Any agent working here must not violate these. They exist because each one was a
 
 17. **What we publish is measured, and the measurement never decides.** The engine used to post
     and learn nothing. `post_to_ig.py` now keeps the media id in `carousels/<slug>/published.json`,
-    and `scripts/insights.py` reads reach, saves, shares, interactions and profile visits into
+    and `scripts/insights.py` reads reach, saves, shares and interactions into
     `state/insights.jsonl` three days later — long enough for saves and shares to arrive, short
     enough that the deck is still recognisable. It runs on its own schedule and a failure there
     can never touch publishing.

@@ -143,7 +143,7 @@ def run() -> int:
         # ── a good run ──
         insights.requests = Stub(lambda n, kw: ok({
             "reach": 800 + n, "saved": 40, "shares": 9,
-            "total_interactions": 130, "profile_visits": 12,
+            "total_interactions": 130,
         }))
         held, sys.stderr = sys.stderr, io.StringIO()
         held_out, sys.stdout = sys.stdout, io.StringIO()
@@ -162,7 +162,16 @@ def run() -> int:
         if first.get("host") != post_to_ig.GRAPH_FACEBOOK:
             failures.append("the record does not say which host answered")
         if set(first.get("metrics", {})) != set(insights.METRICS):
-            failures.append("the five metrics we chose are not what was stored")
+            failures.append("the metrics we chose are not what was stored")
+
+        # profile_visits is an ACCOUNT metric, not a media one. It was in this
+        # list once; the ladder hid the mistake by falling through, so the only
+        # symptom was two wasted requests a deck. Assert the absence.
+        for account_only in ("profile_visits", "profile_views", "follows",
+                             "impressions", "views"):
+            if account_only in insights.METRICS or account_only in insights.CORE_METRICS:
+                failures.append(f"{account_only} is not a media metric and must not "
+                                f"be asked for on /<media-id>/insights")
 
         # ── append-only ──
         insights.requests = Stub(lambda n, kw: ok({"reach": 1}))
@@ -193,8 +202,13 @@ def run() -> int:
             failures.append("an empty 200 was accepted as a measurement")
         except insights.InsightsError:
             pass
-        if len(insights.requests.calls) != 3:
-            failures.append("an empty answer did not fall through to the other metric shapes")
+        # One attempt per distinct shape. CORE is only asked when it is genuinely
+        # narrower than METRICS — asking twice for the same list is a retry loop
+        # wearing a ladder's clothes.
+        expected = 2 + (1 if set(insights.CORE_METRICS) < set(insights.METRICS) else 0)
+        if len(insights.requests.calls) != expected:
+            failures.append(f"an empty answer tried {len(insights.requests.calls)} "
+                            f"shapes, expected {expected}")
 
         # ── a renamed metric falls through, a refusal does not ──
         insights.requests = Stub(lambda n, kw: (
@@ -302,7 +316,7 @@ def run() -> int:
         failures.append("the module docstring no longer forbids the approval path, so the "
                         "next person has nothing telling them not to build it")
 
-    total = 30
+    total = 35
     if failures:
         print(f"insights: {len(failures)} failed of {total}")
         for line in failures:

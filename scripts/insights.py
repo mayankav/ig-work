@@ -101,17 +101,25 @@ INSIGHTS_PATH = STATE_DIR / "insights.jsonl"
 #                       the algorithm's goodwill — somebody handed it to someone.
 #   total_interactions  likes + comments + saves + shares in one figure, so a
 #                       deck can be compared with a deck without adding up four.
-#   profile_visits      the only one that says the deck sent anyone toward the
-#                       account rather than just past it.
-#
 # Deliberately not collected: impressions and views (inflated by repeat serving
 # and not a decision anybody makes), follows (too sparse per post to read), and
 # per-child breakdowns (a slide-level number invites exactly the optimisation
 # loop the docstring above forbids).
-METRICS = ("reach", "saved", "shares", "total_interactions", "profile_visits")
+#
+# profile_visits was here and has been removed. Meta documents it as an ACCOUNT
+# metric, on /{ig-user-id}/insights, not a media one — it counts visits to the
+# profile over a period, and there is no per-post version of it to ask for. The
+# ladder below would have swallowed the mistake by falling through to CORE, so
+# the numbers would have been right and two requests a deck would have been
+# wasted proving it. If the account-level figure is ever wanted it is a second
+# endpoint and a different record, not a column on a deck.
+METRICS = ("reach", "saved", "shares", "total_interactions")
 
-# What we fall back to if the API refuses the full list. Every one of these has
-# been a media metric across every recent API version.
+# What we fall back to if the API refuses the full list. Identical to METRICS
+# today, and kept separate on purpose: METRICS is what we would like and CORE is
+# what has been a media metric across every recent API version. When the first
+# grows again — and it will, Meta keeps moving these — the floor should not move
+# with it.
 CORE_METRICS = ("reach", "saved", "shares", "total_interactions")
 
 # How long a deck ages before we ask.
@@ -316,8 +324,12 @@ def fetch(media_id: str, token: str) -> tuple[dict, list[str], str]:
     attempts = [
         ("full", METRICS, {}),
         ("full+total_value", METRICS, {"metric_type": "total_value"}),
-        ("core", CORE_METRICS, {}),
     ]
+    # Only worth a third request when CORE is actually narrower than METRICS.
+    # They are the same list today, and asking twice for the same thing is how a
+    # ladder quietly turns into a retry loop.
+    if set(CORE_METRICS) < set(METRICS):
+        attempts.append(("core", CORE_METRICS, {}))
     last: InsightsError = InsightsError("no attempt was made")
     for variant, metrics, extra in attempts:
         params = {"metric": ",".join(metrics), "access_token": token, **extra}
@@ -472,6 +484,77 @@ def collect(
     return 1 if written == 0 else 0
 
 
+def check_token(token: str) -> int:
+    """Prove the token works and carries the insights permission. Reads nothing
+    of ours and writes nothing.
+
+    This exists because the ordinary run cannot tell you. It only looks at decks
+    that already carry a media id, so on a fresh install it exits before making
+    a single call and reports success — which says nothing at all about whether
+    the secret in GitHub is the right string. A permission is added to the app
+    in one place and carried by a token minted in another, and a token issued
+    before the permission existed does not have it. That gap is invisible until
+    the first deck comes due, days later.
+
+    So: ask the account who it is, borrow its newest post, and ask for that
+    post's numbers. If all three answer, the loop will work when a deck is due.
+
+    The token is never printed. Neither is anything that could reconstruct it.
+    """
+    if requests is None:
+        print("::error::requests is not installed")
+        return 1
+    if not token:
+        print("::error::IG_ACCESS_TOKEN is not set")
+        return 1
+
+    base = post_to_ig.graph_base(token)
+    kind = ("Instagram login" if base == post_to_ig.GRAPH_INSTAGRAM
+            else "Facebook login")
+    print(f"host {base}  ({kind} token)")
+
+    try:
+        r = requests.get(f"{base}/me", params={"fields": "id,username",
+                                               "access_token": token}, timeout=30)
+        body = r.json() if r.content else {}
+    except Exception as exc:                                  # noqa: BLE001
+        print(f"::error::could not reach the API: {exc}")
+        return 1
+    if r.status_code != 200:
+        print(f"::error::the token was refused: {_classify(body, r.status_code, r.text)}")
+        print(scope_help(token))
+        return 1
+    print(f"token is valid for @{body.get('username', '?')} (id {body.get('id', '?')})")
+
+    try:
+        r = requests.get(f"{base}/me/media",
+                         params={"fields": "id,timestamp,media_type", "limit": 1,
+                                 "access_token": token}, timeout=30)
+        media = (r.json() or {}).get("data", []) if r.status_code == 200 else []
+    except Exception as exc:                                  # noqa: BLE001
+        print(f"::error::could not list media: {exc}")
+        return 1
+    if not media:
+        print("the account has no posts yet, so the permission cannot be proved "
+              "here. It will be proved by the first deck that comes due.")
+        return 0
+
+    newest = media[0]
+    print(f"newest post {newest.get('media_type', '?')} from {newest.get('timestamp', '?')}")
+    try:
+        metrics, _, variant = fetch(newest["id"], token)
+    except InsightsError as why:
+        print(f"::error::the insights permission is missing or not yet live: {why}")
+        print(scope_help(token))
+        return 1
+
+    got = ", ".join(f"{k}={v}" for k, v in sorted(metrics.items()))
+    print(f"insights permission works ({variant}): {got}")
+    print("nothing was written. The scheduled run collects a deck three days "
+          "after it posts.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Collect Instagram insights for published decks.")
     ap.add_argument("--min-age-days", type=float, default=MIN_AGE_DAYS,
@@ -480,7 +563,13 @@ def main(argv: list[str] | None = None) -> int:
                     help=f"most decks to ask about in one run (default {MAX_PER_RUN})")
     ap.add_argument("--dry-run", action="store_true",
                     help="list what is due and call nothing")
+    ap.add_argument("--check-token", action="store_true",
+                    help="prove the token works and carries the insights "
+                         "permission, using the account's newest post. Writes "
+                         "nothing and reads none of our state")
     args = ap.parse_args(argv)
+    if args.check_token:
+        return check_token(os.getenv("IG_ACCESS_TOKEN", ""))
     return collect(
         token=os.getenv("IG_ACCESS_TOKEN", ""),
         min_age_days=args.min_age_days,
