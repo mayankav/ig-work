@@ -186,3 +186,63 @@ if __name__ == "__main__":
 
     print("\n=== cross-deck recency penalty ===")
     test_recency_penalty()
+
+
+# ─────────────────── thresholds must live on the current scale ───────────────
+
+def test_the_special_bar_is_reachable_on_the_current_score_scale():
+    """SPECIAL_BAR is in absolute score units, so it only means anything against
+    the scale _overlap() actually returns.
+
+    When _overlap started returning a per-tag mean instead of a sum, the top of
+    the scale fell from 11.96 to 1.708 and the bar stayed at 6. Nothing could
+    reach it, so all 24 costume poses took the penalty on every slide and none
+    of them scored above zero anywhere — a silent total ban that the accuracy
+    numbers did not move, because the labelled cases mostly do not want a
+    costume. This test is the one that would have caught it.
+    """
+    have = library.available()
+    special = [p for p in library.SPECIAL if p in have]
+    assert special, "no costume poses in the library; this test is meaningless"
+    best = max(
+        library.score(brief, pose, head, body, role)
+        for role, brief, head, body, _ in TUNED + HELDOUT
+        for pose in special)
+    assert best > 0, (
+        f"no costume pose can score above zero (best {best:.3f}); SPECIAL_BAR="
+        f"{library.SPECIAL_BAR} is unreachable on the current score scale")
+
+
+def test_score_is_not_just_a_count_of_tags():
+    """The bias that made 140 of 186 poses unreachable: _overlap summed over a
+    pose's tags, so a long tag list scored higher for the same quality of match.
+    Two poses matching one identical phrase must score the same whatever else
+    they are tagged with."""
+    words = {"lonely"}
+    lean = library._overlap(words, "__lean__")
+    assert lean == 0.0, "unknown pose should score nothing"
+
+    library.SYNONYMS["__lean__"] = ["lonely"]
+    library.SYNONYMS["__rich__"] = ["lonely"] + [f"filler{i}" for i in range(15)]
+    try:
+        a = library._overlap(words, "__lean__")
+        b = library._overlap(words, "__rich__")
+        assert a > 0 and b > 0
+        assert b <= a, (
+            f"a pose with 16 tags scored {b:.3f} on the same single match that "
+            f"earned a 1-tag pose {a:.3f} — tag count is buying score again")
+    finally:
+        del library.SYNONYMS["__lean__"], library.SYNONYMS["__rich__"]
+
+
+def test_a_single_figure_pose_is_not_tagged_as_a_pair():
+    """carrying_it_all is one donkey carrying a stack of boxes, and it was
+    tagged 'two people', 'the pair', 'between you'. Those pull a solo pose onto
+    every slide about two people, which is the one thing PAIR_PHRASES exists to
+    get right."""
+    import json as _json
+    manifest = _json.loads((pathlib.Path(library.MANIFEST)).read_text())["poses"]
+    pair_words = {"two people", "the pair", "both of you", "between you"}
+    wrong = [n for n, e in manifest.items()
+             if e.get("figures", 1) == 1 and pair_words & set(e.get("tags", []))]
+    assert wrong == [], f"single-figure poses carrying pair tags: {wrong}"
