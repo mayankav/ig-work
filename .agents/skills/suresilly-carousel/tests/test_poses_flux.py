@@ -598,13 +598,13 @@ def test_the_pupil_gate_does_not_refuse_the_real_library():
     180 real poses 'text'. A gate is worth nothing until it has been run against
     everything we already ship.
 
-    Two poses are refused and both are known: `guarded` and `relieved` are drawn
-    with narrowed or closed lids, so what white shows carries no pupil. They are
-    good poses. The gate never runs on the library — it runs on freshly
-    generated frames only — so the cost of that strictness is a re-roll, which
-    is free, and the cost of loosening it is shipping a blank-eyed Silly beside
-    a proper one. Refusing 1% is the right side of that trade, and this test
-    exists to make the number visible rather than to bless it.
+    Three poses are refused and all three are known: `guarded` (narrowed lids),
+    `chasing` and `lab_coat`. They are good poses. The gate never runs on the
+    library — only on freshly generated frames — so the cost of that strictness
+    is a re-roll, which is free, and the cost of loosening it is shipping a
+    blank-eyed or cross-eyed Silly beside a proper one. Refusing 1.7% is the
+    right side of that trade, and this test exists to make the number visible
+    rather than to bless it.
     """
     import cv2, glob
     from cutout import QAFailure
@@ -619,7 +619,7 @@ def test_the_pupil_gate_does_not_refuse_the_real_library():
             pf.assert_has_pupils(img, path)
         except QAFailure:
             refused.append(path.rsplit("/", 1)[-1])
-    assert set(refused) <= {"guarded.png", "relieved.png"}, \
+    assert set(refused) <= {"guarded.png", "chasing.png", "lab_coat.png"}, \
         f"the pupil gate started refusing library poses: {refused}"
     assert len(refused) / len(files) < 0.03, \
         f"{len(refused)}/{len(files)} refused — too strict to be useful"
@@ -665,3 +665,66 @@ def test_the_written_frame_is_the_corrected_one():
     assert "corrected, _ = check(blob)" in source
     assert "dest.write_bytes(blob)" not in source, \
         "make_pose is writing the raw model bytes again, discarding the correction"
+
+
+def test_a_white_prop_cannot_pass_as_an_eye():
+    """The defect that made this gate a pair-finder.
+
+    A train-window scene passed with two blank eyes because the picture held a
+    135x279 rectangle of pale glass. It was white, blob-shaped and in the upper
+    half, so it counted as an eye; something dark inside it satisfied "at least
+    one eye has a pupil"; and a prop rescued a face that had none. A fridge, a
+    sink, a plate and a laptop screen all do this.
+
+    A lone prop cannot make a matched pair, which is why the unit is the pair.
+    """
+    import numpy as np
+    from cutout import QAFailure
+    rgba = np.zeros((500, 400, 4), np.uint8)
+    rgba[..., :3] = (80, 150, 70)
+    rgba[..., 3] = 255
+    for cx in (150, 250):                            # two blank eyes
+        rgba[100:160, cx - 30:cx + 30, :3] = (255, 255, 255)
+    rgba[60:290, 300:380, :3] = (250, 250, 250)      # a tall pale "window"
+    rgba[150:200, 320:360, :3] = (30, 30, 30)        # something dark inside it
+    try:
+        pf.assert_has_pupils(rgba, "window scene")
+    except QAFailure as why:
+        assert "blank" in str(why)
+    else:
+        raise AssertionError("a white prop rescued a face with two blank eyes")
+
+
+def test_a_tilted_head_is_not_a_crooked_stare():
+    """Measured on the real library: comparing the two pupils' ABSOLUTE heights
+    refused 11 good poses — jumping, leaping, falling, chasing, on_back — every
+    one of them a tilted head, where eyes at different heights is correct
+    drawing. Each pupil is judged inside its own eye instead."""
+    import numpy as np
+    rgba = np.zeros((500, 400, 4), np.uint8)
+    rgba[..., :3] = (80, 150, 70)
+    rgba[..., 3] = 255
+    # Two eyes, the right one 40px lower — a head tilted hard. Both pupils sit
+    # in the same place within their own white.
+    for cx, top in ((150, 90), (250, 130)):
+        rgba[top:top + 60, cx - 30:cx + 30, :3] = (255, 255, 255)
+        rgba[top + 22:top + 42, cx - 10:cx + 10, :3] = (25, 25, 25)
+    pf.assert_has_pupils(rgba, "tilted head")        # must not raise
+
+
+def test_one_pupil_high_and_one_low_is_refused():
+    import numpy as np
+    from cutout import QAFailure
+    rgba = np.zeros((500, 400, 4), np.uint8)
+    rgba[..., :3] = (80, 150, 70)
+    rgba[..., 3] = 255
+    rgba[100:160, 120:180, :3] = (255, 255, 255)
+    rgba[104:120, 140:160, :3] = (25, 25, 25)        # left pupil near the top
+    rgba[100:160, 220:280, :3] = (255, 255, 255)
+    rgba[142:158, 240:260, :3] = (25, 25, 25)        # right pupil near the bottom
+    try:
+        pf.assert_has_pupils(rgba, "crooked")
+    except QAFailure as why:
+        assert "crooked" in str(why) or "high in its eye" in str(why)
+    else:
+        raise AssertionError("a crooked stare was accepted")

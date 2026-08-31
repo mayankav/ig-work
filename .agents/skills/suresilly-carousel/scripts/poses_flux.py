@@ -757,59 +757,129 @@ def correct_palette(bgr: np.ndarray) -> np.ndarray:
     return np.where(touched, fixed, bgr).astype(np.uint8)
 
 
-def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
-    """Refuse a pose whose eyes came back blank.
-
-    Two of the first four generations had white eyes with no pupil at all. It is
-    the single most obvious way a generated pose reads as wrong beside a library
-    one, and it is cheap to detect: Silly's eyes are large white blobs, and a
-    correct eye has a dark island inside its own bounding box.
-
-    So: find the white regions in the upper half of the figure that are the
-    right size to be eyes, and require a dark core inside at least one. One is
-    enough — a profile or a wink legitimately shows a single eye, and a gate
-    that demanded two would refuse good poses.
-    """
-    if rgba.shape[2] < 4:
-        return
+def _eye_candidates(rgba: np.ndarray) -> list[tuple[int, int, int, int, int]]:
+    """White blobs that could be an eye. Returns (x, y, w, h, area), largest first."""
     solid = rgba[..., 3] > 200
     bgr = rgba[..., :3]
     grey = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
     sat = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 1]
-    height, width = grey.shape
+    height, _ = grey.shape
     upper = np.zeros_like(solid)
-    upper[: int(height * 0.62)] = True          # the head, generously
+    upper[: int(height * 0.62)] = True
 
-    # An eye white is WHITE: near-zero saturation. The cream muzzle is bright
-    # too — and measured across the library it sits at saturation 73-94, so a
-    # brightness-only mask finds the muzzle, decides it is a blank eye, and
-    # refuses a perfectly good pose. That is what happened: cheering, relieved,
-    # guarded, floor_slumped and cheering_m all have closed or curved eyes, so
-    # the muzzle was the only bright blob and none of them had a pupil in it.
     whites = ((grey > 200) & (sat < EYE_MAX_SAT) & solid & upper).astype(np.uint8)
-    count, labels, stats, _ = cv2.connectedComponentsWithStats(whites, 8)
+    count, _, stats, _ = cv2.connectedComponentsWithStats(whites, 8)
     figure_area = max(int(solid.sum()), 1)
 
-    eyes, with_pupil = 0, 0
+    out = []
     for i in range(1, count):
-        x, y, w, h, area = stats[i]
+        x, y, w, h, area = (int(v) for v in stats[i])
         if not (0.0008 * figure_area < area < 0.06 * figure_area):
             continue
-        if w < 4 or h < 4 or not (0.35 < w / h < 2.8):
+        if w < 5 or h < 5 or not (0.45 < w / h < 2.2):
             continue
-        eyes += 1
-        # A pupil is a dark island INSIDE the white blob's own box. Looking only
-        # inside the box is what stops the brow bar above the eye counting.
-        patch = grey[y:y + h, x:x + w]
-        inner = patch[max(1, h // 6):h - max(1, h // 6), max(1, w // 6):w - max(1, w // 6)]
-        if inner.size and (inner < 110).sum() >= max(4, int(0.04 * inner.size)):
-            with_pupil += 1
+        out.append((x, y, w, h, area))
+    return sorted(out, key=lambda b: -b[4])
 
-    if eyes and not with_pupil:
+
+def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
+    """Centre of the dark core inside one eye white, or None if there isn't one."""
+    x, y, w, h, _ = box
+    patch = grey[y:y + h, x:x + w]
+    inset_y, inset_x = max(1, h // 7), max(1, w // 7)
+    inner = patch[inset_y:h - inset_y, inset_x:w - inset_x]
+    if inner.size == 0:
+        return None
+    dark = (inner < 110).astype(np.uint8)
+    if dark.sum() < max(6, int(0.05 * inner.size)):
+        return None
+    ys, xs = np.nonzero(dark)
+    return (x + inset_x + float(xs.mean()), y + inset_y + float(ys.mean()))
+
+
+def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
+    """Refuse a pose whose eyes came back blank, mismatched or crooked.
+
+    Written twice, and the first version is why this docstring is long.
+
+    Draft one asked "is there a bright blob, and does one of them contain
+    something dark". It refused five real library poses, because the cream
+    muzzle is bright. Measured, the library cream sits at saturation 73-94 and
+    an eye white is near zero, so the mask now demands that white be white.
+
+    Draft two still passed a train-window scene with two blank eyes. The reason
+    is the useful one: the picture contained a WINDOW, 135x279 of pale glass,
+    which is blob-shaped, white, and in the upper half of the frame. It was
+    counted as an eye, something dark inside it satisfied "at least one has a
+    pupil", and a prop rescued a face that had none. A fridge, a sink, a plate
+    and a laptop screen do the same thing.
+
+    So the unit here is the PAIR, not the blob. Two whites of similar size,
+    sitting side by side at the same height, is a shape a prop does not
+    accidentally make, and it is what a face actually looks like. Both must
+    carry a pupil, and the two pupils must sit at roughly the same height —
+    crooked pupils are the other way a generated face reads as wrong, and
+    draft two could not see them at all.
+
+    When no pair is found the gate passes. That is deliberate and it is the
+    limit of what this can honestly claim: a closed-eye pose, a wink and a
+    profile all legitimately show no pair, and refusing them would refuse good
+    art to catch bad art. The gate's promise is narrow and complete — IF a pair
+    of eye whites is visible, THEN both are correct.
+    """
+    if rgba.shape[2] < 4:
+        return
+    grey = cv2.cvtColor(rgba[..., :3], cv2.COLOR_BGR2GRAY)
+    boxes = _eye_candidates(rgba)
+
+    pair = None
+    for i, a in enumerate(boxes):
+        for b in boxes[i + 1:]:
+            ax, ay, aw, ah, _ = a
+            bx, by, bw, bh, _ = b
+            tall = max(ah, bh)
+            if abs(ah - bh) > 0.40 * tall or abs(aw - bw) > 0.40 * max(aw, bw):
+                continue                       # eyes are a matched pair
+            if abs(ay - by) > 0.60 * tall:
+                continue                       # and sit at the same height
+            gap = max(ax, bx) - min(ax + aw, bx + bw)
+            if not (-0.20 * max(aw, bw) < gap < 2.6 * max(aw, bw)):
+                continue                       # side by side, not stacked or far apart
+            pair = (a, b) if ax < bx else (b, a)
+            break
+        if pair:
+            break
+
+    if pair is None:
+        return                                  # closed, winking or in profile
+
+    left, right = pair
+    pupils = [_pupil_centre(grey, box) for box in pair]
+    blank = [side for side, p in zip(("left", "right"), pupils) if p is None]
+    if blank:
         raise QAFailure(
-            f"pupils: {what} has {eyes} blank eye(s) with no pupil. The model "
-            f"does this often and it is the loudest way a generated pose reads "
-            f"as wrong beside a library one. Re-roll with another seed.")
+            f"pupils: {what} has a pair of eye whites and the {' and '.join(blank)} "
+            f"one is blank. Both eyes must carry a pupil. Re-roll with another seed.")
+
+    # Crookedness is measured INSIDE each eye, not against the horizon.
+    #
+    # The first attempt compared the two pupils' absolute heights and refused 11
+    # real library poses: jumping, leaping, falling, chasing, on_back — every
+    # pose where the head is tilted. A tilted head has its eyes at different
+    # heights and its pupils with them, and that is correct drawing, not a
+    # defect. What is a defect is one pupil sitting high in its own white while
+    # the other sits low, which is what a model produces and an illustrator does
+    # not. So each pupil is expressed as a fraction of its own eye box, and the
+    # two fractions are compared.
+    offsets = []
+    for (px, py), (bx, by, bw, bh, _) in zip(pupils, (left, right)):
+        offsets.append(((px - bx) / bw, (py - by) / bh))
+    (lu, lv), (ru, rv) = offsets
+    if abs(lv - rv) > 0.30:
+        raise QAFailure(
+            f"pupils: {what} has one pupil high in its eye and the other low "
+            f"({lv:.0%} against {rv:.0%} of the way down). A crooked stare is the "
+            f"other way a generated face reads as wrong. Re-roll with another seed.")
 
 
 def check(png: bytes) -> tuple[np.ndarray, np.ndarray]:
