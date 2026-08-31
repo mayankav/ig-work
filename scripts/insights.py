@@ -101,17 +101,25 @@ INSIGHTS_PATH = STATE_DIR / "insights.jsonl"
 #                       the algorithm's goodwill — somebody handed it to someone.
 #   total_interactions  likes + comments + saves + shares in one figure, so a
 #                       deck can be compared with a deck without adding up four.
-#   profile_visits      the only one that says the deck sent anyone toward the
-#                       account rather than just past it.
-#
 # Deliberately not collected: impressions and views (inflated by repeat serving
 # and not a decision anybody makes), follows (too sparse per post to read), and
 # per-child breakdowns (a slide-level number invites exactly the optimisation
 # loop the docstring above forbids).
-METRICS = ("reach", "saved", "shares", "total_interactions", "profile_visits")
+#
+# profile_visits was here and has been removed. Meta documents it as an ACCOUNT
+# metric, on /{ig-user-id}/insights, not a media one — it counts visits to the
+# profile over a period, and there is no per-post version of it to ask for. The
+# ladder below would have swallowed the mistake by falling through to CORE, so
+# the numbers would have been right and two requests a deck would have been
+# wasted proving it. If the account-level figure is ever wanted it is a second
+# endpoint and a different record, not a column on a deck.
+METRICS = ("reach", "saved", "shares", "total_interactions")
 
-# What we fall back to if the API refuses the full list. Every one of these has
-# been a media metric across every recent API version.
+# What we fall back to if the API refuses the full list. Identical to METRICS
+# today, and kept separate on purpose: METRICS is what we would like and CORE is
+# what has been a media metric across every recent API version. When the first
+# grows again — and it will, Meta keeps moving these — the floor should not move
+# with it.
 CORE_METRICS = ("reach", "saved", "shares", "total_interactions")
 
 # How long a deck ages before we ask.
@@ -316,8 +324,12 @@ def fetch(media_id: str, token: str) -> tuple[dict, list[str], str]:
     attempts = [
         ("full", METRICS, {}),
         ("full+total_value", METRICS, {"metric_type": "total_value"}),
-        ("core", CORE_METRICS, {}),
     ]
+    # Only worth a third request when CORE is actually narrower than METRICS.
+    # They are the same list today, and asking twice for the same thing is how a
+    # ladder quietly turns into a retry loop.
+    if set(CORE_METRICS) < set(METRICS):
+        attempts.append(("core", CORE_METRICS, {}))
     last: InsightsError = InsightsError("no attempt was made")
     for variant, metrics, extra in attempts:
         params = {"metric": ",".join(metrics), "access_token": token, **extra}

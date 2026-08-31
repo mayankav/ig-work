@@ -277,8 +277,8 @@ prune says so loudly and carries on — stopping would jam every later run.
 ## What happened to a deck after it went out
 
 `state/insights.jsonl`, written by `scripts/insights.py` on its own daily
-schedule. Three days after a deck posts it records reach, saves, shares,
-interactions and profile visits, keyed on the media id kept in the deck folder.
+schedule. Three days after a deck posts it records reach, saves, shares and
+interactions, keyed on the media id kept in the deck folder.
 
 It reads. It never decides. Nothing in the pipeline may import it and it may
 import nothing from the pipeline — `tests/test_insights.py` enforces both, because
@@ -306,8 +306,8 @@ or shares for somebody else's account.
 
 For **this** account it does, and that is worth saying plainly so the warning
 above is not read as "the number is unobtainable". @suresilly is the owner of
-its own posts, and `scripts/insights.py` now reads the real saves, shares, reach,
-interactions and profile visits three days after each deck goes out, into
+its own posts, and `scripts/insights.py` now reads the real saves, shares, reach
+and interactions three days after each deck goes out, into
 `state/insights.jsonl`. The metric a model invented is free from a token this
 repo already holds. It is a ledger to read, never an input to a gate — see
 invariant 17.
