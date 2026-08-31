@@ -196,7 +196,18 @@ SPECIAL = {
     "hero_defeated", "hero_hiding", "lantern_bearer", "traveller",
     "storyteller", "gardener", "patient_one", "night_watch",
 }
-SPECIAL_BAR = 6
+# Both of these live on the score scale, so they moved when _overlap started
+# returning a per-tag mean instead of a sum. Measured on the same 94-slide
+# corpus, the top of the scale went from 11.96 to 1.708 — a factor of 7 — so
+# the bar and its penalty are the old 6 divided by that.
+#
+# Leaving them at 6 was a silent ban, not a bias: nothing could reach a bar of
+# 6 on a scale that tops out at 1.7, so every one of the 24 costume poses took
+# the penalty on every slide and none of them scored above zero anywhere. A
+# threshold in absolute units is only ever calibrated for the scale it was
+# written against, and this is the note for whoever changes the scale next.
+SPECIAL_BAR = 0.857
+SPECIAL_PENALTY = 0.857
 
 
 def mood_of(pose: str) -> tuple[float, float]:
@@ -256,6 +267,36 @@ def _weight(word: str) -> float:
 
 
 def _overlap(words: set[str], pose: str) -> float:
+    """How well a pose's tags match a slide's words, per tag.
+
+    PER TAG is the whole point. This used to return the raw sum, so a pose with
+    sixteen tags had sixteen chances to accumulate score and a pose with five
+    had five. That rewards whoever wrote the longest tag list, not the pose that
+    fits, and it shows up in the library exactly that way. Measured over the 94
+    real and labelled slides in this repo:
+
+        2-4 tags    11 poses    won   0 slides    0 of 11 ever reachable
+        5-6 tags    93 poses    won  32 slides   16 of 93 ever reachable
+        9-16 tags   68 poses    won  52 slides   24 of 68 ever reachable
+
+    Tag count correlates +0.31 with mean score and +0.22 with wins. The eleven
+    thinnest poses — which includes every scene imported so far — could not win
+    a single slide out of ninety-four.
+
+    Dividing by the count removes the arithmetic advantage and leaves the real
+    one: a pose with more tags still has more ways to match, it just cannot bank
+    a weak match as a strong one. Held-out accuracy 54% -> 63%, tuned unchanged
+    at 95%, reachable poses 26 -> 32.
+
+    Be honest about that held-out number: the set is eleven cases, so it moved
+    by one. The justification is the bias, which is arithmetic and does not
+    depend on the sample; the accuracy figure is a check that fixing it does no
+    harm, not the reason for doing it.
+
+    Dividing by sqrt(n) and by log(1+n) were both tried. Same accuracy, fewer
+    poses reachable (27 and 29 against 32), so the plain mean wins on the one
+    measure that separated them.
+    """
     total = 0.0
     for tag in SYNONYMS.get(pose, []):
         tw = _words(tag)
@@ -272,7 +313,7 @@ def _overlap(words: set[str], pose: str) -> float:
             # "brain will not stop" hitting the stop in palm_out, or "take up
             # space" hitting the up in point_up, is a word-sense accident. A
             # partial hit should never outrank a pose that matches the theme.
-    return total
+    return total / max(1, len(SYNONYMS.get(pose, [])))
 
 
 # What a slide is FOR constrains which moods belong on it, whatever the words
@@ -313,7 +354,7 @@ def score(brief: str, pose: str, headline: str = "", body: str = "",
 
     # A costume or prop needs a real hit, not a stray one.
     if pose in SPECIAL and total < SPECIAL_BAR:
-        total -= 6
+        total -= SPECIAL_PENALTY
 
     # A strong penalty, not an exclusion. Made absolute, this removed so many
     # candidates that weak accidental matches surfaced instead and held-out
