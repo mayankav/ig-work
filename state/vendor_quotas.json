@@ -1,0 +1,16 @@
+{
+  "groq": {
+    "model": "openai/gpt-oss-120b",
+    "observed_at": "2026-08-31T16:35:26Z",
+    "requests": {
+      "limit": 1000,
+      "remaining": 999,
+      "reset_seconds": 86.4
+    },
+    "tokens": {
+      "limit": 8000,
+      "remaining": 7917,
+      "reset_seconds": 0.622
+    }
+  }
+}

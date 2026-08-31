@@ -42,9 +42,36 @@ except ImportError:
     requests = None
 
 TIMEOUT = 30
-# Telegram truncates a caption past this, and a truncated status is a confusing
-# status, so the rest is sent as a follow-up message instead.
+# Telegram caps a media caption at 1024 characters and a plain message at 4096.
+# It does NOT truncate an over-long caption — it rejects the whole call with
+# "Bad Request: message is too long", so the report would not arrive at all.
+# 1000 leaves headroom, and the rest is sent as a follow-up message.
 CAPTION_LIMIT = 1000
+
+
+def split_for_caption(text: str, limit: int = CAPTION_LIMIT) -> tuple[str, str]:
+    """Break a report into a caption and a follow-up, AT A LINE BOUNDARY.
+
+    The overflow was always sent on, so nothing was ever lost. What was lost was
+    the line the cut landed in. The dashboard reports figures like
+
+        groq       61/1000 requests    ▓░░░░░░░░░  full again in 13.3h
+
+    and a blind cut at character 1000 can end the caption at "61/10", which is
+    not a truncated number but a different and wholly believable one. Splitting
+    on the last newline that fits means a line is either shown or is in the next
+    message, and never both.
+
+    A single line longer than the limit has no boundary to find, so it is cut
+    where it must be. That is the one case where there is no better answer.
+    """
+    if len(text) <= limit:
+        return text, ""
+    window = text[:limit]
+    cut = window.rfind("\n")
+    if cut <= 0:
+        return window, text[limit:]
+    return text[:cut].rstrip(), text[cut:].lstrip("\n")
 
 
 def _env(name: str) -> str:
@@ -73,15 +100,16 @@ def _telegram(subject: str, body: str, attach: Path | None) -> tuple[bool, str]:
     base = f"https://api.telegram.org/bot{token}"
     try:
         if attach and attach.is_file():
+            caption, rest = split_for_caption(text)
             with attach.open("rb") as handle:
                 response = requests.post(
                     f"{base}/sendDocument",
-                    data={"chat_id": chat, "caption": text[:CAPTION_LIMIT]},
+                    data={"chat_id": chat, "caption": caption},
                     files={"document": (attach.name, handle, "image/png")},
                     timeout=TIMEOUT)
-            if response.ok and len(text) > CAPTION_LIMIT:
+            if response.ok and rest:
                 requests.post(f"{base}/sendMessage",
-                              data={"chat_id": chat, "text": text[CAPTION_LIMIT:]},
+                              data={"chat_id": chat, "text": rest[:4000]},
                               timeout=TIMEOUT)
         else:
             response = requests.post(f"{base}/sendMessage",

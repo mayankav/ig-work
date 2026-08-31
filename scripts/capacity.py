@@ -11,13 +11,30 @@ fail because a vendor is down. That also sets its honest limit: it reports what
 THIS repo has spent through its own ledger. A call made by hand outside the
 pipeline is invisible to it, and so is anything the account spent elsewhere.
 
-Everything it reports comes from one of three places:
+Everything it reports comes from one of four places:
 
   state/flux_neurons.json   what the image generator has spent today, written
                             by poses_flux.Ledger every time it books a call
+  state/vendor_quotas.json  what a vendor said it had LEFT, written by
+                            quotas.record from the vendor's own headers
   poses_flux constants      the free allowance, the share this repo may use,
                             and what one picture is booked at
   the clock                 when the allowance resets
+
+Those two state files are opposites and are deliberately not merged. The ledger
+accumulates what we spent and may never be lowered; the quota snapshot holds
+what the vendor reports is left and is always replaced by the newest reading.
+
+THREE VENDORS, THREE UNITS, THREE KINDS OF REFRESH
+
+There is no common currency here and this file does not invent one. Cloudflare
+bills neurons from one account-wide pot that returns whole at 00:00 UTC. Groq
+counts requests, per model, shared across the organisation, and drips them back
+continuously — there is no boundary to wait for. Gemini counts requests per
+model per project against a limit it never reports, returning at midnight
+Pacific. So each vendor is reported in its own unit, and the only numbers that
+are added together are ones that answer the same question: how many more
+pictures can today's deck have.
 
 WHY A SCRIPT AND NOT A NOTE SOMEWHERE
 
@@ -40,6 +57,73 @@ SKILL = REPO / ".agents" / "skills" / "suresilly-carousel"
 sys.path.insert(0, str(SKILL / "scripts"))
 
 SLIDES_PER_DECK = 9
+
+# Below this share of its own allowance, a vendor is worth a line of its own in
+# the report. Above it, saying so every morning is noise that trains you to skip
+# the section on the morning it matters.
+LOW_WATER = 0.20
+
+
+def _quotas() -> dict:
+    """The vendor snapshot, or nothing. Never raises: this file is written by a
+    best-effort recorder and a fresh checkout has never had one."""
+    try:
+        import quotas
+        return quotas.read()
+    except Exception:                                          # noqa: BLE001
+        return {}
+
+
+def vendors() -> list[dict]:
+    """One record per text vendor, each in its OWN unit.
+
+    `known` is the field that matters. Gemini reports no quota header at all —
+    checked live on 2026-08-31, a successful call carries none — so its record
+    says so instead of showing a bar that would be a guess drawn as a
+    measurement. A vendor we cannot see is not a vendor with room.
+    """
+    import quotas as _q
+    flux = _flux()
+    ledger = flux.Ledger()
+    snap = _quotas()
+    out: list[dict] = []
+
+    # Gemini — counted by nobody. Stated, not implied.
+    out.append({"name": "gemini", "unit": "requests", "known": False,
+                "note": "no quota reported by the vendor",
+                "low": False})
+
+    # Groq — the vendor's own remaining, and its age, because a reading from
+    # yesterday is not a reading from today.
+    groq = snap.get("groq") if isinstance(snap.get("groq"), dict) else None
+    reqs = (groq or {}).get("requests") or {}
+    limit, remaining = reqs.get("limit"), reqs.get("remaining")
+    if limit and remaining is not None:
+        share = remaining / limit
+        out.append({"name": "groq", "unit": "requests", "known": True,
+                    "limit": limit, "remaining": remaining, "share": share,
+                    "model": groq.get("model"),
+                    "refills_in_seconds": reqs.get("reset_seconds"),
+                    "age_seconds": _q.age_seconds(groq),
+                    "low": share < LOW_WATER})
+    else:
+        out.append({"name": "groq", "unit": "requests", "known": False,
+                    "note": "no reading yet — it is written by the next call",
+                    "low": False})
+
+    # Cloudflare text — the only one of the three we have to keep the total for
+    # ourselves, because its header reports a cost and not a remaining.
+    share_for_text = flux.FREE_DAILY_NEURONS - ledger.budget
+    used = ledger.text_spent()
+    left = max(0.0, share_for_text - used)
+    out.append({"name": "cloudflare", "unit": "neurons", "known": True,
+                "limit": round(share_for_text), "remaining": round(left),
+                "share": (left / share_for_text) if share_for_text else 0.0,
+                "account_left": round(ledger.account_left()),
+                # Never refused, only recorded: writing is what this repo exists
+                # to do. So this flag is a warning and not a gate.
+                "low": used > 0.85 * share_for_text})
+    return out
 
 
 def _flux():
@@ -73,6 +157,7 @@ def snapshot() -> dict:
         "decks_left": int(remaining // (per_picture * SLIDES_PER_DECK)),
         "pictures_per_full_day": int(ledger.budget // per_picture),
         "library_poses": len(list((SKILL / "mascot" / "library").glob("*.png"))) - 1,
+        "vendors": vendors(),
     }
 
 

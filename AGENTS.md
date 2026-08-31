@@ -176,8 +176,18 @@ Any agent working here must not violate these. They exist because each one was a
     against the same queue and fingerprints. Any run that produces a deck consumes its moment,
     whether or not it posts. Only `--dry-run` writes nothing, and it writes no deck either.
     State lives under `state/` and is committed: `used.jsonl`, `reserve.json`, `claim.json`,
-    `fp/`, `phrases.json`, `pending/`, plus `insights.jsonl` (invariant 17) and
-    `flux_neurons.json`, the offline pose generator's daily spend ledger.
+    `fp/`, `phrases.json`, `pending/`, plus `insights.jsonl` (invariant 17),
+    `flux_neurons.json`, the offline pose generator's daily spend ledger, and
+    `vendor_quotas.json`, what a vendor last said it had LEFT.
+
+    Those last two are opposites and must not be merged. A ledger accumulates
+    what we spent and may never be lowered, because the vendor bills a refused
+    call too. A quota snapshot holds the vendor's own remaining and is always
+    replaced by the newest reading, because an older one is not a partial truth
+    to top up. Groq reports its remaining on every response — including the 429
+    that proves the allowance is gone, which is why `llm.py` records it in a
+    `finally` — and Gemini reports nothing at all, which is stored as nothing
+    and never as a full tank.
 
 17. **What we publish is measured, and the measurement never decides.** The engine used to post
     and learn nothing. `post_to_ig.py` now keeps the media id in `carousels/<slug>/published.json`,

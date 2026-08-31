@@ -26,9 +26,12 @@ inside its own try, and a section that cannot be read prints as "unknown" rather
 than taking the message down with it. A missing state file is normal on a fresh
 checkout, not an error.
 
-Kept short on purpose. Telegram truncates a caption at 1000 characters and a
-truncated dashboard is worse than a brief one, so this aims well under that and
-puts the line that changes decisions at the top.
+Kept short on purpose. Telegram caps a media caption at 1024 characters and
+rejects an over-long one outright rather than trimming it, so notify.py cuts at
+1000 and spills the rest into a follow-up message. Nothing is lost either way,
+but a report split across two messages is a report half of which gets skimmed —
+so this aims well under the cap, puts the line that changes decisions at the
+top, and expands the per-vendor rows only when one of them is near an edge.
 """
 
 from __future__ import annotations
@@ -67,18 +70,72 @@ def pictures() -> str:
     return _safe(read)
 
 
-def writing() -> str:
+def _bar(share: float, width: int = 10) -> str:
+    full = max(0, min(width, round(share * width)))
+    return "▓" * full + "░" * (width - full)
+
+
+def _age(seconds) -> str:
+    """A reading has to carry its own age. Groq's allowance drips back all day,
+    so a figure from yesterday evening is not a figure about this morning, and
+    printing it bare would be the most confident wrong number in the report."""
+    if seconds is None:
+        return ""
+    if seconds < 2 * 3600:
+        return ""
+    if seconds < 48 * 3600:
+        return f"  (seen {seconds / 3600:.0f}h ago)"
+    return f"  (seen {seconds / 86400:.0f}d ago)"
+
+
+def _refill(seconds) -> str:
+    if seconds is None:
+        return "drips back continuously"
+    if seconds < 90:
+        return f"full again in {seconds:.0f}s"
+    if seconds < 5400:
+        return f"full again in {seconds / 60:.0f}m"
+    return f"full again in {seconds / 3600:.1f}h"
+
+
+def _vendor_row(v: dict) -> str:
+    """One vendor, in its own unit. No conversion, because there is no exchange
+    rate between a neuron and a request and inventing one would put a number in
+    the report that no vendor could account for."""
+    name = f"  {v['name']:<11}"
+    if not v.get("known"):
+        # The unknown is spelled out rather than drawn. A bar here would be a
+        # guess with the shape of a measurement.
+        return f"{name}{'not counted':<20}?   {v.get('note', '')}"
+    figure = f"{v['remaining']}/{v['limit']} {v['unit']}"
+    if v["name"] == "groq":
+        tail = _refill(v.get("refills_in_seconds")) + _age(v.get("age_seconds"))
+    else:
+        tail = "of the writing share, resets 00:00 UTC"
+    return f"{name}{figure:<20}{_bar(v.get('share', 0.0))}  {tail}"
+
+
+def writing() -> tuple[str, list[str]]:
     """Writing shares the one daily allowance with pictures, and it is the half
     that must never run out — a deck that cannot be written is a day with no
-    post. It is recorded and never refused, so this line is the warning."""
+    post. It is recorded and never refused, so this line is the warning.
+
+    Returns a headline and, only when something is actually near an edge, a row
+    per vendor. Three vendors printed every morning is three lines you learn to
+    skip, and Telegram truncates a caption at 1000 characters — a held deck is
+    771 of them before any of this, so the rows have to earn their place.
+    """
     def read():
         sys.path.insert(0, str(REPO / "scripts"))
         import capacity
-        s = capacity.snapshot()
-        used, share = s["text_spent"], s["reserved_for_text"]
-        flag = "  ⚠ near the end of its share" if used > 0.85 * share else ""
-        return f"{used}/{share} neurons used, {s['account_left']} left on the account{flag}"
-    return _safe(read)
+        vendors = capacity.snapshot()["vendors"]
+        low = [v for v in vendors if v.get("low")]
+        if not low:
+            return "all vendors have room", []
+        names = ", ".join(v["name"] for v in low)
+        share = "its share" if len(low) == 1 else "their shares"
+        return f"⚠ {names} near the end of {share}", [_vendor_row(v) for v in vendors]
+    return _safe(read, default=("unknown", []))
 
 
 def library() -> str:
@@ -156,9 +213,11 @@ def build(status: str, slug: str | None, note: str, score: str | None,
     lines = [head, f"{datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC", ""]
     if note:
         lines += [note, ""]
+    head_writing, rows_writing = writing()
     lines += [
         f"PICTURES   {pictures()}",
-        f"WRITING    {writing()}",
+        f"WRITING    {head_writing}",
+        *rows_writing,
         f"LIBRARY    {library()}",
         f"THIS DECK  {poses_used(slug)}",
         f"QUEUE      {queue()}",

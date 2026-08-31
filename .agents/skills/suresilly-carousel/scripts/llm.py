@@ -412,6 +412,11 @@ def _post(url: str, payload: dict, headers: dict,
                 capture.update({k.lower(): v for k, v in response.headers.items()})
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
+        # The headers matter MOST here. A 429 is the one response that says the
+        # allowance is actually gone, and dropping its headers meant the report
+        # could only ever show a vendor with room to spare.
+        if capture is not None and exc.headers:
+            capture.update({k.lower(): v for k, v in exc.headers.items()})
         if exc.code in (429, 503):
             wait, quota = _retry_after(exc)
             raise RateLimited(f"HTTP {exc.code}", wait, quota) from exc
@@ -543,15 +548,34 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
             {"role": "user", "content": user},
         ],
     }
+    # Every Groq response — including the 429 that says the allowance is gone —
+    # carries x-ratelimit-remaining-requests, which is the DAILY figure. That is
+    # more than Cloudflare gives us: Cloudflare says what one call cost and
+    # leaves us to keep the running total, Groq says what is left. So nothing is
+    # estimated here and nothing is reconciled; the vendor's own number is
+    # recorded as it arrives.
+    #
+    # Recorded in a finally, because the reading is most valuable on the call
+    # that failed, and a refusal must still leave a true number behind.
+    headers: dict = {}
     try:
-        data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"})
-    except ModelRefused as refused:
-        # Strict mode has limited model support. If it is refused, fall back to
-        # the looser mode rather than losing the provider entirely.
-        if "400" not in str(refused):
-            raise
-        payload["response_format"] = _groq_format(schema, strict=False)
-        data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"})
+        try:
+            data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"},
+                         capture=headers)
+        except ModelRefused as refused:
+            # Strict mode has limited model support. If it is refused, fall back
+            # to the looser mode rather than losing the provider entirely.
+            if "400" not in str(refused):
+                raise
+            payload["response_format"] = _groq_format(schema, strict=False)
+            data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"},
+                         capture=headers)
+    finally:
+        try:
+            import quotas
+            quotas.record("groq", GROQ_MODEL, headers)
+        except Exception:                                      # noqa: BLE001
+            pass    # a quota file that cannot be written must never fail a deck
 
     choices = data.get("choices") or []
     if not choices:
