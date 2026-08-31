@@ -27,6 +27,7 @@ asked "is this original enough?" will say yes. Counting words has no opinion.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -34,8 +35,105 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import llm  # noqa: E402
+import memory  # noqa: E402
+import novelty  # noqa: E402
 import safety  # noqa: E402
 import screen  # noqa: E402
+
+# ── Not saying the same thing twice ──────────────────────────────────
+#
+# Two checks, because there are two failures and one detector cannot see both.
+# Both were measured on this repo's own four real moments plus the near-repeat
+# that prompted them, not chosen on taste.
+#
+# 1. NEAR-DUPLICATE — same words. 3-gram Jaccard against every moment ever
+#    used. Measured: genuinely different moments score 0.000 to 0.022, and the
+#    two that were near-copies of each other ("I sat on the edge of the bed at
+#    11:45pm and stared at the dark hallway", twice) score 0.429. Two
+#    populations an order of magnitude apart, so 0.20 sits in open space
+#    between them and is not a guess about either.
+#
+# 2. SAME SHAPE — different words, same sentence. This is the one a reader
+#    notices, and word overlap is blind to it: "I sat in the car at 9:15pm ...
+#    too cold to stay and too tired to go inside" scores 0.000 to 0.050 against
+#    everything before it while reading as the fourth copy of one template.
+#    Stripping the nouns and comparing skeletons does not work either, measured
+#    at 0.027 — what actually repeats is short fragments, not long runs.
+#
+#    So this is a signature, not a score: the posture the moment opens on, and
+#    whether it uses the "too ___ to ___" frame. On the five real moments those
+#    two features give four distinct signatures and exactly one collision — the
+#    repeat. No false positives on anything already shipped.
+#
+#    Compared against a SHORT window on purpose. There are few postures, so
+#    banning a signature forever would run out of sentences. The complaint is
+#    "I keep seeing this", not "this may never appear again".
+MOMENT_OVERLAP_LIMIT = 0.20
+MOMENT_SHINGLE = 3
+SHAPE_WINDOW = 8
+# How much of the sentence counts as "the opening". Four words reaches the main
+# verb of "I sat on the ..." and of "At 11pm I stood ...", and stops before a
+# posture that arrives in a later clause. Six was too many: it swept up "At
+# 1:20am I gave up, sat on the kitchen floor", whose subject is giving up.
+OPENING_WORDS = 4
+
+POSTURE = re.compile(r"\b(sat|stood|lay|lie|lying|paced|knelt|crouched|leaned|"
+                     r"sitting|standing|walked|drove|woke|stared)\b", re.I)
+TOO_FRAME = re.compile(r"\btoo\s+\w+\s+to\s+\w+", re.I)
+
+
+def shape_signature(text: str) -> str:
+    """The sentence's skeleton, as a short string.
+
+    Deliberately coarse in what it keeps: a richer signature would include the
+    object, and the object is exactly what changes when the same sentence is
+    written again about a car instead of a bed.
+
+    But the posture is read from the OPENING only, and that precision matters.
+    Reading it from anywhere in the sentence made this fire on moments that are
+    genuinely different — "At 1:20am I gave up, sat on the kitchen floor, and
+    felt ..." opens on giving up, not on sitting, and shares nothing with "I sat
+    on the edge of the bed" beyond a word further in. Two real test moments were
+    refused that way. What repeats is how a moment STARTS.
+    """
+    opening = " ".join(text.split()[:OPENING_WORDS])
+    found = POSTURE.search(opening)
+    opener = found.group(1).lower() if found else "none"
+    return f"{opener}|{'too' if TOO_FRAME.search(text) else 'plain'}"
+
+
+def repetition_faults(moment: str, previous: list[str] | None = None) -> list[str]:
+    """Why this moment is one we have already published. Empty means it is new.
+
+    `previous` is injectable so a test does not depend on what happens to be in
+    state/used.jsonl. It read the live file at first, and the suite then failed
+    the moment real history contained a sentence shaped like a fixture — which
+    would have happened again on any day a deck shipped.
+    """
+    problems: list[str] = []
+    if previous is None:
+        previous = memory.used_texts()
+    if not previous:
+        return problems
+
+    mine = novelty.shingles(moment, MOMENT_SHINGLE)
+    for old in previous:
+        score = novelty.jaccard(mine, novelty.shingles(old, MOMENT_SHINGLE))
+        if score >= MOMENT_OVERLAP_LIMIT:
+            problems.append(
+                f"this is the same moment we already published, {score:.0%} of it word for "
+                f"word: {old[:90]!r}. Invent a different evening, not a reworded one")
+            break
+
+    mine_shape = shape_signature(moment)
+    for old in previous[-SHAPE_WINDOW:]:
+        if shape_signature(old) == mine_shape:
+            problems.append(
+                f"same sentence shape as a recent moment ({mine_shape}): {old[:90]!r}. "
+                f"Change how it is built, not just what is in it — open on a different "
+                f"action, and do not use the 'too ___ to ___' construction if that one did")
+            break
+    return problems
 
 # The line between composing and copying. Seven is short enough that a genuine
 # invention never trips it and long enough that ordinary shared phrasing — "I
@@ -73,8 +171,18 @@ HOW IT IS WRITTEN, and this matters as much as what is in it.
   supposed to be small.
 
   The same evening, written properly:
-    "I got up at 3:17am and stood in the kitchen with the light off, too tired
-     to go back to bed and too awake to stay there."
+    "I got up at 3:17am and stood in the kitchen with the light off, and I did
+     not put the kettle on because that would mean the night was over."
+
+  THAT SENTENCE IS AN EXAMPLE OF REGISTER, NOT A TEMPLATE. Do not borrow its
+  build. In particular, "too ___ to ___ and too ___ to ___" is BANNED: the
+  example here used to end that way and the engine copied it into three of its
+  first four moments, which is how a reader started recognising the sentence
+  before they had read it.
+
+  Every moment must be BUILT differently from the last. Vary what the first
+  verb is doing — an action, not a posture. Not every moment is somebody
+  sitting or standing somewhere feeling two things at once.
 
   RULES
     No fragments hung off a comma. Full sentences.
@@ -134,8 +242,60 @@ No prose, no code fences."""
 USER = """SEED-{nonce}-BEGIN
 {text}
 SEED-{nonce}-END
-
+{variety}
 Read the seed between the markers. Invent your own moment and return the JSON."""
+
+# Rejecting a repeat is not enough on its own. A gate that only says no makes
+# the model try again from the same standing start, and the standing start is
+# the problem: 1,100 posts collapse to one of eight subjects, and a model with
+# no memory reaches for its favourite sentence. Retrying that costs calls and
+# arrives somewhere similar.
+#
+# So code also pushes. It works out, from the moments already used, which
+# postures and which hours have been leaned on lately, and forbids them by
+# NAME OF CATEGORY.
+#
+# What it must never do is show the model a past moment. Invariant 10: old work
+# is a blocklist, never a source, never material, never an example. The model is
+# told "do not open on somebody sitting". It is never told what was sitting, or
+# where, or when. The past stays on this side of the prompt.
+# The verb as it appears in a moment, mapped to the words a prompt uses. Written
+# out rather than derived: "stood" does not start with "standing", and a clever
+# prefix rule silently matched nothing at all when this was first written.
+POSTURE_NAMES = {
+    "sat": "sitting", "sitting": "sitting",
+    "stood": "standing", "standing": "standing", "stared": "standing still",
+    "lay": "lying down", "lie": "lying down", "lying": "lying down",
+    "paced": "pacing", "walked": "walking", "drove": "driving",
+    "knelt": "kneeling", "crouched": "crouching", "leaned": "leaning",
+    "woke": "waking up",
+}
+HOUR_POOL = ("very early morning", "mid-morning", "the middle of the afternoon",
+             "early evening", "late at night", "the small hours")
+
+
+def variety_brief(previous: list[str], roll: int) -> str:
+    """A positive instruction that widens the search, built only from categories.
+
+    `roll` makes consecutive runs differ even when the history does not, so two
+    runs on one quiet day do not get the same instruction and answer it the same
+    way.
+    """
+    if not previous:
+        return ""
+    recent = previous[-SHAPE_WINDOW:]
+    spent = {shape_signature(t).split("|")[0] for t in recent}
+    banned = sorted({POSTURE_NAMES[s] for s in spent if s in POSTURE_NAMES})
+    lines = []
+    if banned:
+        lines.append("Do not open on somebody " + ", ".join(banned) + ".")
+    if sum("too" in shape_signature(t) for t in recent) >= 2:
+        lines.append('Do not use the "too ___ to ___" construction.')
+    # One nudge that is not a prohibition, so there is somewhere to go.
+    lines.append(f"Set it in {HOUR_POOL[roll % len(HOUR_POOL)]}, "
+                 f"and open on the action, not on the posture.")
+    return "\nHOW THIS ONE MUST DIFFER (these are about SHAPE, not subject):\n  " \
+           + "\n  ".join(lines) + "\n"
 
 SCHEMA = {
     "type": "object",
@@ -246,7 +406,7 @@ def shared_run(a: str, b: str) -> int:
     return best
 
 
-def verify(seed: str, moment: str) -> list[str]:
+def verify(seed: str, moment: str, previous: list[str] | None = None) -> list[str]:
     """Everything wrong with an invented moment. Empty means it may be used."""
     problems: list[str] = []
 
@@ -285,6 +445,12 @@ def verify(seed: str, moment: str) -> list[str]:
     if peopled(seed) and not peopled(moment):
         problems.append("the seed is about two people and this one is about nobody; "
                         "keep she, he or the relationship")
+
+    # Not one we have already made. The seed being new does not make the
+    # moment new: two different strangers' posts reduce to the same subject
+    # from a closed list of eight, and a model with no memory of what it wrote
+    # last week reaches for the same sentence.
+    problems.extend(repetition_faults(moment, previous))
 
     shaped = screen.shape(moment)
     if not shaped["ok"]:
@@ -433,6 +599,10 @@ def invent(seed: str, nonce: str = "7f3a2c") -> dict:
     trouble: list[str] = []
     clean = seed.replace(nonce, " ")
     complaint = ""
+    # Built from history in code, and from the nonce so two runs on one quiet
+    # day are pushed in different directions. No past moment reaches the prompt.
+    variety = variety_brief(memory.used_texts(),
+                            int(hashlib.sha256(nonce.encode()).hexdigest(), 16))
     # Three attempts, not two. Each one is a single cheap call and the moment is
     # what everything downstream is built on, so it is worth one more try here
     # rather than throwing the seed away and paying for a fresh judge call.
@@ -440,8 +610,9 @@ def invent(seed: str, nonce: str = "7f3a2c") -> dict:
         # The second attempt is only worth its quota if it is told what was
         # wrong with the first. Asking the same question twice got the same
         # answer twice, three runs in a row.
-        answer, provider = llm.ask(SYSTEM, USER.format(nonce=nonce, text=clean) + complaint,
-                                   SCHEMA, temperature=0.7)
+        answer, provider = llm.ask(
+            SYSTEM, USER.format(nonce=nonce, text=clean, variety=variety) + complaint,
+            SCHEMA, temperature=0.9)
         if answer["injection"]:
             raise llm.ModelRefused("the seed tried to give instructions")
         problems = verify(seed, answer["moment"])

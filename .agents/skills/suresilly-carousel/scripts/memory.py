@@ -158,6 +158,28 @@ def used_raw_hashes() -> set[str]:
     return {r["raw_hash"] for r in _read_jsonl(USED_PATH) if r.get("raw_hash")}
 
 
+def used_texts(limit: int | None = None) -> list[str]:
+    """The moments we have already invented, newest last.
+
+    Note what this is NOT for. Invariant 10 says old decks are a blocklist and
+    never a source, and nothing here may be shown to a model as material. These
+    strings exist so CODE can compare a new moment against them and refuse it.
+    They never go into a prompt.
+
+    The check they enable was missing entirely. Uniqueness was tested on the
+    SEED — its id and a hash of the stranger's wording — which happens before
+    our moment exists, and novelty.py explicitly assumed that was enough:
+    "Unique moments are enforced upstream, so two decks can never be about the
+    same evening." Two different seeds produced "I sat on the edge of the bed at
+    11:45pm and stared at the dark hallway" twice, and both shipped.
+
+    `limit` takes the most recent N, for the checks that only care about not
+    repeating oneself lately.
+    """
+    texts = [r["text"] for r in _read_jsonl(USED_PATH) if r.get("text")]
+    return texts[-limit:] if limit else texts
+
+
 def is_used(mid: str) -> bool:
     return mid in used_ids()
 

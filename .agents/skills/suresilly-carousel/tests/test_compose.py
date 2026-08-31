@@ -157,7 +157,54 @@ def run() -> int:
     if compose.proper_nouns("Sarah rang me") != set():
         failures.append("NAMES the sentence-opener limit has changed, update the note")
 
-    total = (7 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
+    # ── Not the same moment, and not the same sentence, twice ──
+    #
+    # Two failures, two detectors, and each is blind to the other's case. The
+    # numbers here are the measured ones from this repo's own four real moments.
+    BED = ("I sat on the edge of the bed at 11:45pm and stared at the dark hallway, "
+           "too tired to stand up and get ready for the morning.")
+    NEAR_COPY = ("I sat on the edge of the bed at 11:45pm and stared at the dark hallway, "
+                 "dreading the morning that was coming.")
+    SAME_SHAPE = ("I sat in the car at 9:15pm with the engine off, too cold to stay "
+                  "and too tired to go inside.")
+    DIFFERENT = ("My phone buzzed during dinner and I answered my manager "
+                 "before the plate was down.")
+
+    real = compose.memory.used_texts
+    try:
+        compose.memory.used_texts = lambda limit=None: [BED]
+
+        # Same words. This is the pair that actually shipped twice.
+        if not any("word for word" in p for p in compose.repetition_faults(NEAR_COPY)):
+            failures.append("REPEAT a near-copy of a published moment was accepted")
+
+        # Different words, same sentence. Word overlap scores this at 0.000 to
+        # 0.050 and cannot see it; the shape signature is what catches it.
+        if not any("same sentence shape" in p for p in compose.repetition_faults(SAME_SHAPE)):
+            failures.append("REPEAT the fourth copy of one template was accepted")
+
+        # And the gate must not swallow everything. A genuinely different
+        # moment has to survive both checks.
+        if compose.repetition_faults(DIFFERENT):
+            failures.append(f"REPEAT a new moment was refused: {compose.repetition_faults(DIFFERENT)}")
+
+        # The push, not just the refusal. It must name the posture to avoid and
+        # must never quote the moment it learned that from — invariant 10.
+        brief = compose.variety_brief([BED], 3)
+        if "sitting" not in brief:
+            failures.append("VARIETY the brief did not ban the posture just used")
+        if "bed" in brief or "11:45pm" in brief:
+            failures.append("VARIETY the brief leaked a past moment into the prompt")
+    finally:
+        compose.memory.used_texts = real
+
+    # The example in SYSTEM taught the template it was meant to prevent: three
+    # of the first four moments copied "too ___ to ___ and too ___ to ___"
+    # straight out of it.
+    if "too awake to stay there" in compose.SYSTEM:
+        failures.append("SYSTEM the worked example still demonstrates the banned construction")
+
+    total = (12 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
              + len(MUST_ACCEPT_NAMED) + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON))
     if failures:
         print(f"compose: {len(failures)}/{total} failed")
