@@ -51,32 +51,41 @@ import screen  # noqa: E402
 
 # ── Not saying the same thing twice ──────────────────────────────────
 #
-# Two checks, because there are two failures and one detector cannot see both.
-# Both were measured on this repo's own four real moments plus the near-repeat
-# that prompted them, not chosen on taste.
+# THREE checks, because there are three ways to repeat yourself and no one
+# detector sees more than one of them. Every number here was measured on this
+# engine's own output, not chosen on taste.
 #
-# 1. NEAR-DUPLICATE — same words. 3-gram Jaccard against every moment ever
-#    used. Measured: genuinely different moments score 0.000 to 0.022, and the
-#    two that were near-copies of each other ("I sat on the edge of the bed at
-#    11:45pm and stared at the dark hallway", twice) score 0.429. Two
+# 1. SAME WORDS — 3-gram Jaccard against every moment ever used. Measured:
+#    genuinely different moments score 0.000 to 0.022, and the two that were
+#    near-copies of each other ("I sat on the edge of the bed at 11:45pm and
+#    stared at the dark hallway", twice, both shipped) score 0.429. Two
 #    populations an order of magnitude apart, so 0.20 sits in open space
-#    between them and is not a guess about either.
+#    between them.
 #
-# 2. SAME SHAPE — different words, same sentence. This is the one a reader
-#    notices, and word overlap is blind to it: "I sat in the car at 9:15pm ...
-#    too cold to stay and too tired to go inside" scores 0.000 to 0.050 against
-#    everything before it while reading as the fourth copy of one template.
-#    Stripping the nouns and comparing skeletons does not work either, measured
-#    at 0.027 — what actually repeats is short fragments, not long runs.
+# 2. SAME SHAPE — different words, same sentence, which is what a reader
+#    actually notices. Word overlap is blind to it: "I sat in the car at 9:15pm
+#    ... too cold to stay and too tired to go inside" scores 0.000 to 0.050
+#    against everything before it while reading as the fourth copy of one
+#    template. Stripping the nouns and comparing skeletons does not work either,
+#    measured at 0.027 — what repeats is short fragments, not long runs.
 #
-#    So this is a signature, not a score: the posture the moment opens on, and
-#    whether it uses the "too ___ to ___" frame. On the five real moments those
-#    two features give four distinct signatures and exactly one collision — the
-#    repeat. No false positives on anything already shipped.
+#    So this is a signature, not a score: the verb the moment OPENS on, plus
+#    whether it uses the "too ___ to ___" frame.
 #
-#    Compared against a SHORT window on purpose. There are few postures, so
-#    banning a signature forever would run out of sentences. The complaint is
-#    "I keep seeing this", not "this may never appear again".
+# 3. SAME PLACE — the room. The signature ignores the object deliberately, and
+#    that blindness showed up at once: of the twelve moments this engine has
+#    produced, five are in a kitchen and three are on a bed. Eight of twelve in
+#    two rooms, invisible to checks 1 and 2.
+#
+# Both windows are bounded, for the same reason and to different depths. A
+# sentence shape may be reused eventually; a room may be reused sooner. Banning
+# either forever would run the engine out of ordinary evenings. The complaint
+# being answered is "I keep seeing this", not "this may never appear again".
+#
+# Replaying all twelve known moments through the finished gate refuses five —
+# the two beds, two of the kitchens, and a repeated opening verb — and lets
+# seven through. That is the intended shape of it, and it is also why invent()
+# was given a fourth attempt.
 MOMENT_OVERLAP_LIMIT = 0.20
 MOMENT_SHINGLE = 3
 SHAPE_WINDOW = 8
@@ -101,6 +110,30 @@ OPENER_SKIP = frozenset({
     "so", "because", "his", "her", "their", "we", "she", "he", "they",
 })
 TOO_FRAME = re.compile(r"\btoo\s+\w+\s+to\s+\w+", re.I)
+
+# How far back the place check looks. Deliberately much shorter than
+# SHAPE_WINDOW: see the note at the check itself.
+PLACE_WINDOW = 3
+
+
+def settings_in(text: str) -> set[str]:
+    """Where this moment happens.
+
+    Read from screen.shape's own anchors rather than a second list of rooms.
+    That extractor is already maintained, already used by the shape filter, and
+    already knows words a narrower list missed — "office" is a place to it and
+    is not in coherence.CONCRETE at all.
+
+    It is approximate, and that is accepted. "I stood outside the building at
+    6am ... too tired to go back to bed" is recorded as a bed. The cost of that
+    is one wrongly-refused moment and a retry; the cost of no check is five
+    kitchens in twelve.
+    """
+    try:
+        return set(screen.shape(text)["anchors"].get("place") or [])
+    except Exception:                                  # noqa: BLE001
+        # A place we cannot read must never be the thing that stops a deck.
+        return set()
 
 
 def opening_verb(text: str) -> str:
@@ -160,6 +193,29 @@ def repetition_faults(moment: str, previous: list[str] | None = None) -> list[st
                 f"Change how it is built, not just what is in it — open on a different "
                 f"action, and do not use the 'too ___ to ___' construction if that one did")
             break
+
+    # Third axis: WHERE. The signature ignores the object on purpose, because
+    # the object is what changes when one sentence is rewritten about a car
+    # instead of a bed. The cost of that blindness showed up immediately —
+    # across the twelve moments this engine has produced, five are in a kitchen
+    # and three are on a bed. Eight of twelve in two rooms, and neither of the
+    # other checks can see it.
+    #
+    # The window is short on purpose, and much shorter than the shape window. A
+    # room is not a template: coming back to a kitchen in a fortnight is fine,
+    # and three kitchens in a row is what a reader notices. Refusing on a longer
+    # window would exhaust the small set of rooms an ordinary evening happens in
+    # and cost a run, since invent() only gets three attempts.
+    mine_place = settings_in(moment)
+    if mine_place:
+        for old in previous[-PLACE_WINDOW:]:
+            shared = mine_place & settings_in(old)
+            if shared:
+                problems.append(
+                    f"set in the same place as one of the last {PLACE_WINDOW} moments "
+                    f"({', '.join(sorted(shared))}). Put it somewhere else — a different "
+                    f"room, or out of the house entirely")
+                break
     return problems
 
 # The line between composing and copying. Seven is short enough that a genuine
@@ -318,6 +374,13 @@ def variety_brief(previous: list[str], roll: int) -> str:
                      + ", ".join(banned) + ".")
     if sum("too" in shape_signature(t) for t in recent) >= 2:
         lines.append('Do not use the "too ___ to ___" construction.')
+    # Rooms, named. Wider than the refusal window, because steering is cheap and
+    # a refusal costs an attempt. A room name is not a moment: this says "not
+    # the kitchen", never what happened in one.
+    rooms = sorted({p for t in recent for p in settings_in(t)})
+    if rooms:
+        lines.append("Do not set it in: " + ", ".join(rooms)
+                     + ". Five of our first twelve moments were in a kitchen.")
     # One nudge that is not a prohibition, so there is somewhere to go.
     lines.append(f"Set it in {HOUR_POOL[roll % len(HOUR_POOL)]}, "
                  f"and open on an action, not on a posture.")
@@ -630,10 +693,17 @@ def invent(seed: str, nonce: str = "7f3a2c") -> dict:
     # day are pushed in different directions. No past moment reaches the prompt.
     variety = variety_brief(memory.used_texts(),
                             int(hashlib.sha256(nonce.encode()).hexdigest(), 16))
-    # Three attempts, not two. Each one is a single cheap call and the moment is
-    # what everything downstream is built on, so it is worth one more try here
+    # Four attempts, not three. Each one is a single cheap call and the moment
+    # is what everything downstream is built on, so it is worth another try
     # rather than throwing the seed away and paying for a fresh judge call.
-    for _ in range(3):
+    #
+    # Raised from three when the place check went in. Replaying the twelve
+    # moments this engine has made, that check refuses five of them — correctly,
+    # they are the repeats — and a rejected moment costs an attempt. The brief
+    # should stop most of them being written in the first place, but a run that
+    # posts nothing because it ran out of tries is the expensive outcome, and one
+    # more Groq call is not.
+    for _ in range(4):
         # The second attempt is only worth its quota if it is told what was
         # wrong with the first. Asking the same question twice got the same
         # answer twice, three runs in a row.

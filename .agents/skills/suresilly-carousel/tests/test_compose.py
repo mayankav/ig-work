@@ -109,39 +109,39 @@ def run() -> int:
         failures.append("RUN a partial overlap was measured wrongly")
 
     for moment, expected in MUST_REJECT:
-        problems = compose.verify(SEED, moment)
+        problems = compose.verify(SEED, moment, previous=[])
         if not problems:
             failures.append(f"ACCEPTED a moment that should have been refused: {moment[:58]}")
         elif expected and not any(expected in p for p in problems):
             failures.append(f"WRONG REASON for {moment[:44]!r}: got {problems}")
 
     for moment in MUST_ACCEPT:
-        problems = compose.verify(SEED, moment)
+        problems = compose.verify(SEED, moment, previous=[])
         if problems:
             failures.append(f"REFUSED a good moment: {problems} | {moment[:58]}")
 
     for moment in MUST_REJECT_EMPTY:
-        if not any("nothing in the room" in p for p in compose.verify(SEED, moment)):
+        if not any("nothing in the room" in p for p in compose.verify(SEED, moment, previous=[])):
             failures.append(f"EMPTY a moment with nothing in shot was accepted: {moment[:56]}")
 
     for moment in MUST_REJECT_NAMED:
-        if not any("names somebody" in p for p in compose.verify(NAMED_SEED, moment)):
+        if not any("names somebody" in p for p in compose.verify(NAMED_SEED, moment, previous=[])):
             failures.append(f"NAMES a moment naming a person was accepted: {moment[:58]}")
     for moment in MUST_ACCEPT_NAMED:
-        problems = compose.verify(NAMED_SEED, moment)
+        problems = compose.verify(NAMED_SEED, moment, previous=[])
         if problems:
             failures.append(f"NAMES refused a moment that named nobody: {problems}")
 
     for moment in MUST_REJECT_PERSON:
-        if not any("about nobody" in p for p in compose.verify(PEOPLED_SEED, moment)):
+        if not any("about nobody" in p for p in compose.verify(PEOPLED_SEED, moment, previous=[])):
             failures.append(f"PERSON a moment about nobody was accepted: {moment[:58]}")
     for moment in MUST_ACCEPT_PERSON:
-        problems = compose.verify(PEOPLED_SEED, moment)
+        problems = compose.verify(PEOPLED_SEED, moment, previous=[])
         if problems:
             failures.append(f"PERSON refused a moment that kept the person: {problems}")
 
     # A moment spent alone must never be asked to produce a companion.
-    if compose.verify(SEED, "At 2:40am my eyes opened, chest thumping, and I stayed awake until six."):
+    if compose.verify(SEED, "At 2:40am my eyes opened, chest thumping, and I stayed awake until six.", previous=[]):
         failures.append("PERSON asked for another person in a moment spent alone")
 
     # A weekday is not a name, and neither is the first word of a sentence.
@@ -184,17 +184,43 @@ def run() -> int:
             failures.append("REPEAT the fourth copy of one template was accepted")
 
         # And the gate must not swallow everything. A genuinely different
-        # moment has to survive both checks.
+        # moment has to survive all three checks.
         if compose.repetition_faults(DIFFERENT):
             failures.append(f"REPEAT a new moment was refused: {compose.repetition_faults(DIFFERENT)}")
+
+        # Same room, nothing else shared. Checks 1 and 2 are blind to this by
+        # construction, and it is why the engine put five of its first twelve
+        # moments in a kitchen.
+        SAME_ROOM = ("I dropped the shopping on the kitchen counter at 6:40pm and "
+                     "answered his message before taking my coat off, feeling rushed.")
+        OTHER_ROOM = ("I dropped the shopping on the hall floor at 6:40pm and answered "
+                      "his message before taking my coat off, feeling rushed.")
+        KITCHEN = ("At 11pm I stood in the kitchen and washed the heavy ceramic bowls "
+                   "by hand, feeling resentful about it.")
+        if not any("same place" in p for p in compose.repetition_faults(SAME_ROOM, [KITCHEN])):
+            failures.append("REPEAT a third kitchen in a row was accepted")
+        if compose.repetition_faults(OTHER_ROOM, [KITCHEN]):
+            failures.append("REPEAT the same sentence in a different room was refused")
+        # The window is short on purpose: a room may come back, a template may not.
+        older = [KITCHEN] + ["I drove to the shop at 9am and forgot what I came for."] * 3
+        if any("same place" in p for p in compose.repetition_faults(SAME_ROOM, older)):
+            failures.append("REPEAT a room was banned beyond its window")
 
         # The push, not just the refusal. It must name the posture to avoid and
         # must never quote the moment it learned that from — invariant 10.
         brief = compose.variety_brief([BED], 3)
         if "sat" not in brief:
             failures.append("VARIETY the brief did not ban the verb just used")
-        if "bed" in brief or "11:45pm" in brief:
-            failures.append("VARIETY the brief leaked a past moment into the prompt")
+        if "bed" not in brief:
+            failures.append("VARIETY the brief did not ban the room just used")
+        # It may name a verb and a room — those are categories, the same class
+        # of thing as "do not open on a posture". What it must never carry is
+        # the moment itself: the clock, the scene, any phrase from the sentence.
+        # Invariant 10 is about TEXT being reused as material, and a one-word
+        # category is not material.
+        for leaked in ("11:45pm", "dark hallway", "stared", "edge of"):
+            if leaked in brief:
+                failures.append(f"VARIETY the brief leaked {leaked!r} from a past moment")
     finally:
         compose.memory.used_texts = real
 
@@ -204,7 +230,7 @@ def run() -> int:
     if "too awake to stay there" in compose.SYSTEM:
         failures.append("SYSTEM the worked example still demonstrates the banned construction")
 
-    total = (12 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
+    total = (15 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
              + len(MUST_ACCEPT_NAMED) + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON))
     if failures:
         print(f"compose: {len(failures)}/{total} failed")
