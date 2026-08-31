@@ -227,8 +227,13 @@ overflow. Both layout bugs it now guards against shipped silently and were caugh
 
 ### The pose library
 
-`../mascot/library/` holds **165 poses**, generated as 6-up sheets on a magenta backdrop and cut
+`../mascot/library/` holds **180 poses**, generated as 6-up sheets on a magenta backdrop and cut
 out by `scripts/import_poses.py`. See `_contact_sheet.png` for all of them.
+
+The count is not fixed any more. `scripts/poses_flux.py` adds poses for free through
+Cloudflare Workers AI, offline, into the same import and matting path. Generated green
+drifts washed-out against the palette, so check a new pose on a contact sheet beside the
+existing ones before importing — the contact sheet is the judgement, not the slide.
 
 | | Count |
 |---|---|

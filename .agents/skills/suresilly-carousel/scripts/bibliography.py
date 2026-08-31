@@ -20,7 +20,8 @@ night waking is caused by cortisol".
 Five gates, in cost order, cheapest first. A candidate that fails any gate is
 discarded and the next one is tried. There is no shortage of books.
 
-  1  the book exists          Open Library, matched on author and title
+  1  the book exists          Open Library, matched on author and title,
+                             and shelved in a psychology-adjacent subject
   2  the claim is falsifiable no percentages, no counts, no "studies show"
   3  the term is real         Open Library full-text search over scanned books
   4  nobody can refute it     a model that did NOT propose it tries to
@@ -47,7 +48,21 @@ SKILL_DIR = Path(__file__).resolve().parent.parent
 
 SEARCH_URL = "https://openlibrary.org/search.json"
 INSIDE_URL = "https://openlibrary.org/search/inside.json"
-AGENT = "suresilly-carousel (citation verification; contact via github)"
+# Open Library asks for a name and a contact so they can reach us "when we
+# notice high request volume", and gives 3 req/s to a User-Agent carrying an
+# email against 1 req/s without one. We deliberately take the 1 req/s.
+#
+# The faster tier is for applications making "multiple calls per minute". This
+# module tries at most VERIFY_MAX candidate books per deck, once or twice a
+# day — about ten requests, nowhere near one a second, let alone three. The
+# speed buys nothing, and a personal address on every request, in every log at
+# the other end and in this file's git history forever, is a real cost paid for
+# it. The public account is a contact a librarian can actually use.
+#
+# Do not add an address here to "follow the policy". Volume is what the policy
+# is about, and if this module's volume ever grows to where the limit bites,
+# that is the moment to revisit it — with an address chosen on purpose.
+AGENT = "suresilly-carousel/3.0 (+https://instagram.com/suresilly)"
 TIMEOUT = 20
 
 # Open Library is free and unmetered but it is somebody's donated infrastructure,
@@ -114,6 +129,131 @@ def _surname(author: str) -> str:
     return parts[-1].lower() if parts else ""
 
 
+# ── gate 1b: the book is shelved in this field ──
+#
+# A real book by a real author can still be the wrong book entirely. The sister
+# module's docstring records how that looks in production: a fantasy novel was
+# accepted as the proof of "bed rotting" because a scanned sentence contained
+# the word "bed". Nothing above catches that. The author exists, the title
+# exists, the phrase exists, and the citation is nonsense.
+#
+# Librarians have already done this work. Open Library returns a book's Dewey
+# and Library of Congress classes on the SAME search request gate 1 already
+# makes — same round trip, no extra call, and the code used to throw them away.
+# "The Body Keeps the Score" is RC 552 (psychiatry); "The Name of the Wind" is
+# PS 3618 (American literature). That is the whole gate.
+#
+# The whitelist below is measured, not guessed. 47 books were looked up live on
+# 2026-08-31: 28 psychology titles this page would actually cite, and a control
+# set of novels, memoirs, self-help, business, cookery, popular science, true
+# crime and religion. Two changes came out of that measurement:
+#
+#   QP ADDED. Physiology. Not an obvious psychology class, but "Why We Sleep",
+#   Porges' "The Polyvagal Theory" and "Why Zebras Don't Get Ulcers" (QP 82.2,
+#   Stress) carry QP AND NOTHING ELSE. Without it the gate silently deletes the
+#   body-and-nervous-system shelf, which is a third of what this page talks
+#   about.
+#
+#   HV DROPPED. Social pathology and criminology. Not one of the 28 psychology
+#   titles needed it, and it admits "In Cold Blood" (HV 6533) and "The New Jim
+#   Crow" — exactly the wrong-book class this gate exists to stop.
+#
+# BF psychology · RC internal medicine, which is where psychiatry (RC 435–576)
+# lives · RJ paediatrics, which holds child psychiatry · HQ family, marriage
+# and sexuality · HM sociology and social psychology · QP physiology.
+PSYCH_LCC = frozenset({"BF", "RC", "RJ", "HQ", "HM", "QP"})
+
+# Dewey, for the records that carry no LC class. 150–158 is psychology through
+# applied psychology and is checked numerically. The rest are prefixes, each one
+# earned by a measured book that would otherwise have been refused: 302 social
+# interaction (Lerner), 612.8 neurophysiology (Walker on sleep), 616.0
+# psychosomatic and medical psychology (Maté 616.08, Sapolsky 616.0019), 616.8
+# psychiatry (van der Kolk, Herman, Fisher, Levine), 649.1 child rearing
+# (Greene, Siegel).
+PSYCH_DDC = ("302", "612.8", "616.0", "616.8", "649.1")
+
+
+def _codes(value) -> list[str]:
+    """Whatever the catalogue put in a classification field, as clean strings.
+
+    Open Library returns a list, but a field can be absent, null, a bare string,
+    or a list with something odd in it. None of that may raise: a crash here
+    would take out the whole run over a cataloguing quirk, and an entry that
+    cannot be read is simply not evidence.
+    """
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (list, tuple)):
+        return [c for c in value if isinstance(c, str) and c.strip()]
+    return []
+
+
+def _lcc_class(code: str) -> str:
+    """The alphabetic class at the front of an LC call number.
+
+    Open Library stores these in a sortable form with the numbers zero-padded
+    and single-letter classes padded with dashes: "RC-0552.00000000.P67 V358
+    2014eb", "R--0726.50000000.M375 2003". So the letters cannot be taken as a
+    fixed-width slice — they are read up to the first thing that is not a
+    letter, which also copes with a plain "PS3618" from an older record.
+    """
+    match = re.match(r"[^A-Za-z]*([A-Za-z]{1,3})", code)
+    return match.group(1).upper() if match else ""
+
+
+def _ddc_is_psych(code: str) -> bool:
+    """True if a Dewey number sits in a psychology-adjacent range."""
+    # Dewey fields carry things that are not numbers at all — "[Fic]", "j004",
+    # "616.8914092 B" — so the number is found rather than parsed from the start.
+    match = re.search(r"\d{1,3}(?:\.\d+)?", code)
+    if not match:
+        return False
+    head = match.group(0)
+    if 150 <= float(head) < 159:            # psychology → applied psychology
+        return True
+    return head.startswith(PSYCH_DDC)
+
+
+def check_discipline(doc: dict) -> None:
+    """Gate 1b. The catalogue shelves this book somewhere near psychology.
+
+    ANY in-discipline code passes, rather than most of them. That is deliberate
+    and it is the one judgement call in here worth arguing about. An Open
+    Library work record merges every edition, translation and re-issue, so a
+    single book routinely carries codes from several shelves: Frankl's "Man's
+    Search for Meaning" has thirty-nine LC numbers of which most are D (the
+    Second World War) and only a handful are RC. Requiring a majority would
+    refuse Frankl, and refusing Frankl is a worse failure for this module than
+    admitting a memoir — a gate that wrongly rejects is invisible from outside
+    and narrows the shelf, which is the thing this file exists to widen.
+
+    What "any" costs: a book with one stray self-help edition gets through.
+    "Eat, Pray, Love" carries a BF 637 alongside its travel-writing G class, so
+    it passes here. That is accepted. This gate proves SUBJECT, not quality, and
+    a book that is merely off-key still has to survive gates 3 and 4.
+
+    NO classification at all is REJECTED. This is the fail-closed rule of
+    invariant 12 applied literally: an unclassified record is "we could not
+    check", and that must not come out the same as "we checked". A handful of
+    Open Library records are stubs with nothing on them — the first result for
+    "Why Zebras Don't Get Ulcers" is one — which is why the caller keeps reading
+    the rest of the SAME response instead of giving up on the first match. The
+    second Sapolsky record carries QP 82.2 and the book is cited. Nothing here
+    costs another request.
+    """
+    title = doc.get("title") or "this book"
+    lcc = [_lcc_class(c) for c in _codes(doc.get("lcc"))]
+    ddc = _codes(doc.get("ddc"))
+    if not any(c for c in lcc) and not ddc:
+        raise Unverified(f"{title!r} carries no library classification at all, so there is "
+                         "no way to tell what field it is in")
+    if any(c in PSYCH_LCC for c in lcc) or any(_ddc_is_psych(c) for c in ddc):
+        return
+    shelved = ", ".join(dict.fromkeys(lcc + [c.strip() for c in ddc]))
+    raise Unverified(f"{title!r} is catalogued under {shelved}, which is not psychology. "
+                     "A real book on the wrong shelf is still the wrong book")
+
+
 def verify_book(author: str, title: str, year: int) -> dict:
     """Gate 1. The book exists, by that author, at roughly that date.
 
@@ -130,15 +270,19 @@ def verify_book(author: str, title: str, year: int) -> dict:
     # indistinguishable from the book not existing — the failure mode this
     # module has to be most careful about, because it narrows the shelf
     # invisibly and looks like an author simply never coming up.
+    # ddc and lcc ride along on the request that was already being made. They
+    # are what gate 1b reads, and asking for them costs nothing: same URL, same
+    # round trip, two more field names.
     found = _get(SEARCH_URL, {
         "q": f"{_norm(title)} {_norm(author)}", "limit": 8,
-        "fields": "title,author_name,first_publish_year",
+        "fields": "title,author_name,first_publish_year,ddc,lcc",
     })
     docs = found.get("docs") or []
     if not docs:
         raise Unverified(f"no book called {title!r} by {author} exists in the catalogue")
 
     want_title, want_author = _norm(title), _surname(author)
+    wrong_shelf: list[str] = []
     for doc in docs:
         got_title = _norm(doc.get("title") or "")
         names = doc.get("author_name") or []
@@ -146,12 +290,22 @@ def verify_book(author: str, title: str, year: int) -> dict:
         title_ok = want_title in got_title or got_title in want_title
         author_ok = any(_surname(n) == want_author for n in names)
         if title_ok and author_ok:
+            try:
+                check_discipline(doc)
+            except Unverified as off_field:
+                # Keep reading. Several records for one book is the normal case,
+                # and an unclassified stub coming first says nothing about the
+                # classified record two rows below it.
+                wrong_shelf.append(str(off_field))
+                continue
             published = doc.get("first_publish_year")
             return {
                 "author": names[0] if names else author,
                 "title": doc.get("title") or title,
                 "year": int(published) if published else int(year),
             }
+    if wrong_shelf:
+        raise Unverified(wrong_shelf[0])
     shown = f"{docs[0].get('title')!r} by {(docs[0].get('author_name') or ['?'])[0]}"
     raise Unverified(f"{title!r} by {author} does not match the catalogue (closest: {shown})")
 

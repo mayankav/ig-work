@@ -95,13 +95,19 @@ jobs:
       # Instagram fetches the images itself, so they have to be public before
       # the post exists. This is why building and posting are separate steps
       # rather than one --publish run.
+      #
+      # Only the slides folder goes up, not the whole deck. The URL is unchanged
+      # — publish_dir/destination_dir both gained the same `/slides` — but the
+      # contact sheet and the markdown stop being uploaded, which is 1.2 MB a
+      # publish that nothing has ever fetched. The host is the path Instagram
+      # reads from; the archive is the repo.
       - name: Publish the slides
         if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./carousels/${{ steps.build.outputs.slug }}
-          destination_dir: slides/${{ steps.build.outputs.slug }}
+          publish_dir: ./carousels/${{ steps.build.outputs.slug }}/slides
+          destination_dir: slides/${{ steps.build.outputs.slug }}/slides
           keep_files: true
           cname: media.suresilly.com
 
@@ -128,14 +134,88 @@ jobs:
             --carousel "${{ steps.build.outputs.deck }}" \
             --base-url "https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides"
 
+      # ── the host is a delivery path, not an archive ───────────────────────
+      #
+      # Instagram cURLs each image once, at container creation, and serves the
+      # published carousel from its own CDN afterwards. The window in which a
+      # slide URL has to answer is the two minutes above plus the length of a
+      # post. Everything kept past that is archive, and the archive belongs in
+      # the repo, not on the path Instagram fetches from. Nothing removed it, so
+      # `slides/` grew by about 11 MB a day against a 1 GB Pages limit.
+      #
+      # AFTER the post, on purpose. Housekeeping must never be able to cost a
+      # deck, so it cannot run anywhere before the images are live. It is also
+      # not continue-on-error: a failure here turns the run red, while `Record
+      # what happened` and `Report the result` still run because both are
+      # always(). Housekeeping that fails quietly is housekeeping nobody notices
+      # has stopped, and prune_slides.py refuses rather than reporting a tidy
+      # nothing when it cannot tell what it is looking at.
+      - name: Fetch the published branch
+        if: ${{ !cancelled() && steps.build.outputs.slug != '' && env.MODE == 'publish' }}
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Take down the slides that are past the window
+        if: ${{ !cancelled() && steps.build.outputs.slug != '' && env.MODE == 'publish' }}
+        run: |
+          # --protect is also a check that the publish landed: the script aborts
+          # if the deck this run put up is not on the host.
+          #
+          # Held decks need protecting too, and for a different reason. A deck
+          # in state/pending is posted by release.py DAYS later, straight from
+          # this host. Prune it on the window and the owner's "publish" reply
+          # fetches nine 404s. --protect-if-present keeps them without making a
+          # already-pruned slug wedge every future run.
+          PROTECT=()
+          for f in state/pending/*.json; do
+            [ -e "$f" ] || continue
+            slug=$(basename "$f" .json)
+            PROTECT+=(--protect-if-present "$slug")
+            echo "holding on host for review: $slug"
+          done
+          python scripts/prune_slides.py \
+            --root gh-pages/slides \
+            --days 14 \
+            --protect "${{ steps.build.outputs.slug }}" \
+            "${PROTECT[@]}"
+          cd gh-pages
+          git config user.name "suresilly-bot"
+          git config user.email "bot@suresilly.com"
+          git add -A slides
+          git diff --staged --quiet && { echo "nothing came off the host"; exit 0; }
+          git commit -m "prune: slides older than 14 days [skip ci]"
+          # No `|| true`. This workflow is the only writer of gh-pages and its
+          # concurrency group serialises it, so a push that fails here means
+          # something is wrong rather than something is busy.
+          git push
+
       # Committed whatever happened. The used list and the fingerprints are how
       # the next run knows what has already been done, and a run that built a
       # deck and failed to record it would let that moment come round again.
+      #
+      # The slide PNGs are gitignored now — 5.6 MB a deck, twice a day, written
+      # into permanent history and never read back. The markdown, the published
+      # id and the contact sheet are the record, and the contact sheet is what a
+      # deck is judged by (invariant 8). `git add carousels` skips the ignored
+      # files without complaining.
       - name: Record what happened
         if: always()
         run: |
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
+          # The one deck whose slides must stay in git: a held deck is posted
+          # later, by release.py, from a fresh checkout of this repo, and
+          # post_to_ig.py builds its image URLs from the local filenames. Ignore
+          # the ignore for exactly as long as a person still has to answer.
+          for record in state/pending/*.json; do
+            [ -e "$record" ] || continue
+            slug=$(basename "$record" .json)
+            [ -d "carousels/$slug/slides" ] || continue
+            echo "held deck $slug: keeping its slides in git until it is answered"
+            git add -f "carousels/$slug/slides"
+          done
           git add state carousels .agents/skills/suresilly-carousel/mascot/usage_history.json \
                   .agents/skills/suresilly-carousel/palette_history.json \
                   .agents/skills/suresilly-carousel/citation_history.json \
