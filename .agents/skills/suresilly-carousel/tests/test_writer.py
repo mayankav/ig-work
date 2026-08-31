@@ -208,7 +208,12 @@ def run() -> int:
         ("a citation that does not cover the subject", broken(citation_id="tawwab-2021"), "does not cover"),
         ("beats out of their fixed order", broken(beats=beats_wrong_order), "role order"),
         # A token this moment really does contain, which never reaches slide 1.
-        ("a scene token missing from slide 1", broken(scene_token="body"), "missing from slide 1"),
+        # The expected text asserts the message NAMES the token. It used to read
+        # only "the scene token is missing from slide 1", and a run on 2026-09-01
+        # burned all four plan attempts against that note without ever being told
+        # which word to add.
+        ("a scene token missing from slide 1", broken(scene_token="body"),
+         "must contain the scene token 'body'"),
         # The name is the thing a reader repeats and sends on, so it has to be
         # on the only slide most people see.
         ("a pattern name that never reaches slide 1",

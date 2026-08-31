@@ -568,7 +568,23 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
         problems.append(f"the scene token {token!r} is not one of the things in this "
                         f"moment: {', '.join(sorted(allowed))}")
     elif token not in beats[0]["beat"].lower():
-        problems.append("the scene token is missing from slide 1")
+        # Name the word and show the sentence it has to go in.
+        #
+        # This said only "the scene token is missing from slide 1", which is the
+        # counted-not-named failure the hook validator already learned: a repair
+        # prompt that does not say WHICH word cannot fix the word. On 2026-09-01
+        # a run spent all four attempts here, faults going 2, 2, 2, 1, and posted
+        # nothing. Every other message in this function names its value.
+        #
+        # The allowed set is small — coherence knows about thirty concrete nouns,
+        # so "I sat in the car at 9:15pm with the engine off" offers exactly two,
+        # and "engine" is not one of them. Saying so turns an unguessable note
+        # into a single edit.
+        problems.append(
+            f"slide 1 must contain the scene token {token!r}, and does not. "
+            f"Slide 1 currently reads: {beats[0]['beat'][:120]!r}. "
+            f"Put {token!r} in it, or change the scene token to one of: "
+            f"{', '.join(sorted(allowed)) if allowed else token}")
     # The cheat sheet must carry the moment too, but a beat is a description of a
     # slide rather than its copy, and demanding the literal token inside a
     # description rejects perfectly good plans. The coherence gate enforces it on
