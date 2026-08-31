@@ -242,7 +242,13 @@ Any agent working here must not violate these. They exist because each one was a
     and committing the same PNGs to `main` did it again in git history. So the host keeps a
     14-day window (`scripts/prune_slides.py`, run after the post, never before) and the repo keeps
     `carousel.md` and `contact_sheet.png`, which is what a deck is judged by (invariant 8).
-    `slides/*.png` are gitignored.
+    `slides/*.png` are gitignored, and so is `carousels/*/mascot/`.
+
+    That second one arrived with generation-by-default (invariant 2): every deck now writes a
+    raw frame and a library candidate per pose, about 7.3 MB a deck and ~15 MB a day — the same
+    order as the slides problem, through a different folder. Nothing is lost, because a
+    generated pose also lands in `mascot/library/` via `import_poses.py`, where the library's own
+    gates decide, and that copy IS committed and is reused by every later deck.
 
     The exception that nearly broke this: a deck held for review is posted DAYS later by
     `release.py`, from that same host and from a fresh checkout. So pending decks are protected

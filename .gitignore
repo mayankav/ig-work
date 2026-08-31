@@ -21,6 +21,20 @@ __pycache__/
 # force-added.
 carousels/*/slides/*.png
 
+# The per-deck mascot working folder, for the same reason and a bigger number.
+#
+# With generation on by default (invariant 2), every deck writes the raw frame
+# and the library candidate for each of its nine poses into carousels/<slug>/
+# mascot/. That measured 2.6 MB for two generated poses, so about 7.3 MB a deck
+# and ~15 MB a day in permanent history — the same order as the slides problem
+# that invariant 18 exists to stop, arriving through a different folder.
+#
+# Nothing is lost by ignoring it. A generated pose ALSO goes into
+# mascot/library/ through import_poses.py, where the library's own gates and
+# matte decide, and that copy is committed and reused by every later deck. The
+# per-deck folder is the intermediate, not the artwork.
+carousels/*/mascot/
+
 # The gh-pages working copy the retention step clones into. It is the published
 # branch, checked out beside the repo, and it is never part of main.
 /gh-pages/
