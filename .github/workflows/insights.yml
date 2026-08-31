@@ -29,6 +29,11 @@ on:
         required: false
         default: false
         type: boolean
+      check_token:
+        description: "Only prove the token works and has the insights permission"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -61,9 +66,17 @@ jobs:
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: |
-          python scripts/insights.py \
-            --min-age-days "${{ inputs.min_age_days || '3' }}" \
-            ${{ inputs.dry_run && '--dry-run' || '' }}
+          # --check-token is the answer to "is the secret in this repo the right
+          # string, and does it carry the permission?". The ordinary run cannot
+          # say: it only looks at decks that already hold a media id, so on a
+          # fresh install it makes no call at all and reports success.
+          if [ "${{ inputs.check_token }}" = "true" ]; then
+            python scripts/insights.py --check-token
+          else
+            python scripts/insights.py \
+              --min-age-days "${{ inputs.min_age_days || '3' }}" \
+              ${{ inputs.dry_run && '--dry-run' || '' }}
+          fi
 
       # always(), because insights.py appends each reading the moment it has it.
       # A run that collected three decks and then hit an error still has three
