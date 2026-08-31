@@ -65,6 +65,7 @@ make. The measured brand-green share is printed for every pose either way.
 from __future__ import annotations
 
 import argparse
+import re
 import json
 import sys
 from pathlib import Path
@@ -137,6 +138,38 @@ def matte_flat(bgr: np.ndarray) -> np.ndarray:
     rgb = np.where(a > 0.004, np.clip(sub, 0, 255), bgr).astype(np.uint8)
     return np.dstack([rgb, alpha])
 
+
+
+def sidecar_tags(path: Path) -> list[str]:
+    """Tags from a `<stem>.brief.txt` beside the image, if there is one.
+
+    A pose generated from a slide's own brief arrives with a plain-English
+    description of the BODY — "sitting on the edge of a bed with his head
+    lowered". That is exactly the vocabulary library.py has never had: the tag
+    corpus is emotional and the briefs are physical, so a brief asking for a
+    sitting pose could not tell a sitting pose from a standing one.
+
+    Writing those words in as tags is what makes a generated pose findable
+    later by the next brief that wants the same body. Stop words are dropped so
+    "the" and "with" do not enter the corpus and get an inflated rarity weight,
+    which is the mistake documented above library.STOP.
+    """
+    brief = path.with_suffix("").with_suffix(".brief.txt")
+    if not brief.is_file():
+        brief = path.parent / f"{path.stem}.brief.txt"
+    if not brief.is_file():
+        return []
+    words = re.findall(r"[a-zA-Z]{3,}", brief.read_text(encoding="utf-8").lower())
+    return sorted({w for w in words if w not in BRIEF_STOP})
+
+
+# Function words plus the words every brief contains, which describe nothing.
+BRIEF_STOP = {
+    "the", "and", "with", "his", "her", "its", "one", "two", "both", "small",
+    "donkey", "silly", "into", "onto", "from", "for", "out", "off", "over",
+    "under", "while", "that", "this", "then", "than", "are", "was", "has",
+    "have", "been", "being", "very", "just", "like", "toward", "towards",
+}
 
 
 def _flatten_for_text(cell: np.ndarray, rgba: np.ndarray, kind: str) -> np.ndarray:
@@ -453,7 +486,7 @@ def main_argv(argv: list[str] | None = None) -> None:
 
             base_tags = sorted(set(
                 manifest.get("poses", {}).get(name, {}).get("tags", [])
-                + [name.replace("_", " ")] + extra))
+                + [name.replace("_", " ")] + extra + sidecar_tags(f)))
             if writing:
                 cv2.imwrite(str(LIBRARY / f"{name}.png"), rgba)
                 # sorted(set(...)) here, not append: base_tags already carries

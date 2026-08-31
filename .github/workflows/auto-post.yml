@@ -232,13 +232,19 @@ jobs:
         if: always()
         run: |
           SLUG="${{ steps.build.outputs.slug }}"
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          # The body is a dashboard, not a sentence. scripts/dashboard.py reads
+          # local state only and cannot fail the step: every section it cannot
+          # read prints as "unknown". See its header for why one line was not
+          # enough.
           if [ -n "$SLUG" ]; then
             SUBJECT="[SILLY-OK] $SLUG"
-            BODY="Built $SLUG in mode $MODE. See the contact sheet attached."
+            BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
             ATTACH="carousels/$SLUG/contact_sheet.png"
           else
             SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
-            BODY="No deck was built. This is usually a gate refusing, which is the system working. Logs: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" \
+                     --note "No deck was built. This is usually a gate refusing, which is the system working.")
             ATTACH=""
           fi
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then

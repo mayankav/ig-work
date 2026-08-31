@@ -477,7 +477,8 @@ def generate(prompt: str, refs: list[tuple[str, bytes]], *,
              width: int = 1024, height: int = 1024, seed: int | None = None,
              steps: int | None = None,
              account: str | None = None,
-             token: str | None = None) -> tuple[bytes, float | None]:
+             token: str | None = None,
+             timeout: int = TIMEOUT) -> tuple[bytes, float | None]:
     """One image. Returns (image bytes, neurons billed or None).
 
     Every failure raises; none returns None for the image.
@@ -519,7 +520,7 @@ def generate(prompt: str, refs: list[tuple[str, bytes]], *,
         })
 
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             raw = response.read()
             # Workers AI reports the real cost of the call on the way out. This
             # is the only honest number in the whole cost model.

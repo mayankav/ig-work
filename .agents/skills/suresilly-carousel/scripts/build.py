@@ -72,6 +72,12 @@ def main() -> None:
     ap.add_argument("--random-palette", action="store_true",
                     help="Pick a random bleed/paper pair (avoids immediate repeat), "
                          "instead of LRU round-robin. Use in CI for every-run variety.")
+    ap.add_argument("--fresh", action="store_true",
+                    help="generate a pose per slide from that slide's own brief. "
+                         "Every failure falls back to the library pose, so a build "
+                         "with no key or no network produces the same deck as always.")
+    ap.add_argument("--fresh-budget", type=float,
+                    help="neuron ceiling for this deck's generation (see poses_flux)")
     ap.add_argument("--bootstrap", action="store_true")
     a = ap.parse_args()
 
@@ -123,6 +129,41 @@ def main() -> None:
                 mascots[i] = library.path_for(pose)
                 print(f"  [{i}] {role_key(s.get('role',''), s):9s} -> {pose}")
         print(f"Using {len(mascots)} library poses ({len(set(chosen.values()))} distinct)")
+
+        if a.fresh:
+            # Imported HERE, not at module scope. build.py must keep working on a
+            # machine with no key and no network, so the generator is reached only
+            # when it is asked for, and every way it can fail returns the library
+            # pose that was just chosen above. See fresh_poses for the invariant
+            # this changes and why the guarantee it protected still holds.
+            import fresh_poses
+            print(f"\nGenerating fresh poses from the slide briefs "
+                  f"(library poses are the fallback)…")
+            keep = mdir / "_library_candidates"
+            mascots, stats = fresh_poses.generate_for_deck(
+                slides, mascots, mdir, budget=a.fresh_budget, keep_dir=keep)
+            print(f"  {stats['generated']} generated, {stats['fell_back']} fell back, "
+                  f"{stats['seconds']:.0f}s, ~{stats['neurons']:.0f} neurons")
+            for reason in stats["reasons"][:4]:
+                print(f"    {reason[:110]}")
+
+            # Every generated pose is offered to the library, through
+            # import_poses.py and its gates — never written straight in. A pose
+            # that earned a slide today is a pose the next deck can reach, and
+            # it arrives tagged with the BODY its brief described, which is the
+            # vocabulary selection has never had.
+            #
+            # Wrapped, because growing the library is a bonus and a deck that
+            # already rendered must not fail over it.
+            if stats["kept"]:
+                try:
+                    import import_poses
+                    print(f"\nOffering {len(stats['kept'])} generated pose(s) to the library…")
+                    import_poses.main_argv([str(keep), "--tags", "generated"])
+                except SystemExit as exc:
+                    print(f"  library import refused: {exc}")
+                except Exception as exc:                       # noqa: BLE001
+                    print(f"  library import failed: {type(exc).__name__}: {exc}")
 
 
     elif a.generate:

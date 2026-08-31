@@ -70,9 +70,12 @@ He is drawn as a complete standing figure. This is what makes posture possible a
 previous art was head-and-shoulders only, so every slide looked identical.
 
 ```FRAMING
-Framing: the complete character standing upright, facing the viewer. Head, torso, both arms
-with hooves, both legs and the tail are all fully visible with clear empty margin on every
-side. Nothing is cropped by the edge of the frame.
+Framing: one complete picture, sitting well inside the frame with a clear band of empty
+background on all four sides. Every part of the donkey is drawn and visible - head, both ears,
+torso, both arms with hooves, both legs with hooves, and the tail - except where the pose
+itself hides a part behind his own body or behind something he holds. Every object in the
+picture is drawn whole and unbroken. Nothing is cropped, cut off, or touching an edge, and
+nothing runs out of the frame. Everything sits close together as one compact group.
 ```
 
 ### Rendering style
@@ -92,14 +95,21 @@ the artwork. Never weaken this block.
 ```NEGATIVE
 Absolutely no text of any kind anywhere in the image: no letters, no numbers, no words, no
 captions, no labels, no titles, no watermarks, no signatures, no logos, and no speech bubbles
-or thought bubbles containing writing.
-Exactly one single character - never a grid, sheet, row or collage of multiple poses or
-variations.
-No frame, no border, no panel, no vignette, no drop shadow.
+or thought bubbles containing writing. Nothing in the picture shows a reading: a clock face, a
+watch, a screen, a dial or a gauge is blank and empty, or is turned away.
+Never a grid, sheet, row or collage of multiple poses or variations. One Silly, unless the
+pose is deliberately a scene with a second donkey in it.
+No frame, no border, no panel, no vignette.
+No shadow of any kind: no drop shadow, no cast shadow, no contact shadow, and no shading
+beneath anything in the picture.
+No floor, no ground, no rug, no carpet, no horizon line, no wall and no room. Whatever appears
+sits directly on the flat background with nothing under it - a bed, a chair or a table floats
+on the backdrop rather than standing on a surface.
 The background must be one completely flat uniform solid magenta (#FF00FF) - never green,
-because the character himself is green - filling the
-entire canvas edge to edge, with no gradient, no texture, no pattern, no vignette, no
-horizon line, no props resting on a ground plane, and no shadow cast onto the background.
+because the character himself is green - filling the entire canvas edge to edge, with no
+gradient, no texture, no pattern and no vignette.
+Every edge of the artwork is a crisp hard boundary against the flat magenta: no blur, no glow,
+no soft fade, no semi-transparent haze, so the picture cuts out cleanly.
 ```
 
 ---

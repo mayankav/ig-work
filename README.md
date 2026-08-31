@@ -171,6 +171,23 @@ for a deck to ship.
 **Rendering alone needs nothing.** `build.py` turns a written deck into slides
 with no key and no network, using a library of pre-drawn mascot poses.
 
+### How much of each is free
+
+Everything runs on free allowances. **[CREDITS.md](CREDITS.md)** says how much we
+get, when it comes back, and what happens when it runs out.
+
+The short version: pictures are the only thing that ever runs out. We can make
+about **31 mascot pictures a day**, which is three full decks. When that is gone
+a slide takes a pose from the library instead and nothing breaks.
+
+To see what is left right now:
+
+```bash
+.agents/skills/suresilly-carousel/.venv/bin/python scripts/capacity.py
+```
+
+Add `--notify` to send the same thing to Telegram.
+
 ---
 
 ## Rendering a deck by hand

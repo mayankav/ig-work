@@ -523,15 +523,28 @@ IMPORTS_FLUX = re.compile(
 
 
 def test_nothing_on_the_render_path_imports_this_module():
-    """build.py renders with no key and no network. An import here would break
-    that on exactly the machine nobody tests on.
+    """No render-path file may pull this module in AT IMPORT TIME.
 
-    Matches IMPORT STATEMENTS, not the bare string. It used to match the string,
-    which was a fine proxy until the character gates moved into cutout.py and
-    cutout.py had to explain in a comment where they came from and why. A
-    sentence in a docstring cannot open a socket; only an import can, and the
-    three forms below are all of them. The guard is unchanged in strength — a
-    render-path file that actually pulls this module in still fails.
+    Two narrowings, both deliberate, and the second one matters.
+
+    It matches IMPORT STATEMENTS rather than the bare string, because the
+    character gates moved into cutout.py and cutout.py had to explain in a
+    comment where they came from. A sentence in a docstring cannot open a
+    socket.
+
+    And the guarantee has moved. This rule used to be absolute, on the reasoning
+    that "a build that needs a network is a build that can fail at 8am with
+    nobody watching". The reasoning is right; the rule was a proxy for it. What
+    must never fail is the DECK. build.py can now reach the generator through
+    fresh_poses under --fresh, and every way that can fail hands the slide back
+    the library pose selection already chose. tests/test_fresh_poses.py is where
+    that promise is actually tested — missing module, missing key, dead network,
+    exhausted budget, a frame that fails a gate — and it is the real replacement
+    for the prohibition this test used to be.
+
+    What is still enforced here is the part a fallback cannot cover: nothing on
+    the render path may load this module simply by being imported. A default
+    build must not look for a key, so the import lives inside the flag.
     """
     for name in RENDER_PATH:
         path = ROOT / "scripts" / name

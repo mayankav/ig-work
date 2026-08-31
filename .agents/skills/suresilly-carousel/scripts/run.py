@@ -276,10 +276,21 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
               f"  publish {slug}    to post it as it is",
               f"  rerun {slug}      to throw it away and build another"]
     sheet = REPO_ROOT / path.parent / "contact_sheet.png"
+    # The reason and the reply instructions first, then the same dashboard every
+    # other message carries, so one glance answers "what else needs me today".
+    # It reads local state only and never fails; if it cannot run, the message
+    # still goes with the part that matters.
+    board = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "dashboard.py"),
+         "--status", "held", "--slug", slug, "--score", str(score)],
+        cwd=REPO_ROOT, capture_output=True, text=True)
+    body = "\n".join(lines)
+    if board.returncode == 0 and board.stdout.strip():
+        body += "\n\n" + board.stdout.strip()
     subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "notify.py"),
          "--subject", f"@suresilly held a deck: {slug} ({score}/100)",
-         "--body", "\n".join(lines)]
+         "--body", body]
         + (["--attach", str(sheet)] if sheet.is_file() else []),
         cwd=REPO_ROOT, capture_output=True, text=True)
 
