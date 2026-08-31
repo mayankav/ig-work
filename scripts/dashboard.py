@@ -105,8 +105,16 @@ def _vendor_row(v: dict) -> str:
     name = f"  {v['name']:<11}"
     if not v.get("known"):
         # The unknown is spelled out rather than drawn. A bar here would be a
-        # guess with the shape of a measurement.
-        return f"{name}{'not counted':<20}?   {v.get('note', '')}"
+        # guess with the shape of a measurement, and how many requests we MADE
+        # is not how many are LEFT.
+        made = v.get("made")
+        figure = f"{made} made today" if made is not None else "not counted"
+        tail = v.get("note", "")
+        out, total = v.get("models_out"), v.get("models_total")
+        if out:
+            tail = f"{out} of {total} models out of quota" if total else \
+                   f"{out} model(s) out of quota"
+        return f"{name}{figure:<20}?   {tail}"
     figure = f"{v['remaining']}/{v['limit']} {v['unit']}"
     if v["name"] == "groq":
         tail = _refill(v.get("refills_in_seconds")) + _age(v.get("age_seconds"))
@@ -132,9 +140,12 @@ def writing() -> tuple[str, list[str]]:
         low = [v for v in vendors if v.get("low")]
         if not low:
             return "all vendors have room", []
-        names = ", ".join(v["name"] for v in low)
-        share = "its share" if len(low) == 1 else "their shares"
-        return f"⚠ {names} near the end of {share}", [_vendor_row(v) for v in vendors]
+        # Each vendor states its OWN reason. One shared phrase would have to be
+        # vague enough to fit all three, and "near the end of its share" is not
+        # what happened when two of Gemini's five models went out of quota.
+        why = " · ".join(f"{v['name']}: {v['low_because']}" if v.get("low_because")
+                         else v["name"] for v in low)
+        return f"⚠ {why}", [_vendor_row(v) for v in vendors]
     return _safe(read, default=("unknown", []))
 
 

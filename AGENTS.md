@@ -64,9 +64,11 @@ Any agent working here must not violate these. They exist because each one was a
      `@cf/black-forest-labs/flux-2-klein-4b`, Apache-2.0, so the output may be used
      commercially. It takes up to four reference images, which is what holds the character —
      a text prompt alone cannot reconstruct Silly. It writes raw frames for the existing
-     `import_poses.py` / `cutout.py` matting and QA path and does nothing else. **The 9B model
-     one row below it in the same price table is `flux-non-commercial-license` and must never
-     be used**; two tests say so. Expect colour drift toward a washed-out green — judge new
+     `import_poses.py` / `cutout.py` matting and QA path and does nothing else. **The 9B model one row below
+     it in the same price table must never be used**; two tests say so. Twelve times the
+     price — about 1,554 neurons a pose against 126 — and `flux-non-commercial-license` on
+     Hugging Face, where the 4B is `apache-2.0`. Cloudflare's own model pages show no licence
+     string for either, so nothing at the call site tells you which row you moved to. Expect colour drift toward a washed-out green — judge new
      poses on a contact sheet beside old ones (invariant 8), never one at a time.
    - `--generate` (**obsolete, not in use**): a fresh pose per slide via the Gemini API. Gemini
      image generation has no free tier, so it fails unless billing is on. `scripts/mascot.py`

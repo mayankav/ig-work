@@ -38,8 +38,8 @@ comes out empty — all of them land in the same place, and the caller cannot
 tell the difference except from the count this prints.
 
 Cost and time, measured rather than assumed. One 1024x1024 pose with four
-reference images books 188 neurons against a 6,000/day ceiling, so a nine-slide
-deck costs about 1,700 and the free allowance covers roughly three decks a day.
+reference images books about 126 neurons against a 6,000/day ceiling, so a
+nine-slide deck costs about 1,130 and the ceiling covers five decks a day.
 A single call took 15 seconds wall-clock on 2026-08-31. PER_POSE_TIMEOUT is far
 below poses_flux's own 180s ceiling because a slow generation must not hold up
 a deck that has a perfectly good library pose waiting for it.

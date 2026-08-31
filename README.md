@@ -177,7 +177,7 @@ Everything runs on free allowances. **[CREDITS.md](CREDITS.md)** says how much w
 get, when it comes back, and what happens when it runs out.
 
 The short version: pictures are the only thing that ever runs out. We can make
-about **31 mascot pictures a day**, which is three full decks. When that is gone
+about **47 mascot pictures a day**, which is five full decks. When that is gone
 a slide takes a pose from the library instead and nothing breaks.
 
 To see what is left right now:

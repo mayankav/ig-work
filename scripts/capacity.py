@@ -88,10 +88,29 @@ def vendors() -> list[dict]:
     snap = _quotas()
     out: list[dict] = []
 
-    # Gemini — counted by nobody. Stated, not implied.
+    # Gemini — the vendor reports nothing, so the only figure anyone can have
+    # is the tally llm.py keeps. `known` stays False: how many we MADE is not
+    # how many are LEFT, and the two must not be printed as if they were.
+    gem = _q.counted("gemini")
+    models = gem.get("models") or {}
+    made = sum(int(m.get("made", 0)) for m in models.values())
+    spent_models = [name for name, m in models.items() if m.get("out_of_quota_at")]
+    try:
+        import llm
+        total_models = len(llm.GEMINI_MODELS)
+    except Exception:                                          # noqa: BLE001
+        total_models = None
     out.append({"name": "gemini", "unit": "requests", "known": False,
-                "note": "no quota reported by the vendor",
-                "low": False})
+                "made": made, "models_out": len(spent_models),
+                "models_total": total_models,
+                "day": gem.get("day"), "zone": gem.get("zone"),
+                "note": "no ceiling reported by the vendor",
+                # A model going out is the first sign the writer is degrading,
+                # and it is the only Gemini signal that is a measurement rather
+                # than a tally. So it, and not the count, raises the flag.
+                "low": bool(spent_models),
+                "low_because": (f"{len(spent_models)} of {total_models} models "
+                                f"out of quota") if spent_models else ""})
 
     # Groq — the vendor's own remaining, and its age, because a reading from
     # yesterday is not a reading from today.
@@ -105,7 +124,9 @@ def vendors() -> list[dict]:
                     "model": groq.get("model"),
                     "refills_in_seconds": reqs.get("reset_seconds"),
                     "age_seconds": _q.age_seconds(groq),
-                    "low": share < LOW_WATER})
+                    "low": share < LOW_WATER,
+                    "low_because": (f"{remaining} of {limit} requests left"
+                                    if share < LOW_WATER else "")})
     else:
         out.append({"name": "groq", "unit": "requests", "known": False,
                     "note": "no reading yet — it is written by the next call",
@@ -122,7 +143,10 @@ def vendors() -> list[dict]:
                 "account_left": round(ledger.account_left()),
                 # Never refused, only recorded: writing is what this repo exists
                 # to do. So this flag is a warning and not a gate.
-                "low": used > 0.85 * share_for_text})
+                "low": used > 0.85 * share_for_text,
+                "low_because": (f"past 85% of the {round(share_for_text)} kept "
+                                f"back for writing"
+                                if used > 0.85 * share_for_text else "")})
     return out
 
 

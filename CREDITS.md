@@ -31,21 +31,32 @@ To see the picture budget right now:
 |---|---|
 | Free per day | 10,000 neurons |
 | We allow ourselves | 6,000 (60%) |
-| Cost of one picture | 188 neurons |
-| Pictures per day at our limit | 31 |
-| Pictures for one 9-slide deck | 9 (1,692 neurons) |
-| Full decks per day | 3 |
+| Cost of one picture | ~126 neurons |
+| Pictures per day at our limit | 47 |
+| Pictures for one 9-slide deck | 9 (~1,130 neurons) |
+| Full decks per day | 5 |
 | Measured time per picture | 11 to 18 seconds |
 | Measured time for 6 pictures | 84 seconds |
 
 We keep 40% back on purpose. The text model draws on the same pot, and a day
 that spends it all on pictures leaves the writer with nothing.
 
-**We book the expensive price.** Cloudflare's own response says a picture costs
-about 21 neurons. Their price list says 188. The two disagree by nine times and
-we cannot tell which is right, so we count the big number. If we are wrong we
-lose some speed. If we counted the small number and were wrong, we would go past
-the free limit and start paying.
+**Where 126 comes from.** Cloudflare's price list for this model reads "5.37
+neurons per input 512x512 tile" and "26.05 neurons per output 512x512 tile". A
+1024x1024 frame is four output tiles (104.2) and each reference is one input
+tile (5.37), so four references and a frame come to ~126.
+
+**This said 188 until 2026-08-31.** The response header reported 5.37 per
+reference — 21.48 for four — and that TOTAL was written into the code as the
+rate for ONE. It quadrupled the reference half of every booking and made two
+figures that agree exactly look like they disagreed by nine times. The
+correction is worth 16 more pictures a day.
+
+**We still book the expensive price for the frame.** That part of the
+disagreement is real: the header bills nothing at all for the output tiles,
+where the price list says 104.2. We count the price list. If we are wrong we
+lose some speed; if we believed the header and were wrong, we would go past the
+free limit and start paying.
 
 ### When pictures run out
 
@@ -86,8 +97,8 @@ The writing line stays one line until a vendor is actually near an edge, and
 then it expands to a row per vendor, each in its OWN unit:
 
 ```
-WRITING    ⚠ groq near the end of its share
-  gemini     not counted         ?   no quota reported by the vendor
+WRITING    ⚠ gemini: 2 of 5 models out of quota · groq: 61 of 1000 requests left
+  gemini     14 made today       ?   2 of 5 models out of quota
   groq       61/1000 requests    ▓░░░░░░░░░  full again in 13.3h
   cloudflare 570/4000 neurons    ▓░░░░░░░░░  of the writing share, resets 00:00 UTC
 ```
@@ -97,8 +108,11 @@ neuron and a request, and inventing one would put a figure in the report that
 no vendor could account for. Gemini gets words where the others get a bar,
 because a bar there would be a guess with the shape of a measurement.
 
-A row expands when a vendor drops below 20% of its own allowance, or when
-Cloudflare's writing share passes 85%. Three vendor lines every morning is
+A row expands when a vendor drops below 20% of its own allowance, when one of
+Gemini's five models goes out of quota, or when Cloudflare's writing share
+passes 85%. A Gemini model going out is the only signal on that row that is a
+measurement rather than a tally, which is why it, and not the count, raises the
+flag. Three vendor lines every morning is
 three lines you learn to skip, and the morning they matter you skip them too.
 
 **This was not measured until now.** The response header that says what a call
@@ -148,9 +162,30 @@ place the limit is ever named is the text of a 429.
 Its allowance is per model, per project, and it returns at midnight Pacific —
 07:00 UTC in summer, 08:00 in winter, never 00:00. A Gemini counter keyed on
 the UTC date would zero itself the best part of a day early, every day, so the
-reset boundary has to belong to the vendor and not to the ledger.
+reset boundary belongs to the vendor and not to the ledger.
 
-Neither has been the limit so far. That is a measurement, not a promise.
+So `llm.py` counts its own calls instead, per model, keyed on the **Pacific**
+date, in the same `state/vendor_quotas.json`. Every record in that file says
+which kind it is:
+
+| `source` | Means | Rule |
+|---|---|---|
+| `reported` | the vendor said what is LEFT | always replaced by the newest reading |
+| `counted` | the vendor says nothing, so we count our own calls | only incremented, cleared when the vendor's day rolls over |
+
+They share a file because they answer one question. They never share a
+function, because treating a tally as a remaining is how a vendor with nothing
+left comes to look full.
+
+**What the tally does not claim.** How many requests we MADE is not how many
+are LEFT, and the report never prints it as though it were. When a model
+answers 429 on its daily quota, that is recorded as a fact with a time on it
+and is deliberately not turned into a learned ceiling: "we made 14 and the
+fifteenth was refused" does not establish that the limit is 14, because
+anything else on the same project spends the same quota. A figure that would
+be wrong whenever we are not the only caller is worse than no figure.
+
+Neither vendor has been the limit so far. That is a measurement, not a promise.
 
 ---
 
@@ -160,10 +195,25 @@ Neither has been the limit so far. That is a measurement, not a promise.
 |---|---|
 | Gemini image generation | The free limit is zero. Every call fails unless billing is on. |
 | Groq image generation | There is no image model on Groq. Text and speech only. |
-| FLUX 9B and FLUX dev | Better pictures, but the licence forbids commercial use. @suresilly is commercial, so every pose would be unusable. |
+| FLUX 9B and FLUX dev | Better pictures, but 12x and 45x the price — see below. Also non-commercial on Hugging Face. |
 
 The 9B model sits one row below the one we use in Cloudflare's own price list.
-That is the trap. Do not switch to it.
+That is the trap, and **price is the reason, not licence.** Read off Cloudflare's
+published table on 2026-08-31:
+
+| Model | One 1024x1024 pose, 4 refs | Pictures a day from 6,000 |
+|---|---|---|
+| flux-2-klein-4b | ~126 neurons | ~47 |
+| flux-2-klein-9b | ~1,554 neurons | ~4 |
+| flux-2-dev (25 steps) | ~5,625 neurons | ~1 |
+
+The licence part is real but narrower than this page used to say. On Hugging Face
+the 4B is `apache-2.0` and the 9B is `flux-non-commercial-license`; **Cloudflare's
+own model pages show no licence string for either**, both linking to the same BFL
+terms, so the distinction is invisible where you would look for it. And the
+licence restricts running and distributing the WEIGHTS, while expressly
+permitting commercial use of the pictures. So "every pose would be unusable" was
+the wrong reason. Operating the model for a monetised page is the right one.
 
 Re-checked 2026-08-31 against this project's own key, because 2026 write-ups
 claim a free image tier of 500 requests a day. It is not true here:

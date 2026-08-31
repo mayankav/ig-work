@@ -49,7 +49,7 @@ def fake_flux(**overrides) -> types.ModuleType:
     mod.QAFailure = fresh_poses.QAFailure
     mod.credentials = lambda: ("acct", "token")
     mod.pick_references = lambda brief="", **k: [("deadpan", b"x")]
-    mod.estimate_neurons = lambda w, h, r: 188.0
+    mod.estimate_neurons = lambda w, h, r: 126.0    # one pose at the published rate
     mod.build_prompt = lambda brief: brief
     mod.correct_palette = lambda a: a
     mod.assert_no_text = lambda a, w: None

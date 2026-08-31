@@ -47,6 +47,34 @@ report that is missing a line, and that must never cost a deck. The reader's
 side of the same rule: a value the vendor did not send is stored as absent and
 never as a zero, because a zero is a measurement and an absence is not — and
 these two are the difference between "Groq is out" and "we did not look".
+
+TWO KINDS OF RECORD IN ONE FILE, AND HOW THEY ARE KEPT APART
+
+Every record carries a `source`, and the two obey different rules:
+
+  reported   the vendor said what is LEFT. Written by record(). Always
+             replaced by the newest reading, never accumulated.
+  counted    the vendor says nothing, so we count our own calls. Written by
+             count(). Only ever incremented, and cleared when the vendor's own
+             day rolls over.
+
+They share a file because they answer one question — how much room has each
+vendor got — but never a function, because treating a tally as a remaining is
+how a vendor with nothing left comes to look full. `source` is what a reader
+checks first.
+
+GEMINI'S DAY IS NOT OUR DAY
+
+Gemini's requests-per-day returns at midnight PACIFIC, per model, per project.
+`neurons.py` keys its ledger on the UTC date because that is when Cloudflare's
+pot returns, and reusing that key here would zero the tally at 17:00 Pacific —
+seven hours early, every day, right in the middle of an allowance. So the zone
+belongs to the vendor and is stored beside the day it produced.
+
+What is counted is what THIS repo asked for. A call made by hand against the
+same project is invisible here, the same blind spot capacity.py already owns.
+So this reports how much we have used and never claims how much is left: the
+ceiling is a number Gemini only ever names in the text of a 429.
 """
 
 from __future__ import annotations
@@ -56,6 +84,7 @@ import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 REPO_DIR = Path(__file__).resolve().parents[4]   # scripts -> skill -> skills -> .agents -> repo
 
@@ -144,7 +173,7 @@ def record(vendor: str, model: str, headers: dict,
         tokens_dim = _dimension(headers, "tokens")
         if requests_dim is None and tokens_dim is None:
             return None
-        record_ = {"model": model, "observed_at": _now()}
+        record_ = {"source": "reported", "model": model, "observed_at": _now()}
         if requests_dim:
             record_["requests"] = requests_dim
         if tokens_dim:
@@ -175,3 +204,90 @@ def age_seconds(record_: dict | None) -> float | None:
         return None
     return max(0.0, (datetime.now(timezone.utc)
                      - seen.replace(tzinfo=timezone.utc)).total_seconds())
+
+
+# ── counted vendors: the ones that report nothing ────────────────────────────
+#
+# Gemini's allowance returns at midnight Pacific. Nothing else here uses that
+# zone, which is precisely why it is written down rather than assumed.
+VENDOR_ZONE = {"gemini": "America/Los_Angeles"}
+
+
+def vendor_day(vendor: str) -> str:
+    """Today's date in the vendor's OWN zone, which is the only date its
+    allowance cares about. Falls back to UTC for a vendor with no zone on
+    file, because a wrong-but-stated key beats a crash in a recorder that is
+    not allowed to fail."""
+    zone = VENDOR_ZONE.get(vendor)
+    try:
+        now = datetime.now(ZoneInfo(zone)) if zone else datetime.now(timezone.utc)
+    except Exception:                                          # noqa: BLE001
+        now = datetime.now(timezone.utc)
+    return now.strftime("%Y-%m-%d")
+
+
+def counted(vendor: str, path: Path | str | None = None) -> dict:
+    """This vendor's tally for TODAY, in its own zone.
+
+    A stored tally from an earlier day is not a smaller tally, it is last
+    night's, so it is dropped rather than shown. Returns an empty record
+    rather than None: "we have made no calls yet" is a true statement and a
+    reader should not have to special-case it.
+    """
+    day = vendor_day(vendor)
+    stored = read(path).get(vendor)
+    if not isinstance(stored, dict) or stored.get("source") != "counted":
+        return {"source": "counted", "day": day, "models": {}}
+    if stored.get("day") != day:
+        return {"source": "counted", "day": day, "models": {}}
+    stored.setdefault("models", {})
+    return stored
+
+
+def count(vendor: str, model: str, path: Path | str | None = None) -> None:
+    """One more request made against this vendor's model today. Never raises.
+
+    Counted at the point the request is ATTEMPTED, not where it succeeded. A
+    refused call has still been asked for, and a tally that only counts the
+    answers we liked walks into a daily cap believing it has room.
+    """
+    try:
+        target = Path(path or QUOTAS_PATH)
+        data = read(target)
+        record_ = counted(vendor, target)
+        entry = record_["models"].setdefault(model, {"made": 0})
+        entry["made"] = int(entry.get("made", 0)) + 1
+        record_["observed_at"] = _now()
+        record_["zone"] = VENDOR_ZONE.get(vendor, "UTC")
+        data[vendor] = record_
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n",
+                          encoding="utf-8")
+    except Exception:                                          # noqa: BLE001
+        pass          # a tally that cannot be written must never cost a deck
+
+
+def mark_exhausted(vendor: str, model: str, path: Path | str | None = None) -> None:
+    """This model said it is out of its daily allowance.
+
+    Recorded as a fact with a time on it, and deliberately NOT turned into a
+    learned ceiling. The tally counts only what this repo asked for, so
+    "we made 14 and the fifteenth was refused" does not establish that the
+    limit is 14 — anything else on the same project spends the same quota. A
+    figure that would be wrong whenever we are not the only caller is worse
+    than no figure.
+    """
+    try:
+        target = Path(path or QUOTAS_PATH)
+        data = read(target)
+        record_ = counted(vendor, target)
+        entry = record_["models"].setdefault(model, {"made": 0})
+        entry["out_of_quota_at"] = _now()
+        record_["observed_at"] = _now()
+        record_["zone"] = VENDOR_ZONE.get(vendor, "UTC")
+        data[vendor] = record_
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n",
+                          encoding="utf-8")
+    except Exception:                                          # noqa: BLE001
+        pass

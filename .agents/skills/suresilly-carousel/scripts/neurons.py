@@ -38,30 +38,42 @@ class BudgetExceeded(Exception):
 # llm.py bills its third text vendor against. So this tool may not spend the
 # lot: whatever it takes, the writer and the critic no longer have.
 #
-# Two numbers disagree about what a call costs, by a factor of ten, and this
-# module believes the expensive one.
+# What one call costs, from Cloudflare's own price list for this model:
 #
-#   PUBLISHED   ~104 neurons for a 1024x1024 frame, ~21 for references.
-#   MEASURED    every response carries a cf-ai-neurons header. Five calls on
-#               2026-08-31 at 1024x1024 reported 5.37 neurons per reference
-#               image and nothing at all for the output frame:
-#                   1 ref -> 5.37    2 refs -> 10.74    4 refs -> 21.48
-#               Exactly linear, three independent confirmations.
+#     "5.37 neurons per input 512x512 tile"
+#     "26.05 neurons per output 512x512 tile"
 #
+# A 1024x1024 output is four 512x512 tiles, so 4 x 26.05 = 104.2. A reference
+# is one tile, so 5.37 each. Four references and a 1024x1024 frame come to
+# about 126 neurons.
+#
+# THE ERROR THIS CONSTANT USED TO CARRY, because it is an easy one to repeat.
+# The cf-ai-neurons header on five real calls on 2026-08-31 reported
+#
+#     1 ref -> 5.37    2 refs -> 10.74    4 refs -> 21.48
+#
+# and 21.48 — the TOTAL for four references — was written down here as the rate
+# for ONE, giving 21.0. That quadrupled the reference half of every reservation
+# and booked a pose at 188 instead of 126. Two numbers that in fact agree
+# exactly were recorded as disagreeing by a factor of ten, and the module was
+# built around reconciling a conflict that was never there. A total is not a
+# rate; check the unit before copying a measurement into a constant.
+#
+# WHAT REALLY DOES DISAGREE, and why the reservation stays pessimistic. The
+# header bills NOTHING for the output frame, where the price list says 104.2.
 # One of those is wrong and there is no way from here to tell which. If the
-# header is right, believing the published rate costs some throughput. If the
-# header undercounts — it plainly does not bill the output frame, so something
-# is missing from it — then believing the header runs ten times over the free
-# allowance and starts spending the user's money.
+# header is right, believing the price list costs some throughput. If the
+# header is incomplete — it plainly is, since no output tile is billed at all —
+# then believing it runs over the free allowance and starts spending money.
 #
-# So: RESERVE at the published rate, which is the pessimistic one and does not
-# depend on the header being complete. Reconcile against the header only when
-# the header is HIGHER than the reservation. Reconciliation can raise the
-# recorded spend and can never lower it, which means a surprise expensive call
-# is caught and a suspiciously cheap one buys nothing. Same rule as everywhere
-# else here: "we could not check" must never come out the same as "we checked".
-NEURONS_PER_MEGAPIXEL = 104.0     # published, per 1024x1024-equivalent output
-NEURONS_PER_REFERENCE = 21.0      # published, per reference image
+# So: RESERVE at the published rate, which does not depend on the header being
+# complete. Reconcile against the header only when the header is HIGHER than
+# the reservation. Reconciliation can raise the recorded spend and can never
+# lower it, which means a surprise expensive call is caught and a suspiciously
+# cheap one buys nothing. Same rule as everywhere else here: "we could not
+# check" must never come out the same as "we checked".
+NEURONS_PER_MEGAPIXEL = 104.0     # published: 4 output tiles x 26.05
+NEURONS_PER_REFERENCE = 5.37      # published: one input 512x512 tile
 FREE_DAILY_NEURONS = 10_000
 DEFAULT_BUDGET = 6_000            # 60%: the text vendors draw on the same pot
 

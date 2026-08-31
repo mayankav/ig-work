@@ -1,4 +1,15 @@
 {
+  "gemini": {
+    "day": "2026-08-31",
+    "models": {
+      "gemini-2.5-flash": {
+        "made": 1
+      }
+    },
+    "observed_at": "2026-08-31T16:47:28Z",
+    "source": "counted",
+    "zone": "America/Los_Angeles"
+  },
   "groq": {
     "model": "openai/gpt-oss-120b",
     "observed_at": "2026-08-31T16:35:26Z",

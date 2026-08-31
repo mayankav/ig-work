@@ -4,12 +4,14 @@ poses_flux regression. No network is touched by any test in this file.
 
 The three things worth locking here, in order of what they would cost:
 
-  1 · THE LICENCE. @cf/black-forest-labs/flux-2-klein-4b is apache-2.0. The 9B
-      that sits one row below it in Cloudflare's pricing table makes visibly
-      nicer pictures and is licensed flux-non-commercial. @suresilly is a
-      commercial page, so every pose made with the 9B would be unshippable and
-      nothing downstream would notice. A one-word edit does that, which is
-      exactly why it is a test.
+  1 · THE MODEL. @cf/black-forest-labs/flux-2-klein-4b is apache-2.0 on Hugging
+      Face; the 9B one row below it in Cloudflare's pricing table is
+      flux-non-commercial-license there and makes visibly nicer pictures. It is
+      also twelve times the price — about 1,554 neurons a pose against 126 —
+      which on its own is the reason to refuse it. Cloudflare's model pages
+      show no licence string for either, so nothing at the call site would tell
+      you which row you had moved to. A one-word edit does it, which is exactly
+      why it is a test.
 
   2 · INVARIANT 3, no text in mascot artwork. The gate has to reject a caption
       wherever it lands in the frame, and it has to accept all 180 poses in the
@@ -376,43 +378,66 @@ def test_spend_accumulates_and_stops_at_the_budget(tmp_path):
         book.check(41)
 
 
+# One pose, booked. Derived rather than typed, so that changing a published rate
+# cannot leave a stale figure sitting in three tests pretending to be a fact.
+POSE = pf.estimate_neurons(1024, 1024, 4)
+
+
 def test_reconcile_tops_up_when_the_call_cost_more_than_booked(tmp_path):
     book = ledger(tmp_path)
-    book.spend(188.0)
-    book.reconcile(188.0, 260.0)
-    assert book.spent() == pytest.approx(260.0)
+    book.spend(POSE)
+    book.reconcile(POSE, POSE * 2)
+    assert book.spent() == pytest.approx(POSE * 2)
 
 
 def test_reconcile_never_refunds_a_cheap_looking_header(tmp_path):
-    """The header reports about a tenth of the published rate and does not bill
-    the output frame at all, so it is a floor and not a total. A cheap header
-    must not buy throughput — that is how a day runs ten times over the free
-    allowance and starts spending the user's money."""
+    """The header does not bill the output frame at all, so it is a floor and
+    not a total. A cheap header must not buy throughput — that is how a day
+    runs over the free allowance and starts spending the user's money."""
     book = ledger(tmp_path)
-    book.spend(188.0)
-    book.reconcile(188.0, 21.48)
-    assert book.spent() == pytest.approx(188.0)
+    book.spend(POSE)
+    book.reconcile(POSE, 21.48)          # what the header really says for 4 refs
+    assert book.spent() == pytest.approx(POSE)
 
 
 def test_reconcile_without_a_header_keeps_the_reservation(tmp_path):
     """"We could not check" must never come out the same as "we checked"."""
     book = ledger(tmp_path)
-    book.spend(188.0)
-    book.reconcile(188.0, None)
-    assert book.spent() == pytest.approx(188.0)
+    book.spend(POSE)
+    book.reconcile(POSE, None)
+    assert book.spent() == pytest.approx(POSE)
 
 
-def test_the_reservation_uses_the_pessimistic_published_rate():
-    """Measured live on 2026-08-31, the header said 5.37 neurons per reference:
-    21.48 with four, 10.74 with two, 5.37 with one. The published rate is ten
-    times that. One of them is wrong and there is no way from here to tell
-    which, so the reservation believes the expensive one."""
-    four = pf.estimate_neurons(1024, 1024, 4)
-    assert four == pytest.approx(188.0)
-    assert four > 21.48 * 5
-    assert pf.estimate_neurons(1024, 1024, 1) > 5.37 * 5
+def test_the_rates_are_the_published_per_tile_ones():
+    """Cloudflare's price list for flux-2-klein-4b, verbatim:
+
+        "5.37 neurons per input 512x512 tile"
+        "26.05 neurons per output 512x512 tile"
+
+    A 1024x1024 output is four tiles (4 x 26.05 = 104.2) and a reference is
+    one (5.37). This test exists because the reference rate was once 21.0 —
+    the header's TOTAL for four references, 21.48, copied in as the rate for
+    one. It quadrupled the reference half of every reservation, booked a pose
+    at 188 instead of 126, and made two figures that agree exactly look like
+    they disagreed by a factor of ten. A total is not a rate.
+    """
+    assert pf.NEURONS_PER_REFERENCE == pytest.approx(5.37)
+    assert pf.NEURONS_PER_MEGAPIXEL == pytest.approx(104.0, abs=0.3)
+    # Each reference is billed as one tile, so four of them cost what the
+    # header reported for four — the two sources agree, and always did.
+    assert pf.estimate_neurons(1024, 1024, 4) - pf.estimate_neurons(1024, 1024, 0) \
+        == pytest.approx(21.48, abs=0.05)
+
+
+def test_the_reservation_stays_pessimistic_about_the_output_frame():
+    """The one figure genuinely in dispute. The header bills nothing for the
+    output frame; the price list says 104.2. We book the price list, because a
+    header that is incomplete and believed is how a day starts costing money."""
+    assert pf.estimate_neurons(1024, 1024, 4) > 21.48 * 5
+    assert pf.estimate_neurons(1024, 1024, 0) == pytest.approx(104.0, abs=0.3)
     # and a whole day of it still cannot cost real money
     assert pf.DEFAULT_BUDGET <= pf.FREE_DAILY_NEURONS
+    assert pf.DEFAULT_BUDGET / pf.estimate_neurons(1024, 1024, 4) < pf.FREE_DAILY_NEURONS
 
 
 def test_a_ledger_survives_a_corrupt_file(tmp_path):

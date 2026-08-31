@@ -107,10 +107,27 @@ DEFAULT_OUT = SKILL_DIR / "mascot" / "inbox"
 #     flux-2-dev        flux-non-commercial-license   ← forbidden
 #
 # The 9B sits one row below the 4B in Cloudflare's own pricing table and makes
-# visibly nicer pictures. That is the trap. Its licence forbids commercial use,
-# and every pose made with it would be unshippable. If output quality is not
-# good enough, the answer is a better prompt, better references, or not using
-# this tool — never a different row in that table.
+# visibly nicer pictures. That is the trap, and there are two reasons not to
+# take it. The first used to be stated wrongly here.
+#
+# PRICE, which is decisive on its own. Read off Cloudflare's published table on
+# 2026-08-31: the 4B is billed "26.05 neurons per output 512x512 tile", so a
+# 1024x1024 pose with four references comes to about 126. The 9B is billed per
+# megapixel — "1363.64 neurons per first MP" — so the same pose costs about
+# 1,554. Twelve times the price. That is six pictures a day instead of forty.
+#
+# LICENCE, which is real but narrower than this comment claimed. On Hugging
+# Face the 4B carries license:apache-2.0 and the 9B carries
+# flux-non-commercial-license. Cloudflare's own model pages show NO licence
+# string for either one — both link to the same BFL terms — so the distinction
+# is invisible in the place you would look for it, which is the whole reason a
+# test guards it. And the licence text restricts running and distributing the
+# WEIGHTS to non-commercial purposes while expressly permitting commercial use
+# of the pictures. So "every pose would be unshippable" was the wrong reason.
+# Operating the model for a monetised page is the right one.
+#
+# If output quality is not good enough, the answer is a better prompt, better
+# references, or not using this tool — never a different row in that table.
 MODEL = "@cf/black-forest-labs/flux-2-klein-4b"
 RUN_URL = "https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
 
@@ -457,10 +474,12 @@ def encode_multipart(fields: dict[str, str],
 # ─────────────────────────── neuron ledger ───────────────────────────────────
 
 def estimate_neurons(width: int, height: int, refs: int) -> float:
-    """What one call is RESERVED at: the published rate, which is the
-    pessimistic one. A four-reference 1024x1024 pose books at 188 neurons and
-    the response header claims 21.48. See the note above NEURONS_PER_MEGAPIXEL
-    for why the expensive number is the one that governs."""
+    """What one call is RESERVED at: the published per-tile rate.
+
+    A four-reference 1024x1024 pose books at about 126 neurons — 104.2 for the
+    four output tiles and 5.37 for each reference. The response header claims
+    21.48, which is exactly the reference half and nothing for the frame. See
+    the note above NEURONS_PER_MEGAPIXEL for why the frame is booked anyway."""
     megapixels = (width * height) / (1024 * 1024)
     return NEURONS_PER_MEGAPIXEL * megapixels + NEURONS_PER_REFERENCE * refs
 

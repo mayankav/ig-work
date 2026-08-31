@@ -429,6 +429,20 @@ def _post(url: str, payload: dict, headers: dict,
         raise ModelRefused(f"HTTP {exc.code}: {detail}") from exc
 
 
+def _tally(fn: str, *args) -> None:
+    """Write to the quota file, and never let it cost a call.
+
+    Gemini reports no quota header at all, so the only figure anyone can have
+    is the one we keep. That makes it worth keeping and still not worth a
+    failed deck, which is the same bargain the Cloudflare recorder makes.
+    """
+    try:
+        import quotas
+        getattr(quotas, fn)(*args)
+    except Exception:                                          # noqa: BLE001
+        pass
+
+
 def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
     keys = resolve_keys("GEMINI_API_KEY") or resolve_keys("GOOGLE_API_KEY")
     if not keys:
@@ -455,6 +469,10 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     for index, model in live:
         _pace("gemini")
         label = model if len(keys) == 1 else f"key {index + 1} {model}"
+        # Counted where the request is ASKED FOR, not where it succeeded. A
+        # refusal still spent the attempt, and a tally of only the answers we
+        # liked walks into a daily cap believing it has room.
+        _tally("count", "gemini", model)
         try:
             data = _post(GEMINI_URL.format(model=model), payload,
                          {"x-goog-api-key": keys[index]})
@@ -462,6 +480,10 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
         except RateLimited as limited:
             if limited.daily:
                 _SPENT.add(f"{index}:{model}")
+                # _SPENT lives for this process only. The file outlives it, so
+                # tomorrow morning's report can say which models went out today
+                # and roughly when.
+                _tally("mark_exhausted", "gemini", model)
                 # Once per bucket, and worded so nobody reads it as the reason a
                 # run failed. It is not an error: the next model, and then the
                 # next vendor, carries on from here.
