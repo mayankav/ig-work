@@ -11,7 +11,7 @@ Three reference grids set the bar. We borrow **traits**, never artwork:
 
 | Reference | Trait borrowed |
 |---|---|
-| Sticker-kit carousel packs | A tight palette applied as **full-bleed colour blocks**, one repeating background motif, one deliberately rotated element per frame |
+| Sticker-kit carousel packs | A tight palette applied as **full-bleed colour blocks** and one repeating background motif. The rotated element that used to be listed here was never built — see §5 |
 | Flat-illustration tile sets | The character is a **compositional element** — it shares the frame with the type and sits in the layout, never a corner sticker |
 | Single-character comic grids (`_labadessa`) | **One character, endlessly re-posed** plus one owned colour is what makes a nine-up grid read as a single body of work |
 
@@ -261,7 +261,7 @@ overflow. Both layout bugs it now guards against shipped silently and were caugh
 
 ### The pose library
 
-`../mascot/library/` holds **186 poses**, 32 of them two-donkey scenes, generated as 6-up sheets
+`../mascot/library/` holds **about 190 poses and grows every run**, 32 of them two-donkey scenes, generated as 6-up sheets
 on a magenta backdrop and cut out by `scripts/import_poses.py`. See `_contact_sheet.png` for all
 of them.
 

@@ -44,6 +44,9 @@ Read these only when you need them — do not pull them all in up front.
 critique, render, publish, record. The scheduled job and a person at a laptop run this same
 script against the same state, so a manual build cannot repeat a moment the schedule spent.
 `--publish` posts, `--no-post` builds and still uses the moment up, `--dry-run` writes nothing.
+`--no-fresh` skips drawing new mascot art and takes every pose from the library instead —
+generation is ON by default on this path (invariant 2), so leave the flag off unless you are
+building to read the copy.
 
 Read `references/strategy.md` before changing any of it.
 
@@ -65,19 +68,20 @@ itself; run it by hand only to re-render a deck you have edited.
 | `--generate` | Obsolete paid path. Needs billing; fails otherwise. |
 | `--model pro` | only meaningful alongside `--generate` — uses Gemini Pro. |
 | `--model empero` | alongside `--generate` — uses Empero community models (`glm-5.3-flash` or `qwen3.8-flash`) via `https://free.empero.org/v1`. Free tier with fair usage limits. API key `free` is accepted by default. |
-| `--fresh` | Generate a pose per slide from that slide's own brief, via `fresh_poses.py`. Free, opt-in, never load-bearing — every failure hands the slide back its library pose. See invariant 2. |
+| `--fresh` | Generate a pose per slide from that slide's own brief, via `fresh_poses.py`. Free, never load-bearing — every failure hands the slide back its library pose. `run.py` passes this on every run; on `build.py` it is opt-in. See invariant 2. |
 | `--fresh-budget N` | Cap what `--fresh` may spend, in neurons. Only meaningful with `--fresh`. |
 | `--random-palette` | Ignore the round-robin and roll a theme. |
 | `--bootstrap` | Create the venv and install Chromium. Run once per machine. |
 
 ### Which mascot path
 
-**The library is the default — no flag needed.** 186 full-body poses live in `mascot/library/`, generated
+**The library is the fallback, and it grows.** About 190 full-body poses live in `mascot/library/`, generated
 as 6-up sheets and cut out by `scripts/import_poses.py`. `library.py` picks one per slide by
 matching words in the `**Mascot:**` brief, never repeating within a deck. Costs nothing, needs
 no key. 32 of them are two-donkey scenes for relationship slides.
 
-The counts are the live ones: `mascot/poses.json` has 186 entries and 32 carry
+Never quote a count from this file — every run generates poses and imports them, so the
+library grows by up to 18 a day. `mascot/poses.json` is the only true count, and 32 carry
 `"figures": 2`. Check with `python3 -c "import json,collections;p=json.load(open('mascot/poses.json'))['poses'];print(len(p),collections.Counter(v['figures'] for v in p.values()))"`
 rather than trusting this line, which has been wrong before.
 

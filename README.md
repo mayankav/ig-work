@@ -39,6 +39,13 @@ manual build cannot quietly repeat a moment the schedule already spent.
 | `--dry-run` | Look at the feed and stop. Writes nothing and builds nothing. |
 | `--source feed` | Where the idea comes from: a harvested post. The default. |
 | `--source concept` | Where the idea comes from: a proved concept from the vocabulary. |
+| `--no-fresh` | Do not draw new mascot pictures. Use the pose library for every slide. |
+
+Pictures are **drawn fresh by default**, one per slide, from that slide's own
+brief. `--no-fresh` turns that off, which is worth doing when you are building
+to read the copy and will throw the artwork away. It can never make a deck fail:
+without it, or on any failure, each slide keeps the library pose it was already
+given.
 
 A run that produces a deck consumes its moment whether or not it posts. A deck
 sitting on your laptop is still a deck, and if it did not retire its moment the
@@ -106,48 +113,55 @@ this pipeline comes from code.
 
 ```mermaid
 flowchart TD
-    A[Schedule 08:00 and 20:00 IST<br/>or a manual run] --> B{SS_HALT set,<br/>or state/HALT?}
-    B -->|yes| STOP1([Stop. Nothing runs.])
-    B -->|no| C{Is state/ clean<br/>and current?}
-    C -->|dirty or behind| STOP2([Stop. Pull or commit first.])
-    C -->|ok| D{Which source?}
+    A["Twice a day: 08:00 and 20:00 IST<br/>or you press Run"] --> B{"Stop switch on?"}
+    B -->|yes| S1(["Stops. Nothing happens."])
+    B -->|no| C{"Is our memory of<br/>past posts up to date?"}
+    C -->|no| S2(["Stops. Pull the latest first."])
+    C -->|yes| D{"Where does the idea<br/>come from?"}
 
-    D -->|--source feed<br/>DEFAULT| E[49 measured phrases<br/>searched on Bluesky]
-    D -->|--source concept| F[concepts.json<br/>best unused term]
+    D -->|"the feed (normal)"| E["Search Bluesky for<br/>49 phrases we tested"]
+    D -->|"the word list"| F["Pick the best psychology<br/>term we have not used"]
 
-    E --> G[~1100 posts fetched]
-    G --> H[Reject 9 families of harm]
-    H --> I[Keep only filmable posts,<br/>rank by tension]
-    I --> J{Seen this post<br/>before? id + hash}
+    E --> G["About 1,100 posts come back"]
+    G --> H["Throw out anything about<br/>self-harm, abuse, crisis, minors"]
+    H --> I["Keep only posts you could film.<br/>Rank by how much tension is in them"]
+    I --> J{"Used this post<br/>before?"}
     J -->|yes| I
     J -->|no| K
 
-    F --> K[SEED:<br/>1 of 8 subjects<br/>+ 1 short phrase]
+    F --> K["ALL WE KEEP:<br/>1 topic from a list of 8,<br/>+ one short phrase.<br/>The post itself is thrown away."]
 
-    K --> L[["A model INVENTS a moment.<br/>The post's own words are thrown away."]]
-    L --> M{Safety judge<br/>may this be published?}
-    M -->|no| I
-    M -->|yes| N[Plan the deck<br/>4 attempts]
-    N -->|all 4 fail| STOP3([Stop. No deck today.])
-    N --> O[Write 9 slides<br/>7 attempts]
-    O --> P{Critic, on a vendor that<br/>did NOT write the deck}
-    P -->|blocks| STOP4([Stop. Never published.])
-    P -->|passes| Q[Gates: coherence, novelty,<br/>citation proved, copy audit]
-    Q -->|fails| STOP5([Stop.])
-    Q -->|passes| R[Render 9 PNGs.<br/>Generate a pose per slide;<br/>fall back to the library on any failure]
+    K --> L["Tell the model what NOT to repeat:<br/>verbs and rooms used lately,<br/>a different time of day,<br/>one of 5 example sentences"]
+    L --> M["The model writes<br/>our own small moment"]
 
-    R --> S{Score out of 100}
-    S -->|below the bar| T[HOLD. Send to Telegram]
-    T --> U{Your answer}
-    U -->|publish| V
-    U -->|rerun| STOP6([Dropped. Next run builds another.])
-    S -->|above the bar| V[Upload slides to gh-pages]
+    M --> N{"Is it a repeat?<br/>same words · same opening verb<br/>· same room · copied our example"}
+    N -->|yes, up to 4 tries| L
+    N -->|"still repeating"| S3(["Stops. Try again tonight."])
+    N -->|no| O{"Is it safe to post<br/>about at all?"}
+    O -->|no| I
+    O -->|yes| P["Plan the 9 slides.<br/>4 tries"]
+    P -->|"all 4 fail"| S4(["Stops. No post today."])
+    P --> Q["Write the 9 slides.<br/>7 tries"]
 
-    V --> W[Wait until the images<br/>answer publicly]
-    W --> X[Post to Instagram]
-    X --> Y[Remove slides older<br/>than 14 days]
-    X --> Z[3 days later:<br/>record reach, saves, shares]
-    Z --> ZZ[[insights.jsonl<br/>READ ONLY. Never changes<br/>what gets published.]]
+    Q --> R{"A second company's model<br/>argues against posting it"}
+    R -->|"it objects"| S5(["Stops. Never posted."])
+    R -->|"it cannot"| T["Check: not like past posts,<br/>slides hold together,<br/>the book quoted is real"]
+    T -->|"any check fails"| S6(["Stops."])
+    T -->|"all pass"| U["Draw a donkey for each slide<br/>from that slide's own words.<br/>If drawing fails, use the<br/>pose library instead"]
+
+    U --> V["Make the 9 images"]
+    V --> W{"Score out of 100"}
+    W -->|"below the bar"| X["HELD. Sent to your Telegram<br/>with the score and a preview"]
+    X --> Y{"You reply"}
+    Y -->|"publish"| Z
+    Y -->|"rerun"| S7(["Thrown away. Tonight builds another."])
+    W -->|"above the bar"| Z["Put the images on our website"]
+
+    Z --> AA["Wait until they load publicly"]
+    AA --> AB["Post to Instagram"]
+    AB --> AC["Delete website images<br/>older than 14 days"]
+    AB --> AD["3 days later: record how many<br/>people saw, saved and shared it"]
+    AD --> AE["Written down for you to read.<br/>It never changes what gets posted."]
 ```
 
 ### Why the same ideas come back
@@ -200,22 +214,30 @@ Three changes, because there were three causes:
    several deliberately unalike examples, picks one per run, and **measures the
    answer against the one it showed.** Four words in a row and the moment is
    refused. Worst borrow across five live runs fell from 4 words to 2.
-2. **Two checks now compare a new moment to old ones**, which nothing did before.
-   Uniqueness used to be tested on the *seed post* — its id and a hash of the
-   stranger's wording — which happens before our moment exists.
+2. **Three checks now compare a new moment to the old ones**, which nothing did
+   before. Being new used to be tested on the *stranger's post* — its id and a
+   hash of their wording — which is settled before our moment exists.
 
-   | Check | Catches | Threshold |
+   | Check | Catches | How far back |
    |---|---|---|
-   | Same words | The near-copy pair that shipped twice | 3-gram overlap ≥ 0.20 |
-   | Same shape | Different nouns, same sentence | opening posture + construction |
+   | Same words | The near-copy pair that shipped twice | everything |
+   | Same opening verb | Same sentence, different nouns | last 8 moments |
+   | Same room | Five kitchens out of twelve | last 3 moments |
 
-   Both are measured on real data, not chosen on taste. Genuinely different
-   moments score 0.000–0.022 on word overlap; the near-copy pair scores 0.429.
-   Word overlap is blind to the shape case — the car moment scores 0.000–0.050
-   against everything before it — which is why there are two checks and not one.
-3. **Code pushes variety in**, rather than only refusing. It works out which
-   postures and constructions were used lately and forbids them by category,
-   rotates the hour, and raises the model's temperature.
+   Each needs the others. Word overlap cannot see the shape case: the car moment
+   scores 0.000–0.050 against everything before it and is plainly the fourth
+   copy of one sentence. The verb check cannot see the room, because the room is
+   what changes when a sentence is rewritten about a car instead of a bed.
+
+   The numbers are measured, not chosen. Genuinely different moments score
+   0.000–0.022 on word overlap; the near-copy pair scores 0.429, so the 0.20
+   limit sits in empty space. The room window is short on purpose — a room is
+   not a template, and banning rooms for long would run out of the places an
+   ordinary evening happens in.
+3. **Code pushes variety in**, rather than only refusing. Refusing alone makes
+   the model try again from the same starting point. So before it writes, code
+   tells it which opening verbs and which rooms were used lately, rotates the
+   time of day, and raises the model's temperature.
 
 None of this shows the model a past moment. Invariant 10 holds: old work is a
 blocklist, never a source. The prompt says *"do not open on somebody sitting"*
@@ -332,9 +354,16 @@ Add `--notify` to send the same thing to Telegram.
 First run on a machine: add `--bootstrap` to build the virtualenv and fetch
 Chromium.
 
-Silly is drawn ahead of time in 186 poses, stored in `mascot/library/`. Each
-slide's brief is matched to a pose, and no pose repeats inside a deck. Thirty-two
-of them are two-donkey scenes. This costs nothing and needs no account.
+Silly is drawn ahead of time and kept in `mascot/library/` — about 190 poses and
+**growing every run**, since each deck now draws new ones and imports them. Each
+slide's brief is matched to a pose, and no pose repeats inside a deck. 32 are
+two-donkey scenes. This costs nothing and needs no account.
+
+Do not trust a number written here. Count them:
+
+```bash
+.agents/skills/suresilly-carousel/.venv/bin/python -c "import json;p=json.load(open('.agents/skills/suresilly-carousel/mascot/poses.json'))['poses'];print(len(p),'poses')"
+```
 
 The library is no longer frozen. `scripts/poses_flux.py` adds poses to it for
 nothing, through Cloudflare Workers AI — the same account the third text vendor
