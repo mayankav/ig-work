@@ -246,3 +246,52 @@ def test_a_single_figure_pose_is_not_tagged_as_a_pair():
     wrong = [n for n, e in manifest.items()
              if e.get("figures", 1) == 1 and pair_words & set(e.get("tags", []))]
     assert wrong == [], f"single-figure poses carrying pair tags: {wrong}"
+
+
+def test_a_never_used_pose_gains_ground_but_cannot_invent_a_match():
+    """89 of 186 poses had never been placed across 35 decks and the top 20 took
+    55% of all placements. The recency penalty only spreads the top of that
+    distribution; a pose sitting at zero never competes closely enough for a
+    rival's penalty to matter, so it needs the other half of the nudge.
+
+    The bound is what makes it safe: the multiply happens before score()'s
+    `total <= 0` return, so a pose with no word in common is zero, and zero
+    times 1.5 is still zero. Variety is bought only among poses that already
+    fit."""
+    have = library.available()
+    usage = {"20260101_a": ["deadpan"], "20260102_b": ["deadpan"]}
+    # a pose with nothing in common must stay at zero however cold it is
+    cold = [p for p in have if not library._ever_used(p, usage, None)][0]
+    assert library.score("", cold, "qwertyuiop zxcvbnm", "", "value",
+                         usage=usage) <= 0
+
+    # and a real match must be worth more when the pose is unused than when it
+    # is not, all else equal
+    warm = library.score("deadpan unimpressed", "deadpan", "", "", "hook",
+                         usage={"20260101_a": ["deadpan"]}, exclude_slug=None)
+    unused = library.score("deadpan unimpressed", "deadpan", "", "", "hook",
+                           usage={"20260101_a": ["welcoming"]}, exclude_slug=None)
+    assert unused > warm
+
+
+def test_the_boost_skips_mirrors_and_pairs():
+    """Both exclusions were measured, not assumed. Without the mirror guard,
+    five of the seven poses a 1.25 boost newly introduced were mirrored copies —
+    the off-model half of the library, not the unused good half. Pair scenes are
+    idle because only 1 of 63 real slides is about two people, which is a fact
+    about what has been written; boosting them rebuilds the defect the is_pair
+    scaling exists to prevent."""
+    have = library.available()
+    mirrors = [p for p in have if library.is_mirrored(p)]
+    pairs = [p for p in have if library.is_pair(p)]
+    assert mirrors and pairs, "library lacks the poses this test is about"
+    usage = {"20260101_a": ["deadpan"]}
+    for pose in (mirrors[0], pairs[0]):
+        tags = library.SYNONYMS.get(pose, [])
+        if not tags:
+            continue
+        text = tags[0]
+        with_usage = library.score("", pose, text, "", "value", usage=usage)
+        without = library.score("", pose, text, "", "value")
+        assert with_usage <= without + 1e-9, (
+            f"{pose} received the cold-start boost and should not have")

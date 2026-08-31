@@ -324,6 +324,30 @@ def _overlap(words: set[str], pose: str) -> float:
 # a slide that offers the reader something kind must not use one.
 ROLE_MOOD_FLOOR = {"script": 0.0, "cta": 1.0}
 
+# How much a never-placed pose is favoured over a comparable veteran.
+#
+# Chosen by measuring the trade rather than by taste. Over the seven real decks,
+# scoring each chosen pose by its UNBOOSTED merit so the boost cannot flatter
+# itself:
+#
+#     boost   mean fit of chosen   placements of never-used poses
+#     off     1.438                 2 / 63
+#     1.25    1.435                 4 / 63
+#     1.50    1.387 (-3.5%)        10 / 63
+#     1.75    1.339 (-6.9%)        13 / 63
+#
+# 1.5 buys five times the variety for three and a half percent of fit. The
+# median chosen pose is still the highest-scoring one available at every level
+# on that table — the boost only decides slides where two poses were already
+# close, which is exactly the case where variety is free.
+COLD_BOOST = 1.5
+
+
+def _ever_used(pose: str, usage: dict[str, list[str]],
+               exclude_slug: str | None) -> bool:
+    """Has this pose been placed on any deck other than the one being rebuilt."""
+    return any(pose in poses for slug, poses in usage.items() if slug != exclude_slug)
+
 
 def score(brief: str, pose: str, headline: str = "", body: str = "",
           role: str = "", usage: dict[str, list[str]] | None = None,
@@ -367,10 +391,40 @@ def score(brief: str, pose: str, headline: str = "", body: str = "",
     # Cross-deck variety. Soft and bounded, same lesson as the mood floor above:
     # a pose used across recent decks loses ground to a comparably-scoring
     # fresh one, but is never excluded outright.
+    #
+    # COLD_BOOST is the other half of that, and it exists because the penalty
+    # alone was not enough. Measured over the 35 decks in usage_history.json:
+    # 89 of 186 poses have never been placed once, and the top 20 poses take 55%
+    # of all 315 placements. Penalising the overused ones spreads the top of the
+    # distribution; it does nothing for a pose sitting at zero, which never
+    # competes closely enough for the penalty on its rival to matter.
+    #
+    # It can only ever amplify a match that already exists. The multiply happens
+    # before the `total <= 0` return below, so a pose with no word in common
+    # scores zero, and zero times anything is still zero. This buys a
+    # never-placed pose a nudge past a comparable veteran, never a slide it does
+    # not fit.
+    #
+    # NOT given to mirrored copies either. A flipped Silly has his mane on the
+    # wrong side and selection already breaks ties against him. At a boost of
+    # 1.25 without this guard, five of the seven poses the boost newly
+    # introduced were mirrors — it was surfacing the off-model half of the
+    # library rather than the unused good half, which is the opposite of the
+    # point.
+    #
+    # NOT given to pair scenes. 19 of the 65 idle poses are two-donkey scenes,
+    # and they are idle because only 1 of 63 real slides is about two people —
+    # a fact about what has been written, not a fault in the scoring. Boosting
+    # them would rebuild the exact defect the is_pair scaling above was added to
+    # fix: a slide reading "real security is steady" pulling the two-donkey
+    # `secure` scene onto a page about one person.
     if usage is not None:
         recent = _recent_pose_count(pose, usage, exclude_slug)
         if recent:
             total *= max(0.35, 1.0 - 0.20 * recent)
+        elif (not is_pair(pose) and not is_mirrored(pose)
+              and not _ever_used(pose, usage, exclude_slug)):
+            total *= COLD_BOOST
 
     if total <= 0:
         return total
