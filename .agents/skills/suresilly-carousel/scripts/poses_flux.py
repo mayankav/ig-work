@@ -261,9 +261,122 @@ def _library_poses(manifest: Path = MANIFEST) -> list[str]:
             and not meta.get("mirrored")]
 
 
+# ─────────────────────────── posture matching ────────────────────────────────
+#
+# References decide the POSTURE. Measured twice on 2026-08-31, and both times
+# the brief lost to the pictures: a brief asking for a lowered head and drooping
+# ears came back head-up and alert, and a brief asking to tumble head over heels
+# came back mid-jump. In both runs the four references were the front of the
+# manifest — deadpan, clutching, serene, realising — all upright and alert, and
+# that is what the model drew.
+#
+# So the references have to know what the brief is asking for. The risk in that
+# is the one the old fixed slice was protecting against: references that change
+# every run make two poses generated a week apart into two different donkeys.
+# Hence ANCHORS. Half the slots never move and hold the character; the rest are
+# chosen for posture. Identity comes from the constant half, staging from the
+# other.
+ANCHORS = ("deadpan", "explaining")
+
+# Posture families. A brief matches a family when it uses any of its words, and
+# a candidate pose matches when its description or tags do. Deliberately about
+# the BODY and nothing else: matching on ordinary words would pick a pose about
+# beds for any brief that mentions a bed, whatever the body in it is doing,
+# which is the mistake selection already makes (see library._overlap).
+POSTURE_FAMILIES = {
+    "seated":   ("sitting", "sits", "seated", "sit", "perched", "cross-legged"),
+    "lying":    ("lying", "lies", "lie", "flat", "face down", "on his back",
+                 "sprawled", "asleep", "sleeping"),
+    "curled":   ("curled", "curl", "knees", "hugging", "tucked", "foetal",
+                 "huddled", "crouched", "crouching", "crouch"),
+    "upright":  ("standing", "stands", "stand", "upright", "squarely", "planted"),
+    "leaning":  ("leaning", "leans", "slumped", "hunched", "stooped", "bowed",
+                 "drooping", "sagging"),
+    "moving":   ("walking", "walks", "running", "runs", "pacing", "stepping",
+                 "chasing", "fleeing", "leaving"),
+    "airborne": ("jumping", "jumps", "leaping", "falling", "falls", "tumbling",
+                 "flying", "mid-air", "dropped"),
+    "reaching": ("reaching", "reaches", "pointing", "points", "holding up",
+                 "raised", "outstretched", "extending", "offering"),
+    "covering": ("covering", "covers", "hiding", "hides", "behind his hooves",
+                 "over his eyes", "head in"),
+}
+
+
+def posture_families(text: str) -> set[str]:
+    """Which body families a piece of text is talking about."""
+    low = " " + " ".join((text or "").lower().split()) + " "
+    return {family for family, words in POSTURE_FAMILIES.items()
+            if any(w in low for w in words)}
+
+
+def _descriptions(manifest: Path = MANIFEST) -> dict[str, str]:
+    """What each pose's BODY is, in words, from the two places that know.
+
+    GENERATION_PROMPTS.md carries the numbered pose lines the library was drawn
+    from — "Standing straight, deadpan, staring at the viewer, arms at his
+    sides" — for 115 of the poses, and they have never been read by anything.
+    Poses generated from a slide brief carry the brief's own words as tags, so
+    they describe their body too. Everything else contributes only its name.
+    """
+    out: dict[str, str] = {}
+    prompts = SKILL_DIR / "mascot" / "GENERATION_PROMPTS.md"
+    if prompts.is_file():
+        text = prompts.read_text(encoding="utf-8")
+        for poses, names in re.findall(
+                r"Poses:\n((?:\d+\.[^\n]*\n)+)[\s\S]*?--names ([a-z_,0-9]+)", text):
+            lines = [re.sub(r"^\d+\.\s*", "", ln).strip()
+                     for ln in poses.strip().split("\n")]
+            keys = names.split(",")
+            if len(lines) == len(keys):
+                out.update(dict(zip(keys, lines)))
+    if manifest.is_file():
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        for name, meta in data.get("poses", {}).items():
+            words = " ".join(meta.get("tags", []))
+            out[name] = (out.get(name, "") + " " + name.replace("_", " ")
+                         + " " + words).strip()
+    return out
+
+
+def posture_matches(brief: str, count: int, exclude: tuple[str, ...] = (),
+                    manifest: Path = MANIFEST) -> list[str]:
+    """Poses whose body is doing what the brief describes, best first.
+
+    Empty when the brief names no posture at all, which is the honest answer:
+    a brief that does not say what the body is doing gives nothing to match on,
+    and the anchors are a better guess than a coincidence.
+
+    Deterministic. Ties break on the name, so the same brief always draws the
+    same references and two poses made a week apart stay the same donkey.
+    """
+    wanted = posture_families(brief)
+    if not wanted:
+        return []
+    descriptions = _descriptions(manifest)
+    brief_words = set(re.findall(r"[a-z]{4,}", brief.lower()))
+    scored = []
+    for name in _library_poses(manifest):
+        if name in exclude:
+            continue
+        text = descriptions.get(name, name)
+        overlap = wanted & posture_families(text)
+        if not overlap:
+            continue
+        # Family count first, then how much of the brief's own wording the
+        # description shares. Families alone rank `head_tilt` level with
+        # `sitting_ledge` for a brief about legs hanging over the side of a
+        # bed, and only one of those is the picture asked for.
+        words = len(brief_words & set(re.findall(r"[a-z]{4,}", text.lower())))
+        scored.append((-len(overlap), -words, name))
+    scored.sort()
+    return [name for _, _, name in scored[:count]]
+
+
 def pick_references(names: list[str] | None = None, count: int = MAX_REFS,
                     library: Path = LIBRARY,
-                    manifest: Path = MANIFEST) -> list[tuple[str, bytes]]:
+                    manifest: Path = MANIFEST,
+                    brief: str = "") -> list[tuple[str, bytes]]:
     """The reference images to condition on, as (label, png bytes).
 
     They come from mascot/library/ and NOT from mascot/style_refs/, which is
@@ -296,10 +409,21 @@ def pick_references(names: list[str] | None = None, count: int = MAX_REFS,
         if not available:
             raise FluxError(
                 f"no full-body single-figure poses in {manifest} to use as references")
-        # A fixed, front-of-manifest slice on purpose: references are the one
-        # input that must not drift run to run, or two poses generated a week
-        # apart are two different donkeys.
-        paths = [library / f"{n}.png" for n in available]
+        # ANCHORS first, then posture matches, then the front of the manifest
+        # to fill up. The anchors are what stops the references drifting run to
+        # run; the posture slots are what stops the model drawing an alert,
+        # upright donkey for a brief that asked for a lowered head — which it
+        # did, twice, when every reference was upright and alert.
+        chosen = [n for n in ANCHORS if n in available]
+        matched = posture_matches(brief, count - len(chosen),
+                                  exclude=tuple(chosen), manifest=manifest)
+        chosen += matched
+        for n in available:
+            if len(chosen) >= count:
+                break
+            if n not in chosen:
+                chosen.append(n)
+        paths = [library / f"{n}.png" for n in chosen]
         paths = [p for p in paths if p.is_file()][:count]
 
     out = []

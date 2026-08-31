@@ -128,7 +128,10 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
 
     try:
         account, token = flux.credentials()
-        refs = flux.pick_references()
+        # Probed once so a missing library or an unreadable reference fails here
+        # rather than nine times inside the loop. The real set is chosen per
+        # slide, because the brief decides half of it.
+        flux.pick_references()
         ledger = flux.Ledger(budget=budget) if budget else flux.Ledger()
     except Exception as exc:                                  # noqa: BLE001
         stats["reasons"].append(f"no generator credentials: {exc}")
@@ -146,6 +149,11 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
 
         started = time.time()
         try:
+            # Half anchors, half chosen for the posture this brief describes.
+            # References decide the body: measured twice, a brief asking for a
+            # lowered head came back alert and a brief asking to tumble came
+            # back mid-jump, both times against four upright references.
+            refs = flux.pick_references(brief=brief)
             reserved = flux.estimate_neurons(1024, 1024, len(refs))
             ledger.check(reserved)
             ledger.spend(reserved, note=f"deck-slide-{number}")

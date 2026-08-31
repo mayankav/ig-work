@@ -763,3 +763,57 @@ def test_one_pupil_high_and_one_low_is_refused():
         assert "crooked" in str(why) or "high in its eye" in str(why)
     else:
         raise AssertionError("a crooked stare was accepted")
+
+
+# ─────────────────── references match the brief's posture ────────────────────
+
+def test_a_falling_brief_draws_airborne_references():
+    """The defect this fixes, measured twice on 2026-08-31: a brief asking Silly
+    to tumble head over heels came back mid-jump and upright, because all four
+    references were upright. References decide the body; wording does not."""
+    names = [n for n, _ in pf.pick_references(
+        brief="tumbling and falling head over heels through the air")]
+    descriptions = pf._descriptions()
+    airborne = [n for n in names
+                if "airborne" in pf.posture_families(descriptions.get(n, n))]
+    assert airborne, f"nothing airborne among {names}"
+
+
+def test_a_lying_brief_draws_lying_references():
+    names = [n for n, _ in pf.pick_references(
+        brief="lying face down on the floor, not moving")]
+    descriptions = pf._descriptions()
+    lying = [n for n in names
+             if "lying" in pf.posture_families(descriptions.get(n, n))]
+    assert lying, f"nothing lying down among {names}"
+
+
+def test_the_anchors_are_always_there():
+    """Half the slots never move. That is what keeps two poses generated a week
+    apart the same donkey, which is what the old fixed slice was protecting and
+    what this must not give up."""
+    for brief in ("tumbling through the air", "lying flat on his back",
+                  "walking away down a hallway", ""):
+        names = [n for n, _ in pf.pick_references(brief=brief)]
+        for anchor in pf.ANCHORS:
+            assert anchor in names, f"{anchor} missing for {brief!r}"
+
+
+def test_the_same_brief_always_draws_the_same_references():
+    brief = "sitting on the edge of a bed with his head lowered"
+    assert pf.pick_references(brief=brief) == pf.pick_references(brief=brief)
+
+
+def test_a_brief_with_no_posture_falls_back_to_the_fixed_set():
+    """A brief that never says what the body is doing gives nothing to match on,
+    and the anchors are a better guess than a coincidence."""
+    assert pf.posture_matches("a thoughtful moment about trust", 2) == []
+
+
+def test_posture_references_are_never_mirrored_or_pair_scenes():
+    """The same rule the fixed slice had: a flipped Silly has his mane on the
+    wrong side, and a two-donkey reference produces two donkeys."""
+    for brief in ("sitting down", "standing tall", "falling through the air"):
+        for name, _ in pf.pick_references(brief=brief):
+            assert not name.endswith("_m")
+            assert pf._library_poses().count(name) == 1

@@ -48,7 +48,7 @@ def fake_flux(**overrides) -> types.ModuleType:
     mod.np = np
     mod.QAFailure = fresh_poses.QAFailure
     mod.credentials = lambda: ("acct", "token")
-    mod.pick_references = lambda: [("deadpan", b"x")]
+    mod.pick_references = lambda brief="", **k: [("deadpan", b"x")]
     mod.estimate_neurons = lambda w, h, r: 188.0
     mod.build_prompt = lambda brief: brief
     mod.correct_palette = lambda a: a
