@@ -1,9 +1,9 @@
 {
   "2026-08-31": {
     "adjusted": "rebooked 6002.0 -> 4140.84 on 2026-08-31: NEURONS_PER_REFERENCE was 21.0, the header's total for four refs, where the published rate is 5.37 for one. Per-call shapes are not recoverable from a totals-only ledger, so this is 33 x the dearest call the tool can make (125.48) \u2014 an upper bound, not an estimate.",
-    "calls": 33,
-    "last": "bed_sitting_v2",
-    "neurons": 4140.84,
+    "calls": 35,
+    "last": "deck-slide-2",
+    "neurons": 4391.8,
     "text_calls": 0,
     "text_neurons": 0.0
   }

@@ -9,6 +9,16 @@ runs end up with two different ideas of what has already been used.
     run.py --publish     build and post          (scheduled, and manual live)
     run.py --no-post     build, do not post      (still uses up the moment)
     run.py --dry-run     look only, write nothing
+    run.py --no-post --no-fresh    as above, but do not generate artwork
+
+Poses are GENERATED from each slide's own brief by default. Add --no-fresh to
+take them from the library instead, which is worth doing when you are building
+to look at copy or layout and would only throw the artwork away.
+
+That default is safe because generation can never fail the deck: no key, dead
+network, spent budget, a frame that fails a QA gate — every one of them hands
+the slide back the library pose it was already given, and tests/test_fresh_poses
+proves each path.
 
 Two rules make manual and scheduled runs safe to mix:
 
@@ -371,17 +381,32 @@ def write_deck(markdown: str, slug: str) -> Path:
     return path
 
 
-def render_slides(path: Path) -> None:
+def render_slides(path: Path, fresh: bool = True) -> None:
     """Render the PNGs with the existing builder.
 
     Called as a subprocess rather than imported: build.py owns argument parsing,
     palette rotation and its own QA gates, and running it the way a person would
     keeps one code path instead of two.
+
+    `fresh` is ON by default, so a scheduled run draws a pose from each slide's
+    OWN brief instead of taking the nearest thing the library happens to hold.
+    The flag existed and nothing ever passed it, which made the whole path dead
+    code: measured over 63 real slides, 50 name a physical object, the library
+    knows seven of those words, and a bed appears in 17 briefs while no pose has
+    ever had one. On those slides selection was picking the least wrong pose.
+
+    Turning it on does not make the deck depend on the network. Every failure —
+    no key, dead network, spent budget, a frame that fails a QA gate, a matte
+    that will not cut — hands the slide back the library pose already chosen,
+    and tests/test_fresh_poses.py proves each of those paths. What must never
+    fail is the DECK, and it still cannot.
     """
-    done = subprocess.run(
-        [sys.executable, str(Path(__file__).resolve().parent / "build.py"),
-         "--random-palette", str(path)],
-        cwd=REPO_ROOT, capture_output=True, text=True)
+    args = [sys.executable, str(Path(__file__).resolve().parent / "build.py"),
+            "--random-palette"]
+    if fresh:
+        args.append("--fresh")
+    args.append(str(path))
+    done = subprocess.run(args, cwd=REPO_ROOT, capture_output=True, text=True)
     if done.returncode != 0:
         tail = (done.stdout + done.stderr).strip().splitlines()[-4:]
         raise Stop("the renderer refused this deck: " + " | ".join(tail))
@@ -416,9 +441,10 @@ def emit_slug(slug: str, path: Path) -> None:
             handle.write(f"deck={path.relative_to(REPO_ROOT)}\n")
 
 
-def run(mode: str, source: str = "feed") -> int:
+def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
     run_id = os.environ.get("GITHUB_RUN_ID") or f"local-{int(time.time())}"
-    print(f"\nrun {run_id}  mode {mode}  source {source}\n")
+    poses = "generated" if fresh else "library"
+    print(f"\nrun {run_id}  mode {mode}  source {source}  poses {poses}\n")
 
     claimed: memory.Moment | None = None
     try:
@@ -545,7 +571,7 @@ def run(mode: str, source: str = "feed") -> int:
         path = write_deck(markdown, slug)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
-        render_slides(path)
+        render_slides(path, fresh=fresh)
         say("rendered", "slides and contact sheet")
 
         # Recorded at render, not at publish. A deck that was built and never
@@ -638,9 +664,16 @@ def main() -> None:
     ap.add_argument("--source", choices=("feed", "concept"), default="feed",
                     help="feed: a moment harvested from Bluesky (default). "
                          "concept: an idea from the proved vocabulary")
+    # Generation is ON. The opt-out exists for a build you are running to look
+    # at the copy or the layout, where spending the day's neuron budget on
+    # artwork you are about to throw away is waste. It cannot make a deck fail:
+    # without it, every slide simply keeps the library pose it was already
+    # given.
+    ap.add_argument("--no-fresh", action="store_true",
+                    help="do not generate poses; use the library for every slide")
     args = ap.parse_args()
     mode = "publish" if args.publish else "no-post" if args.no_post else "dry-run"
-    raise SystemExit(run(mode, source=args.source))
+    raise SystemExit(run(mode, source=args.source, fresh=not args.no_fresh))
 
 
 if __name__ == "__main__":

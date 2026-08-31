@@ -3049,6 +3049,45 @@
       "override": [
         "palette"
       ]
+    },
+    "standing_by_dark_kitchen_5a57": {
+      "tags": [
+        "dark",
+        "drooping",
+        "ears",
+        "edge",
+        "front",
+        "generated",
+        "hooves",
+        "kitchen",
+        "resting",
+        "sink",
+        "standing",
+        "standing by dark kitchen 5a57"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "staring_fixedly_single_ceramic_20d3": {
+      "tags": [
+        "ceramic",
+        "fixedly",
+        "forty",
+        "front",
+        "generated",
+        "held",
+        "hooves",
+        "minutes",
+        "plate",
+        "single",
+        "staring",
+        "staring fixedly single ceramic 20d3",
+        "tightly"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
     }
   },
   "role_default": {

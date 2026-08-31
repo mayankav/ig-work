@@ -72,9 +72,10 @@ Any agent working here must not violate these. They exist because each one was a
    - **The runtime path, and the default**: 186 poses in `mascot/library/`,
      generated as 6-up sheets and cut out by `scripts/import_poses.py`, then matched to each
      slide by the words in its brief. Finite, but broad. 32 are two-donkey scenes. No key, no
-     network, deterministic. This is what every build uses unless `--fresh` is passed, and it
-     is what `--fresh` falls back to on any failure. `poses_flux.py` and `--generate` are
-     offline tools and stay uncallable from `build.py`.
+     network, deterministic. It is the FALLBACK now rather than the default: `run.py` generates
+     by default (below), and the library is what every one of those failures lands on, plus what
+     `--no-fresh` selects outright. `poses_flux.py` and `--generate` are offline tools and stay
+     uncallable from `build.py`.
    - `scripts/poses_flux.py` (**offline, free**): grows the library. Cloudflare Workers AI,
      `@cf/black-forest-labs/flux-2-klein-4b`, Apache-2.0, so the output may be used
      commercially. It takes up to four reference images, which is what holds the character —
@@ -89,7 +90,7 @@ Any agent working here must not violate these. They exist because each one was a
      image generation has no free tier, so it fails unless billing is on. `scripts/mascot.py`
      carries a header saying so, and nothing load-bearing lives there (invariant 6).
 
-   - `build.py --fresh` (**free, opt-in, never load-bearing**): a pose per slide, generated
+   - `build.py --fresh` (**free, ON by default, never load-bearing**): a pose per slide, generated
      from that slide's own brief through `scripts/fresh_poses.py`. The library is finite and
      the brief is not — measured over 63 real slides, 50 name a physical object and the library
      knows seven of those words, while a bed appears in 17 briefs and no pose has ever had one.
@@ -100,7 +101,17 @@ Any agent working here must not violate these. They exist because each one was a
      right and the old rule was a proxy for it: what must never fail is the DECK. So every
      failure — no key, dead network, spent budget, a frame that fails a gate — hands the slide
      back the library pose already chosen, and `tests/test_fresh_poses.py` proves each one.
-     Without the flag, nothing is imported and no key is looked for.
+     With `--no-fresh`, nothing is imported and no key is looked for.
+
+     **`run.py` passes it on every run.** It did not until 2026-09-01, and nothing else ever
+     called it either, so the entire path was dead code: every deck this engine has published
+     used a library pose, including the 17 briefs asking for a bed that no pose has. The flag
+     was built, tested and never switched on. `--no-fresh` is the opt-out, for a build you are
+     running to read the copy and will throw the artwork away.
+
+     Roughly 126 neurons a pose, so about 1,134 for a nine-slide deck and ~2,268 for the two
+     decks a day, against a 6,000/day ceiling shared with the text vendors. Comfortable, and
+     `scripts/capacity.py` reports what is left.
 
    All three offline paths read the SAME plain-English `**Mascot:**` brief, so a script written
    for one works with the others. Prompts are in `mascot/GENERATION_PROMPTS.md`. Pose metadata is data, not
