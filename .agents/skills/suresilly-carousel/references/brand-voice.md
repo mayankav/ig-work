@@ -113,12 +113,6 @@ from rotation against the last few decks (see "Rotate the pattern" in
    reframes how the reader sees a common situation. *"You don't have commitment
    issues. You have trust issues. The difference matters."*
 
-> **Superseded, 2026-09-01.** This section used to read "3 carousels + 1 Reel"
-> a week, with Diagnosis on Monday, Script on Wednesday, Philosophy on Friday
-> and a 15-second animated Reel on Saturday. That was the 2025 launch plan from
-> `research/`. None of it was built and none of it is the plan: the engine has
-> never produced a video, and it posts fourteen carousels a week, not three.
-> The line survived here long enough to send an agent looking for a video
-> pipeline that does not exist.
+> No Reels. No weekday timetable. The engine has never produced a video.
 
 ---

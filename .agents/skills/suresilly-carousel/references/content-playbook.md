@@ -94,68 +94,55 @@ same-y even when each post is individually fine. Before writing, check the last 
 `carousels/` and pick a pattern none of them used. Tier 1 is ~70% of output *spread across six
 patterns*, not 70% on one.
 
-### For "I'm feeling lucky" — superseded, kept for hand-written decks
+## Part 2.6 · Utility first, hook last
 
-Do not invent a topic. Layer 1 Suggestion pulls from `references/topic-bank.md` (VOC-derived scenes),
-the VOC table, pattern gaps and trend. Layer 2 Selection scores 1-5 on Scene / Self-blame / Stealability / Freshness / Intent fit (25 total, ship ≥18). The winner must still pass the three questions below — they are the gate after scoring, not the search. Superseded: `run.py` chooses the moment and the angle, from the feed or from `references/concepts.json`. If the bank is stale (all <15), mine 10 new VOC before scoring.
+**Order: job → moment → one mechanism → tools → hook.** Hook-first optimises for the swipe and turns the value into insight that nobody acts on. The hook is squeezed out of the tools at the end.
 
----
+### 1 · Pick the job
 
-## Part 2.6 · Utility-first — JTBD, Moment, Protocol (from scratch, 2026-08-28)
+The reader hires a carousel at midnight for exactly one of these:
 
-Why rearranged: Old was `Topic → Hook → Source → Value (3 why :1 how)` — hook-first optimizes for swipe, value becomes insight porn (Wilson/Gilbert: insight calms, doesn't redirect; <5% apply). New is `JTBD → Moment → Sniper → Protocol (cheat first) → Hook last → 1 why :3 tools` — hook distills utility, not invents promise. Useful = `I will [behavior] at [time] in [location]` (Gollwitzer 91% vs 35%) that works while anxious.
+| Job | They are |
+|---|---|
+| Give me words | at 11pm, unable to form the sentence without rehearsing it four times |
+| Give me a tiny next step | frozen in front of an inbox or an appointment |
+| Give me proof to send | tired of explaining themselves |
+| Give me a way to act *while* anxious | not willing to wait until they feel calm |
 
-### JTBD — 4 hires (pick one primary + anti-job before topic)
+**Not hirable for one of these in the next 24 hours? Pick another topic.** Also name the anti-job — what this deck is *not* doing.
 
-Reader hires carousel at midnight for:
-1. **Give me words when I have none** — 11pm can't form sentence without rehearsing 4x
-2. **Give me tiny next step before motivation dies** — frozen before appointment/inbox
-3. **Give me proof to send** — so I don't have to explain myself
-4. **Give me way to act *while* anxious** — not after I calm down
+### 2 · Lock the moment
 
-If topic is interesting but not hirable for one of these in next 24h, pick different topic. Anti-job: what we are NOT doing (e.g., not `explain why`).
+One clock time, one place, one body. *"11:47pm, bed, phone, chest tight, left on read."*
+If it works for every evening, it works for none.
 
-### Moment Lock (one clock-time, location, body)
+### 3 · Build the cheat sheet FIRST
 
-Crystallize `When [11:47pm bed phone chest tight after left on read] + Who + What happened + What you want to say/do but can't`. If it works for every moment, it works for no moment. Specificity is what makes them send `this is me`. Filmable = number/body/place.
+Before a word of slide copy. **If you cannot write these, kill the idea now** — this is the entire reason anyone saves a deck.
 
-### Protocol Forge — cheat sheet FIRST
+| Piece | Shape | Example |
+|---|---|---|
+| Script | <20w, copy-paste, with `[brackets]` | *"I'm flooded, need 20 min, back at 7:30"* |
+| Intention | `I will [do X] at [time] in [place]` | *"I will set a 10:00 timer at the kitchen table at 3:47"* |
+| Habit stack | `After I [existing habit], I will…` | *"After I close the laptop at 11pm, I will open only the one email"* |
+| If-then | `If [trigger], then [2-min response]` | Must work while anxious. No googling. One behaviour. |
 
-Build utility before any slide copy. Tiny Protocol:
-- **Script** (<20w copy-paste with `[name][day]`) — e.g., Walker `Let me think and get back to you`, Gottman `I'm flooded, need 20 min, back at 7:30`, Tawwab `I don't take calls after 9pm...`
-- **Implementation Intention** `I will [behavior] at [time] in [location]` — e.g., `I will press 10:00 timer and open only document at kitchen table at 3:47`
-- **Habit Stack** `After I [existing habit], I will...` — e.g., `After I close laptop at 11pm, I will open only the one email`
-- **If-Then** `If [trigger at place/time with body], then [2-min response]` — must be doable while anxious, no googling, <2 min, one behavior. If you can't make it, kill idea here. This is the entire reason to save.
+### 4 · The three beats
 
-### The three beats, now with utility
+1. **Name the scene before explaining it.** Slides 1–2 are pure scene. No diagnosis before slide 3.
+2. **Invert the blame, then bridge to the tool.** *"You learned this where moods changed without warning"* → *"so here is what you can say"*. Reassurance soothes; explanation plus a tool redirects.
+3. **Give words and a tiny next step they can steal.** One script and one if-then, minimum.
 
-**Beat 1 · Name the scene before you explain it.**
-Recognition first, mechanism second — Slides 1–2 are pure scene. No diagnosis before slide 3.
+### 5 · The gate — abort if any fails
 
-**Beat 2 · Invert the blame — then bridge to tool.**
-Causal reattribution (`you learned this where mood changed without warning`) + immediate `So here's what you can say/do` — not platitude. Reassurance soothes, explanation + tool reframes.
+| Check | Fails if |
+|---|---|
+| 24 hours, no googling | It needs searching, inventing, or motivation |
+| Words, not why | Fewer than 2 slides are copy-paste scripts |
+| One moment | Slide 1 and slides 7–8 do not name the same scene |
+| Screenshot save | Slide 8 is a summary rather than a self-contained tool |
 
-**Beat 3 · Give them words + a tiny next step they can steal.**
-People screenshot sentences *and* if-thens. Every deck needs one stealable script *and* one stealable pact.
-
-### The three questions (now after Protocol, as gate)
-
-Answer all three in one sentence each. Cannot answer one — topic not ready, back to Protocol.
-
-1. **What scene is this?** (concrete nouns, filmable — same as Moment Lock)
-2. **What does the reader blame themselves for?** (the flaw you will reattribute)
-3. **What is the one sentence + one pact they will steal?** (script + if-then, quotable alone)
-
-### Four usefulness tests — Gate 1 (abort if fail, before Truth Gate)
-
-1. **24-hour without googling:** Could a 28yo do it in next 24h without searching, inventing, or needing motivation? Fail: `Send two sentences` / `Do starter task` (must invent).
-2. **Words, not why:** ≥2 slides are copy-paste scripts with brackets (≥20w total). Fail: only reframes/mindset.
-3. **One-moment:** H1 + slides 7+8 name same scene with body/number/place/time. Fail: category + life advice.
-4. **Screenshot save:** Slide 8 cheat is self-contained tool (scripts + if-then + menu) — not summary, needs revisiting. Fail: consumable in one read.
-
-One behavior at a time — Gollwitzer fails when targeting multiple habits. Cheat asks for one pact.
-
----
+One behaviour at a time. Targeting several is how implementation intentions fail.
 
 ## Part 3 · Viral Content Patterns (Ranked by @suresilly Fit)
 
@@ -230,129 +217,29 @@ real hooks proven to drive high engagement in the psychology and relationships n
 - "Stop shrinking yourself for people who aren't even thinking about you"
 - "How to set a hard boundary with someone who never respects them"
 
-### Hook craft — the rules that decide whether slide 1 works
+### Hook craft — the 12 rules for slide 1
 
-A hook fails by being *long and abstract*, not by being badly written. Every rule below exists
-because a shipped deck broke it.
+A hook fails by being **long and abstract**, not by being badly written. Every rule below was broken by a shipped deck.
 
-**Research note (2026-08-27):** Across 30 viral general-psychology hooks, only 20% pass a strict
-≤8w cap, 47% contain clinical terms, 67% are abstract. Authority pages (1-8M followers) win *despite*
-breaking these rules via saves + search demand, then pay -31% QoQ when the well-being classifier fires.
-For @suresilly (peer, not guru, needs sends to grow) the stricter version below is the edge.
+| # | Rule | Do this, not that |
+|---|---|---|
+| 1 | **≤8 words, 12 hard max.** Length is an intent switch, not a moral. | 8w for sends (swipe + DM). 9–12w only if you can say *"this deck is for saves"*. |
+| 2 | **No second-person diagnosis.** Clinical nouns are fine; labelling the reader is not. | `You rehearsed a text for 2 minutes` · not `You have rejection sensitivity` |
+| 3 | **Filmable or fail.** A body, number, time or place a camera could see. | `you reread 'okay' 4 times` · not `anxiety in communication` |
+| 4 | **Second person, specific.** Write to one person mid-scroll who did this *this week*. | `you` beats `people` beats `we` |
+| 5 | **Leave the loop open.** Do not answer the hook in its own second sentence. | `It was never about the dishes.` · not `…It was about being unseen.` |
+| 6 | **Stage the scene, do not announce the lesson.** | `You typed it, deleted it, typed it again` · not `How to stop over-explaining` |
+| 7 | **H2 is an aside, ≤7 words.** If it carries meaning H1 needed, H1 is wrong. | Fix H1, delete H2 |
+| 8 | **H1 mirrors, H2 absolves.** H1 names the hidden behaviour; H2 removes the shame. | `You check your phone 58 times before getting out of bed` / `You're not undisciplined — you're scanning for safety` |
+| 9 | **First three words carry it.** Openers that delay the noun are deletable. | Cut `Why`, `The reason`, `Here's how`, `What nobody tells you about` |
+| 10 | **Read it aloud.** One breath, or cut it. | — |
+| 11 | **Slide 2 is a second cover.** ≤25 words, its own `[[accent]]`. | Never open it with "Let me explain" |
+| 12 | **Re-hook on slides 4 and 6.** 6–10 words, in body copy. | Never write "Swipe →" — the renderer adds it |
 
-**1 · Sliding length — 8 ideal, 12 hard max. Choose by intent.**
-At 112px ≤8w is three lines (one glance). 12w is five lines (a paragraph — scroll). Do not treat 8 as
-a moral rule; treat it as an intent switch:
-* **Sends-driven (Unspoken Reality — "this is us, send to friend"):** 8w max. Swipe + DM is the goal.
-* **Saves-driven (Absolution — "I need this later, bookmark"):** 9-12w tolerated, because a list/reference earns a save even when longer.
-If you are over 8w, you must be able to say *this deck is for saves, not sends.* If you cannot, cut.
+**Banned openers, enforced in code:** `Why` · `How to` · `The reason` · `What nobody` · `Most people` · `Here's`.
+**Also banned:** em dashes in the hook, and the `not X, it's Y` seesaw.
 
-**2 · No second-person diagnosis.**
-Clinical vocabulary as a noun is allowed (`waiting mode`, `functional freeze`, `trauma`) — it can be
-a shared label. Second-person diagnosis is not: `You have anxious attachment`, `You are dysregulated`,
-`You suffer from executive dysfunction`. Those violate peer posture and trigger the classifier.
-Rewrite as behaviour: `You rehearsed a text for 2 minutes` not `You have rejection sensitivity`.
-
-**3 · Name the behaviour, not the concept — filmable or fail.**
-The reader recognises what they *did*, never a diagnosis. H1 must name one filmable behavior with a
-body/number/time/place a camera can see: `you reread 'okay' 4 times`, `phone face-down 10 minutes`,
-`staring at 127 unread at 11:47pm, chest tight`. `You` beats `people` beats `we`. One concrete detail
-out-pulls any general statement: *"you reread the text four times"* over *"anxiety in communication."*
-
-**4 · Second person, and specific.**
-`You` beats `people` beats `we`. One concrete detail out-pulls any general statement:
-*"you reread the text four times"* over *"anxiety in communication."* Write to one person mid-scroll
-who did the exact thing this week. If the line could appear on any therapist page, it is not specific yet.
-
-**5 · Leave something unresolved.**
-A brain will not scroll past an open loop. The hook must create a gap it does not close —
-recognition *plus* an unanswered *why*. The most common way to kill a hook is to answer it in
-its own second sentence:
-
-| Closed — no reason to swipe | Open — the gap does the work |
-|---|---|
-| You don't lack discipline. You have an identity trap. | **You don't lack discipline.** |
-| Why calm people make your nervous system panic | **Calm people make you nervous.** |
-| It was never about the dishes. It was about being unseen. | **It was never about the dishes.** |
-
-Note that shortening a hook usually opens the loop automatically — the words you cut are almost
-always the explanation. This is why the length cap and the tension rule tend to be the same
-edit.
-
-**6 · Stage the scenario, do not announce the lesson.**
-Defences drop when a reader thinks they are recognising a situation, and go straight back up
-when they think they are being taught. *"How to stop over-explaining"* is instruction —
-the reader has to admit a fault to keep reading. *"You typed it, deleted it, typed it again"*
-is a scene — they are already nodding before the lesson arrives.
-
-Same content, opposite posture. Our stated authority position is **peer, not guru**
-(`brand-voice.md`), and this is where that gets enforced or lost. Hooks that sound like hooks
-are the current fastest way to look dated. Never open with *"Here's how to…"*, *"5 things you
-need to…"*, *"Most people don't realise…"* — all three announce a lecture.
-
-**7 · The subtitle is an aside, not a second hook.**
-`- **H2:**` on the hook slide renders small and soft on purpose. Seven words maximum. If it is
-carrying meaning the H1 needed, the H1 is wrong — fix the H1 and delete the subtitle.
-For H2, use the **Absolution** lens: H1 is the mirror (painful hidden behavior), H2 is the peer
-reframe that removes shame (`You're stuck in waiting mode`, `Not lazy — frozen`). Never add
-"Swipe →" into copy — the renderer adds it and H2's 86px voice is already soft.
-
-**8 · Mirror + Absolution — H1 and H2 work as a pair.**
-Best hooks do both triggers at once: H1 names the invisible private state (Unspoken Reality — send),
-H2 reframes the moral failure as biology/human (Absolution — save). `You check your phone 58 times
-before getting out of bed` (mirror) / `You're not undisciplined — you're scanning for safety` (absolution)
-earns both dwell + save + send. If H1 is saves-heavy (abstract list), H2 must be scene-absolution to rescue it.
-
-**9 · First three words carry it.**
-The reader decides inside those three words. `Why you can tell…` spends all three on scaffolding
-and lands nothing. `You knew first.` lands immediately. Openers that delay the noun — *Why*,
-*The reason*, *Here's how*, *What nobody tells you about* — are almost always deletable.
-
-**10 · The read-aloud + screenshot test.**
-Say the hook out loud once. If you need a breath, or you would never send it to a friend in a
-voice note at midnight with "this is literally us," rewrite it. Pass = screenshot send; fail = WebMD definition.
-
-**11 · Slide 2 is also a cover.**
-Instagram often shows slide 2 to someone who did not swipe past slide 1. Slide 2 must work
-alone: ≤25 words, its own `[[accent]]`, a clear frustration + a promise of payoff, never
-"Let me explain" or logo. If slide 1 fails, slide 2 is the second chance — do not waste it.
-
-**12 · Keep the reader moving — one re-hook on slides 4 and 6.**
-A hook only stops the scroll; a re-hook keeps them swiping. End slides 4 and 6 with a line
-that opens the next slide instead of closing the thought:
-
-> "But here's what actually happens when you do that…"
-> "So what do you do instead? Slide 6 has the line."
-
-Keep it to 6–10 words, in the body copy, not the headline. No clickbait — the next slide
-must immediately pay it.
-
-**12 · The swipe line on the cover.**
-The cover's job is twofold: be recognized and be swiped. The H1 does the first. The H2
-(or a small `→` / `01/09` cue the renderer adds) does the second. If the H2 exists, use it
-to name a reason to swipe, on the decoder's `8px` voice, not as a second headline. Example:
-H1 `You reread their two-word reply four times.` / H2 `(slide 6 names the threat)` — 5 words.
-If the H2 would carry the meaning, fix H1 instead (rule 7 still applies). Never add "Swipe →"
-into copy — the renderer adds it.
-
-#### Timeframes — mostly not ours
-
-Timeframe hooks (*"3 years of progress in 30 seconds"*, *"0 to 211K in three months"*) are
-among the strongest devices on other accounts and **mostly do not transfer here.** They need a
-visible before/after, and psychological change has no montage. Reaching for one produces
-*"how I fixed my attachment style in 30 days"* — a transformation promise we cannot keep, from
-exactly the guru posture we avoid.
-
-One adaptation is honest, and it inverts the usual direction. Instead of *how fast it changed*,
-use **how long it went unnamed**, or **how small the moment was**:
-
-> *"Fifteen years of doing this. Nobody ever named it."*
-> *"The four seconds before they say 'nothing's wrong.'"*
-
-Same tension, no false promise. Use sparingly — this is a Tier 2 move, not a default.
-
-**The read-aloud test.** Say the hook out loud once. If you need a breath in the middle, or you
-would never say it to a friend in a voice note, rewrite it.
+**Timeframes are mostly not ours.** *"How I fixed my attachment style in 30 days"* is a transformation promise we cannot keep, from exactly the guru posture we avoid. Tier 2 move, use sparingly.
 
 #### Fixing our own weak hooks
 
@@ -395,305 +282,18 @@ Script / Nobody Tells You" rows above map into 1–3 and 5 — kept for referenc
 | Script / Replacement | 6 Promise / Value |
 | Nobody Tells You | 2 Mistake (Warning variant) |
 
-### Source Reference Database (for Slide 3 — Source Anchor)
+### Slide 3's source — you do not pick it
 
-Every carousel requires a Slide 3 source anchor. Select or adapt a source from
-this database based on the carousel's topic. When the exact topic isn't listed,
-find the closest match or identify an appropriate source independently.
+**Do not choose a citation from a list, and never type an author, title or year onto a slide.** That is invariant 12.
 
-#### Attachment & Bonding
-| Source | Work | Year | Best For |
-|---|---|---|---|
-| John Bowlby | *Attachment and Loss* | 1969 | Attachment theory foundations, anxious-avoidant dynamics |
-| Mary Ainsworth | Strange Situation experiment | 1970 | Attachment styles, childhood bonding patterns |
-| Amir Levine & Rachel Heller | *Attached* | 2010 | Anxious/avoidant/secure dynamics in modern dating |
-| Sue Johnson | *Hold Me Tight* | 2008 | Emotional bonding, couples therapy, EFT |
-| Stan Tatkin | *Wired for Love* | 2012 | Nervous system in relationships, couple bubbles |
+`bibliography.py` finds and proves the citation for every deck. Five gates, all fail closed:
 
-#### Relationship Dynamics
-| Source | Work | Year | Best For |
-|---|---|---|---|
-| John Gottman | *The Seven Principles for Making Marriage Work* | 1999 | Conflict, communication, the "Four Horsemen" |
-| Esther Perel | *Mating in Captivity* | 2006 | Desire vs. security tension, erotic vs. domestic |
-| Harriet Lerner | *The Dance of Anger* | 1985 | Pursue-withdraw cycles, anger in relationships |
-| Gary Chapman | *The 5 Love Languages* | 1992 | Mismatched expression of love, feeling unseen |
-| Alain de Botton | *The Course of Love* | 2016 | Romantic realism, post-honeymoon relationships |
+1. The book exists in Open Library **and is shelved there as psychology**
+2. The claim carries no unverifiable statistic
+3. The term of art appears in scanned text
+4. A model that did **not** propose it fails to refute it
+5. Code assembles the line from the catalogue's own spelling
 
-#### Trauma & Nervous System
-| Source | Work | Year | Best For |
-|---|---|---|---|
-| Bessel van der Kolk | *The Body Keeps the Score* | 2014 | Trauma stored in the body, somatic responses |
-| Stephen Porges | Polyvagal Theory | 1994 | Fight/flight/freeze/fawn, nervous system regulation |
-| Gabor Maté | *When the Body Says No* | 2003 | Stress, people-pleasing, mind-body connection |
-| Pete Walker | *Complex PTSD: From Surviving to Thriving* | 2013 | Fawn response, inner critic, emotional flashbacks |
-| Peter Levine | *Waking the Tiger* | 1997 | Somatic experiencing, trauma release |
+Whatever survives is appended to `references/citations.json` — a record of what has been proved, not a list anybody maintains.
 
-#### Self-Worth & Boundaries
-| Source | Work | Year | Best For |
-|---|---|---|---|
-| Brené Brown | *Daring Greatly* | 2012 | Vulnerability, shame resilience, worthiness |
-| Nedra Glover Tawwab | *Set Boundaries, Find Peace* | 2021 | Boundary-setting scripts, people-pleasing |
-| bell hooks | *All About Love* | 2000 | Love as practice, self-love as foundation |
-| Erich Fromm | *The Art of Loving* | 1956 | Love as skill, not feeling; mature vs. immature love |
-| Carl Rogers | *On Becoming a Person* | 1961 | Unconditional positive regard, self-acceptance |
-
-#### Philosophy & Existentialism
-| Source | Work | Year | Best For |
-|---|---|---|---|
-| Viktor Frankl | *Man's Search for Meaning* | 1946 | Meaning-making, suffering, agency |
-| Rainer Maria Rilke | *Letters to a Young Poet* | 1929 | Solitude, patience, learning to love |
-| Kahlil Gibran | *The Prophet* | 1923 | Space in togetherness, freedom in love |
-| Albert Camus | *The Myth of Sisyphus* | 1942 | Absurdism, finding meaning despite futility |
-| Thich Nhat Hanh | *How to Love* | 2014 | Mindful love, deep listening, presence |
-
-#### Key Studies & Frameworks
-| Source | Finding | Year | Best For |
-|---|---|---|---|
-| Gottman Institute | The "Magic Ratio" (5:1 positive to negative interactions) | 1994 | Conflict, relationship health metrics |
-| Gottman Institute | "Bids for Connection" predict divorce with 94% accuracy | 1999 | Micro-moments, emotional responsiveness |
-| Harlow's monkey experiments | Contact comfort > food provision | 1958 | Why we crave closeness, attachment needs |
-| ACE Study (Felitti et al.) | Adverse childhood experiences predict adult health/relationships | 1998 | Childhood trauma, intergenerational patterns |
-| Porges & Dana | Neuroception — threat detection below conscious awareness | 2018 | Why calm people feel "boring," hypervigilance |
-
----
----
-
-## Appendix · Imported framework references
-
-Folded in from the three standalone docs that used to sit unused at the repo root.
-
-
-### social-media-carousel
-
-
-##### 1. The Anatomy of a 10M+ Carousel
-
-A high-performing carousel typically contains **7 to 10 slides** structured as follows:
-
-```
-Slide 1: Hook (Scroll Stopper)
-Slide 2: The Reframe / Agitation (Why this matters)
-Slides 3–5: Core Meat / Value Delivery (Frameworks, diagnosis, examples)
-Slides 6–7: The "Aha!" / Actionable Shift (What to do differently)
-Slide 8: Summary / Takeaway Snapshot (High save-rate slide)
-Slide 9/10: Call to Action (DM-share, follow, comment trigger)
-```
-
----
-
-##### 2. Slide-by-Slide Psychological Mechanics
-
-### Slide 1: The Scroll Stopper (Hook)
-- **Goal:** Stop rapid feed scrolling in under 1.5 seconds.
-- **Rules:**
-  - Max 10–14 words.
-  - Giant typography hierarchy (Hook headline is 2.5x larger than subtext).
-  - Clear visual curiosity gap or identity trigger ("Why smart people end up in anxious-avoidant traps").
-  - Visual cue to swipe (e.g., subtle arrow, "Swipe ->", or 1/8 counter).
-
-### Slide 2: The Agitation & Curiosity Anchor
-- **Goal:** Prevent drop-off after Slide 1.
-- **Rules:**
-  - Validate the reader's hidden frustration: *"You think the problem is communication. It's actually regulation."*
-  - Promise specific payoff on slides 4–7.
-  - Keep text under 25 words.
-
-### Slides 3–6: Core Value & Step-by-Step Delivery
-- **Goal:** Deliver one standalone insight per slide. Never combine two big ideas on one slide.
-- **Format:**
-  - **Headline:** Bold, 3–6 words (e.g., *1. The Silent Withdrawal*).
-  - **Body text:** 2–3 short sentences explaining the mechanism.
-  - **Visual element:** A 2x2 matrix, before/after contrast box, annotated script, or diagram.
-  - **Continuity loop:** Connect the end of Slide 3 to the start of Slide 4 (e.g., *"Which leads directly to..."*).
-
-### Slide 7/8: The Synthesis (The Save Trigger)
-- **Goal:** Trigger an immediate **Save** bookmark.
-- **Mechanic:** A single cheat-sheet or 4-quadrant summary summarizing the entire post.
-- **Headline:** *"Save this checklist for your next conversation"* or *"The 10-second summary."*
-
-### Final Slide: The Viral Spread (DM-Share Trigger)
-- **Goal:** Trigger lateral sharing via Direct Messages (the #1 viral lever).
-- **Rules:**
-  - Don't just say *"Like & Subscribe"*.
-  - Prompt a relational share: *"Send this to someone who needs to hear slide 4 today."*
-  - Include profile handle `@suresilly` and profile avatar clearly.
-
----
-
-##### 3. Visual & Text Hierarchy Rules
-
-| Element | Specification | Constraint |
-|---|---|---|
-| **Aspect Ratio** | 4:5 Portrait (1080 x 1350 px) | Maximum screen estate in mobile feed |
-| **Font Count** | Max 2 typeface families | 1 bold display serif/sans + 1 clean sans |
-| **Word Count / Slide** | 15–35 words average | Never exceed 50 words on a single slide |
-| **Margins** | Minimum 120px safe zone | Prevent UI clipping from IG buttons & icons |
-| **Slide Numbers** | Bottom right or top right (`01/08`) | Provides subconscious progress feedback |
-
----
-
-##### 4. Swipe Retention Killers (What to Avoid)
-
-1. **Wall of Text:** More than 4 lines of consecutive body text.
-2. **Slow Hook:** Spending Slide 1 introducing yourself or giving background instead of leading with tension.
-3. **Inconsistent Design:** Switching font sizes, background colors, or alignment styles midway.
-4. **Vague CTAs:** "What do you think?" produces 0 comments compared to "Are you more Type A or Type B on slide 3?".
-
-### marketing-copywriting-frameworks
-
-
-##### 1. Core Direct-Response Copywriting Models
-
-### A. The PAS Formula (Problem – Agitate – Solve)
-*Best for: Relationship habits, boundary scripts, and emotional pattern breakdowns.*
-- **Problem:** State the surface-level symptom (*"You keep apologizing even when you did nothing wrong."*)
-- **Agitate:** Expose the hidden psychological cost (*"It feels polite in the moment, but over time it trains people to treat your boundaries as optional suggestions."*)
-- **Solve:** Deliver the mindset shift and script (*"Here is the 3-word replacement to use instead."*)
-
-### B. The BAB Formula (Before – After – Bridge)
-*Best for: Growth transformations, communication upgrades, mindset shifts.*
-- **Before:** Describe the chaotic current state (*"Walking on eggshells during small disagreements."*)
-- **After:** Paint the grounded, regulated state (*"Expressing frustration clearly without turning it into a 3-hour trial."*)
-- **Bridge:** Provide the actionable system or framework to cross over.
-
-### C. The "Uncomfortable Truth" Pattern
-*Best for: Viral top-of-funnel reach and identity sharing.*
-- **Formula:** State a counter-intuitive observation that dismantles a popular myth.
-- **Example:** *"Most people aren't emotionally unavailable. They're just matching your lack of clarity."*
-- **Mechanism:** Forces the reader to pause and reflect, creating strong agreement or debate in comments.
-
----
-
-##### 2. Hook Formulas for Instagram Carousels
-
-| Category | Formula | Example |
-|---|---|---|
-| **Identity Mirror** | *"If you [Behavior], you're probably [Hidden Trait]."* | *"If you over-explain every text, you grew up in a house with unpredictable reactions."* |
-| **Mistake / Warning** | *"Stop doing [Common Advice]. Do [Contrarian Action] instead."* | *"Stop trying to 'communicate better'. Learn to regulate your nervous system first."* |
-| **Signs / Diagnosis** | *"7 subtle signs of [Psychological State] in smart adults."* | *"5 signs of quiet burnout that people mistake for laziness."* |
-| **Script / Replacement** | *"Instead of saying [Passive Phrase], say [Clear Script]."* | *"Instead of 'Sorry to bother you', say 'Thanks for your patience'. Here are 6 more."* |
-| **Nobody Tells You** | *"What nobody tells you about [Life Milestone/Phase]."* | *"What nobody tells you about outgrowing your 20s friend group."* |
-
----
-
-##### 3. The 4 C's of Micro-Copywriting
-
-1. **Clear > Clever:** If the reader has to read a sentence twice to understand the concept, rewrite it.
-2. **Concise:** Delete words like *very, really, actually, in order to, essentially*. 
-3. **Compelling:** Use sensory and behavioral verbs (*"clam up", "fume", "spiraling", "ghosting"*) over abstract clinical jargon (*"maladaptive avoidant coping mechanism"*).
-4. **Credible:** Back up claims with observable micro-behaviors rather than sweeping generalities.
-
----
-
-##### 4. Caption & Comment Conversion Engine
-
-### The Caption Hierarchy:
-```
-Line 1: 1-line punchy extension of Slide 1 (Hook)
-Line 2: [Empty line for breathing room]
-Lines 3–6: Short micro-story or philosophical takeaway
-Lines 7–8: Explicit Discussion Question (e.g. "Which slide called you out most?")
-Line 9: Profile CTA ("Follow @suresilly for daily psychology reframes")
-```
-
-### Tone Calibration (The @suresilly Voice):
-- **Warmth:** 8/10 (compassionate, validating, non-judgmental)
-- **Sharpness:** 9/10 (intellectually rigorous, psychologically accurate)
-- **Self-Deprecation:** 6/10 (lighthearted, relatable group-chat energy)
-- **Clinical Jargon:** 1/10 (strictly translate textbook psychology into everyday human English)
-
-### social-carousel-writer
-
-
-##### 1. Standard Output Schema
-
-When generating a carousel, the agent MUST format output following this exact Markdown schema:
-
-```markdown
-#### Carousel Title: [Internal Name / Topic]
-**Target Audience:** [e.g. Anxious attachers, recovering people-pleasers, 25-38 adults]
-**Core Emotion Trigger:** [Recognition / Curiosity / Revelation / Validation]
-
-> Not Relief. Berger and Milkman (JMR 2012, ~7,000 articles) found that
-> low-arousal deactivating states suppress sharing, and relief is one. Relief is
-> where a deck ENDS, on slide 9. What carries a post is the jolt earlier in it:
-> "there is a NAME for that", being caught out, mild indignation.
-**Visual Theme / Palette:** [e.g. Oatmeal background #F5F4F0, Charcoal text #1E1E1E, Terracotta accent #D96B43]
-
----
-
-### Slide 1: [Hook / Title Slide]
-- **Slide Type:** Hook Cover
-- **Main Headline (H1):** [Max 10-12 words in bold display font]
-- **Sub-headline (H2):** [Optional 1-line context, max 8 words]
-- **Visual Cue:** [Swipe Arrow "->", Slide counter "01/08", or minimal icon]
-- **Design Note:** [Centered, high contrast, uncluttered]
-
----
-
-### Slide 2: [The Problem / Unspoken Reality]
-- **Slide Type:** Agitation / Context
-- **Headline:** [Bold takeaway]
-- **Body Content:** [2-3 lines of relatable insight]
-- **Design Note:** [Quote block or 1 highlighted phrase]
-
----
-
-### Slide 3 to Slide N-2: [Core Insights / Framework Points]
-- **Slide Type:** Value Step [1..k]
-- **Step Number & Title:** [e.g. 01. The Hyper-Vigilance Loop]
-- **Micro-Insight:** [Why it happens — one sentence, plain language]
-- **When → Say / Script (never presume their old words):**
-  - **When:** [specific moment, e.g., "When you're staring at the screen, frozen, chest tight"]
-  - **Say:** "[copy-paste script with [brackets] — <20w, sayable while anxious]"
-  - *Why this works:* `When` is a condition they can test (`am I staring right now?`), not a line they must have said. Old `WHAT YOU SAY / "Staring at the screen, paralyzed."` is deprecated — it puts words in their mouth and leaks viewers who don't say that exact sentence. Use `When` + `Say`, not `Old Reaction`.
-- **Design Note:** [Boxed highlight, single script card, or clean bullets — one script per slide, no two-column accusation]
-
----
-
-### Slide N-1: [The Summary Cheat Sheet]
-- **Slide Type:** Save Magnet (Evergreen Reference)
-- **Headline:** [e.g. "The 4-Step Regulation Checklist"]
-- **Bullets / Grid:** [Quick bulleted review of all key points]
-- **Bottom Callout:** *"Save this post so you have it next time you need it."*
-
----
-
-### Slide N: [The DM & Relationship Share Trigger]
-- **Slide Type:** CTA & Profile Outro
-- **Header:** [Warm closing thought or provocative question]
-- **Primary CTA:** *"Send this to your favorite overthinker."*
-- **Secondary CTA:** *"Follow @suresilly for daily psychology reframes."*
-- **Profile Tag:** `@suresilly`
-
----
-
-##### Caption & Metadata:
-- **Caption Copy:** [Hook line + 2 short paragraphs + discussion prompt]
-- **Pinned First Comment:** [Conversation starter question]
-- **Alt Text (Accessibility & SEO):** [Slide-by-slide image descriptions]
-- **Hashtags:** [#relationshipdynamics #attachmentstyles #communicationpatterns #suresilly]
-```
-
----
-
-##### 2. Character & Readability Guardrails
-
-To ensure mobile readability on screens as small as iPhone SE:
-
-1. **Slide 1 Character Limit:** Max 70 characters for headline.
-2. **Body Slide Character Limit:** Max 220 characters total per slide (including headline + body).
-3. **Line Breaks:** Every sentence should be broken by a blank line or bullet point. Never write a paragraph longer than 2 lines.
-4. **Emphasis Markers:** Use **Bold** for the 2–3 words the eye should scan first.
-5. **No Cliché Fluff:** Remove opening lines like *"Have you ever wondered..."* or *"Communication is key in every relationship."* Start immediately with the raw truth.
-
----
-
-##### 3. Agent Execution Checklist
-
-Before delivering a generated carousel script, verify:
-- [ ] Does Slide 1 evoke instant identification ("That's me") or curiosity ("Why is that?")?
-- [ ] Is there an unbroken logic chain from Slide 2 to Slide 7?
-- [ ] Is Slide 8/9 legitimately saveable as a standalone reference guide?
-- [ ] Does the final slide encourage a DM-share to a partner, friend, or coworker?
-- [ ] Is the tone warm, grounded, and witty rather than dry and clinical?
+A model may *suggest* a book. It may never name one on a slide.

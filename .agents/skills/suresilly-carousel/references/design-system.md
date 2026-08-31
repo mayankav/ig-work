@@ -11,7 +11,7 @@ Three reference grids set the bar. We borrow **traits**, never artwork:
 
 | Reference | Trait borrowed |
 |---|---|
-| Sticker-kit carousel packs | A tight palette applied as **full-bleed colour blocks** and one repeating background motif. The rotated element that used to be listed here was never built — see §5 |
+| Sticker-kit carousel packs | A tight palette applied as **full-bleed colour blocks**, one repeating background motif |
 | Flat-illustration tile sets | The character is a **compositional element** — it shares the frame with the type and sits in the layout, never a corner sticker |
 | Single-character comic grids (`_labadessa`) | **One character, endlessly re-posed** plus one owned colour is what makes a nine-up grid read as a single body of work |
 
@@ -31,8 +31,7 @@ the deck is not done.
 | Canvas padding | 36 px top and bottom; 56 px total top on source slides |
 | Export | PNG, `device_scale_factor: 1` |
 
-Every value here is a named constant at the top of `scripts/render.py`. Read them
-there before quoting them — this table has been wrong before.
+Every value is a named constant at the top of `scripts/render.py`. Read it there, not here.
 
 ---
 
@@ -87,11 +86,7 @@ carousel — never nine different colours. `scripts/render.py::deck_palette()` p
   sees the first theme fall out of the window and picks it again, so themes five through nine
   never ship.
 
-**A `**Palette:**` line that resolves to nothing aborts the build.** It used to fall through to
-the round robin, which is how `**Palette:** deep blue` shipped a terracotta deck with no sign
-anything was wrong. Asking for a colour and silently getting a different one is worse than a
-failed build. A line that resolves *partly* still builds — the half that resolved is honoured —
-but prints what it ignored.
+**A `**Palette:**` line that resolves to nothing aborts the build.** Asking for a colour and silently getting a different one is worse than a failed build. A line that resolves *partly* still builds and prints what it ignored.
 
 Do not hand-pick a hex value or add a theme for a one-off request — extend `COLOR_ALIASES` to
 point at an existing theme, or add a theme and let `tests/test_layout.py` prove it clears the
@@ -130,10 +125,7 @@ Two families: **Archivo Black** for display (`DISPLAY = "ArchivoBlk"`, `ArchivoB
 **Familjen Grotesk** for everything else (`BODY = "Familjen"`,
 `FamiljenGrotesk-Variable.ttf`). Both embedded as TrueType, both **verified at render time**.
 
-> **Not Fraunces and Inter.** This section named those two until 2026-09-01 and had done for
-> some time. `Fraunces-Variable.ttf` and `Inter-Variable.ttf` are still sitting in
-> `assets/fonts/`, unreferenced — that is why the error was invisible. The renderer has been
-> setting Archivo Black and Familjen Grotesk throughout.
+> `Fraunces-Variable.ttf` and `Inter-Variable.ttf` also sit in `assets/fonts/`. Nothing references them.
 
 The scale is the `TYPE` dict in `render.py`, `(size, line-height, letter-spacing)`:
 
@@ -157,9 +149,7 @@ Two rules the renderer enforces so they cannot be violated by accident:
    against `400 104px ArchivoBlk` and `450 38px Familjen`. A silent fallback to a system sans is
    a failed deck, not a warning. This is invariant 7.
 
-The `opsz` rule that used to sit here went with Fraunces and Inter. Archivo Black is a static
-face with no optical-size axis, and the Familjen Grotesk variable font carries a weight axis
-only — there is no `opsz` to pin on either.
+There is no `opsz` axis to pin: Archivo Black is static, and Familjen Grotesk carries `wght` only.
 
 ### Inline markup
 
@@ -178,10 +168,7 @@ reported as a writing problem, not silently shrunk. 220 characters per body slid
 limit enforced in three places — `writer.py`'s schema caps the field at 220, `audit_copy.py`
 fails the deck over it, and the render reports the overflow.
 
-This section used to describe an auto-fit that measured each block and shrank it in 3% steps.
-That is exactly what was removed, and `render.py` carries the reason: the *same* level rendered
-at 62, 70, 72, 74 and 108 px across one deck and bullets fell to 24 px. Nothing looked
-consistent and short slides looked lost in the frame. Do not reintroduce it — write shorter.
+**Do not reintroduce auto-fit.** It rendered the same level at 62, 70, 72, 74 and 108 px across one deck. Write shorter instead.
 
 ---
 
@@ -197,11 +184,7 @@ Exactly two, and no more — restraint is what makes them read as a system.
 
 **Everything sits square.** Nothing on a slide is tilted.
 
-> **Removed, 2026-09-01: "one rotated element per slide".** This used to promise a badge, card
-> or callout pill set a couple of degrees off-square — "sticker energy". No such rotation was
-> ever implemented: there is no `rotate()` anywhere in `render.py`, and the word survives only
-> in two stale comments. It was a written instruction nothing obeyed, so it is gone rather than
-> pending. The system reads as type and shape, squarely set. Do not add a tilt back in.
+> There is no `rotate()` in `render.py`. Do not add a tilt.
 
 Plus the oversized ghost numeral bleeding off the top-right corner, which is the page-number
 device that ties the deck together.
@@ -215,8 +198,7 @@ source slide. It is not vertically centred. Centring left about 330px of dead sp
 eyebrow and gave the composition nothing to sit on. The CTA slide is the exception and stays
 centred, because it has no reading order to establish.
 
-The oversized slide numeral sits top-right. It used to be 300px, which made decoration the
-single loudest element on the slide, louder than both the headline and the character.
+The oversized slide numeral sits top-right, small enough not to outshout the headline.
 
 ### Three mascot modes, chosen automatically
 

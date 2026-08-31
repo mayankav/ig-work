@@ -36,24 +36,16 @@ The source is a config value so it can be swapped without touching anything else
 
 ### Do not use the firehose
 
-Bluesky also publishes an open stream of everything posted, about 1.8 million a
-day. It looks like the better source: no phrases to guess, no assumption about
-what people are feeling this week, and the filters left to do the deciding.
-
-Measured, it produces nothing.
+Bluesky also publishes everything posted, ~1.8M a day. It looks better: no phrases to guess, filters left to decide. Measured, it produces nothing.
 
 | Source | Posts | Usable | Rate |
 |---|---|---|---|
 | Phrase search | 293 | 5 | 1.7% |
-| Firehose, 4 minutes | 1,767 | **0** | under 0.06% |
+| Firehose, 4 min | 1,767 | **0** | under 0.06% |
 
-An unbiased sample of the internet is bots, sport, links and other languages.
-**Bluesky's search index is doing the work, not our filters.** This was tried,
-measured and removed; do not try it again without a number that beats 1.7%.
+An unbiased sample of the internet is bots, sport, links and other languages. **Bluesky's search index does the work, not our filters.** Do not retry without a number beating 1.7%.
 
-**We never publish anyone's words.** The fact of waking at 2:17am is free to use. The person's
-sentence is theirs. Every moment is rewritten before use and the original is discarded. Log that
-the discard happened; keep no raw corpus on disk.
+**We never publish anyone's words.** Waking at 2:17am is a free fact; the sentence is theirs. Keep no raw corpus on disk.
 
 ---
 
@@ -117,91 +109,12 @@ scores 5 and the judge allows it.
 
 Then invent our own moment from it, and throw the post away.
 
-**Throwing the post away is also what makes ideas repeat, so the invented moment is checked
-against the invented moments before it.** All that survives a seed is one subject from a closed
-list of eight, plus a short phrase. About 1,100 posts a run collapse into that, and a model with
-no memory writes its favourite sentence. Two different seeds produced the same bed at the same
-11:45pm twice and both shipped, because uniqueness was tested on the SEED and nothing looked at
-the output. `compose.repetition_faults` now refuses a moment that repeats an earlier one's words
-or its shape, and `compose.variety_brief` forbids the recently used postures by category before
-the model starts. See invariant 19 — and note the cause worth remembering: the prompt's own
-worked example was being copied verbatim into the moments.
+**The post is a seed, not a source.** It supplies only the subject and the shape of the problem. We invent a different hour, room and sentence carrying the same trouble. Two consequences:
 
-**The post is a seed, not a source.** This changed after the rewriting approach failed for a
-week. Rewriting somebody's sentence has to satisfy four demands at once — keep the evening, drop
-the words, drop the name, stay publishable — and they fight each other. The step that hid the
-name deleted the person with it, and what came out ("someone was locked out, I let them in") had
-nothing in it to write about. The judge refused it, correctly.
+* Nothing of theirs is republished, because nothing of theirs is used. Privacy becomes one mechanical check: no run of 7 words survives.
+* The moment can be **built to fit** — asked for a clock and a feeling, rather than happening to have them.
 
-So the post now supplies only the subject and the shape of the problem. We invent a different
-hour, a different room, a different sentence carrying the same ordinary trouble. Two consequences,
-both good:
-
-* Nothing of theirs is republished, because nothing of theirs is used. The privacy question stops
-  being a balancing act and becomes one mechanical check: no run of seven words survives.
-* The moment can be BUILT to fit. A harvested sentence either happened to contain a clock and a
-  feeling or it did not, and most did not — 7 of 8 candidates in the last live run were about
-  devices. An invented one is asked for both, so it clears the shape filter by construction.
-
-Reading their name is fine. The post is public and we are only looking at it. The rule is about
-what we WRITE: the published moment carries no name at all, whether copied or invented. That is
-one rule instead of two, and it is stronger than either.
-
-### What a deck is FOR, and the evidence behind it
-
-Added 2026-08-30, after the first live deck read as unshareable. Everything here
-has a source, because the repo's own `research/` folder turned out to be partly
-invented and some of the copy rules came from it.
-
-**Lead with the NAME, not the scene.** Orvell, Kross and Gelman, PNAS 2020:
-across 1,120 book passages matched against roughly 250,000 Kindle highlights,
-always-true "you" ("eventually you recover from heartbreak") appears in 26% of
-highlighted passages against 3% of controls — an odds ratio of 12.86. One
-person doing one thing at one time runs the other way, 29% against 44%, odds
-ratio 0.41. Packard and Berger, Psychological Science 2020, split the pronoun
-across 4,200 chart rankings: the "you" that works points at somebody in the
-reader's life, and the "you" cast as the actor in a scene was not significant
-once controlled (p = .142). Every hook this engine wrote was the losing variant.
-
-**A name is the sendable unit.** Mosseri says sends per reach is the ranking
-signal. The bird test spread where the Gottman research behind it did not,
-because "bird" survives a retelling and "verbal bid for emotional connection"
-does not. A name can be sent as an accusation, a confession, or a diagnosis of
-a third person; a stranger's Tuesday gives a sender nothing to point at.
-
-**Slide 2 is a second cover.** Mosseri, 17 October 2024: a carousel that nobody
-swipes is re-served starting from the second frame. So slide 2 is read cold, by
-people who have not seen slide 1, and boilerplate there throws away the
-platform's one structural gift to the format.
-
-**Concrete words, general claim.** Hu, Pilgrim, Zhao and Hills, QJEP 2026: 15M
-tweets and 50,517 Reddit posts, concreteness predicts sharing. That is about
-imageable WORDS, not about a particular invented situation — the two get
-confused, and the difference is the whole argument. "Bowl washing" is concrete
-and general. "You stood in the kitchen at 11pm" is concrete and particular.
-
-**The saved card carries no clock.** Carousels are a saves format — Metricool,
-24M posts: nine times the saves of a single image — and the card is the slide
-with a second life. A step that says "start the timer at 2:50pm in the kitchen"
-is an instruction for a person who does not exist, and it destroys the one
-thing the slide is for.
-
-**Not relief.** Berger and Milkman, JMR 2012, roughly 7,000 articles:
-low-arousal deactivating states suppress sharing. Every deck this engine built
-declared its core emotion as Relief. Relief is where a deck ENDS.
-
-**Ask for the save, never for the like.** Metricool, 24.4M posts: asking for
-saves moves saves +92%, asking for comments +203%, and asking for likes moves
-likes −4.9%. One post gets roughly one action out of one person, so there are
-two asks in a deck and no more: send on slide 9, save in the caption.
-
-**Caption length is genuinely unsettled.** The study behind "under 30 words
-wins" (Socialinsider, 9.1M posts) measures likes and comments over followers
-and excludes saves and sends, which are the two behaviours this page is built
-for — and the largest accounts in this niche run captions of a couple of
-hundred words. So the schema allows a range and the prompt asks for a shape,
-rather than forcing either. What it no longer does is force a 200 character
-FLOOR, which is why the caption used to be the whole deck retold underneath it.
+**Throwing the post away is also why ideas repeat.** All that survives is one subject from a list of 8, plus a phrase. 1,100 posts collapse into that, and a model with no memory writes its favourite sentence. Four checks in `compose.py` now compare each invented moment against the earlier ones — words, opening verb, room, and whether it copied the prompt's own example. See invariant 19.
 
 ### Layer 3 — Shuffled queue
 
