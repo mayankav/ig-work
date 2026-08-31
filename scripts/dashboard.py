@@ -67,6 +67,20 @@ def pictures() -> str:
     return _safe(read)
 
 
+def writing() -> str:
+    """Writing shares the one daily allowance with pictures, and it is the half
+    that must never run out — a deck that cannot be written is a day with no
+    post. It is recorded and never refused, so this line is the warning."""
+    def read():
+        sys.path.insert(0, str(REPO / "scripts"))
+        import capacity
+        s = capacity.snapshot()
+        used, share = s["text_spent"], s["reserved_for_text"]
+        flag = "  ⚠ near the end of its share" if used > 0.85 * share else ""
+        return f"{used}/{share} neurons used, {s['account_left']} left on the account{flag}"
+    return _safe(read)
+
+
 def library() -> str:
     def read():
         poses = [p for p in (SKILL / "mascot" / "library").glob("*.png")
@@ -144,6 +158,7 @@ def build(status: str, slug: str | None, note: str, score: str | None,
         lines += [note, ""]
     lines += [
         f"PICTURES   {pictures()}",
+        f"WRITING    {writing()}",
         f"LIBRARY    {library()}",
         f"THIS DECK  {poses_used(slug)}",
         f"QUEUE      {queue()}",

@@ -1,7 +1,9 @@
 {
   "2026-08-31": {
-    "calls": 32,
+    "calls": 33,
     "last": "bed_sitting_v2",
-    "neurons": 5995.0
+    "neurons": 6002.0,
+    "text_calls": 0,
+    "text_neurons": 0.0
   }
 }

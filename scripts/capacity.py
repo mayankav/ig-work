@@ -59,6 +59,10 @@ def snapshot() -> dict:
 
     return {
         "date_utc": now.strftime("%Y-%m-%d"),
+        "text_spent": round(ledger.text_spent()),
+        "account_spent": round(ledger.account_spent()),
+        "account_left": round(ledger.account_left()),
+        "reserved_for_text": round(flux.FREE_DAILY_NEURONS - ledger.budget),
         "resets_in_hours": round((reset - now).total_seconds() / 3600, 1),
         "free_per_day": flux.FREE_DAILY_NEURONS,
         "our_ceiling": ledger.budget,
@@ -86,7 +90,23 @@ def as_text(s: dict) -> str:
         f"  {verdict}",
         f"  resets in {s['resets_in_hours']}h",
         f"  library holds {s['library_poses']} poses to fall back on",
+        "",
+        "WRITING",
+        f"  {s['text_spent']} neurons used of the {s['reserved_for_text']} kept back for it",
+        f"  {s['account_left']} left on the whole account today",
+        f"  {_writing_verdict(s)}",
     ])
+
+
+def _writing_verdict(s: dict) -> str:
+    """Writing shares the allowance with pictures and is never refused to
+    protect them, so the only thing worth saying is how much room is left."""
+    if s["text_spent"] == 0:
+        return "writing has not touched the allowance today"
+    share = s["text_spent"] / max(1, s["reserved_for_text"])
+    if share > 0.85:
+        return "⚠ writing is near the end of what was kept back for it"
+    return f"writing has used {share:.0%} of its share"
 
 
 def main(argv: list[str] | None = None) -> int:

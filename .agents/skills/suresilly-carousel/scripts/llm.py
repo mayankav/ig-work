@@ -396,7 +396,8 @@ def _retry_after(exc: urllib.error.HTTPError) -> tuple[int, str]:
     return RATE_LIMIT_PAUSE, name
 
 
-def _post(url: str, payload: dict, headers: dict) -> dict:
+def _post(url: str, payload: dict, headers: dict,
+          capture: dict | None = None) -> dict:
     body = json.dumps(payload).encode()
     # A real User-Agent is not politeness. Groq sits behind Cloudflare, which
     # blocks the default "Python-urllib" with a 403 that looks exactly like an
@@ -407,6 +408,8 @@ def _post(url: str, payload: dict, headers: dict) -> dict:
         **headers})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+            if capture is not None:
+                capture.update({k.lower(): v for k, v in response.headers.items()})
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         if exc.code in (429, 503):
@@ -594,8 +597,25 @@ def call_cloudflare(system: str, user: str, temperature: float,
         payload["response_format"] = {
             "type": "json_schema", "json_schema": _strict(schema)}
 
+    # Text and pictures come out of ONE 10,000-neuron daily allowance, and
+    # until this was recorded only the pictures were. The split everyone quoted
+    # — 6,000 for pictures, the rest for writing — was an assumption nobody
+    # could check: if the writer had quietly eaten half of it, the picture
+    # budget would still have reported itself full.
+    #
+    # Recorded, never refused. Writing is what this repo exists to do, and a
+    # deck that cannot be written is a day with no post, so text is never
+    # turned away to protect a picture budget.
+    headers: dict = {}
     data = _post(CLOUDFLARE_URL.format(account=account, model=CLOUDFLARE_MODEL),
-                 payload, {"Authorization": f"Bearer {token}"})
+                 payload, {"Authorization": f"Bearer {token}"}, capture=headers)
+    try:
+        billed = headers.get("cf-ai-neurons")
+        if billed is not None:
+            import neurons
+            neurons.Ledger().spend_text(float(billed), note=CLOUDFLARE_MODEL)
+    except Exception:                                          # noqa: BLE001
+        pass        # a ledger that cannot be written must never fail a deck
     result = data.get("result") or {}
     text = result.get("response")
     if isinstance(text, dict):

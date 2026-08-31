@@ -75,6 +75,14 @@ from cutout import (  # noqa: E402
     detect_key_colour, glyph_runs, qa,
 )
 from imaging import drop_neighbour_bleed, tight_crop  # noqa: E402
+# The ledger and the budget constants live in neurons.py: llm.py records the
+# TEXT half of the same daily allowance and cannot import this module, because
+# this module imports llm for its credentials. Re-exported so callers and tests
+# that reach for pf.Ledger keep working.
+from neurons import (  # noqa: E402
+    DEFAULT_BUDGET, FREE_DAILY_NEURONS, LEDGER_PATH, NEURONS_PER_MEGAPIXEL,
+    NEURONS_PER_REFERENCE, BudgetExceeded, Ledger, _today,
+)
 from llm import resolve_key  # noqa: E402
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
@@ -115,49 +123,10 @@ CHROMA_BGR = (255, 0, 255)
 MAX_REFS = 4                # the model accepts input_image_0 .. input_image_3
 TIMEOUT = 180               # a 1024px generation is slow; this is not a chat call
 
-# ── neuron budget ────────────────────────────────────────────────────────────
-#
-# Workers AI gives 10,000 neurons/day free, per ACCOUNT — the same account
-# llm.py bills its third text vendor against. So this tool may not spend the
-# lot: whatever it takes, the writer and the critic no longer have.
-#
-# Two numbers disagree about what a call costs, by a factor of ten, and this
-# module believes the expensive one.
-#
-#   PUBLISHED   ~104 neurons for a 1024x1024 frame, ~21 for references.
-#   MEASURED    every response carries a cf-ai-neurons header. Five calls on
-#               2026-08-31 at 1024x1024 reported 5.37 neurons per reference
-#               image and nothing at all for the output frame:
-#                   1 ref -> 5.37    2 refs -> 10.74    4 refs -> 21.48
-#               Exactly linear, three independent confirmations.
-#
-# One of those is wrong and there is no way from here to tell which. If the
-# header is right, believing the published rate costs some throughput. If the
-# header undercounts — it plainly does not bill the output frame, so something
-# is missing from it — then believing the header runs ten times over the free
-# allowance and starts spending the user's money.
-#
-# So: RESERVE at the published rate, which is the pessimistic one and does not
-# depend on the header being complete. Reconcile against the header only when
-# the header is HIGHER than the reservation. Reconciliation can raise the
-# recorded spend and can never lower it, which means a surprise expensive call
-# is caught and a suspiciously cheap one buys nothing. Same rule as everywhere
-# else here: "we could not check" must never come out the same as "we checked".
-NEURONS_PER_MEGAPIXEL = 104.0     # published, per 1024x1024-equivalent output
-NEURONS_PER_REFERENCE = 21.0      # published, per reference image
-FREE_DAILY_NEURONS = 10_000
-DEFAULT_BUDGET = 6_000            # 60%: the text vendors draw on the same pot
-
-LEDGER_PATH = Path(os.environ.get(
-    "SS_FLUX_LEDGER", REPO_DIR / "state" / "flux_neurons.json"))
 
 
 class FluxError(Exception):
     """The generation call did not produce usable artwork."""
-
-
-class BudgetExceeded(FluxError):
-    """Refusing to spend past the daily neuron budget."""
 
 
 # ─────────────────────────── character bible ─────────────────────────────────
@@ -496,93 +465,6 @@ def estimate_neurons(width: int, height: int, refs: int) -> float:
     return NEURONS_PER_MEGAPIXEL * megapixels + NEURONS_PER_REFERENCE * refs
 
 
-def _today() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
-
-class Ledger:
-    """What this tool has spent today, on disk, so two runs cannot both think
-    they have the whole allowance.
-
-    Keyed on the UTC date because that is when Cloudflare's allowance rolls
-    over. Spend is recorded BEFORE the call and never refunded on failure: a
-    refused image is an image you were still billed for, and a ledger that only
-    counts successes will walk you straight into a 429 in the middle of a batch.
-    """
-
-    def __init__(self, path: Path | str | None = None,
-                 budget: float = DEFAULT_BUDGET):
-        # Resolved here rather than defaulted in the signature, which binds the
-        # module constant once at import and then ignores every attempt to
-        # point it somewhere else. A test suite that cannot redirect this file
-        # writes its arithmetic into the repo's real ledger, and the next run
-        # believes it has already spent the afternoon.
-        self.path = Path(path) if path is not None else LEDGER_PATH
-        self.budget = float(budget)
-        if self.budget > FREE_DAILY_NEURONS:
-            raise BudgetExceeded(
-                f"budget {self.budget:.0f} exceeds the free daily allowance of "
-                f"{FREE_DAILY_NEURONS} neurons — this tool does not spend money")
-
-    def _read(self) -> dict:
-        try:
-            data = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            return {}
-        return data if isinstance(data, dict) else {}
-
-    def spent(self) -> float:
-        day = self._read().get(_today())
-        return float(day.get("neurons", 0.0)) if isinstance(day, dict) else 0.0
-
-    def remaining(self) -> float:
-        return max(0.0, self.budget - self.spent())
-
-    def check(self, cost: float) -> None:
-        if cost > self.remaining():
-            raise BudgetExceeded(
-                f"this call is booked at {cost:.0f} neurons and only "
-                f"{self.remaining():.0f} of today's {self.budget:.0f} budget are left "
-                f"(the account's free allowance is {FREE_DAILY_NEURONS}/day and the "
-                f"text vendors draw on it too). Try again tomorrow.")
-
-    def _write(self, neurons_delta: float, calls_delta: int, note: str = "") -> None:
-        data = self._read()
-        day = data.get(_today())
-        day = day if isinstance(day, dict) else {"neurons": 0.0, "calls": 0}
-        day["neurons"] = max(0.0, round(float(day.get("neurons", 0.0)) + neurons_delta, 2))
-        day["calls"] = int(day.get("calls", 0)) + calls_delta
-        if note:
-            day["last"] = note
-        data[_today()] = day
-        # Keep a fortnight; the file is a rate limiter, not an archive.
-        for stale in sorted(data)[:-14]:
-            data.pop(stale, None)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
-
-    def spend(self, cost: float, note: str = "") -> None:
-        self._write(cost, 1, note)
-
-    def reconcile(self, reserved: float, actual: float | None, note: str = "") -> None:
-        """Top the reservation up if Cloudflare billed MORE than we booked.
-
-        One-directional on purpose. The cf-ai-neurons header reports about a
-        tenth of the published rate and visibly does not bill the output frame,
-        so it is trustworthy as a floor and not as a total: a call that comes
-        back dearer than expected is news worth acting on, and one that comes
-        back cheap buys no extra throughput.
-
-        actual is None when the response carried no header at all. Then the
-        reservation stands, because "we could not check" must never come out
-        the same as "we checked".
-        """
-        if actual is None or actual <= reserved:
-            return
-        self._write(actual - reserved, 0, note)
-
-
-# ─────────────────────────── the call ────────────────────────────────────────
 
 def credentials() -> tuple[str, str]:
     """Reuses llm.py's resolution: environment, then .env.local, then the two
@@ -856,7 +738,7 @@ def main(argv: list[str] | None = None) -> int:
         refs = pick_references(a.ref, count=len(a.ref) if a.ref else a.refs)
         ledger = Ledger(a.ledger, budget=a.budget)
         per_call = estimate_neurons(a.size, a.size, len(refs))
-    except (FluxError, QAFailure) as exc:
+    except (FluxError, BudgetExceeded, QAFailure) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
 
@@ -879,7 +761,7 @@ def main(argv: list[str] | None = None) -> int:
             failed.append((name, str(exc)))
             print(f"  ✗ {name:20s} {exc}")
             break
-        except (FluxError, QAFailure) as exc:
+        except (FluxError, BudgetExceeded, QAFailure) as exc:
             failed.append((name, str(exc)))
             print(f"  ✗ {name:20s} {str(exc)[:100]}")
             continue

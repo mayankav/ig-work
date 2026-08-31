@@ -502,8 +502,16 @@ def test_dry_run_calls_nothing(monkeypatch, tmp_path, capsys):
 def test_the_ledger_path_can_be_redirected(monkeypatch, tmp_path):
     """Bound at construction, not at import. A Ledger whose default is frozen
     into the signature writes a test suite's arithmetic into the repo's real
-    ledger, and the next real run believes it has already spent the day."""
-    monkeypatch.setattr(pf, "LEDGER_PATH", tmp_path / "redirected.json")
+    ledger, and the next real run believes it has already spent the day.
+
+    Patched on `neurons`, which is where the Ledger now lives — llm.py records
+    the TEXT half of the same daily allowance and cannot import this module,
+    because this module imports llm for its credentials. Patching the name
+    re-exported here would silently do nothing, so the assert below pins the
+    two together and fails if the re-export ever drifts."""
+    import neurons
+    assert pf.LEDGER_PATH is neurons.LEDGER_PATH
+    monkeypatch.setattr(neurons, "LEDGER_PATH", tmp_path / "redirected.json")
     pf.Ledger(budget=100).spend(7)
     assert (tmp_path / "redirected.json").is_file()
     assert json.loads((tmp_path / "redirected.json").read_text())

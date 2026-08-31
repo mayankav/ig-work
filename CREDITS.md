@@ -66,8 +66,30 @@ Gemini gives a free allowance **per model, per day**. We use five model names,
 so we get five separate allowances. Groq and Cloudflare are the second and third
 opinions. The critic must never be the same vendor as the writer.
 
-A full day of posting costs a few thousand tokens. Text has never been the
-limit. Pictures are.
+### Writing is never refused to protect pictures
+
+The Cloudflare text model draws on the **same 10,000** as the pictures. We keep
+**4,000 back for it** and never spend that on pictures.
+
+Writing is recorded but never blocked. A deck that cannot be written is a day
+with no post, so text always gets what it asks for. Pictures are the only thing
+that gets turned away.
+
+Every run reports it:
+
+```
+PICTURES   14 pictures left (3384/6000 used, resets in 9.1h)
+WRITING    260/4000 neurons used, 6356 left on the account
+```
+
+A warning appears if writing goes past 85% of its share.
+
+**This was not measured until now.** The response header that says what a call
+cost was being thrown away, so only pictures were counted and the 4,000 for
+writing was an assumption nobody could check.
+
+Gemini and Groq do not report a cost per call, so they cannot be counted this
+way. They have never been the limit.
 
 ---
 
