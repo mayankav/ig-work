@@ -695,9 +695,130 @@ def backdrop_fraction(bgr: np.ndarray) -> float:
 MIN_BACKDROP = 0.25
 
 
-def check(png: bytes) -> np.ndarray:
+# ── palette correction ───────────────────────────────────────────────────────
+#
+# Measured, not guessed. Across the first four generated poses, against the four
+# library poses used as references:
+#
+#     body green     library saturation 49-52   generated 30-41
+#     muzzle/belly   library hue 38-40 deg      generated 22-28 deg
+#
+# So the model holds the SHAPES from the references and drifts the COLOUR: a
+# sage body instead of the brand green, and a blush muzzle instead of a buttery
+# one. Consistent in one direction, which is what makes it correctable.
+#
+# This is a colour correction and nothing more. It moves saturation and hue of
+# pixels already in the right family; it cannot repair a wrong shape and must
+# never be asked to. It runs BEFORE the gates, so what is judged and what is
+# written are the same picture.
+LIBRARY_GREEN_SAT = 0.51        # median of the library reference poses
+LIBRARY_CREAM_HUE = 39.0        # degrees, ditto
+GREEN_HUE_RANGE = (35, 95)      # OpenCV H is 0-179, so this is 70-190 deg
+CREAM_MIN_V, CREAM_MAX_S = 180, 120
+EYE_MAX_SAT = 45          # an eye white is white; the cream muzzle is 73-94
+
+
+def correct_palette(bgr: np.ndarray) -> np.ndarray:
+    """Pull the body green and the cream back onto the brand palette.
+
+    Returns a new frame. The magenta key is untouched on purpose — everything
+    downstream mattes against it and shifting it would break the one thing that
+    is already right.
+    """
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV).astype(np.float32)
+    h, sat, val = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+
+    green = (h > GREEN_HUE_RANGE[0]) & (h < GREEN_HUE_RANGE[1]) & (sat > 25)
+    if green.sum() <= 500:
+        green = np.zeros_like(green)
+    else:
+        current = float(np.median(sat[green])) / 255.0
+        if current > 0.01:
+            sat[green] = np.clip(sat[green] * (LIBRARY_GREEN_SAT / current), 0, 255)
+
+    # The cream is pale and barely saturated, which is what separates it from
+    # both the green and the magenta without needing a mask from anywhere else.
+    cream = (val > CREAM_MIN_V) & (sat < CREAM_MAX_S) & (sat > 12) & (h < 45)
+    if cream.sum() <= 500:
+        cream = np.zeros_like(cream)
+    else:
+        h[cream] += (LIBRARY_CREAM_HUE / 2.0) - float(np.median(h[cream]))
+        h[cream] = np.clip(h[cream], 0, 179)
+
+    fixed = cv2.cvtColor(np.stack([h, sat, val], -1).astype(np.uint8),
+                         cv2.COLOR_HSV2BGR)
+
+    # Write back ONLY the pixels we meant to change. A BGR->HSV->BGR round trip
+    # is not lossless — it moved the magenta key from 255 to 254 — and while one
+    # level is nothing to the eye, cutout.py's key_residue gate measures exactly
+    # that kind of thing. Compositing on the masks keeps every untouched pixel
+    # byte-identical, so the correction cannot cost us an import rejection.
+    touched = (green | cream)[..., None]
+    return np.where(touched, fixed, bgr).astype(np.uint8)
+
+
+def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
+    """Refuse a pose whose eyes came back blank.
+
+    Two of the first four generations had white eyes with no pupil at all. It is
+    the single most obvious way a generated pose reads as wrong beside a library
+    one, and it is cheap to detect: Silly's eyes are large white blobs, and a
+    correct eye has a dark island inside its own bounding box.
+
+    So: find the white regions in the upper half of the figure that are the
+    right size to be eyes, and require a dark core inside at least one. One is
+    enough — a profile or a wink legitimately shows a single eye, and a gate
+    that demanded two would refuse good poses.
+    """
+    if rgba.shape[2] < 4:
+        return
+    solid = rgba[..., 3] > 200
+    bgr = rgba[..., :3]
+    grey = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+    sat = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 1]
+    height, width = grey.shape
+    upper = np.zeros_like(solid)
+    upper[: int(height * 0.62)] = True          # the head, generously
+
+    # An eye white is WHITE: near-zero saturation. The cream muzzle is bright
+    # too — and measured across the library it sits at saturation 73-94, so a
+    # brightness-only mask finds the muzzle, decides it is a blank eye, and
+    # refuses a perfectly good pose. That is what happened: cheering, relieved,
+    # guarded, floor_slumped and cheering_m all have closed or curved eyes, so
+    # the muzzle was the only bright blob and none of them had a pupil in it.
+    whites = ((grey > 200) & (sat < EYE_MAX_SAT) & solid & upper).astype(np.uint8)
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(whites, 8)
+    figure_area = max(int(solid.sum()), 1)
+
+    eyes, with_pupil = 0, 0
+    for i in range(1, count):
+        x, y, w, h, area = stats[i]
+        if not (0.0008 * figure_area < area < 0.06 * figure_area):
+            continue
+        if w < 4 or h < 4 or not (0.35 < w / h < 2.8):
+            continue
+        eyes += 1
+        # A pupil is a dark island INSIDE the white blob's own box. Looking only
+        # inside the box is what stops the brow bar above the eye counting.
+        patch = grey[y:y + h, x:x + w]
+        inner = patch[max(1, h // 6):h - max(1, h // 6), max(1, w // 6):w - max(1, w // 6)]
+        if inner.size and (inner < 110).sum() >= max(4, int(0.04 * inner.size)):
+            with_pupil += 1
+
+    if eyes and not with_pupil:
+        raise QAFailure(
+            f"pupils: {what} has {eyes} blank eye(s) with no pupil. The model "
+            f"does this often and it is the loudest way a generated pose reads "
+            f"as wrong beside a library one. Re-roll with another seed.")
+
+
+def check(png: bytes) -> tuple[np.ndarray, np.ndarray]:
     """Every gate a freshly generated pose has to pass. Raises QAFailure, and a
     caller that catches it must write nothing.
+
+    Returns (corrected raw frame, matted rgba). The FIRST is what gets written:
+    the palette correction has to reach the file, or the gates would be judging
+    a picture nobody ever sees.
 
     Order matters. Text is checked on the raw frame first, because matting a
     captioned image throws the caption away and then the artwork looks clean.
@@ -715,7 +836,12 @@ def check(png: bytes) -> np.ndarray:
 
     assert_no_text(arr, "generated artwork")
 
+    # Colour is corrected BEFORE matting and before the remaining gates, so the
+    # frame that is judged is the frame that gets written.
+    arr = correct_palette(arr)
+
     rgba = tight_crop(drop_neighbour_bleed(auto_chroma_matte(arr)))
+    assert_has_pupils(rgba, "generated artwork")
     # The strict configuration, which is the right one here and would be wrong
     # in import_poses.py. There a sheet cell is a tight crop of a grid, so ear
     # tips legitimately touch an edge and a detached fragment is normal. Here
@@ -724,7 +850,7 @@ def check(png: bytes) -> np.ndarray:
     # picture. Same gates, tightened — never loosened.
     qa(rgba, src_shape=arr.shape[:2], allow_detached=False, strict_framing=True,
        key_hue=detect_key_hue(arr))
-    return rgba
+    return arr, rgba
 
 
 # ─────────────────────────── driver ──────────────────────────────────────────
@@ -751,11 +877,20 @@ def make_pose(name: str, brief: str, out_dir: Path, *, refs: list[tuple[str, byt
     blob, billed = generate(prompt, refs, width=width, height=height, seed=seed,
                             steps=steps, account=account, token=token)
     ledger.reconcile(reserved, billed, note=name)
-    check(blob)                      # raises QAFailure; nothing written if it does
+    corrected, _ = check(blob)       # raises QAFailure; nothing written if it does
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    dest = out_dir / f"{name}{image_suffix(blob)}"
-    dest.write_bytes(blob)
+    # PNG, not the suffix the model's bytes imply. Two reasons, and the second
+    # is the one that matters: the frame has been colour-corrected so it must be
+    # re-encoded anyway, and this endpoint returns JPEG whatever we ask for.
+    # JPEG chroma subsampling leaves a half-magenta fringe along every green
+    # edge, which is exactly what cutout.py's key_residue gate then objects to.
+    # Re-encoding lossless removes a whole class of import rejection.
+    dest = out_dir / f"{name}.png"
+    ok, buf = cv2.imencode(".png", corrected)
+    if not ok:
+        raise QAFailure(f"could not encode {name} as PNG")
+    dest.write_bytes(buf.tobytes())
     return dest
 
 
