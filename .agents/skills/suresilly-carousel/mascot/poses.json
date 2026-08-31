@@ -2982,6 +2982,78 @@
       "source": "imported",
       "valence": -1.2,
       "arousal": 2.0
+    },
+    "bedtime_story": {
+      "tags": [
+        "bedtime story",
+        "between you",
+        "both of you",
+        "relationship",
+        "scene",
+        "the pair",
+        "two donkeys",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "consoling": {
+      "tags": [
+        "between you",
+        "both of you",
+        "consoling",
+        "relationship",
+        "scene",
+        "the pair",
+        "two donkeys",
+        "two people"
+      ],
+      "framing": "full",
+      "figures": 2,
+      "source": "imported"
+    },
+    "desk_idea": {
+      "tags": [
+        "desk idea",
+        "scene"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "hiking": {
+      "tags": [
+        "hiking",
+        "scene"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "hoodie_drink": {
+      "tags": [
+        "hoodie drink",
+        "scene"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "override": [
+        "palette"
+      ]
+    },
+    "kaleidoscope": {
+      "tags": [
+        "kaleidoscope",
+        "scene"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported",
+      "override": [
+        "palette"
+      ]
     }
   },
   "role_default": {
