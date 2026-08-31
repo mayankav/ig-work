@@ -6,6 +6,14 @@ Unique moments are enforced upstream, so two decks can never be about the same
 evening. What is left for this module is the other failure: the writer saying
 the same thing twice about two different moments.
 
+That first sentence was an assumption, and for a long time it was false. Upstream
+checked the SEED — the stranger's post id and a hash of their wording — which is
+decided before our moment exists, so two different seeds produced "I sat on the
+edge of the bed at 11:45pm and stared at the dark hallway" twice and both
+shipped. `compose.repetition_faults` is what makes the sentence true now: it
+compares each invented moment against every earlier one, on words and on shape.
+Do not delete it and leave this docstring standing.
+
 The cost of checking has to stay flat as the archive grows, so nothing here ever
 opens a past carousel. Each deck writes a small fingerprint once, when it is
 rendered, and every later check reads fingerprints only.

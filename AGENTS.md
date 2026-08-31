@@ -266,4 +266,30 @@ Any agent working here must not violate these. They exist because each one was a
     rule, taking pending decks with it — which is the exact failure the protection above exists
     to prevent. The upload is additive; the pruner is the only thing that removes.
 
+19. **A new seed does not make a new moment, and the prompt's example is a template.**
+    Uniqueness was checked on the harvested post — its id and a hash of the stranger's wording —
+    which is settled before our moment exists. Nothing compared an invented moment to the ones
+    invented before it, and `novelty.py` said in its own docstring that it did not need to:
+    "Unique moments are enforced upstream." Two different seeds produced *"I sat on the edge of
+    the bed at 11:45pm and stared at the dark hallway"* twice, and both shipped.
+
+    Worse, the repetition was taught. `compose.SYSTEM`'s worked example of a good moment ended
+    *"too tired to go back to bed and too awake to stay there"*, and three of the first four
+    moments copied that construction. **An example in a prompt is a template, whatever the
+    surrounding words call it.** When you show the model one, expect it back.
+
+    `compose.repetition_faults` now compares every invented moment against every earlier one,
+    on two axes, because one detector cannot see both failures: 3-gram word overlap catches the
+    reworded copy (measured: different moments 0.000–0.022, the near-copy pair 0.429, limit
+    0.20), and a shape signature — the posture the moment OPENS on, plus whether it uses the
+    `too ___ to ___` frame — catches the same sentence rebuilt with different nouns, which
+    word overlap scores at 0.000–0.050 and cannot see.
+
+    Refusing is only half of it. A gate that only says no makes the model retry from the same
+    standing start, so `compose.variety_brief` also pushes: it bans the recently used postures
+    BY CATEGORY, rotates the hour and raises temperature. It must never quote a past moment into
+    a prompt — invariant 10 — so it says "do not open on somebody sitting" and never what was
+    sitting, where, or when. `tests/test_compose.py` locks both directions, including that the
+    brief leaks no past text.
+
 See `.agents/skills/suresilly-carousel/references/strategy.md` for the full layered design.

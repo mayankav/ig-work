@@ -182,16 +182,43 @@ The four moments this engine has produced:
 One template with the furniture moved: **[posture] at [time], too X to Y.**
 Numbers 3 and 4 are near-copies and both shipped.
 
-**Nothing checks for this.** The uniqueness test runs on the *seed post* — its id
-and a hash of its original wording — before the moment exists. `novelty.py` then
-checks the finished slide text only, and states the assumption it relies on:
-*"Unique moments are enforced upstream, so two decks can never be about the same
-evening."* Upstream never checks the invented moment against earlier invented
-moments. Two different seeds can produce the same sentence and nothing objects.
+**And the biggest cause was our own instructions.** The prompt that asks for a
+moment carried a worked example of a good one, ending *"too tired to go back to
+bed and too awake to stay there."* The second moment ever published reads *"I
+stood outside the building at 6am with my coat on, too tired to go back to bed
+and too anxious…"*. Three of the first four copied that construction. The model
+was not falling into a habit. It was copying the example we gave it.
 
-This is a known, open gap. It is written here rather than fixed because deciding
-*how similar is too similar* is a judgement about the brand, not a bug with one
-correct answer.
+### Fixed, 2026-09-01
+
+Three changes, because there were three causes:
+
+1. **The example was rewritten** and the `too ___ to ___` construction is banned
+   by name in the prompt.
+2. **Two checks now compare a new moment to old ones**, which nothing did before.
+   Uniqueness used to be tested on the *seed post* — its id and a hash of the
+   stranger's wording — which happens before our moment exists.
+
+   | Check | Catches | Threshold |
+   |---|---|---|
+   | Same words | The near-copy pair that shipped twice | 3-gram overlap ≥ 0.20 |
+   | Same shape | Different nouns, same sentence | opening posture + construction |
+
+   Both are measured on real data, not chosen on taste. Genuinely different
+   moments score 0.000–0.022 on word overlap; the near-copy pair scores 0.429.
+   Word overlap is blind to the shape case — the car moment scores 0.000–0.050
+   against everything before it — which is why there are two checks and not one.
+3. **Code pushes variety in**, rather than only refusing. It works out which
+   postures and constructions were used lately and forbids them by category,
+   rotates the hour, and raises the model's temperature.
+
+None of this shows the model a past moment. Invariant 10 holds: old work is a
+blocklist, never a source. The prompt says *"do not open on somebody sitting"*
+and never says what was sitting, where, or when.
+
+Verified against the four moments already published: they produce four distinct
+signatures, so nothing already shipped would be refused, and the repeat is
+caught. `tests/test_compose.py` locks both directions.
 
 ---
 

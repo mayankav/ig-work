@@ -23,6 +23,15 @@ The model invents. It does not decide whether the invention is acceptable —
 mechanical checks do, and the important one is still the word count: a moment
 sharing seven consecutive words with the seed was copied, not composed. A model
 asked "is this original enough?" will say yes. Counting words has no opinion.
+
+The cost of using a seed this way is that the seed's variety is thrown away on
+purpose. About 1,100 posts a run reduce to one subject from a list of eight plus
+a short phrase, and a model with no memory of last week reaches for the same
+sentence. So a moment is also checked against the moments before it, on words
+and on shape, and the prompt is given a code-chosen instruction about what NOT
+to repeat. Invariant 19, and the part worth remembering: the sentence being
+repeated was the worked example in SYSTEM below. An example in a prompt is a
+template. Read the note above it before editing it.
 """
 
 from __future__ import annotations

@@ -117,6 +117,16 @@ scores 5 and the judge allows it.
 
 Then invent our own moment from it, and throw the post away.
 
+**Throwing the post away is also what makes ideas repeat, so the invented moment is checked
+against the invented moments before it.** All that survives a seed is one subject from a closed
+list of eight, plus a short phrase. About 1,100 posts a run collapse into that, and a model with
+no memory writes its favourite sentence. Two different seeds produced the same bed at the same
+11:45pm twice and both shipped, because uniqueness was tested on the SEED and nothing looked at
+the output. `compose.repetition_faults` now refuses a moment that repeats an earlier one's words
+or its shape, and `compose.variety_brief` forbids the recently used postures by category before
+the model starts. See invariant 19 — and note the cause worth remembering: the prompt's own
+worked example was being copied verbatim into the moments.
+
 **The post is a seed, not a source.** This changed after the rewriting approach failed for a
 week. Rewriting somebody's sentence has to satisfy four demands at once — keep the evening, drop
 the words, drop the name, stay publishable — and they fight each other. The step that hid the
