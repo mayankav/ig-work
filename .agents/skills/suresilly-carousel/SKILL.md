@@ -69,16 +69,28 @@ itself; run it by hand only to re-render a deck you have edited.
 
 ### Which mascot path
 
-**The library is the default — no flag needed.** 165 full-body poses live in `mascot/library/`, generated
+**The library is the default — no flag needed.** 180 full-body poses live in `mascot/library/`, generated
 as 6-up sheets and cut out by `scripts/import_poses.py`. `library.py` picks one per slide by
 matching words in the `**Mascot:**` brief, never repeating within a deck. Costs nothing, needs
 no key. 30 of them are two-donkey scenes for relationship slides.
 
 `--generate` makes a fresh pose per slide instead. It is **obsolete and not in use**: Gemini image
 generation has no free tier at all, so it fails unless billing is switched on. It stays wired for
-the day you want a pose the library does not hold. Both paths read the same brief field.
+the day you want a pose the library does not hold. All paths read the same brief field.
 
-To grow the library instead, see `mascot/GENERATION_PROMPTS.md` — write a 6-up sheet, then
+**To grow the library, free:** `scripts/poses_flux.py`. It calls Cloudflare Workers AI
+`@cf/black-forest-labs/flux-2-klein-4b` — Apache-2.0, so the output can be used commercially —
+with up to four reference images taken from `mascot/library/`, which is what actually holds the
+character. It reuses `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`, already resolved by
+`llm.py`, so there is nothing new to sign up for. Frames land in an inbox for the existing
+`import_poses.py` / `cutout.py` path; nothing on the render path imports it.
+
+Three cautions. The **9B** model beside it in the same price table is non-commercial and the
+code refuses it. Generated green drifts washed-out against `#3C965A`, so check a contact sheet
+against existing poses before importing (invariant 8). And the free allowance is shared with
+`llm.py`'s Cloudflare text vendor — `state/flux_neurons.json` is the spend ledger.
+
+Hand-drawn 6-up sheets still work: see `mascot/GENERATION_PROMPTS.md`, then
 `scripts/import_poses.py`.
 
 Runs the same under Claude Code, Antigravity, a bare shell and CI. It calls the Gemini REST API

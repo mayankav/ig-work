@@ -183,9 +183,23 @@ with no key and no network, using a library of pre-drawn mascot poses.
 First run on a machine: add `--bootstrap` to build the virtualenv and fetch
 Chromium.
 
-Silly is drawn ahead of time in 165 poses, stored in `mascot/library/`. Each
+Silly is drawn ahead of time in 180 poses, stored in `mascot/library/`. Each
 slide's brief is matched to a pose, and no pose repeats inside a deck. Thirty of
 them are two-donkey scenes. This costs nothing and needs no account.
+
+The library is no longer frozen. `scripts/poses_flux.py` adds poses to it for
+nothing, through Cloudflare Workers AI — the same account the third text vendor
+already uses, so there is no new signup and no card. It uses FLUX.2 klein **4B**,
+which is Apache-2.0 and may be used commercially, and it takes four reference
+images so it can be shown the character instead of told about him. The 9B model
+beside it is better and is non-commercial; the code refuses it and two tests say
+so.
+
+It is an offline tool. It writes frames for the existing import and matting path
+and is never called at build time, because a build that needs a network is a
+build that can fail at 8am with nobody watching. Expect the generated green to
+come out washed out against `#3C965A`, and judge new poses on a contact sheet
+next to old ones before importing them.
 
 There is an older path, `--generate`, that draws a fresh picture per slide. It
 is **obsolete**: Gemini image generation has no free tier at all, so it fails
@@ -220,12 +234,60 @@ Needs no key and no network.
 ├── references/                        voice, playbook, design system, citations
 ├── mascot/                            the poses and the character bible
 ├── scripts/                           run.py is the only entry point
-└── tests/                             17 suites. CI runs every one.
+└── tests/                             22 suites. CI runs every one.
 
-carousels/<date>_<slug>/               one published deck: script, slides, contact sheet
+scripts/                               posting and the jobs around it:
+                                       post_to_ig · notify · insights · prune_slides
+carousels/<date>_<slug>/               one deck: carousel.md, contact_sheet.png,
+                                       published.json. slides/*.png are rendered
+                                       but not committed — see below.
 state/                                 what has been used. Shared by every run.
 research/                              ⚠ see the warning below
 ```
+
+---
+
+## Where the slides live, and for how long
+
+Instagram fetches each slide **once**, when the post is being assembled, and
+serves the carousel from its own servers after that. The public URL only has to
+answer for about a minute.
+
+So the two places a slide is kept have different jobs:
+
+| | what it is for | how long |
+|---|---|---|
+| `gh-pages` → `media.suresilly.com` | the address Instagram reads from | 14 days |
+| the repo | the archive you look back at | forever |
+
+`scripts/prune_slides.py` runs **after** the post and takes down decks past the
+window. The repo keeps `carousel.md` and `contact_sheet.png`, which is what a
+deck is judged by; the nine full-size PNGs are gitignored. That is about 1.2 MB
+a deck instead of 6.8 MB.
+
+This was not tidying. Nothing removed anything, so the host grew ~14 MB a day
+against a 1 GB GitHub Pages limit, and the same PNGs went into git history as
+well. Both ceilings were about nine weeks out.
+
+**A held deck is the exception to watch.** It is posted days later from that same
+host, so decks waiting in `state/pending/` are protected by name and their slides
+stay in git until somebody answers. If a held deck's slides are already gone, the
+prune says so loudly and carries on — stopping would jam every later run.
+
+## What happened to a deck after it went out
+
+`state/insights.jsonl`, written by `scripts/insights.py` on its own daily
+schedule. Three days after a deck posts it records reach, saves, shares,
+interactions and profile visits, keyed on the media id kept in the deck folder.
+
+It reads. It never decides. Nothing in the pipeline may import it and it may
+import nothing from the pipeline — `tests/test_insights.py` enforces both, because
+a number that quietly starts choosing hooks is how invariant 11 stops being true.
+
+It needs one permission added to `IG_ACCESS_TOKEN` that posting does not need
+(`instagram_manage_insights`, or `instagram_business_manage_insights` on an
+Instagram-login token). Until then the job fails daily and prints the steps.
+Decks published before this existed carry no media id and cannot be measured.
 
 ---
 
@@ -240,7 +302,15 @@ has 84K. It puts `@mindfulmft` at 1.1M against a real figure near 700K. The hook
 table attributes a hundred hooks to `@habit.hacker`, `@darkpsych` and
 `@shadow.work`, which are not real accounts, under an "Engagement Indicator"
 column that nobody could have measured, because Instagram does not publish saves
-or shares to anyone but the owner.
+or shares for somebody else's account.
+
+For **this** account it does, and that is worth saying plainly so the warning
+above is not read as "the number is unobtainable". @suresilly is the owner of
+its own posts, and `scripts/insights.py` now reads the real saves, shares, reach,
+interactions and profile visits three days after each deck goes out, into
+`state/insights.jsonl`. The metric a model invented is free from a token this
+repo already holds. It is a ledger to read, never an input to a gate — see
+invariant 17.
 
 Those files were written by a model and labelled as verified, and some of this
 engine's copy rules came from them. Evidence that is real, with sources, is in
@@ -255,3 +325,5 @@ The short version: no text inside mascot artwork, gates abort rather than warn,
 a harvested post is a seed and never a source, old decks are a blocklist and
 never material, a citation is proved against a library catalogue before a model
 can put an author's name on a slide, and there is one entry point with one state.
+Two more since: what we publish is measured and the measurement never decides,
+and the public host is not the archive.
