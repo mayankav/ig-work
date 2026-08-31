@@ -102,6 +102,97 @@ families reject a concept exactly as they reject a moment.
 A model may write, and it may refuse. **It may never approve.** Every yes in
 this pipeline comes from code.
 
+### The full map, with every route
+
+```mermaid
+flowchart TD
+    A[Schedule 08:00 and 20:00 IST<br/>or a manual run] --> B{SS_HALT set,<br/>or state/HALT?}
+    B -->|yes| STOP1([Stop. Nothing runs.])
+    B -->|no| C{Is state/ clean<br/>and current?}
+    C -->|dirty or behind| STOP2([Stop. Pull or commit first.])
+    C -->|ok| D{Which source?}
+
+    D -->|--source feed<br/>DEFAULT| E[49 measured phrases<br/>searched on Bluesky]
+    D -->|--source concept| F[concepts.json<br/>best unused term]
+
+    E --> G[~1100 posts fetched]
+    G --> H[Reject 9 families of harm]
+    H --> I[Keep only filmable posts,<br/>rank by tension]
+    I --> J{Seen this post<br/>before? id + hash}
+    J -->|yes| I
+    J -->|no| K
+
+    F --> K[SEED:<br/>1 of 8 subjects<br/>+ 1 short phrase]
+
+    K --> L[["A model INVENTS a moment.<br/>The post's own words are thrown away."]]
+    L --> M{Safety judge<br/>may this be published?}
+    M -->|no| I
+    M -->|yes| N[Plan the deck<br/>4 attempts]
+    N -->|all 4 fail| STOP3([Stop. No deck today.])
+    N --> O[Write 9 slides<br/>7 attempts]
+    O --> P{Critic, on a vendor that<br/>did NOT write the deck}
+    P -->|blocks| STOP4([Stop. Never published.])
+    P -->|passes| Q[Gates: coherence, novelty,<br/>citation proved, copy audit]
+    Q -->|fails| STOP5([Stop.])
+    Q -->|passes| R[Render 9 PNGs.<br/>Generate a pose per slide;<br/>fall back to the library on any failure]
+
+    R --> S{Score out of 100}
+    S -->|below the bar| T[HOLD. Send to Telegram]
+    T --> U{Your answer}
+    U -->|publish| V
+    U -->|rerun| STOP6([Dropped. Next run builds another.])
+    S -->|above the bar| V[Upload slides to gh-pages]
+
+    V --> W[Wait until the images<br/>answer publicly]
+    W --> X[Post to Instagram]
+    X --> Y[Remove slides older<br/>than 14 days]
+    X --> Z[3 days later:<br/>record reach, saves, shares]
+    Z --> ZZ[[insights.jsonl<br/>READ ONLY. Never changes<br/>what gets published.]]
+```
+
+### Why the same ideas come back
+
+Different posts do **not** give different ideas, and the double-boxed step above
+is where it happens.
+
+About 1,100 posts are fetched. Roughly 8 survive the harm and shape filters. But
+a surviving post is not carried forward — **it is reduced to two things**: one
+subject from a closed list of eight (`anxiety, burnout, sleep,
+executive_dysfunction, self_worth, boundaries, people_pleasing, numbing`) and one
+short phrase describing the problem underneath.
+
+That is deliberate. It is invariant 9: a harvested post is a seed, never a
+source, and no run of seven words may survive from the post into what we
+publish. It is what keeps us from republishing a stranger's evening.
+
+The cost is that **the variety of those 1,100 posts is thrown away on purpose.**
+What reaches the model is a category. The model then invents a scene, with no
+memory of any scene it has invented before, so it falls back on its own favourite
+sentence shape.
+
+The four moments this engine has produced:
+
+| # | Moment |
+|---|---|
+| 1 | At 11pm I stood in the kitchen and washed all his heavy ceramic bowls |
+| 2 | I stood outside the building at 6am, too tired to go back to bed |
+| 3 | I sat on the edge of the bed at 11:45pm, dark hallway, too tired to stand |
+| 4 | I sat on the edge of the bed at 11:45pm, dark hallway, dreading the morning |
+
+One template with the furniture moved: **[posture] at [time], too X to Y.**
+Numbers 3 and 4 are near-copies and both shipped.
+
+**Nothing checks for this.** The uniqueness test runs on the *seed post* — its id
+and a hash of its original wording — before the moment exists. `novelty.py` then
+checks the finished slide text only, and states the assumption it relies on:
+*"Unique moments are enforced upstream, so two decks can never be about the same
+evening."* Upstream never checks the invented moment against earlier invented
+moments. Two different seeds can produce the same sentence and nothing objects.
+
+This is a known, open gap. It is written here rather than fixed because deciding
+*how similar is too similar* is a judgement about the brand, not a bug with one
+correct answer.
+
 ---
 
 ## The harvested post is a seed, never a source
