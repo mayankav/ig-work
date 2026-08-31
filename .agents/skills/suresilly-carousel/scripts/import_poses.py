@@ -14,14 +14,52 @@ Handles three input shapes:
 and three background types, detected automatically: chroma green, flat white or
 paper, and existing alpha.
 
+    # LOOK FIRST. Mattes, gates and writes a judging sheet. Touches nothing.
+    import_poses.py ~/inbox --preview /tmp/silly
+
     # a 6-up sheet, name the cells in reading order
-    import_poses.py sheets/batch1.png --grid 3x2 --fullbody \
+    import_poses.py sheets/batch1.png --grid 3x2 \
         --names slumped,pointing,shrugging,covering_eyes,leaning_in,arms_crossed
 
     # a folder of singles, named from their filenames
-    import_poses.py inbox/ --fullbody
+    import_poses.py inbox/
 
 Anything that fails QA is reported and NOT written, with the reason.
+
+The gates, and why they are here rather than where they used to be
+------------------------------------------------------------------
+Every one of the 180 poses in the library arrived through this script, and
+until now this script checked almost nothing. `qa()` was called with
+allow_detached=True and strict_framing=False, which switches off two of its
+five gates, and the three CHARACTER gates — no text, on-palette colour, a
+correct pair of eyes — lived in poses_flux.py, a module this one does not
+import. So the strict text detector never ran on a single imported pose, and
+neither did the eye check or any colour check at all.
+
+They now live in cutout.py, which both paths import, and run here on every
+cell. All of them run, and all failures are reported together: stopping at the
+first one told you a pose failed once when it had failed three times.
+
+Two deliberate choices about who decides:
+
+  · --preview writes a judging sheet and NOTHING else. The sheet puts each new
+    pose on three real slide grounds beside three library poses, because a pose
+    is judged against the body of work (invariant 8) and against the background
+    it will actually be printed on — not on a checkerboard, and not after it
+    has already been added to the library, which was the only way to see one
+    before.
+
+  · The pupil gate REPORTS here and blocks on the generation path. It refuses
+    three real library poses — guarded, chasing, lab_coat — which was an
+    accepted cost while it only saw generated frames, where the remedy is
+    another seed and a seed is free. Artwork a person chose and handed over is
+    not free to re-roll, and the picture is right there to look at. Text and
+    palette still block; they are invariants, not judgement calls.
+
+--correct-palette is off by default. The generation path corrects colour
+automatically because it knows the model drifts; here the artwork came from a
+person, and silently rewriting their colours is not this script's decision to
+make. The measured brand-green share is printed for every pose either way.
 """
 
 from __future__ import annotations
@@ -35,8 +73,17 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from imaging import contact_sheet, drop_neighbour_bleed, tight_crop  # noqa: E402
-from cutout import QAFailure, auto_chroma_matte, detect_key_hue, qa  # noqa: E402
+from imaging import (  # noqa: E402
+    contact_sheet, drop_neighbour_bleed, judging_sheet, tight_crop,
+)
+from cutout import (  # noqa: E402
+    QAFailure, assert_has_pupils, assert_no_text, assert_on_palette,
+    auto_chroma_matte, body_green_delta, correct_palette, detect_key_colour, qa,
+)
+
+# The backdrop every prompt in GENERATION_PROMPTS.md asks for. Only used to
+# give an already-transparent input something to be text-checked against.
+CHROMA_BGR = (255, 0, 255)
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 LIBRARY = SKILL_DIR / "mascot" / "library"
@@ -92,6 +139,165 @@ def matte_flat(bgr: np.ndarray) -> np.ndarray:
 
 
 
+def _flatten_for_text(cell: np.ndarray, rgba: np.ndarray, kind: str) -> np.ndarray:
+    """The BGR frame the text gate should read.
+
+    Text has to be looked for BEFORE matting: matting throws a caption away and
+    then the artwork looks clean. For a chroma or paper input the original cell
+    is that frame. For an input that arrived already transparent there is no
+    "before", so the pose is composited back onto the key — the caption, if
+    there is one, is opaque and survives the trip.
+    """
+    if kind != "alpha":
+        return cell[:, :, :3]
+    a = rgba[:, :, 3:4].astype(np.float32) / 255.0
+    key = np.zeros_like(rgba[:, :, :3], np.float32)
+    key[:, :] = CHROMA_BGR
+    return (rgba[:, :, :3].astype(np.float32) * a + key * (1 - a)).astype(np.uint8)
+
+
+# The pupil gate is ADVISORY here and blocking on the generation path, and the
+# difference is a cost asymmetry, not a difference of opinion about the gate.
+#
+# assert_has_pupils refuses three real library poses — `guarded`, whose lids are
+# narrowed, `chasing` and `lab_coat`. They are good poses. That was an accepted
+# cost while the gate only ever saw freshly generated frames, because there the
+# remedy is another seed and a seed is free. Its own test in test_poses_flux.py
+# says so in as many words, and names those three.
+#
+# On this path the artwork came from a person who chose it. Re-rolling is not
+# free, the picture is right there to look at, and a gate with a known 1.7%
+# false-refusal rate on the body of work should not be the thing that stops it.
+# So it reports and does not block: the sheet shows the pose, the note says
+# what the gate thinks, and the person decides.
+#
+# Nothing is loosened by this. The gate is unchanged and still blocks on the
+# generation path, where the premise it was calibrated under still holds.
+ADVISORY = {"pupils"}
+
+# Gates a person may overrule with --allow. `text` is not among them: invariant
+# 3 admits no exceptions and no amount of looking at a picture makes a caption
+# acceptable. `palette` is, because the brand colour is the brand owner's to
+# change and a deliberate palette shift is a decision, not a defect — but an
+# overruled pose records the fact in poses.json, so a colour that entered the
+# library by exception can always be told apart from one that passed.
+OVERRIDABLE = {"palette"}
+
+
+def run_gates(cell: np.ndarray, rgba: np.ndarray, kind: str, name: str,
+              allow: set[str] | None = None) -> tuple[list[str], list[str], list[str]]:
+    """Every gate, all of them, reported rather than stopping at the first.
+
+    Returns (blocking, advisory, overridden). `blocking` empty means the pose
+    may be written. Nothing here writes anything.
+
+    Reporting all of them is the point. The old path ran one composite gate and
+    stopped, so a pose that failed twice looked like a pose that failed once,
+    and you fixed the wrong thing and re-rolled for nothing.
+    """
+    allow = (allow or set()) & OVERRIDABLE
+    blocking: list[str] = []
+    advisory: list[str] = []
+    overridden: list[str] = []
+
+    def gate(label: str, fn) -> None:
+        try:
+            fn()
+        except QAFailure as e:
+            # Every gate already names itself in its own message, so prefixing
+            # with the label again reads "palette: palette: only 0.4% ...".
+            msg = str(e)
+            line = msg if msg.startswith(f"{label}:") else f"{label}: {msg}"
+            if label in allow:
+                overridden.append(line)
+            elif label in ADVISORY:
+                advisory.append(line)
+            else:
+                blocking.append(line)
+
+    # 1 · invariant 3, on the pre-matte frame. Strictly stronger than qa()'s
+    #     bottom-strays heuristic, which only reads the lowest fifth of the
+    #     frame and cannot see a watermark or a signature.
+    gate("text", lambda: assert_no_text(_flatten_for_text(cell, rgba, kind), name))
+    # 2 · is this actually made of Silly's green
+    gate("palette", lambda: assert_on_palette(rgba, name))
+    # 3 · the eyes, which is the other way a generated face reads as wrong
+    gate("pupils", lambda: assert_has_pupils(rgba, name))
+    # 4 · the structural gates, unchanged. allow_detached and the loose framing
+    #     are correct HERE and wrong for a generated frame: a sheet cell is a
+    #     tight crop of a grid, so ear tips legitimately reach an edge and a
+    #     detached fragment is normal.
+    gate("qa", lambda: qa(rgba, src_shape=cell.shape[:2], allow_detached=True,
+                          strict_framing=False,
+                          key_bgr=detect_key_colour(cell[:, :, :3]) if kind == "chroma" else None))
+    return blocking, advisory, overridden
+
+
+def near_duplicates(rgba: np.ndarray, library: Path, top: int = 1,
+                    thresh: float = 0.93) -> list[tuple[str, float]]:
+    """Existing poses whose silhouette matches this one.
+
+    Compares alpha silhouettes on a common 64x64 grid, which is deliberately
+    crude: it is looking for "you already have this pose", not for a subtle
+    difference in expression. A duplicate is a real cost — library.py picks a
+    pose by tag overlap, so two near-identical poses split the same tags and
+    make the choice worse, not better.
+
+    Advisory. It is printed, never enforced: a mirrored pair is a legitimate
+    near-duplicate and the library has 36 of them on purpose.
+    """
+    def sig(a: np.ndarray) -> np.ndarray:
+        m = (a > 128).astype(np.float32)
+        return cv2.resize(m, (64, 64), interpolation=cv2.INTER_AREA)
+
+    if rgba.shape[2] < 4:
+        return []
+    mine = sig(rgba[:, :, 3])
+    hits = []
+    for p in sorted(library.glob("*.png")):
+        if p.stem.startswith("_"):
+            continue
+        other = cv2.imread(str(p), cv2.IMREAD_UNCHANGED)
+        if other is None or other.shape[2] < 4:
+            continue
+        theirs = sig(other[:, :, 3])
+        inter = np.minimum(mine, theirs).sum()
+        union = np.maximum(mine, theirs).sum()
+        iou = float(inter / union) if union else 0.0
+        if iou >= thresh:
+            hits.append((p.stem, iou))
+    return sorted(hits, key=lambda t: -t[1])[:top]
+
+
+# Fields import owns and may overwrite. Everything else in a pose's manifest
+# entry is curated by hand and survives a re-import untouched.
+IMPORT_OWNED = {"tags", "framing", "figures", "source", "mirrored", "override"}
+
+
+def merge_pose(manifest: dict, name: str, fields: dict) -> None:
+    """Update a pose entry in place, preserving every field import does not own.
+
+    This is the whole bug that made re-importing dangerous. The old code did
+    `manifest["poses"][name] = {...}` — a wholesale replacement that carefully
+    merged `tags` from the prior entry and then dropped everything else on the
+    floor. 170 of the 180 poses carry hand-tuned `valence` and `arousal`, and
+    library.py scores poses on exactly those two numbers, falling back to
+    (0.0, 1.5) when they are missing. So re-importing a sheet to fix one bad
+    cell silently flattened the mood scoring of the five good ones beside it,
+    and nothing anywhere said so.
+
+    The comment above the old `tags` merge described this failure exactly, for
+    tags, and was never carried to the fields next to it. Hence a whitelist of
+    what import owns rather than a list of what to rescue: a field added to a
+    pose entry tomorrow is preserved by default, which is the safe direction.
+    """
+    entry = manifest.setdefault("poses", {}).setdefault(name, {})
+    stale = set(entry) & IMPORT_OWNED - set(fields)
+    for key in stale:
+        del entry[key]
+    entry.update(fields)
+
+
 LR_SWAP = [("left", "\x00"), ("right", "left"), ("\x00", "right")]
 
 
@@ -126,7 +332,7 @@ def cells(img: np.ndarray, grid: str | None):
             yield img[ri * ch:(ri + 1) * ch, ci * cw:(ci + 1) * cw]
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("src", help="image file or a folder of images")
@@ -137,10 +343,45 @@ def main() -> None:
                     help="two Sillys in the frame — marks them so selection can find them")
     ap.add_argument("--mirror", action="store_true",
                     help="also write a horizontally flipped copy of each pose as <name>_m")
+    # Full body is the DEFAULT, and --bust is the opt-out.
+    #
+    # It used to be the other way round: --fullbody opted in, and forgetting it
+    # silently recorded the pose as "bust", which loses tie-breaks in
+    # library.py's selection. Nobody would ever see that happen. All 180 poses
+    # in the library are full — there is not one bust among them — so the flag
+    # that had to be remembered every single time was the one for the case that
+    # has never once occurred.
+    ap.add_argument("--bust", action="store_true",
+                    help="head-and-shoulders artwork, not a full standing figure "
+                         "(the library has none; full body is the default)")
     ap.add_argument("--fullbody", action="store_true",
-                    help="mark these as full-body (they win ties over the old bust-only poses)")
+                    help=argparse.SUPPRESS)   # accepted, now the default, kept
+                                              # so the commands in
+                                              # GENERATION_PROMPTS.md still run
+    ap.add_argument("--allow", default="",
+                    help="comma-separated gates to overrule, e.g. --allow palette. "
+                         "Only 'palette' may be overruled, and the override is "
+                         "recorded in poses.json. 'text' may not.")
+    ap.add_argument("--correct-palette", action="store_true",
+                    help="pull the body green and cream back onto the brand palette "
+                         "before matting. Off by default: this rewrites your artwork.")
+    ap.add_argument("--preview", metavar="DIR",
+                    help="matte, gate and write a judging sheet to DIR. Writes NOTHING "
+                         "to the library and nothing to the manifest.")
     ap.add_argument("--dry-run", action="store_true")
-    a = ap.parse_args()
+    return ap
+
+
+def main_argv(argv: list[str] | None = None) -> None:
+    a = build_parser().parse_args(argv)
+    allow = {t.strip() for t in a.allow.split(",") if t.strip()}
+    refused = allow - OVERRIDABLE
+    if refused:
+        sys.exit(f"ERROR: --allow {','.join(sorted(refused))} refused. Only "
+                 f"{'/'.join(sorted(OVERRIDABLE))} may be overruled; text is an "
+                 f"invariant, not a judgement call.")
+    preview_dir = Path(a.preview) if a.preview else None
+    writing = not (a.dry_run or preview_dir)
 
     src = Path(a.src)
     files = sorted(p for p in (src.iterdir() if src.is_dir() else [src])
@@ -165,6 +406,7 @@ def main() -> None:
     manifest = json.loads(MANIFEST.read_text()) if MANIFEST.is_file() else {"poses": {}}
 
     written, failed, idx = [], [], 0
+    entries: list[dict] = []
     for f in files:
         img = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)
         if img is None:
@@ -174,43 +416,65 @@ def main() -> None:
             name = (names[idx] if names and idx < len(names)
                     else (f.stem if not a.grid else f"{f.stem}_{idx + 1}"))
             idx += 1
+            if a.correct_palette and cell.shape[2] == 3:
+                # Opt-in, and it happens BEFORE matting so what is judged and
+                # what is written are the same picture — the same ordering the
+                # generation path uses for the same reason.
+                cell = correct_palette(cell)
             rgba, kind = to_rgba(cell)
             # A pair scene's second donkey is legitimately small and often sits
             # near a side edge — exactly what drop_neighbour_bleed is designed
             # to delete. Skip it for --pair imports so it doesn't eat the
             # partner donkey; single-figure cells still get the bleed cleanup.
             rgba = tight_crop(rgba if a.pair else drop_neighbour_bleed(rgba))
-            key = detect_key_hue(cell[:, :, :3]) if kind == "chroma" else None
-            try:
-                qa(rgba, src_shape=cell.shape[:2], allow_detached=True,
-                   strict_framing=False, key_hue=key)
-            except QAFailure as e:
-                failed.append(f"{name}: {e}")
-                print(f"  ✗ {name:20s} {str(e)[:62]}")
+
+            blocking, advisory, overridden = run_gates(cell, rgba, kind, name, allow)
+            dupes = near_duplicates(rgba, LIBRARY)
+            notes = list(advisory) + [f"[OVERRULED] {o}" for o in overridden]
+            found = body_green_delta(rgba)
+            green = (f"body green #{found[1][2]:02X}{found[1][1]:02X}{found[1][0]:02X} "
+                     f"({found[0]:.0f} dE off brand)") if found else "no green found"
+            notes.append(f"{green} · {rgba.shape[1]}x{rgba.shape[0]} · bg={kind}")
+            if dupes:
+                notes.append("near-duplicate of " + ", ".join(
+                    f"{n} ({v:.0%} silhouette overlap)" for n, v in dupes))
+            entries.append({"name": name, "rgba": rgba, "ok": not blocking,
+                            "verdicts": blocking + notes})
+
+            if blocking:
+                failed.append(f"{name}: {blocking[0]}")
+                print(f"  ✗ {name:20s} {len(blocking)} gate(s) failed")
+                for line in blocking:
+                    print(f"      {line[:96]}")
                 continue
             print(f"  ✓ {name:20s} {rgba.shape[1]:3d}x{rgba.shape[0]:3d}  bg={kind}")
-            # MERGE, never replace. Re-importing a sheet used to reset a pose's
-            # tags to just its name, which silently gutted the curated
-            # vocabulary — including the hook and CTA defaults — and only
-            # surfaced later as bad pose choices.
-            prior = manifest.get("poses", {}).get(name, {}).get("tags", [])
-            base_tags = sorted(set(prior + [name.replace("_", " ")] + extra))
-            if not a.dry_run:
+            for line in notes:
+                print(f"      {line[:96]}")
+
+            base_tags = sorted(set(
+                manifest.get("poses", {}).get(name, {}).get("tags", [])
+                + [name.replace("_", " ")] + extra))
+            if writing:
                 cv2.imwrite(str(LIBRARY / f"{name}.png"), rgba)
-                manifest["poses"][name] = {
-                    # sorted(set(...)) here, not append: base_tags already
-                    # carries these pair markers on a re-import (they merged
-                    # in from `prior` last time), and appending again without
-                    # dedup double-lists them — which then double-counts them
-                    # in scoring, since _overlap() sums over every tag in the
-                    # list, duplicates included.
-                    "tags": sorted(set(base_tags + (
-                        ["two people", "both of you", "the pair",
-                         "relationship", "between you"] if a.pair else []))),
-                    "framing": "full" if a.fullbody else "bust",
+                # sorted(set(...)) here, not append: base_tags already carries
+                # these pair markers on a re-import (they merged in from the
+                # prior entry last time), and appending again without dedup
+                # double-lists them — which then double-counts them in scoring,
+                # since _overlap() sums over every tag in the list.
+                pair_tags = (["two people", "both of you", "the pair",
+                              "relationship", "between you"] if a.pair else [])
+                fields = {
+                    "tags": sorted(set(base_tags + pair_tags)),
+                    "framing": "bust" if a.bust else "full",
                     "figures": 2 if a.pair else 1,
                     "source": "imported",
                 }
+                if overridden:
+                    # Recorded, so a pose that entered by exception can always be
+                    # told apart from one that passed on its own.
+                    fields["override"] = sorted(
+                        {o.split(":")[0] for o in overridden})
+                merge_pose(manifest, name, fields)
             written.append(name)
 
             if a.mirror:
@@ -219,31 +483,37 @@ def main() -> None:
                 # subtly the wrong way round — selection breaks ties against them.
                 mname = f"{name}_m"
                 print(f"  ✓ {mname:20s} mirrored")
-                if not a.dry_run:
+                if writing:
                     cv2.imwrite(str(LIBRARY / f"{mname}.png"), cv2.flip(rgba, 1))
                     prior_m = manifest.get("poses", {}).get(mname, {}).get("tags", [])
-                    manifest["poses"][mname] = {
+                    merge_pose(manifest, mname, {
                         "tags": sorted(set(prior_m + mirror_tags(base_tags))),
-                        "framing": "full" if a.fullbody else "bust",
+                        "framing": "bust" if a.bust else "full",
                         "figures": 2 if a.pair else 1,
                         "source": "imported",
                         "mirrored": True,
-                    }
+                    })
                 written.append(mname)
 
-    if not a.dry_run and written:
+    if preview_dir is not None and entries:
+        sheet = judging_sheet(entries, LIBRARY, preview_dir / "judging_sheet.png")
+        print(f"\njudging sheet: {sheet}")
+        print("Nothing was written to the library. Look at the sheet, then re-run "
+              "without --preview to import.")
+
+    if writing and written:
         MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
         contact_sheet(LIBRARY)
 
-    verb = "would import" if a.dry_run else "imported"
+    verb = "imported" if writing else "would import"
     print(f"\n{len(written)} {verb}, {len(failed)} rejected")
     if failed:
         print("Rejected (nothing written for these):")
         for x in failed:
             print("  -", x)
-    if written and not a.dry_run:
+    if written and writing:
         print(f"\nAdd tags in {MANIFEST} so briefs match them well.")
 
 
 if __name__ == "__main__":
-    main()
+    main_argv()

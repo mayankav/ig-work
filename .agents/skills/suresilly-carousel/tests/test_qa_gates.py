@@ -56,7 +56,7 @@ report("clipped_left", l, "reject")
 g = clean()
 cv2.circle(g, (300, 300), 34, (255, 0, 255, 255), -1)
 try:
-    qa(g, src_shape=(600,600), key_hue=150.0); print("  \u2717\u2717 key_residue          expected reject got accept"); FAILURES.append("key_residue")
+    qa(g, src_shape=(600,600), key_bgr=(255,0,255)); print("  \u2717\u2717 key_residue          expected reject got accept"); FAILURES.append("key_residue")
 except QAFailure as e:
     print(f"  \u2713 key_residue          expected reject got reject  [{str(e)[:66]}]")
 

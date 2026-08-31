@@ -23,6 +23,13 @@ import cv2
 import numpy as np
 
 
+# Below this brightness a pixel's hue and saturation carry no information:
+# saturation is (max-min)/max, so a near-black BGR (5,0,3) reports as fully
+# saturated with an arbitrary hue. Both the key mask and the residue gate use
+# this floor, so they agree about what the backdrop colour is.
+KEY_MIN_VALUE = 40
+
+
 class QAFailure(Exception):
     """A pose failed a quality gate. Nothing is written when this is raised."""
 
@@ -32,6 +39,23 @@ def detect_key_hue(bgr: np.ndarray) -> float:
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     border = np.concatenate([hsv[0], hsv[-1], hsv[:, 0], hsv[:, -1]])
     return float(np.median(border, axis=0)[0])
+
+
+def detect_key_colour(bgr: np.ndarray) -> np.ndarray:
+    """Median BGR of the frame border — the backdrop colour itself.
+
+    The hue alone is not enough to identify a backdrop, and detect_key_hue()
+    below is kept only for callers that genuinely want the hue. A flat chroma
+    backdrop is ONE colour, and knowing which one is what lets a lilac tissue
+    box survive on a magenta key: same hue family, 113-154 units away in BGR,
+    where the backdrop's own pixels sit within 15 of their median.
+    """
+    border = np.concatenate([bgr[0], bgr[-1], bgr[:, 0], bgr[:, -1]])
+    return np.median(border.astype(np.float32), axis=0)
+
+
+KEY_TOL = 60.0      # BGR distance that still counts as the backdrop itself
+KEY_REACH = 3       # px from the backdrop within which a blend is its edge
 
 
 def auto_chroma_matte(bgr: np.ndarray) -> np.ndarray:
@@ -46,15 +70,37 @@ def auto_chroma_matte(bgr: np.ndarray) -> np.ndarray:
     Shared by the generation path and by import_poses.py so there is one
     implementation to get right.
     """
-    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
-    border = np.concatenate([hsv[0], hsv[-1], hsv[:, 0], hsv[:, -1]])
-    med = np.median(border, axis=0)
-    hue = float(med[0])
+    # Two tiers, and the split is what stops the key eating the artwork.
+    #
+    # CORE is the backdrop itself: pixels within KEY_TOL of the measured border
+    # colour. A flat chroma backdrop is one colour and stays within 15 units of
+    # its own median, so this is a generous match with room for JPEG noise.
+    #
+    # EDGE is the antialiased blend between the backdrop and the subject. Those
+    # pixels are genuinely part-backdrop and have to go, but they are far from
+    # the key colour by construction — a 50% blend of magenta and green sits
+    # ~118 units away — so a colour match alone leaves a fringe. They are caught
+    # by hue, and ONLY within KEY_REACH pixels of the core, which is the whole
+    # point: an antialiased edge is by definition next to the backdrop.
+    #
+    # The previous version had only the hue tier, applied everywhere. That is
+    # why a lilac tissue box vanished out of a scene: at 113-154 units from the
+    # key it is obviously not the backdrop, but it shares the hue family, and
+    # nothing was asking about anything but hue. Sitting on a rug in the middle
+    # of the picture, it is nowhere near the backdrop and now survives.
+    key = detect_key_colour(bgr)
+    core = np.linalg.norm(bgr.astype(np.float32) - key, axis=2) <= KEY_TOL
 
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+    hue = float(cv2.cvtColor(np.uint8([[key]]), cv2.COLOR_BGR2HSV)[0, 0, 0])
     # Hue wraps at 180 in OpenCV, so a magenta key near 150 needs circular distance.
     dh = np.abs(hsv[:, :, 0].astype(np.int16) - hue)
     dh = np.minimum(dh, 180 - dh)
-    mask = ((dh <= 22) & (hsv[:, :, 1] >= 70) & (hsv[:, :, 2] >= 40)).astype(np.uint8)
+    hue_band = ((dh <= 22) & (hsv[:, :, 1] >= 70) & (hsv[:, :, 2] >= KEY_MIN_VALUE))
+
+    reach = np.ones((2 * KEY_REACH + 1,) * 2, np.uint8)
+    near_core = cv2.dilate(core.astype(np.uint8), reach, 1).astype(bool)
+    mask = (core | (hue_band & near_core)).astype(np.uint8)
 
     # Remove EVERY key-coloured pixel, not only the border-connected ones. A
     # chroma backdrop is a colour the character never uses, so an enclosed patch
@@ -94,7 +140,7 @@ def auto_chroma_matte(bgr: np.ndarray) -> np.ndarray:
 
 def qa(rgba: np.ndarray, *, src_shape: tuple[int, int],
        allow_detached: bool = False, strict_framing: bool = True,
-       key_hue: float | None = None) -> None:
+       key_bgr: np.ndarray | tuple[int, int, int] | None = None) -> None:
     """Every gate raises QAFailure naming itself. Nothing is saved on failure."""
     alpha = rgba[:, :, 3]
     solid = (alpha > 128).astype(np.uint8)
@@ -131,15 +177,24 @@ def qa(rgba: np.ndarray, *, src_shape: tuple[int, int],
                 f"no_bottom_strays: {len(similar)} similar-height components in a row "
                 f"below 80% height — this is what baked-in caption text looks like")
 
-    # 3 · leftover backdrop colour. Must be measured against the ACTUAL key,
-    #     not hardcoded green: the character is green, so on a magenta backdrop
-    #     a perfectly clean edge is strongly green-dominant. Callers that know
-    #     the key pass its hue; the check is skipped when they do not.
-    if key_hue is not None:
-        hsv = cv2.cvtColor(rgba[:, :, :3], cv2.COLOR_BGR2HSV)
-        dh = np.abs(hsv[:, :, 0].astype(np.int16) - key_hue)
-        dh = np.minimum(dh, 180 - dh)
-        residue = (dh <= 18) & (hsv[:, :, 1] > 90) & (alpha > 200)
+    # 3 · leftover backdrop colour. Measured as distance from the ACTUAL key
+    #     COLOUR, which is the same question auto_chroma_matte's core tier asks,
+    #     so the matte and the gate cannot disagree about what the backdrop was.
+    #
+    #     It used to ask about HUE, and that was wrong twice over. It called a
+    #     lilac tissue box "backdrop" because lilac is magenta-family, and it
+    #     called black outlines "backdrop" because saturation is a ratio and
+    #     BGR (5,0,3) reports as fully saturated magenta — two outlined poses
+    #     measured 1.0% and 0.9% residue whose pixels had a median brightness of
+    #     3 out of 255, and showed no fringe whatever on a real slide ground.
+    #
+    #     Measured over all 18 library sheet cells and the six scene imports,
+    #     the colour-distance definition reports 0.000% residue everywhere,
+    #     because there genuinely is none.
+    if key_bgr is not None:
+        key = np.asarray(key_bgr, dtype=np.float32)
+        dist = np.linalg.norm(rgba[:, :, :3].astype(np.float32) - key, axis=2)
+        residue = (dist <= KEY_TOL) & (alpha > 200)
         frac = residue.sum() / max(1, solid.sum())
         if frac > 0.004:
             raise QAFailure(
@@ -174,3 +229,414 @@ def qa(rgba: np.ndarray, *, src_shape: tuple[int, int],
     fill = solid.sum() / total
     if fill < 0.22:
         raise QAFailure(f"subject_size: subject fills only {fill:.0%} of its bounding box (<22%)")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Shared character gates
+# ═════════════════════════════════════════════════════════════════════════════
+#
+# These four gates — no text, on-palette colour, a correct pair of eyes, and the
+# palette correction that feeds them — were written for the generation path in
+# poses_flux.py and lived there alone. That was a mistake with a measurable
+# cost, and moving them here is the fix.
+#
+# The import path is where artwork ACTUALLY enters this project. Every one of
+# the 180 poses in the library arrived through import_poses.py, and not one of
+# them was ever checked for text, for eyes, or for colour, because those checks
+# sat in a module import_poses.py does not import. The evidence is in the
+# library: sage.png is 24.9 dE76 off the brand green at saturation 81 against a
+# library median of 145 — the washed-out drift AGENTS.md warns about, shipped,
+# because nothing on the way in measured it.
+#
+# So they live here now, in the module both paths already depend on, and
+# poses_flux.py imports them back. One implementation, both ends — the same
+# argument auto_chroma_matte is shared under.
+#
+# Nothing here is loosened in the move. assert_no_text is a strict SUPERSET of
+# qa()'s bottom-strays heuristic: qa() only looks below 80% of the frame, since
+# that is where a sheet cell's caption sits and looking higher would reject
+# legitimate detached artwork; this one reads the whole frame, which is what
+# catches a corner watermark or a signature across the chest.
+def backdrop_mask(bgr: np.ndarray, tolerance: int = 44) -> np.ndarray:
+    """Pixels close to the frame's border colour — the flat backdrop.
+
+    Border median, the same trick cutout.py and import_poses.py both use, so it
+    works on the magenta key we ask for, on the cream of the old style sheets,
+    and on whatever a model hands back instead.
+    """
+    border = np.concatenate([bgr[0], bgr[-1], bgr[:, 0], bgr[:, -1]])
+    med = np.median(border, axis=0)
+    return (np.abs(bgr.astype(np.int16) - med).max(2) <= tolerance)
+
+
+def glyph_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
+    """Runs of small, similar-height marks sitting on one baseline, detached
+    from the figure: the shape of text. Each run is a list of bounding boxes.
+
+    Two conditions, and the second one is what makes this usable.
+
+    Size and alignment alone are not enough. Silly's mane is dense black
+    corkscrew curls, his hooves are four small black shapes and his ear insides
+    are two more — small dark blobs of near-identical height, and the hooves
+    genuinely do line up along the bottom of the frame. A detector that looks
+    only at shape calls 82 of the 181 poses in the library "text".
+
+    So a mark counts only if it is a SEPARATE PIECE OF PICTURE: its own
+    connected region of non-backdrop, not part of the main figure. A caption is
+    printed on the background with clear space round every letter. A hoof is
+    attached to a leg, and a mane curl to a head. That condition takes the
+    false-positive rate on the real 180-pose library to zero while still
+    catching every caption on the four old style sheets.
+
+    Working on non-backdrop regions rather than on dark pixels also means the
+    colour of the lettering does not matter. A pale watermark is as detectable
+    as a black caption.
+
+    cutout.qa() has a cousin of this that only looks BELOW 80% of the frame,
+    because that is where a sheet cell's caption lives and looking higher would
+    reject legitimate detached artwork in imported poses. Here the composition
+    came from a model we prompted, so the whole frame is fair game: a watermark
+    across the middle or a signature in a corner is just as fatal and cutout's
+    version would not see either. Superset, never a relaxation.
+    """
+    H, W = bgr.shape[:2]
+    total = float(H * W)
+    subject = (~backdrop_mask(bgr)).astype(np.uint8)
+    subject = cv2.morphologyEx(subject, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, _, stats, _ = cv2.connectedComponentsWithStats(subject, 8)
+    if n <= 2:
+        return []
+    main = max(range(1, n), key=lambda i: stats[i, cv2.CC_STAT_AREA])
+
+    glyphs = []
+    for i in range(1, n):
+        if i == main:
+            continue
+        area = stats[i, cv2.CC_STAT_AREA]
+        h, w = stats[i, cv2.CC_STAT_HEIGHT], stats[i, cv2.CC_STAT_WIDTH]
+        top, left = stats[i, cv2.CC_STAT_TOP], stats[i, cv2.CC_STAT_LEFT]
+        if not (0.00002 * total <= area <= 0.006 * total):
+            continue
+        if not (0.008 * H <= h <= 0.12 * H):
+            continue
+        if w > 0.25 * W or w > 6 * h:
+            continue
+        glyphs.append((top + h, h, left, (left, top, w, h)))
+
+    runs = []
+    used: set[tuple[int, int, int, int]] = set()
+    for base, h, _, box in sorted(glyphs):
+        if box in used:
+            continue
+        row = [g for g in glyphs if abs(g[0] - base) <= max(3, 0.5 * h)]
+        if len(row) < 3:
+            continue
+        heights = sorted(g[1] for g in row)
+        med = heights[len(heights) // 2]
+        similar = [g for g in row if med / 2.0 <= g[1] <= med * 2.0]
+        xs = sorted(g[2] for g in similar)          # spread across x, not a stack
+        if len(similar) >= 3 and (xs[-1] - xs[0]) >= 2 * med:
+            runs.append([g[3] for g in similar])
+            used.update(g[3] for g in similar)
+    return runs
+
+
+def assert_no_text(bgr: np.ndarray, what: str) -> None:
+    """Invariant 3. Raises QAFailure — it never warns.
+
+    Runs on the frame BEFORE matting, because matting a captioned image throws
+    the caption away and then the artwork looks clean. cutout.qa()'s component
+    gates are the net that catches text after matting. Both have to hold.
+    """
+    runs = glyph_runs(bgr)
+    if runs:
+        raise QAFailure(
+            f"no_text: {what} contains {len(runs)} run(s) of "
+            f"{sum(len(r) for r in runs)} detached, similar-height marks on a "
+            f"shared baseline — this is what lettering looks like, and no "
+            f"mascot artwork may carry any")
+
+# ── palette correction ───────────────────────────────────────────────────────
+#
+# Measured, not guessed. Across the first four generated poses, against the four
+# library poses used as references:
+#
+#     body green     library saturation 49-52   generated 30-41
+#     muzzle/belly   library hue 38-40 deg      generated 22-28 deg
+#
+# So the model holds the SHAPES from the references and drifts the COLOUR: a
+# sage body instead of the brand green, and a blush muzzle instead of a buttery
+# one. Consistent in one direction, which is what makes it correctable.
+#
+# This is a colour correction and nothing more. It moves saturation and hue of
+# pixels already in the right family; it cannot repair a wrong shape and must
+# never be asked to. It runs BEFORE the gates, so what is judged and what is
+# written are the same picture.
+LIBRARY_GREEN_SAT = 0.51        # median of the library reference poses
+LIBRARY_CREAM_HUE = 39.0        # degrees, ditto
+GREEN_HUE_RANGE = (35, 95)      # OpenCV H is 0-179, so this is 70-190 deg
+CREAM_MIN_V, CREAM_MAX_S = 180, 120
+EYE_MAX_SAT = 45          # an eye white is white; the cream muzzle is 73-94
+
+
+def correct_palette(bgr: np.ndarray) -> np.ndarray:
+    """Pull the body green and the cream back onto the brand palette.
+
+    Returns a new frame. The magenta key is untouched on purpose — everything
+    downstream mattes against it and shifting it would break the one thing that
+    is already right.
+    """
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV).astype(np.float32)
+    h, sat, val = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+
+    green = (h > GREEN_HUE_RANGE[0]) & (h < GREEN_HUE_RANGE[1]) & (sat > 25)
+    if green.sum() <= 500:
+        green = np.zeros_like(green)
+    else:
+        current = float(np.median(sat[green])) / 255.0
+        if current > 0.01:
+            sat[green] = np.clip(sat[green] * (LIBRARY_GREEN_SAT / current), 0, 255)
+
+    # The cream is pale and barely saturated, which is what separates it from
+    # both the green and the magenta without needing a mask from anywhere else.
+    cream = (val > CREAM_MIN_V) & (sat < CREAM_MAX_S) & (sat > 12) & (h < 45)
+    if cream.sum() <= 500:
+        cream = np.zeros_like(cream)
+    else:
+        h[cream] += (LIBRARY_CREAM_HUE / 2.0) - float(np.median(h[cream]))
+        h[cream] = np.clip(h[cream], 0, 179)
+
+    fixed = cv2.cvtColor(np.stack([h, sat, val], -1).astype(np.uint8),
+                         cv2.COLOR_HSV2BGR)
+
+    # Write back ONLY the pixels we meant to change. A BGR->HSV->BGR round trip
+    # is not lossless — it moved the magenta key from 255 to 254 — and while one
+    # level is nothing to the eye, cutout.py's key_residue gate measures exactly
+    # that kind of thing. Compositing on the masks keeps every untouched pixel
+    # byte-identical, so the correction cannot cost us an import rejection.
+    touched = (green | cream)[..., None]
+    return np.where(touched, fixed, bgr).astype(np.uint8)
+
+def _eye_candidates(rgba: np.ndarray) -> list[tuple[int, int, int, int, int]]:
+    """White blobs that could be an eye. Returns (x, y, w, h, area), largest first."""
+    solid = rgba[..., 3] > 200
+    bgr = rgba[..., :3]
+    grey = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+    sat = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 1]
+    height, _ = grey.shape
+    upper = np.zeros_like(solid)
+    upper[: int(height * 0.62)] = True
+
+    whites = ((grey > 200) & (sat < EYE_MAX_SAT) & solid & upper).astype(np.uint8)
+    count, _, stats, _ = cv2.connectedComponentsWithStats(whites, 8)
+    figure_area = max(int(solid.sum()), 1)
+
+    out = []
+    for i in range(1, count):
+        x, y, w, h, area = (int(v) for v in stats[i])
+        if not (0.0008 * figure_area < area < 0.06 * figure_area):
+            continue
+        if w < 5 or h < 5 or not (0.45 < w / h < 2.2):
+            continue
+        out.append((x, y, w, h, area))
+    return sorted(out, key=lambda b: -b[4])
+
+
+def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
+    """Centre of the dark core inside one eye white, or None if there isn't one."""
+    x, y, w, h, _ = box
+    patch = grey[y:y + h, x:x + w]
+    inset_y, inset_x = max(1, h // 7), max(1, w // 7)
+    inner = patch[inset_y:h - inset_y, inset_x:w - inset_x]
+    if inner.size == 0:
+        return None
+    dark = (inner < 110).astype(np.uint8)
+    if dark.sum() < max(6, int(0.05 * inner.size)):
+        return None
+    ys, xs = np.nonzero(dark)
+    return (x + inset_x + float(xs.mean()), y + inset_y + float(ys.mean()))
+
+
+def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
+    """Refuse a pose whose eyes came back blank, mismatched or crooked.
+
+    Written twice, and the first version is why this docstring is long.
+
+    Draft one asked "is there a bright blob, and does one of them contain
+    something dark". It refused five real library poses, because the cream
+    muzzle is bright. Measured, the library cream sits at saturation 73-94 and
+    an eye white is near zero, so the mask now demands that white be white.
+
+    Draft two still passed a train-window scene with two blank eyes. The reason
+    is the useful one: the picture contained a WINDOW, 135x279 of pale glass,
+    which is blob-shaped, white, and in the upper half of the frame. It was
+    counted as an eye, something dark inside it satisfied "at least one has a
+    pupil", and a prop rescued a face that had none. A fridge, a sink, a plate
+    and a laptop screen do the same thing.
+
+    So the unit here is the PAIR, not the blob. Two whites of similar size,
+    sitting side by side at the same height, is a shape a prop does not
+    accidentally make, and it is what a face actually looks like. Both must
+    carry a pupil, and the two pupils must sit at roughly the same height —
+    crooked pupils are the other way a generated face reads as wrong, and
+    draft two could not see them at all.
+
+    When no pair is found the gate passes. That is deliberate and it is the
+    limit of what this can honestly claim: a closed-eye pose, a wink and a
+    profile all legitimately show no pair, and refusing them would refuse good
+    art to catch bad art. The gate's promise is narrow and complete — IF a pair
+    of eye whites is visible, THEN both are correct.
+    """
+    if rgba.shape[2] < 4:
+        return
+    grey = cv2.cvtColor(rgba[..., :3], cv2.COLOR_BGR2GRAY)
+    boxes = _eye_candidates(rgba)
+
+    pair = None
+    for i, a in enumerate(boxes):
+        for b in boxes[i + 1:]:
+            ax, ay, aw, ah, _ = a
+            bx, by, bw, bh, _ = b
+            tall = max(ah, bh)
+            if abs(ah - bh) > 0.40 * tall or abs(aw - bw) > 0.40 * max(aw, bw):
+                continue                       # eyes are a matched pair
+            if abs(ay - by) > 0.60 * tall:
+                continue                       # and sit at the same height
+            gap = max(ax, bx) - min(ax + aw, bx + bw)
+            if not (-0.20 * max(aw, bw) < gap < 2.6 * max(aw, bw)):
+                continue                       # side by side, not stacked or far apart
+            pair = (a, b) if ax < bx else (b, a)
+            break
+        if pair:
+            break
+
+    if pair is None:
+        return                                  # closed, winking or in profile
+
+    left, right = pair
+    pupils = [_pupil_centre(grey, box) for box in pair]
+    blank = [side for side, p in zip(("left", "right"), pupils) if p is None]
+    if blank:
+        raise QAFailure(
+            f"pupils: {what} has a pair of eye whites and the {' and '.join(blank)} "
+            f"one is blank. Both eyes must carry a pupil. Re-roll with another seed.")
+
+    # Crookedness is measured INSIDE each eye, not against the horizon.
+    #
+    # The first attempt compared the two pupils' absolute heights and refused 11
+    # real library poses: jumping, leaping, falling, chasing, on_back — every
+    # pose where the head is tilted. A tilted head has its eyes at different
+    # heights and its pupils with them, and that is correct drawing, not a
+    # defect. What is a defect is one pupil sitting high in its own white while
+    # the other sits low, which is what a model produces and an illustrator does
+    # not. So each pupil is expressed as a fraction of its own eye box, and the
+    # two fractions are compared.
+    offsets = []
+    for (px, py), (bx, by, bw, bh, _) in zip(pupils, (left, right)):
+        offsets.append(((px - bx) / bw, (py - by) / bh))
+    (lu, lv), (ru, rv) = offsets
+    if abs(lv - rv) > 0.30:
+        raise QAFailure(
+            f"pupils: {what} has one pupil high in its eye and the other low "
+            f"({lv:.0%} against {rv:.0%} of the way down). A crooked stare is the "
+            f"other way a generated face reads as wrong. Re-roll with another seed.")
+
+
+
+# ── brand palette conformance ────────────────────────────────────────────────
+#
+# BRAND_GREEN_BGR is #3C965A, the body fill named in CHARACTER.md's identity
+# invariants, in CIE L*a*b* so distance is perceptual rather than a raw BGR
+# difference.
+BRAND_GREEN_BGR = (0x5A, 0x96, 0x3C)
+MAX_BODY_DELTA = 25.0     # dE76 between the body green and the brand green
+MIN_REGION = 0.01         # a green region must be this much of the figure to count
+
+
+def body_green_delta(rgba: np.ndarray) -> tuple[float, tuple[int, int, int]] | None:
+    """How far Silly's own green is from the brand green, and what it measures.
+
+    Returns (dE76, median BGR) for the LARGE green region nearest #3C965A, or
+    None if the picture has no substantial green in it at all.
+
+    Two earlier versions of this got it wrong in opposite directions, and both
+    failures are the same mistake: measuring the wrong pixels.
+
+    Version one took the MEDIAN of every green pixel. That rejected sage and
+    knees_hugged, who are wearing a sage robe and bright green trousers — the
+    median was measuring the GARMENT and reporting the character as off-model.
+    Wardrobe is a variable slot in CHARACTER.md; a gate that punishes him for
+    getting dressed is measuring the wrong thing.
+
+    Version two asked what SHARE of the figure was brand green. That works for a
+    cut-out character on an empty backdrop and falls apart the moment the
+    artwork is a scene — a donkey reading in bed with a blanket, a lamp and a
+    stack of books is mostly not donkey, so the share collapses however good the
+    donkey is. It would have refused good artwork for containing furniture.
+
+    What survives both is a question about COLOUR rather than about quantity:
+    of the substantial green regions in this picture, how close to #3C965A does
+    the nearest one get? A blanket, a houseplant or a hillside adds green
+    regions; none of them takes the body away. If the body is on-brand the
+    nearest region is the body and the answer is small. If the body has drifted
+    then nothing in the picture is Silly's green and the answer is large.
+
+    Calibration, measured over all 180 library poses: median 6.0, p90 13.5,
+    p99 14.1, max 24.1. The maximum is knees_hugged, and he is the honest limit
+    of this approach — his green trousers TOUCH his green body, so the two merge
+    into one connected region whose median sits between them. Regions are found
+    by connectivity, so anything the body touches in its own hue is averaged
+    into it.
+
+    The limit worth stating plainly: a large prop that happens to be close to
+    brand green will satisfy this gate on the body's behalf. It proves the
+    picture contains Silly's green, not that the donkey is the thing wearing it.
+    """
+    if rgba.shape[2] == 4:
+        opaque = rgba[..., 3] > 200
+        bgr = rgba[..., :3]
+    else:
+        opaque = np.ones(rgba.shape[:2], bool)
+        bgr = rgba
+    if opaque.sum() < 500:
+        return None
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    green = (((h > 30) & (h < 95) & (s > 60) & (v > 40)) & opaque).astype(np.uint8)
+    count, labels, stats, _ = cv2.connectedComponentsWithStats(green, 8)
+    if count < 2:
+        return None
+    spec = cv2.cvtColor(np.uint8([[BRAND_GREEN_BGR]]), cv2.COLOR_BGR2LAB)[0, 0].astype(float)
+    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(float)
+    floor = max(200, int(MIN_REGION * opaque.sum()))
+    best = None
+    for i in range(1, count):
+        if stats[i, cv2.CC_STAT_AREA] < floor:
+            continue
+        m = labels == i
+        delta = float(np.linalg.norm(np.median(lab[m], 0) - spec))
+        if best is None or delta < best[0]:
+            best = (delta, tuple(int(c) for c in np.median(bgr[m], 0)))
+    return best
+
+
+def assert_on_palette(rgba: np.ndarray, what: str) -> None:
+    """Refuse a figure whose green is not Silly's green.
+
+    The floor is 25, and every real library pose clears it — the highest is
+    knees_hugged at 24.1. See body_green_delta() for what is measured and for
+    the two earlier versions of this gate that measured the wrong pixels.
+    """
+    found = body_green_delta(rgba)
+    if found is None:
+        raise QAFailure(
+            f"palette: {what} contains no substantial green region at all — "
+            f"whatever this is, it is not Silly")
+    delta, bgr = found
+    if delta > MAX_BODY_DELTA:
+        hexcode = f"#{bgr[2]:02X}{bgr[1]:02X}{bgr[0]:02X}"
+        raise QAFailure(
+            f"palette: the nearest large green in {what} is {hexcode}, {delta:.0f} "
+            f"dE from the brand green #3C965A (limit {MAX_BODY_DELTA:.0f}). Every "
+            f"real library pose clears this, the worst at 24.1. Re-generate on "
+            f"the brand colour; do not raise the limit")
