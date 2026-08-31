@@ -2,10 +2,12 @@
 """
 llm.py — talking to a model, and never trusting what comes back.
 
-Two providers, in order: Gemini writes, Groq stands in when Gemini cannot. They
-are different companies on purpose, so a bad afternoon at one is not a bad
-afternoon for the pipeline. When both fail we post nothing, because the
-alternative — a pre-written fallback — is the recombination this rebuild removed.
+Three providers, in order — `PROVIDERS`: Gemini writes, Groq stands in when
+Gemini cannot, and Cloudflare Workers AI stands behind both. They are different
+companies on purpose, so a bad afternoon at one is not a bad afternoon for the
+pipeline, and so the critic always has a vendor that did not write the deck. When
+all three fail we post nothing, because the alternative — a pre-written fallback
+— is the recombination this rebuild removed.
 
 Everything here fails closed. A timeout, a malformed body, a reply that does not
 match its schema, a refusal: all of them are the same answer, which is no. A

@@ -39,13 +39,28 @@ posting costs a few thousand tokens.
   mascot/CHARACTER.md the character bible (identity invariants + variable slots)
   scripts/            run.py is the entry point · compose · safety · writer · critic
                       · coherence · novelty · llm · render · build · discovery
-  tests/              QA-gate regression suite
+  tests/              QA-gate regression suite, 25 suites. CI runs every one.
 .claude/skills/       symlink to the above, so Claude Code discovers it
+scripts/              NOT the skill's scripts/ — the operational jobs around it, which
+                      run on their own schedules and must never be imported by the
+                      pipeline: post_to_ig · prune_slides (invariant 18) · insights
+                      (invariant 17) · notify · capacity · dashboard
+.github/workflows/    auto-post (08:00 and 20:00 IST, one deck each) · insights ·
+                      review · telegram-review
 carousels/            one folder per deck: carousel.md, mascot/, contact_sheet.png,
                       published.json. slides/*.png are rendered but not committed —
                       see invariant 18
-research/             the original niche/hook/design research this brand was built on
+state/                see invariant 16
+research/             the original niche/hook/design research this brand was built on.
+                      ⚠ 02_account_database and 05_hooks_database contain invented
+                      figures — see the warning in README.md
 ```
+
+**Two directories are called `scripts/` and they are not the same place.** The
+pipeline is `.agents/skills/suresilly-carousel/scripts/`; the jobs that run around
+it are `scripts/` at the repo root. Nothing in the second may be imported by the
+first — that separation is what invariant 17 enforces for `insights.py`. Check
+which one you are in before concluding a script is missing.
 
 ## Invariants
 
@@ -56,7 +71,7 @@ Any agent working here must not violate these. They exist because each one was a
 2. **Three mascot paths. Only one of them runs at build time.**
    - **The runtime path, and the default**: 186 poses in `mascot/library/`,
      generated as 6-up sheets and cut out by `scripts/import_poses.py`, then matched to each
-     slide by the words in its brief. Finite, but broad. 30 are two-donkey scenes. No key, no
+     slide by the words in its brief. Finite, but broad. 32 are two-donkey scenes. No key, no
      network, deterministic. This is what every build uses unless `--fresh` is passed, and it
      is what `--fresh` falls back to on any failure. `poses_flux.py` and `--generate` are
      offline tools and stay uncallable from `build.py`.
@@ -95,7 +110,9 @@ Any agent working here must not violate these. They exist because each one was a
    donkey. `cutout.assert_no_text` enforces this on BOTH paths, always BEFORE matting — matting
    throws a caption away and then the artwork looks clean. It counts a mark only if it is its own
    detached region, because Silly's mane is dozens of small dark curls and a naive check called 82
-   of the 180 real library poses "text".
+   of the 180 real library poses "text". (180 was the library at the time of that measurement;
+   it is 186 now. The calibration numbers below are kept as measured rather than restated,
+   because a threshold means the sample it was set against.)
 
    It lived in `poses_flux.py` until it was moved, and for as long as it did this invariant was
    not true. `import_poses.py` does not import that module, so the strict detector had never run
@@ -178,7 +195,7 @@ Any agent working here must not violate these. They exist because each one was a
     against the same queue and fingerprints. Any run that produces a deck consumes its moment,
     whether or not it posts. Only `--dry-run` writes nothing, and it writes no deck either.
     State lives under `state/` and is committed: `used.jsonl`, `reserve.json`, `claim.json`,
-    `fp/`, `phrases.json`, `pending/`, plus `insights.jsonl` (invariant 17),
+    `fp/` and its `fp_index.json`, `phrases.json`, `pending/`, plus `insights.jsonl` (invariant 17),
     `flux_neurons.json`, the offline pose generator's daily spend ledger, and
     `vendor_quotas.json`, what a vendor last said it had LEFT.
 

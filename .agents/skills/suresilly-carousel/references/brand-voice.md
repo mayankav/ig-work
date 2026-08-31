@@ -93,16 +93,32 @@ The agent should position content to differentiate from these incumbents:
 
 ### 2.3 Content Pillars (The 3 Post Types)
 
-Every week, @suresilly publishes **3 carousels + 1 Reel**:
+**Cadence: two carousels a day, every day. Carousels only — there are no Reels.**
+`.github/workflows/auto-post.yml` runs `run.py` at 08:00 and 20:00 IST, one deck
+each. The two are spaced far apart on purpose: Instagram balances how much it
+shows from one account, so two posts close together compete with each other.
 
-1. **Diagnosis Post** (Mon): Names a pattern the reader recognizes but couldn't
+The three pillars below are the *kinds* of deck, not a weekly timetable. Nothing
+assigns a pillar to a weekday — `run.py` picks the moment, and the pattern comes
+from rotation against the last few decks (see "Rotate the pattern" in
+`content-playbook.md`). A deck records which pillar it landed on in its
+`**Content Pillar:**` line.
+
+1. **Diagnosis Post**: Names a pattern the reader recognizes but couldn't
    articulate. *"5 signs you're the 'therapist friend' and it's burning you out."*
-2. **Script / Template Post** (Wed): Gives the reader exact words to use.
+2. **Script / Template Post**: Gives the reader exact words to use.
    *"Instead of 'it's fine', say 'I need a minute to figure out what I'm
    actually feeling.' Here are 6 more."*
-3. **Philosophy / Reframe Post** (Fri): A counter-intuitive observation that
+3. **Philosophy / Reframe Post**: A counter-intuitive observation that
    reframes how the reader sees a common situation. *"You don't have commitment
    issues. You have trust issues. The difference matters."*
-4. **Reel** (Sat): 15-second animated clip teasing the week's best carousel.
+
+> **Superseded, 2026-09-01.** This section used to read "3 carousels + 1 Reel"
+> a week, with Diagnosis on Monday, Script on Wednesday, Philosophy on Friday
+> and a 15-second animated Reel on Saturday. That was the 2025 launch plan from
+> `research/`. None of it was built and none of it is the plan: the engine has
+> never produced a video, and it posts fourteen carousels a week, not three.
+> The line survived here long enough to send an agent looking for a video
+> pipeline that does not exist.
 
 ---

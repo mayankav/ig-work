@@ -293,12 +293,19 @@ Two measured reasons this line sits where it does:
 | Safety judge, writer | Gemini | ~250 to 1,500 requests a day | Key already in the repo. Free tier trains on our prompts |
 | Critic, guard models | Groq | 1,000 requests a day | No card. Does not train on our data |
 | Fallback writer | Groq | same | Different company, different bad day |
+| Last resort, and the third opinion | Cloudflare Workers AI | shares the 10,000 neurons/day account allowance with `poses_flux.py` | `llama-3.3-70b-instruct-fp8-fast`. Why the critic can always be somebody who did not write the deck |
 
-We need about 4 calls a day. Every option is over-provisioned by 50 times or more. Choose on
-quality and independence, never on headroom.
+Three vendors, not two: `PROVIDERS = (gemini, groq, cloudflare)` in `llm.py`, tried in that
+order. The third is not spare capacity — a model recognises its own work and rates it higher, so
+a deck written by the only configured vendor could never be judged independently.
 
-If Gemini fails, try Groq. If Groq fails, **post nothing**. There is no content bank fallback: a
-bank of pre-written variants is recombination, and recombination is the thing we removed.
+A run makes roughly six model calls, so about a dozen a day across the two scheduled runs. Every
+option is over-provisioned many times over. Choose on quality and independence, never on
+headroom.
+
+If Gemini fails, try Groq; if Groq fails, try Cloudflare. If all three fail, **post nothing**.
+There is no content bank fallback: a bank of pre-written variants is recombination, and
+recombination is the thing we removed.
 
 ---
 

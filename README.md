@@ -2,9 +2,14 @@
 
 This repository publishes to Instagram on its own.
 
-Once a day it reads a public feed, invents a small moment of its own from what it
-finds, writes a nine-slide carousel about it, checks the deck against about
-thirty rules, renders the slides, and posts them.
+Twice a day — 08:00 and 20:00 IST — it reads a public feed, invents a small
+moment of its own from what it finds, writes a nine-slide carousel about it,
+checks the deck against about thirty rules, renders the slides, and posts them.
+Two decks a day, fourteen a week. Carousels only; there are no Reels and there
+is no video path anywhere in the repo.
+
+The two runs are spaced far apart deliberately: Instagram balances how much it
+shows from one account, so two posts close together compete with each other.
 
 A deck that clears the bar goes out with nobody looking at it. If you change
 something here and it is wrong, the mistake goes out. That is the first thing to
@@ -48,10 +53,14 @@ An idea reaches a deck one of two ways, and both end in the same place: one
 invented moment with a subject from the closed list.
 
 **The feed** knows what people are actually doing this week and the words they
-use for it. It is 46 measured search phrases. It was 18, and those turned out
+use for it. It is 49 measured search phrases. It was 18, and those turned out
 to be the account's entire subject range — five about a phone, five about the
 night, and three of the first seven decks set on a bed. The 28 added on
-2026-08-31 were each measured with `probe_phrases.py` before being trusted.
+2026-08-31 were each measured with `probe_phrases.py` before being trusted, and
+so were the three added since. Nothing goes into `QUERIES` on taste — of 110
+candidates tested on 2026-08-31, only 28 earned a place.
+
+The live count is `sources.py`'s `QUERIES` tuple, not this sentence.
 
 **The vocabulary** knows what any of it is called. `references/concepts.json`
 holds terms of art discovered from public category listings, each proved to
@@ -200,9 +209,9 @@ Add `--notify` to send the same thing to Telegram.
 First run on a machine: add `--bootstrap` to build the virtualenv and fetch
 Chromium.
 
-Silly is drawn ahead of time in 180 poses, stored in `mascot/library/`. Each
-slide's brief is matched to a pose, and no pose repeats inside a deck. Thirty of
-them are two-donkey scenes. This costs nothing and needs no account.
+Silly is drawn ahead of time in 186 poses, stored in `mascot/library/`. Each
+slide's brief is matched to a pose, and no pose repeats inside a deck. Thirty-two
+of them are two-donkey scenes. This costs nothing and needs no account.
 
 The library is no longer frozen. `scripts/poses_flux.py` adds poses to it for
 nothing, through Cloudflare Workers AI — the same account the third text vendor
@@ -251,10 +260,12 @@ Needs no key and no network.
 ├── references/                        voice, playbook, design system, citations
 ├── mascot/                            the poses and the character bible
 ├── scripts/                           run.py is the only entry point
-└── tests/                             22 suites. CI runs every one.
+└── tests/                             25 suites. CI runs every one.
 
-scripts/                               posting and the jobs around it:
+scripts/                               posting and the jobs around it. NOT the same
+                                       directory as the engine's scripts/ above:
                                        post_to_ig · notify · insights · prune_slides
+                                       · capacity · dashboard
 carousels/<date>_<slug>/               one deck: carousel.md, contact_sheet.png,
                                        published.json. slides/*.png are rendered
                                        but not committed — see below.

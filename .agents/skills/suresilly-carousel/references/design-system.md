@@ -26,9 +26,13 @@ the deck is not done.
 | Property | Value |
 |---|---|
 | Size | 1080 × 1350 (4:5 portrait) |
-| Side / top margin | 108 px |
-| Footer reserve | 150 px |
+| Side / top margin | 92 px (`MARGIN`) |
+| Footer reserve | 132 px (`FOOTER_H`) |
+| Canvas padding | 36 px top and bottom; 56 px total top on source slides |
 | Export | PNG, `device_scale_factor: 1` |
+
+Every value here is a named constant at the top of `scripts/render.py`. Read them
+there before quoting them — this table has been wrong before.
 
 ---
 
@@ -122,45 +126,62 @@ on the charcoal theme the card is cream and its type must flip to dark.
 
 ## 4 · Type
 
-Two families, both variable, both embedded as TrueType and both **verified at render time**.
+Two families: **Archivo Black** for display (`DISPLAY = "ArchivoBlk"`, `ArchivoBlack.ttf`) and
+**Familjen Grotesk** for everything else (`BODY = "Familjen"`,
+`FamiljenGrotesk-Variable.ttf`). Both embedded as TrueType, both **verified at render time**.
 
-| Role | Family | Size | Notes |
-|---|---|---|---|
-| H1 (hook) | Fraunces | 102 px | `opsz 144`, weight 700, tracking −0.032em |
-| H2 | Fraunces | 74 px | `opsz 144`, weight 700 |
-| CTA headline | Fraunces | 78 px | |
-| Body | Inter | 36 px | `opsz 32`, line-height 1.52 |
-| Sub (under an H1) | Inter | 37 px | `soft` colour |
-| Bullets | Inter | 34 px | |
-| Card text | Inter | 33 px | uses `cardink` |
-| Eyebrow | Inter | 20 px | 0.30em tracking, uppercase |
-| Handle / number | Inter / Fraunces | 20 / 25 px | |
+> **Not Fraunces and Inter.** This section named those two until 2026-09-01 and had done for
+> some time. `Fraunces-Variable.ttf` and `Inter-Variable.ttf` are still sitting in
+> `assets/fonts/`, unreferenced — that is why the error was invisible. The renderer has been
+> setting Archivo Black and Familjen Grotesk throughout.
 
-Three rules the renderer enforces so they cannot be violated by accident:
+The scale is the `TYPE` dict in `render.py`, `(size, line-height, letter-spacing)`:
 
-1. **`opsz` is set explicitly.** Both fonts are variable with an optical-size axis that defaults
-   to its *smallest* value (Fraunces 9, Inter 14). Left alone, headlines render in the text cut —
-   muddy, low contrast. Display type pins `opsz 144`, body pins `opsz 32`.
-2. **`font-weight: 100 900` is declared** in `@font-face`, otherwise the weight axis is
+| Role | Key | Size | Line-height | Tracking |
+|---|---|---|---|---|
+| H1 (hook, once per deck) | `h1` | 112 px | 0.94 | −0.042em |
+| H2 (every other slide title) | `h2` | 86 px | 0.99 | −0.034em |
+| Lead (the line under a hook) | `lead` | 46 px | 1.30 | −0.008em |
+| Body | `body` | 44 px | 1.38 | −0.006em |
+| Bullets | `bullet` | 44 px | 1.28 | −0.006em |
+| Source slide hero | `quote` | 54 px | 1.28 | −0.012em |
+| Credit | `credit` | 27 px | 1.40 | 0 |
+| Eyebrow / label | `label` | 23 px | 1.00 | 0.22em |
+| Footer / handle / number | `footer` | 20 px | 1.00 | 0.22em |
+
+Two rules the renderer enforces so they cannot be violated by accident:
+
+1. **`font-weight: 100 900` is declared** in `@font-face`, otherwise the weight axis is
    unreachable and every bold is a faux-bold smear.
-3. **The render aborts if a font did not load.** `document.fonts.check()` runs on every slide.
-   A silent fallback to a system sans is a failed deck, not a warning.
+2. **The render aborts if a font did not load.** `document.fonts.check()` runs on every slide,
+   against `400 104px ArchivoBlk` and `450 38px Familjen`. A silent fallback to a system sans is
+   a failed deck, not a warning. This is invariant 7.
+
+The `opsz` rule that used to sit here went with Fraunces and Inter. Archivo Black is a static
+face with no optical-size axis, and the Familjen Grotesk variable font carries a weight axis
+only — there is no `opsz` to pin on either.
 
 ### Inline markup
 
 | Syntax | Renders as |
 |---|---|
-| `[[word]]` | Accent-coloured Fraunces italic with a hand-drawn underline. **One per slide, on the emotional pivot word.** |
+| `[[word]]` | Accent-coloured, with a hand-drawn underline. **One per slide, on the emotional pivot word.** Enforced: `writer.py` faults a slide with none or with two in one field. |
 | `*text*` | Italic |
 | `**text**` | Bold |
 
 Emoji are stripped automatically — the system is type and shape only, and emoji render as tofu.
 
-### Auto-fit
+### The scale is fixed. There is no auto-fit.
 
-Every text block is measured after layout and shrunk in 3% steps until the column fits its box.
-Copy length is therefore a *quality* concern, not a breakage risk. Aim for ≤ 220 characters of
-headline + body per slide anyway; auto-fit rescues overflow, it does not make dense slides good.
+**A level has exactly one size on every slide of every deck.** Copy that will not fit is
+reported as a writing problem, not silently shrunk. 220 characters per body slide is a hard
+limit enforced in three places — `writer.py`'s schema caps the field at 220, `audit_copy.py`
+fails the deck over it, and the render reports the overflow.
+
+This section used to describe an auto-fit that measured each block and shrank it in 3% steps.
+That is exactly what was removed, and `render.py` carries the reason: the *same* level rendered
+at 62, 70, 72, 74 and 108 px across one deck and bullets fell to 24 px. Nothing looked
+consistent and short slides looked lost in the frame. Do not reintroduce it — write shorter.
 
 ---
 
@@ -168,11 +189,17 @@ headline + body per slide anyway; auto-fit rescues overflow, it does not make de
 
 Exactly three, and no more — restraint is what makes them read as a system.
 
-1. **Grid ground.** A faint 54 px hand-drawn-feeling grid, radially masked toward the top-right.
+1. **Grid ground.** A faint grid on a 58 px pitch — a 2 px line every 58 px, both axes, drawn
+   with `repeating-linear-gradient` in the theme's own `grid` token.
 2. **Raster grain.** A 128 px noise tile generated locally with numpy and embedded as a PNG data
-   URI, overlaid at low opacity. Real raster, no SVG filters.
+   URI, overlaid at 0.5 opacity in `overlay` blend mode. Real raster, no SVG filters
+   (invariant 1).
 3. **One rotated element per slide.** The badge, a card, or the callout pill — never two. This is
    the "sticker" energy, kept to a single beat.
+   **⚠ Aspirational, not implemented.** There is no `rotate()` anywhere in `render.py` — the
+   word survives only in two comments. Nothing on a slide is currently tilted. Treat this as a
+   design intention that was lost in a rewrite, not as a description of what ships. It is worth
+   restoring; it is not worth citing as though it were there.
 
 Plus the oversized ghost numeral bleeding off the top-right corner, which is the page-number
 device that ties the deck together.
@@ -181,12 +208,13 @@ device that ties the deck together.
 
 ## 6 · Composition
 
-The copy hangs from a fixed top line at 150px — it is not vertically centred. Centring left
-about 330px of dead space above the eyebrow and gave the composition nothing to sit on. The CTA
-slide is the exception and stays centred, because it has no reading order to establish.
+The copy hangs from a fixed top line — `MARGIN + CANVAS_PAD_TOP`, so 128px, or 148px on a
+source slide. It is not vertically centred. Centring left about 330px of dead space above the
+eyebrow and gave the composition nothing to sit on. The CTA slide is the exception and stays
+centred, because it has no reading order to establish.
 
-The oversized slide numeral sits top-right at 132px. It used to be 300px, which made decoration
-the single loudest element on the slide, louder than both the headline and the character.
+The oversized slide numeral sits top-right. It used to be 300px, which made decoration the
+single loudest element on the slide, louder than both the headline and the character.
 
 ### Three mascot modes, chosen automatically
 
@@ -201,15 +229,19 @@ banner *actually* renders at, never an estimate.
 **Side column** — only the before/after script template, whose cards are already inset. The
 reserved strip is measured from the pose actually chosen.
 
-| Slide role | Figure height | Rotation |
-|---|---|---|
-| Hook | 680 px | −2° |
-| Agitation | 620 px | +3° |
-| Value | 600 px | +2° |
-| Before/after script | 520 px | −4° |
-| Source | 520 px | −3° |
-| Cheat sheet | 470 px | +3° |
-| CTA | 560 px | 0°, centred |
+**There is no per-role figure height.** The mascot sits in one inline flex box of a fixed
+**460 px** on every slide, whatever the role. If its bottom edge would cross the footer line it
+is shrunk once, then again, with a floor of 180 px — and that is the only thing that changes its
+size. No slide role gets its own height and nothing is rotated.
+
+This replaced a per-role table that read Hook 680 px at −2°, Agitation 620 px at +3°, and so on
+down to CTA 560 px centred. None of those numbers are in the renderer. The comment on the
+current code gives the reason for the flat box: dynamic remaining-space sizing put a huge donkey
+on sparse slides.
+
+`MASCOT_MIN, MASCOT_MAX = 470, 900` and `COPY_MAX_H = 940` are still defined and still passed to
+the measuring script, but they govern the older absolute-positioned path, not the inline one
+that renders today. Do not read them as the live figure bounds.
 
 He sits behind the text and the footer, and his hooves land on the footer rule.
 
@@ -227,20 +259,25 @@ overflow. Both layout bugs it now guards against shipped silently and were caugh
 
 ### The pose library
 
-`../mascot/library/` holds **180 poses**, generated as 6-up sheets on a magenta backdrop and cut
-out by `scripts/import_poses.py`. See `_contact_sheet.png` for all of them.
+`../mascot/library/` holds **186 poses**, 32 of them two-donkey scenes, generated as 6-up sheets
+on a magenta backdrop and cut out by `scripts/import_poses.py`. See `_contact_sheet.png` for all
+of them.
 
 The count is not fixed any more. `scripts/poses_flux.py` adds poses for free through
 Cloudflare Workers AI, offline, into the same import and matting path. Generated green
 drifts washed-out against the palette, so check a new pose on a contact sheet beside the
 existing ones before importing — the contact sheet is the judgement, not the slide.
 
-| | Count |
-|---|---|
-| Single Silly | 135 |
-| Two donkeys — green Silly plus a grey partner | 30 |
-| Mirrored copies, for the opposite direction | 24 |
-| Wide poses, laid out as a banner | 35 |
+| | Count | Where it comes from |
+|---|---|---|
+| Single Silly | 154 | `figures: 1` in `poses.json` |
+| Two donkeys — green Silly plus a grey partner | 32 | `figures: 2` |
+| Mirrored copies, for the opposite direction | 36 | `mirrored: true` |
+| Wide poses, laid out as a banner | 37 | measured at render time, not stored: `render.py` calls a pose wide when the PNG's width ÷ height > 1.0 |
+
+Counted 2026-09-01. The first three come straight out of `poses.json`; the fourth has to be
+measured off the PNGs, because "wide" is a property of the cut-out image and not a field
+anybody maintains.
 
 `library.py` matches a slide's `**Mascot:**` brief to a pose by word overlap, prefers originals
 over mirrored copies, and never repeats a pose inside one deck. Two-donkey scenes are only

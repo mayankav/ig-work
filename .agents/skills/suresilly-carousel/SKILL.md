@@ -6,7 +6,7 @@ description: >
   then renders publication-ready 1080x1350 PNG slides with the Silly the Donkey mascot placed
   on every slide. Use when asked to create, write, draft or render a @suresilly carousel,
   Instagram carousel, psychology carousel or slide deck for the page, or to work on the
-  pipeline that publishes one every day.
+  pipeline that publishes two every day.
 version: "3.0.0"
 author: "@suresilly"
 user-invocable: true
@@ -29,7 +29,7 @@ Read these only when you need them — do not pull them all in up front.
 | `references/topic-bank.md` | **Superseded by `strategy.md`.** Kept as a record of the original VOC mining. Moments now come from the live queue, not this table. |
 | `references/design-system.md` | Changing layout, colour, type or mascot placement. |
 | `mascot/CHARACTER.md` | Writing mascot briefs, or if Silly looks off-model. |
-| `mascot/GENERATION_PROMPTS.md` | Adding poses — 24 sheet prompts, and the rules that keep Silly on-model. |
+| `mascot/GENERATION_PROMPTS.md` | Adding poses — 29 sheet prompts, and the rules that keep Silly on-model. |
 
 ---
 
@@ -65,14 +65,21 @@ itself; run it by hand only to re-render a deck you have edited.
 | `--generate` | Obsolete paid path. Needs billing; fails otherwise. |
 | `--model pro` | only meaningful alongside `--generate` — uses Gemini Pro. |
 | `--model empero` | alongside `--generate` — uses Empero community models (`glm-5.3-flash` or `qwen3.8-flash`) via `https://free.empero.org/v1`. Free tier with fair usage limits. API key `free` is accepted by default. |
+| `--fresh` | Generate a pose per slide from that slide's own brief, via `fresh_poses.py`. Free, opt-in, never load-bearing — every failure hands the slide back its library pose. See invariant 2. |
+| `--fresh-budget N` | Cap what `--fresh` may spend, in neurons. Only meaningful with `--fresh`. |
+| `--random-palette` | Ignore the round-robin and roll a theme. |
 | `--bootstrap` | Create the venv and install Chromium. Run once per machine. |
 
 ### Which mascot path
 
-**The library is the default — no flag needed.** 180 full-body poses live in `mascot/library/`, generated
+**The library is the default — no flag needed.** 186 full-body poses live in `mascot/library/`, generated
 as 6-up sheets and cut out by `scripts/import_poses.py`. `library.py` picks one per slide by
 matching words in the `**Mascot:**` brief, never repeating within a deck. Costs nothing, needs
-no key. 30 of them are two-donkey scenes for relationship slides.
+no key. 32 of them are two-donkey scenes for relationship slides.
+
+The counts are the live ones: `mascot/poses.json` has 186 entries and 32 carry
+`"figures": 2`. Check with `python3 -c "import json,collections;p=json.load(open('mascot/poses.json'))['poses'];print(len(p),collections.Counter(v['figures'] for v in p.values()))"`
+rather than trusting this line, which has been wrong before.
 
 `--generate` makes a fresh pose per slide instead. It is **obsolete and not in use**: Gemini image
 generation has no free tier at all, so it fails unless billing is switched on. It stays wired for
@@ -93,8 +100,11 @@ against existing poses before importing (invariant 8). And the free allowance is
 Hand-drawn 6-up sheets still work: see `mascot/GENERATION_PROMPTS.md`, then
 `scripts/import_poses.py`.
 
-Runs the same under Claude Code, Antigravity, a bare shell and CI. It calls the Gemini REST API
-directly and never depends on an MCP server.
+Runs the same under Claude Code, Antigravity, a bare shell and CI. It calls each vendor's REST
+API directly — Gemini, Groq and Cloudflare Workers AI, in that fallback order (`llm.py`) — and
+never depends on an MCP server. Three vendors is not redundancy for its own sake: the critic
+must not be the model that wrote the deck, so at least two have to be configured for anything
+to ship.
 
 ---
 
@@ -222,7 +232,7 @@ the CTA asks for a DM-share to a *specific person*, not a like · no mascot brie
 this file or from another deck — run `grep -h "Mascot:" carousels/*/carousel.md | sort | uniq -d`
 and confirm nothing repeats verbatim before calling a deck done.
 
-**Topic** — Slides 1–2 name a **scene**, not a concept; no diagnosis vocabulary before slide 3 · the deck reattributes something the reader blames themselves for · **at least one line could be sent alone in a DM and still land** · it is general psychology (anxiety, burnout, sleep, self-worth etc.), not productivity or a book summary · the pattern differs from the last few decks · **if lucky:** topic came from `topic-bank.md` Layer 1+2, scored ≥18/25, and passes Step 0's three questions — not invented.
+**Topic** — Slides 1–2 name a **scene**, not a concept; no diagnosis vocabulary before slide 3 · the deck reattributes something the reader blames themselves for · **at least one line could be sent alone in a DM and still land** · it clears the niche fence — **relational psychology, another person in the scene**, not productivity, career or a book summary. During surge, 70%+ of decks must be Relational / Attachment, and a scene that could run on a general anxiety page without mentioning another person is not relational enough (`content-playbook.md` Test 4) · the pattern differs from the last few decks · **if lucky:** topic came from `topic-bank.md` Layer 1+2, scored ≥18/25, and passes Step 0's three questions — not invented.
 
 **Hook tension** — the hook leaves a gap it does not close · it stages a scene instead of
 announcing a lesson · it carries one odd, specific, true detail rather than a general statement
@@ -233,10 +243,14 @@ updated with VOC list + checks + winner.
 
 **Hook gate (MUST pass before build)** — Slide 1: intent declared (sends ≤8w or saves 9-12w), no second-person diagnosis (`you have/are *attachment/trauma/dysregulation*` banned; noun form `waiting mode` allowed), filmable (body/number/place), H2 ≤7w absolution, passes 4 checks (No second-person DSM / Filmable / One breath / You=hero) · slide 2 works as second cover (≤25 words, own `[[accent]]`, not "Let me explain") · slides 4 and 6 end with re-hook · deck does not repeat previous pattern — check ledger.
 
-**Voice** — Would a 30-year-old screenshot this and text it at midnight with "omg this is us"? No DSM-as-diagnosis left untranslated. Compassionate, not preachy. Rigorous, not platitude-level. Absolution first.
+**Voice** — Would a 28-year-old screenshot this and text it at midnight with "omg this is us"? (Same test as `brand-voice.md` §1.4 — same age, deliberately.) No DSM-as-diagnosis left untranslated. Compassionate, not preachy. Rigorous, not platitude-level. Absolution first.
 
 **Technical** — **Slide 1 H1 ≤8 sends / ≤12 saves hard max** (count; intent must be declared) ·
-H2 ≤7w · ≤220 characters per body slide · 8–10 slides · one `[[accent]]` per slide, on pivot word · US spelling · every slide has alt text.
+H2 ≤7w · ≤220 characters per body slide · **exactly 9 slides** · one `[[accent]]` per slide, on pivot word · US spelling · every slide has alt text.
+
+Nine is not a range. `writer.py`'s `ROLES` fixes the sequence at
+`hook · cost · source · name · script · action · sustain · cheat · cta`, and
+`validate_plan` rejects a plan whose beats are not numbered 1–9 in that order.
 
 **DOUBLE-CHECK BEFORE BUILD — non-negotiable:**
 1. Content audit: `audit_copy.py` must pass (hook gate + no second-person diagnosis + sliding length).
