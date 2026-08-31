@@ -193,8 +193,13 @@ was not falling into a habit. It was copying the example we gave it.
 
 Three changes, because there were three causes:
 
-1. **The example was rewritten** and the `too ___ to ___` construction is banned
-   by name in the prompt.
+1. **The worked example is now rotated and checked, not just rewritten.**
+   Swapping in one new example only changes which sentence gets copied — and it
+   did: the first batch written under the replacement lifted *"put the kettle
+   on"* out of it, four words, after seeing it once. So the prompt now holds
+   several deliberately unalike examples, picks one per run, and **measures the
+   answer against the one it showed.** Four words in a row and the moment is
+   refused. Worst borrow across five live runs fell from 4 words to 2.
 2. **Two checks now compare a new moment to old ones**, which nothing did before.
    Uniqueness used to be tested on the *seed post* — its id and a hash of the
    stranger's wording — which happens before our moment exists.

@@ -224,13 +224,38 @@ def run() -> int:
     finally:
         compose.memory.used_texts = real
 
-    # The example in SYSTEM taught the template it was meant to prevent: three
-    # of the first four moments copied "too ___ to ___ and too ___ to ___"
-    # straight out of it.
+    # ── The worked example is itself a template ──
+    #
+    # The first version taught "too ___ to ___ and too ___ to ___" and three of
+    # the first four moments copied it. Replacing it with one different example
+    # only changed which sentence got copied: the first batch composed under the
+    # replacement lifted "put the kettle on" out of it, four words.
     if "too awake to stay there" in compose.SYSTEM:
         failures.append("SYSTEM the worked example still demonstrates the banned construction")
+    # A single example, however good, becomes the house style. There must be
+    # several and they must be genuinely unalike.
+    if len(compose.GOOD_EXAMPLES) < 3:
+        failures.append("SYSTEM one worked example is a template; there must be several")
+    if len({compose.opening_verb(e) for e in compose.GOOD_EXAMPLES}) < 3:
+        failures.append("SYSTEM the worked examples all open the same way, so rotating them "
+                        "widens nothing")
+    if any(compose.TOO_FRAME.search(e) for e in compose.GOOD_EXAMPLES):
+        failures.append("SYSTEM a worked example uses the construction the prompt bans")
+    # Both prompts must carry the slot, or one channel silently loses rotation.
+    for name, text in (("SYSTEM", compose.SYSTEM), ("CONCEPT_SYSTEM", compose.CONCEPT_SYSTEM)):
+        if "GOOD_EXAMPLE_SLOT" not in text:
+            failures.append(f"SYSTEM {name} has no example slot, so it cannot rotate")
+    # And rotation alone is hope. The borrow is caught.
+    BORROWED = ("I ate half a packet of biscuits at 7:02pm and then put the kettle on, "
+                "feeling guilty.")
+    if not any("worked example" in p for p in
+               compose.verify(SEED, BORROWED, previous=[], example=compose.GOOD_EXAMPLES[0])):
+        failures.append("SYSTEM a moment lifting four words from the example was accepted")
+    # Without an example passed, nothing changes for callers that do not use one.
+    if any("worked example" in p for p in compose.verify(SEED, BORROWED, previous=[])):
+        failures.append("SYSTEM the example check fired when no example was shown")
 
-    total = (15 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
+    total = (22 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
              + len(MUST_ACCEPT_NAMED) + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON))
     if failures:
         print(f"compose: {len(failures)}/{total} failed")

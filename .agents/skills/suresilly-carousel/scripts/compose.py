@@ -223,6 +223,63 @@ def repetition_faults(moment: str, previous: list[str] | None = None) -> list[st
 # could not get back to sleep" — does not.
 MAX_SHARED_RUN = 7
 
+# ── The worked example is itself a template. Rotate it, and check against it ──
+#
+# The first version of this prompt carried ONE good example, ending "too tired
+# to go back to bed and too awake to stay there". Three of the first four
+# moments the engine ever produced used that construction. It was not a habit
+# the model brought with it; we handed it over.
+#
+# Replacing that example with a different single example does not fix the class
+# of problem, it just changes which sentence gets copied — and it did. The very
+# first batch composed under the replacement borrowed "put the kettle on"
+# straight out of it, four words, having been shown it once.
+#
+# So two things, because rotation alone is still hope:
+#   ROTATE  a different example each run, chosen by code from the nonce, so no
+#           single sentence can become the house style.
+#   CHECK   the moment is measured against the example it was actually shown,
+#           the same way it is already measured against the seed. Hope becomes
+#           a gate.
+#
+# Four, not seven. The seed limit can afford to be loose because a seed is a
+# stranger's long post and ordinary phrasing overlaps by chance. An example is
+# one short sentence we wrote, and borrowing from it is never innocent.
+# Measured over ten real compositions: genuine moments share at most 2 words
+# with the example, the one that borrowed shared 4. Nothing sits on 3.
+MAX_EXAMPLE_RUN = 4
+
+# Deliberately unalike: different rooms, different hours, different things being
+# done, and not one of them built on "too ___ to ___". If they were variations
+# on a theme, rotating them would only widen the same rut.
+GOOD_EXAMPLES = (
+    "I got up at 3:17am and stood in the kitchen with the light off, and I did "
+    "not put the kettle on because that would mean the night was over.",
+
+    "I answered his message at 11:40pm from the bus stop, then read what I had "
+    "sent four times on the walk home and felt stupid.",
+
+    "At 7:05pm I said yes to the extra shift while I was still holding the "
+    "shopping, and I was annoyed with myself before I got the door open.",
+
+    "I let the phone ring out at 6:30am with my hand actually on it, and then "
+    "lay there working out what I would say when I rang back.",
+
+    "I redid the spare room shelves at 2pm on a Sunday because my mother was "
+    "visiting on the Tuesday, and I was tired and did not stop.",
+)
+
+
+def example_for(roll: int) -> str:
+    """The worked example this run shows. Deterministic, so a rerun repeats it."""
+    return GOOD_EXAMPLES[roll % len(GOOD_EXAMPLES)]
+
+
+def with_example(system: str, example: str) -> str:
+    """Fill the example slot. str.replace, not format: the prompt is prose and
+    a stray brace in it should never be able to raise."""
+    return system.replace("GOOD_EXAMPLE_SLOT", example)
+
 SYSTEM = """You are given one real post from a public feed. You never quote it,
 repeat it or rewrite it. You read it to learn what KIND of evening somebody had,
 and then you invent a different one of your own.
@@ -254,14 +311,17 @@ HOW IT IS WRITTEN, and this matters as much as what is in it.
   supposed to be small.
 
   The same evening, written properly:
-    "I got up at 3:17am and stood in the kitchen with the light off, and I did
-     not put the kettle on because that would mean the night was over."
+    "GOOD_EXAMPLE_SLOT"
 
   THAT SENTENCE IS AN EXAMPLE OF REGISTER, NOT A TEMPLATE. Do not borrow its
-  build. In particular, "too ___ to ___ and too ___ to ___" is BANNED: the
-  example here used to end that way and the engine copied it into three of its
-  first four moments, which is how a reader started recognising the sentence
-  before they had read it.
+  build, its room, its objects or any phrase from it. In particular,
+  "too ___ to ___ and too ___ to ___" is BANNED: the example here used to end
+  that way and the engine copied it into three of its first four moments, which
+  is how a reader started recognising the sentence before they had read it.
+
+  A different one of these is shown on every run, and code checks your answer
+  against the one you were shown. Borrow four words from it and the moment is
+  refused.
 
   Every moment must be BUILT differently from the last. Vary what the first
   verb is doing — an action, not a posture. Not every moment is somebody
@@ -496,7 +556,8 @@ def shared_run(a: str, b: str) -> int:
     return best
 
 
-def verify(seed: str, moment: str, previous: list[str] | None = None) -> list[str]:
+def verify(seed: str, moment: str, previous: list[str] | None = None,
+           example: str | None = None) -> list[str]:
     """Everything wrong with an invented moment. Empty means it may be used."""
     problems: list[str] = []
 
@@ -506,6 +567,18 @@ def verify(seed: str, moment: str, previous: list[str] | None = None) -> list[st
     run = shared_run(seed, moment)
     if run >= MAX_SHARED_RUN:
         problems.append(f"shares {run} words in a row with the seed (limit {MAX_SHARED_RUN - 1})")
+
+    # And not copied from us either. The worked example in the prompt was the
+    # single biggest source of repetition this engine has had, and a model shown
+    # a sentence once will hand pieces of it back.
+    if example:
+        borrowed = shared_run(example, moment)
+        if borrowed >= MAX_EXAMPLE_RUN:
+            problems.append(
+                f"shares {borrowed} words in a row with the worked example in the "
+                f"instructions (limit {MAX_EXAMPLE_RUN - 1}). The example shows the "
+                f"register, not the sentence. Use your own words, your own room and "
+                f"your own objects")
 
     if IDENTIFYING.search(moment):
         problems.append("contains a handle, hashtag or link")
@@ -653,15 +726,23 @@ def from_concept(term: str, meaning: str, nonce: str = "7f3a2c") -> dict:
     """
     trouble: list[str] = []
     complaint = ""
+    # Both channels get the same treatment. The concept route was writing from
+    # the same single worked example and into the same rooms, so leaving it out
+    # would have kept half the output in the rut this work exists to fix.
+    roll = int(hashlib.sha256(nonce.encode()).hexdigest(), 16)
+    example = example_for(roll)
+    system = with_example(CONCEPT_SYSTEM, example)
     brief = (f"CONCEPT-{nonce}-BEGIN\nterm: {term}\nmeaning: {meaning}\n"
-             f"CONCEPT-{nonce}-END\n\nInvent the moment and return the JSON.")
-    for _ in range(3):
-        answer, provider = llm.ask(CONCEPT_SYSTEM, brief + complaint, SCHEMA,
-                                   temperature=0.7)
+             f"CONCEPT-{nonce}-END"
+             f"{variety_brief(memory.used_texts(), roll)}\n"
+             f"\nInvent the moment and return the JSON.")
+    for _ in range(4):
+        answer, provider = llm.ask(system, brief + complaint, SCHEMA,
+                                   temperature=0.9)
         if answer["injection"]:
             raise llm.ModelRefused("the concept brief tried to give instructions")
         moment = answer["moment"]
-        problems = verify(meaning, moment)
+        problems = verify(meaning, moment, example=example)
         # The term is the one word the deck exists to teach, and a moment that
         # already contains it has done the teaching on slide 1, before the
         # reader has recognised anything. Slides 1 and 2 are a scene; the name
@@ -691,8 +772,10 @@ def invent(seed: str, nonce: str = "7f3a2c") -> dict:
     complaint = ""
     # Built from history in code, and from the nonce so two runs on one quiet
     # day are pushed in different directions. No past moment reaches the prompt.
-    variety = variety_brief(memory.used_texts(),
-                            int(hashlib.sha256(nonce.encode()).hexdigest(), 16))
+    roll = int(hashlib.sha256(nonce.encode()).hexdigest(), 16)
+    variety = variety_brief(memory.used_texts(), roll)
+    example = example_for(roll)
+    system = with_example(SYSTEM, example)
     # Four attempts, not three. Each one is a single cheap call and the moment
     # is what everything downstream is built on, so it is worth another try
     # rather than throwing the seed away and paying for a fresh judge call.
@@ -708,11 +791,11 @@ def invent(seed: str, nonce: str = "7f3a2c") -> dict:
         # wrong with the first. Asking the same question twice got the same
         # answer twice, three runs in a row.
         answer, provider = llm.ask(
-            SYSTEM, USER.format(nonce=nonce, text=clean, variety=variety) + complaint,
+            system, USER.format(nonce=nonce, text=clean, variety=variety) + complaint,
             SCHEMA, temperature=0.9)
         if answer["injection"]:
             raise llm.ModelRefused("the seed tried to give instructions")
-        problems = verify(seed, answer["moment"])
+        problems = verify(seed, answer["moment"], example=example)
         if not problems:
             return {"moment": answer["moment"].strip(), "subject": answer["subject"],
                     "situation": answer["situation"], "provider": provider}

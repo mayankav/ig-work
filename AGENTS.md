@@ -278,6 +278,17 @@ Any agent working here must not violate these. They exist because each one was a
     moments copied that construction. **An example in a prompt is a template, whatever the
     surrounding words call it.** When you show the model one, expect it back.
 
+    **Rewriting the example does not fix this, and that was tried first.** A single replacement
+    example simply changes which sentence gets copied: the very first batch composed under the
+    new one lifted *"put the kettle on"* out of it, four words, having seen it once. So there
+    are now several deliberately unalike examples, `GOOD_EXAMPLES`, one chosen per run from the
+    nonce and dropped into a slot both prompts carry — and rotation alone is still only hope, so
+    the moment is also MEASURED against the example it was actually shown, exactly as it is
+    measured against the seed. Four words in a row and it is refused. Measured after: the worst
+    borrow across five live compositions fell from 4 words to 2. `tests/test_compose.py` locks
+    the count of examples, that they open differently, that neither prompt loses its slot, and
+    that the borrow which really happened is caught.
+
     `compose.repetition_faults` now compares every invented moment against every earlier one,
     on two axes, because one detector cannot see both failures: 3-gram word overlap catches the
     reworded copy (measured: different moments 0.000–0.022, the near-copy pair 0.429, limit

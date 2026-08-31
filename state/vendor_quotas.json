@@ -3,18 +3,18 @@
     "day": "2026-08-31",
     "models": {
       "gemini-2.5-flash": {
-        "made": 6,
-        "out_of_quota_at": "2026-08-31T22:17:35Z"
+        "made": 7,
+        "out_of_quota_at": "2026-08-31T22:30:05Z"
       },
       "gemini-2.5-flash-lite": {
-        "made": 10,
-        "out_of_quota_at": "2026-08-31T22:17:39Z"
+        "made": 11,
+        "out_of_quota_at": "2026-08-31T22:30:09Z"
       },
       "gemini-3.5-flash-lite": {
-        "made": 35
+        "made": 43
       }
     },
-    "observed_at": "2026-08-31T22:18:47Z",
+    "observed_at": "2026-08-31T22:30:41Z",
     "source": "counted",
     "zone": "America/Los_Angeles"
   },
