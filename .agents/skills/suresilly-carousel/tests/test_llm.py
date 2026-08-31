@@ -22,11 +22,38 @@ import io
 import os
 import pathlib
 import sys
+import tempfile
 import urllib.error
 import urllib.request
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
+
+# Send the quota recorder somewhere disposable BEFORE importing llm, and keep it
+# there for the whole module.
+#
+# No network is touched here — urlopen is faked throughout. But llm.py records a
+# vendor's remaining allowance in a `finally`, deliberately, because the 429 that
+# proves the allowance is gone is itself a reading worth keeping (invariant 16).
+# That recorder does not know it is in a test, so a suite that manufactures an
+# exhausted quota wrote "gemini is out for today" into the committed
+# state/vendor_quotas.json. Every run of the suite did it.
+#
+# A snapshot is "what the vendor last said it had LEFT" and is always replaced by
+# the newest reading, so a fabricated one is not a stale truth to be topped up —
+# it is a lie the next real run would act on by skipping Gemini for no reason.
+#
+# quotas.py reads SS_QUOTAS once, at import, into a module constant. So this has
+# to be set before the import below, not inside a test.
+_QUOTA_SANDBOX = pathlib.Path(tempfile.mkdtemp(prefix="ss-test-quotas-")) / "vendor_quotas.json"
+os.environ["SS_QUOTAS"] = str(_QUOTA_SANDBOX)
+
 import llm  # noqa: E402
+import quotas  # noqa: E402
+
+if quotas.QUOTAS_PATH != _QUOTA_SANDBOX:
+    raise SystemExit(
+        f"quota sandbox did not take: recorder still points at {quotas.QUOTAS_PATH}. "
+        "Refusing to run — this suite would write fabricated readings into real state.")
 
 PER_MINUTE = "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
 PER_DAY = "GenerateRequestsPerDayPerProjectPerModel-FreeTier"

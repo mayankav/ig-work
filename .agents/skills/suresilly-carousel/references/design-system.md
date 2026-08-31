@@ -187,19 +187,21 @@ consistent and short slides looked lost in the frame. Do not reintroduce it — 
 
 ## 5 · The recurring motifs
 
-Exactly three, and no more — restraint is what makes them read as a system.
+Exactly two, and no more — restraint is what makes them read as a system.
 
 1. **Grid ground.** A faint grid on a 58 px pitch — a 2 px line every 58 px, both axes, drawn
    with `repeating-linear-gradient` in the theme's own `grid` token.
 2. **Raster grain.** A 128 px noise tile generated locally with numpy and embedded as a PNG data
    URI, overlaid at 0.5 opacity in `overlay` blend mode. Real raster, no SVG filters
    (invariant 1).
-3. **One rotated element per slide.** The badge, a card, or the callout pill — never two. This is
-   the "sticker" energy, kept to a single beat.
-   **⚠ Aspirational, not implemented.** There is no `rotate()` anywhere in `render.py` — the
-   word survives only in two comments. Nothing on a slide is currently tilted. Treat this as a
-   design intention that was lost in a rewrite, not as a description of what ships. It is worth
-   restoring; it is not worth citing as though it were there.
+
+**Everything sits square.** Nothing on a slide is tilted.
+
+> **Removed, 2026-09-01: "one rotated element per slide".** This used to promise a badge, card
+> or callout pill set a couple of degrees off-square — "sticker energy". No such rotation was
+> ever implemented: there is no `rotate()` anywhere in `render.py`, and the word survives only
+> in two stale comments. It was a written instruction nothing obeyed, so it is gone rather than
+> pending. The system reads as type and shape, squarely set. Do not add a tilt back in.
 
 Plus the oversized ghost numeral bleeding off the top-right corner, which is the page-number
 device that ties the deck together.

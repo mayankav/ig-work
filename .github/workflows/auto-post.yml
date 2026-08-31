@@ -71,7 +71,6 @@ jobs:
       - name: Install
         run: |
           pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
-          pip install --quiet requests
           python -m playwright install chromium --with-deps
 
       # Every gate runs before anything is generated. A broken gate must never
@@ -81,11 +80,49 @@ jobs:
           # Every suite in the directory, not a hand-kept list. The list had
           # drifted: six suites existed that CI never ran, including the ones
           # covering the wiring between layers, which is where the bugs were.
+          #
+          # Two styles of suite live here and they must be run differently.
+          # Most are plain scripts with a __main__ that prints "n/n passed".
+          # Four are pytest-style: bare test_* functions, pytest.raises,
+          # pytest.mark.parametrize, and NO __main__.
+          #
+          # Running them the wrong way fails silently in both directions:
+          # a pytest-style suite run as a script defines its functions, runs
+          # nothing and exits 0 having checked nothing; a plain-script suite
+          # collected by pytest offers no test functions and also reports
+          # success. Both look like a pass. That is worse than a red build.
+          #
+          # This is not hypothetical. The four pytest-style suites — 151 real
+          # tests over the pose gates and the quota ledger — ran nowhere at all:
+          # `import pytest` was absent from requirements.txt so CI died on the
+          # import, and a developer running them locally got silence and a zero
+          # exit. Two scheduled runs on 2026-08-31 failed here and posted
+          # nothing.
           failed=0
           for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
-            python "$t" || failed=1
+            if grep -q '^import pytest\|^from pytest' "$t"; then
+              python -m pytest "$t" -q || failed=1
+            else
+              python "$t" || failed=1
+            fi
           done
           exit $failed
+
+      # A test may never write committed state. state/ carries what has been
+      # used and what a vendor last said it had left; a suite that manufactures
+      # an exhausted quota to check the fallback must not leave that reading
+      # behind for the next real run to believe. Cheap to check, and it fails
+      # the build rather than being discovered weeks later in a diff.
+      - name: No test may write committed state
+        run: |
+          dirty=$(git status --porcelain state/)
+          if [ -n "$dirty" ]; then
+            echo "::error::the gate run modified committed state:"
+            echo "$dirty"
+            git diff -- state/ | head -40
+            exit 1
+          fi
+          echo "state/ untouched by the suite"
 
       - name: Build the deck
         id: build

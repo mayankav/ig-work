@@ -238,6 +238,15 @@ Any agent working here must not violate these. They exist because each one was a
     on the host by name (`--protect-if-present`), and their slides are force-added to git for as
     long as somebody still has to answer. A pending slug already pruned WARNS rather than aborts —
     aborting would wedge every future run on one old mistake and the site would fill up behind it.
-    Do not restore `keep_files: true`, and do not prune before the post.
+    Do not prune before the post.
+
+    **`keep_files: true` is correct and must stay.** This line used to read "do not restore
+    `keep_files: true`", and it had been wrong since 2026-08-29, when the upload was narrowed to
+    one deck's `slides/` under a per-slug `destination_dir`. Deletion is owned by
+    `prune_slides.py`, which runs after the post, deletes strictly by age, and is handed
+    `--protect` for the slug just published plus `--protect-if-present` for every deck waiting in
+    `state/pending/`. An upload that also deletes would do it indiscriminately and by the wrong
+    rule, taking pending decks with it — which is the exact failure the protection above exists
+    to prevent. The upload is additive; the pruner is the only thing that removes.
 
 See `.agents/skills/suresilly-carousel/references/strategy.md` for the full layered design.

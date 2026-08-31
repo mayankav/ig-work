@@ -237,17 +237,39 @@ unless billing is on. Text generation is a different matter and is nearly free.
 
 ```bash
 for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
-  .agents/skills/suresilly-carousel/.venv/bin/python "$t" || echo "FAILED $t"
+  if grep -q '^import pytest\|^from pytest' "$t"; then
+    .agents/skills/suresilly-carousel/.venv/bin/python -m pytest "$t" -q || echo "FAILED $t"
+  else
+    .agents/skills/suresilly-carousel/.venv/bin/python "$t" || echo "FAILED $t"
+  fi
 done
 ```
 
 Every suite in the directory, which is exactly what CI does — a hand-kept list
-drifted once and left six suites nobody ran. `pytest` is not the runner: these
-are plain scripts with a `run()`, so pytest collects the files, finds no test
-functions, and reports success without having checked anything. That is worse
-than no test run, because it is believed.
+drifted once and left six suites nobody ran.
 
-Needs no key and no network.
+**Two styles live here, and each is silent when run the wrong way.** Most suites
+are plain scripts with a `__main__` that prints `n/n passed`. Four —
+`test_fresh_poses`, `test_import_poses`, `test_poses_flux`, `test_quotas` — are
+pytest-style: bare `test_*` functions, `pytest.raises`,
+`pytest.mark.parametrize`, and no `__main__`.
+
+Run a plain-script suite under pytest and it offers no test functions, so pytest
+reports success without having checked anything. Run a pytest-style suite as a
+script and it defines its functions, executes none of them, prints nothing and
+exits 0. **Both failures look exactly like a pass**, which is why the loop above
+asks each file which one it is.
+
+That cost two days of posting. `pytest` was missing from `requirements.txt`, so
+CI died on the import and the gate step failed before anything was generated —
+both scheduled runs on 2026-08-31 posted nothing — while locally those same four
+suites, 151 real tests over the pose gates and the quota ledger, had been
+reporting a clean pass while running nothing at all.
+
+Needs no key and no network. **No suite may write to `state/`** — CI checks that
+`state/` is unchanged after the gates run and fails the build if it is not. A
+test that manufactures an exhausted vendor quota to prove the fallback works
+must not leave that reading behind for the next real run to believe.
 
 ---
 

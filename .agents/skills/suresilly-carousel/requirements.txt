@@ -1,5 +1,43 @@
-playwright>=1.62
-opencv-python-headless>=4.10
-numpy>=1.26
-pillow>=10.0
-pyspellchecker>=0.8
+# Exact versions, not floors.
+#
+# These were `>=` until 2026-09-01. A scheduled run installs from this file on a
+# clean GitHub runner twice a day, at 08:00 and 20:00 IST, with nobody watching —
+# so a floor means the pipeline silently adopts whatever each project shipped
+# that morning, and the first anybody hears of a breaking change is a failed
+# post or, worse, a rendered deck that looks wrong.
+#
+# It was not hypothetical: the floor said `opencv-python-headless>=4.10` and the
+# runner had already moved to 5.x, a major version, unnoticed and untested.
+#
+# Upgrading is now a deliberate act. Bump a line here, run the gates, look at a
+# contact sheet, commit. That is the whole process, and it is meant to be a
+# decision somebody makes rather than a thing that happens.
+#
+# Transitive dependencies (greenlet, pyee, …) still float. Pinning those needs a
+# real lockfile; these five are what the code imports directly and what has
+# actually broken.
+playwright==1.62.0
+opencv-python-headless==5.0.0.93
+numpy==2.2.6
+pillow==12.3.0
+pyspellchecker==0.9.0
+
+# Used by the operational scripts at the repo root — notify.py, insights.py and
+# post_to_ig.py all import it. It was never declared here: the workflow ran a
+# bare `pip install requests` on its own line, unpinned, so the thing that
+# actually posts to Instagram floated to whatever shipped that morning.
+requests==2.34.2
+
+# Not optional, and not a dev-only extra.
+#
+# Four suites — test_fresh_poses, test_import_poses, test_poses_flux,
+# test_quotas — are written in pytest style: bare test_* functions,
+# pytest.raises, pytest.mark.parametrize, no __main__. 151 tests covering the
+# pose gates and the quota ledger.
+#
+# pytest was missing from this file, so CI died on `import pytest` and the gate
+# step exited 1 before anything was generated. Two scheduled runs on 2026-08-31
+# failed there and posted nothing. Locally it was worse than a failure: the
+# import succeeded, no __main__ ran, the suite printed nothing and exited 0 —
+# 151 tests reporting a pass while checking nothing at all.
+pytest==9.1.1
