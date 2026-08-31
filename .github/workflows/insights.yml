@@ -1,0 +1,80 @@
+name: insights
+
+# Its own job, on its own cron, deliberately.
+#
+# This reads how published decks performed. It is not part of publishing and
+# must never be able to affect it: it is not called from run.py, it is not a
+# step in auto-post.yml, and it shares no state with either. If this job goes
+# red for a week, four posts still go out a day and nothing about them changes.
+#
+# The reverse also holds, and matters more. Nothing here writes anything the
+# pipeline reads. state/insights.jsonl is a ledger for a person — see the
+# docstring in scripts/insights.py — and AGENTS.md invariant 11 says the rules
+# decide what ships. A performance number must never reach a gate.
+on:
+  schedule:
+    # 06:00 UTC / 11:30 IST. Between the two posting runs (02:30 and 14:30 UTC)
+    # so it never queues behind one, and mid-morning so a red run is seen the
+    # same day.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      min_age_days:
+        description: "How old a deck must be before we ask (days)"
+        required: false
+        default: "3"
+        type: string
+      dry_run:
+        description: "List what is due and call nothing"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insights
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    # The same kill switch as posting. Throwing it should stop everything that
+    # talks to Instagram on this account's behalf, reads included.
+    if: vars.SS_HALT != '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Only requests. Nothing in this job builds, renders or writes a deck, so
+      # none of the skill's dependencies are needed.
+      - name: Install
+        run: pip install --quiet requests
+
+      - name: Collect
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          python scripts/insights.py \
+            --min-age-days "${{ inputs.min_age_days || '3' }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      # always(), because insights.py appends each reading the moment it has it.
+      # A run that collected three decks and then hit an error still has three
+      # readings worth keeping, and a failed run wrote nothing so this is a
+      # no-op.
+      - name: Record what was measured
+        if: always()
+        run: |
+          git config user.name "suresilly-bot"
+          git config user.email "bot@suresilly.com"
+          git add state/insights.jsonl || true
+          git commit -m "auto: insights [skip ci]" || echo "nothing to record"
+          git pull --rebase --quiet || true
+          git push || echo "push failed, the next run appends the same way"

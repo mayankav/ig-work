@@ -7,3 +7,20 @@ __pycache__/
 # llm.py reads this file directly, so nothing has to be exported first.
 .env.local
 .env
+
+# The rendered slides. Instagram fetches each image once, at container creation,
+# and serves the post from its own CDN afterwards, so the copy in git is written
+# and never read. Nine PNGs is 5.6 MB per deck, twice a day, in permanent
+# history. What is worth keeping is the markdown, the published id and the
+# contact sheet — and by invariant 8 the contact sheet is what a deck is judged
+# by anyway.
+#
+# One exception, and auto-post.yml makes it: a deck held for review can be
+# posted days later from a fresh checkout, and post_to_ig.py builds its URLs
+# from the local filenames, so the slides of anything still in state/pending are
+# force-added.
+carousels/*/slides/*.png
+
+# The gh-pages working copy the retention step clones into. It is the published
+# branch, checked out beside the repo, and it is never part of main.
+/gh-pages/

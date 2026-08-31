@@ -13,12 +13,19 @@ Flow per https://developers.facebook.com/docs/instagram-api/content-publishing:
   1. Create 9 image containers: POST /{ig-user}/media image_url=... is_carousel_item=true
   2. Create carousel container: POST /{ig-user}/media media_type=CAROUSEL children=[ids] caption="..."
   3. Publish: POST /{ig-user}/media_publish creation_id=...
+  4. Write the published media id into the deck folder as published.json.
+
+Step 4 exists because the id returned by /media_publish used to be printed and
+thrown away, and it is the only key that can ever ask Instagram how a deck
+performed. scripts/insights.py reads those files days later. Nothing else in
+the pipeline reads them, and nothing may.
 
 Image URLs must be public (gh-pages via media.suresilly.com). Caption comes from carousel.md Caption section.
 """
 
 from __future__ import annotations
 import argparse, re, os, sys, json, time
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
@@ -38,6 +45,33 @@ def graph_base(token: str) -> str:
     if token.startswith("IGAAP"):
         return GRAPH_INSTAGRAM
     return GRAPH_FACEBOOK
+
+# The deck folder is the right home for this. auto-post.yml already `git add`s
+# `carousels`, so an id written here is committed by the run that earned it,
+# without the posting workflow having to learn anything new.
+PUBLISHED_FILENAME = "published.json"
+
+
+def record_publication(carousel_dir: Path, media_id: str) -> None:
+    """Write the published media id next to the deck it belongs to.
+
+    Never raises. By the time this runs the post is already live, so failing the
+    job here would blame the wrong step and misreport a deck that did go out.
+    A warning is loud enough — the only consequence is that insights.py has one
+    fewer deck it can ask about.
+    """
+    path = carousel_dir / PUBLISHED_FILENAME
+    record = {
+        "media_id": media_id,
+        "deck_slug": carousel_dir.name,
+        "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
+    try:
+        path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        print(f"Recorded media id {media_id} in {path}")
+    except OSError as exc:
+        print(f"::warning::could not record media id {media_id} in {path}: {exc}", file=sys.stderr)
+
 
 def parse_caption(md_path: Path) -> str:
     txt = md_path.read_text(encoding="utf-8")
@@ -160,6 +194,8 @@ def main():
     print("Publishing...")
     media_id = publish(ig_user_id, token, carousel_id)
     print(f"Published: https://www.instagram.com/p/{media_id}/")
+    if media_id:
+        record_publication(carousel_dir, media_id)
 
 if __name__ == "__main__":
     main()

@@ -45,7 +45,10 @@ jobs:
         run: |
           git config user.name  "suresilly-bot"
           git config user.email "bot@suresilly.local"
-          git add state/
+          # carousels/ too: post_to_ig.py writes published.json into the deck
+          # folder when release.py posts a held deck, and that media id is the
+          # only way insights.py can ever measure it. state/ alone loses it.
+          git add state/ carousels/
           git diff --staged --quiet && echo "nothing changed" && exit 0
           git commit -m "telegram: replies read [skip ci]"
           # Somebody else may have pushed while this ran. Rebase and try again
