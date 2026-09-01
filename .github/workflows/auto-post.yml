@@ -293,20 +293,27 @@ jobs:
           # local state only and cannot fail the step: every section it cannot
           # read prints as "unknown". See its header for why one line was not
           # enough.
+          # dashboard.py is rendered twice: plain text for the email archive and
+          # the run log, and HTML for the Telegram alert (bold labels, a linked
+          # logs line). Same facts, one styled for a phone and one for a year from
+          # now. The HTML uses only single-line tags, so notify.py can split a
+          # long caption at a newline without landing inside one.
           if [ -n "$SLUG" ]; then
             SUBJECT="[SILLY-OK] $SLUG"
             BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
+            HTML=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL" --format html)
             ATTACH="carousels/$SLUG/contact_sheet.png"
           else
             SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
-            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" \
-                     --note "No deck was built. This is usually a gate refusing, which is the system working.")
+            NOTE="No deck was built. This is usually a gate refusing, which is the system working."
+            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE")
+            HTML=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" --format html)
             ATTACH=""
           fi
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
-            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --attach "$ATTACH"
+            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML" --attach "$ATTACH"
           else
-            python scripts/notify.py --subject "$SUBJECT" --body "$BODY"
+            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML"
           fi
 
   # ── topping up the concept vocabulary ────────────────────────────────

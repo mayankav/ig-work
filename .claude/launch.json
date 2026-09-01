@@ -1,0 +1,9 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gh-actions",
+      "url": "https://github.com/mayankav/ig-work/actions/workflows/auto-post.yml"
+    }
+  ]
+}

@@ -37,6 +37,7 @@ top, and expands the per-vendor rows only when one of them is near an edge.
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import sys
 from datetime import datetime, timezone
@@ -214,29 +215,51 @@ def measured() -> str:
 
 
 def build(status: str, slug: str | None, note: str, score: str | None,
-          run_url: str | None) -> str:
+          run_url: str | None, fmt: str = "text") -> str:
+    """The report, as text (email, logs) or Telegram HTML.
+
+    HTML mode bolds the head and the section labels and links the logs line, and
+    escapes every dynamic value with html.escape. The tags it uses — <b> and a
+    single-line <a> — never span a newline, which is the rule notify.py relies on
+    to split a long caption safely: cut at a newline and both halves are still
+    valid HTML. The text mode is byte-for-byte what it always was.
+    """
+    is_html = fmt == "html"
+    esc = html.escape if is_html else (lambda s: s)
+
+    def label(name: str) -> str:
+        # Text keeps the original column: every value begins at column 11, so the
+        # longest label ("THIS DECK", 9 chars) sets the pad and the rest align to
+        # it. HTML can't hold a column without <pre> (which would span newlines
+        # and break the caption split), so there the bold carries the separation.
+        return f"<b>{name}</b>  " if is_html else f"{name:<9}  "
+
     head = f"{ICON.get(status, 'ℹ')} {status.upper()}"
     if slug:
-        head += f"  {slug}"
+        head += f"  {esc(slug)}"
     if score:
-        head += f"  ({score}/100)"
+        head += f"  ({esc(score)}/100)"
+    if is_html:
+        head = f"<b>{head}</b>"
 
     lines = [head, f"{datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC", ""]
     if note:
-        lines += [note, ""]
+        lines += [esc(note), ""]
     head_writing, rows_writing = writing()
     lines += [
-        f"PICTURES   {pictures()}",
-        f"WRITING    {head_writing}",
-        *rows_writing,
-        f"LIBRARY    {library()}",
-        f"THIS DECK  {poses_used(slug)}",
-        f"QUEUE      {queue()}",
-        f"REVIEW     {waiting()}",
-        f"MEASURED   {measured()}",
+        f"{label('PICTURES')}{esc(pictures())}",
+        f"{label('WRITING')}{esc(head_writing)}",
+        *[esc(row) for row in rows_writing],
+        f"{label('LIBRARY')}{esc(library())}",
+        f"{label('THIS DECK')}{esc(poses_used(slug))}",
+        f"{label('QUEUE')}{esc(queue())}",
+        f"{label('REVIEW')}{esc(waiting())}",
+        f"{label('MEASURED')}{esc(measured())}",
     ]
     if run_url:
-        lines += ["", f"logs: {run_url}"]
+        logs = (f'logs: <a href="{esc(run_url)}">{esc(run_url)}</a>' if is_html
+                else f"logs: {run_url}")
+        lines += ["", logs]
     return "\n".join(lines)
 
 
@@ -249,8 +272,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--note", default="")
     ap.add_argument("--score")
     ap.add_argument("--run-url")
+    ap.add_argument("--format", default="text", choices=["text", "html"],
+                    help="html is Telegram-flavoured (bold labels, linked logs); "
+                         "text is for email and the run log")
     a = ap.parse_args(argv)
-    print(build(a.status, a.slug, a.note, a.score, a.run_url))
+    print(build(a.status, a.slug, a.note, a.score, a.run_url, a.format))
     return 0
 
 

@@ -47,8 +47,9 @@ SLUG_DATE = re.compile(r"^(\d{8})_")
 
 # Fourteen days. The window is not set by what Instagram needs — that is minutes
 # — but by the one path that reaches back for an old URL: a deck held for review.
-# It waits in state/pending with no expiry, telegram-review.yml polls for the
-# owner's reply every twenty minutes, and release.py then posts it from
+# It waits in state/pending with no expiry until the owner replies on Telegram —
+# the reply pushes to the Cloudflare Worker, which dispatches review.yml, and
+# release.py then posts it from
 # https://media.suresilly.com/slides/<slug>/slides. That latency is a person's,
 # not a machine's. Two weeks covers a holiday; at two decks a day it leaves about
 # 28 decks live, roughly 160 MB, a sixth of the 1 GB Pages limit.

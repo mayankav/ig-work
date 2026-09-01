@@ -36,6 +36,7 @@ that owns it, and this script only sequences them and stops on the first no.
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
 import re
@@ -277,30 +278,61 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
     (PENDING / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n",
                                           encoding="utf-8")
 
-    lines = [f"Held for you: {slug}",
+    # A held deck is the ONE message that asks the owner to do something, so it
+    # carries only what a decision needs — the score, why it was held, and the
+    # exact words that act on it — and NOT the status dashboard the posted-OK
+    # report carries. The short id (last six characters) is what release.find
+    # matches on and what a person can actually type from a phone.
+    short = slug.rsplit("_", 1)[-1] if "_" in slug else slug
+
+    # Email: plain text, readable in an archive a year from now.
+    plain = [f"Held for you: {slug}",
              f"Score {score} of 100, and the bar is {critic.PUBLISH_AT}.",
              "", reason[:400], ""]
     if record["notes"]:
-        lines += ["What the reviewer said:"] + [f"  {n}" for n in record["notes"][:6]] + [""]
-    lines += ["Reply to this message with:",
-              f"  publish {slug}    to post it as it is",
-              f"  rerun {slug}      to throw it away and build another"]
+        plain += ["What the reviewer said:"] + [f"  {n}" for n in record["notes"][:6]] + [""]
+    plain += ["Reply to this message with one of these:",
+              f"  publish {short}    post it as it is",
+              f"  rerun {short}      throw it away, tonight builds another",
+              "  list               what else is waiting",
+              "",
+              'Plain replies like "ok", "yes", "no" or "sure" do nothing on '
+              "purpose — only the words above act."]
+    body = "\n".join(plain)
+
+    # Telegram: the same facts formatted for a phone. Bold headers separate the
+    # sections; each command is its own <code> line, which Telegram renders as a
+    # tap-to-copy box. Every dynamic value is escaped, and NO TAG SPANS A NEWLINE
+    # — that is the rule notify.split_for_caption relies on to cut a long caption
+    # without landing inside a tag and getting the whole message rejected.
+    def esc(text: str) -> str:
+        return html.escape(str(text))
+
+    html_lines = [f"<b>Score {score} of 100</b> — the bar is {critic.PUBLISH_AT}.",
+                  "", f"<i>{esc(reason[:400])}</i>", ""]
+    if record["notes"]:
+        html_lines += ["<b>What the reviewer said</b>"]
+        html_lines += [f"• {esc(n)}" for n in record["notes"][:6]]
+        html_lines += [""]
+    html_lines += [
+        "<b>Reply with one of these</b>",
+        f"<code>publish {esc(short)}</code>",
+        f"<code>rerun {esc(short)}</code>",
+        "<code>list</code>",
+        "",
+        f"Tap a line to copy, then send it. For example, send "
+        f"<code>publish {esc(short)}</code> to post the deck as it is.",
+        "",
+        '<i>Plain replies like "ok", "yes", "no" or "sure" do nothing on '
+        "purpose — only the words above act.</i>",
+    ]
+    telegram_html = "\n".join(html_lines)
+
     sheet = REPO_ROOT / path.parent / "contact_sheet.png"
-    # The reason and the reply instructions first, then the same dashboard every
-    # other message carries, so one glance answers "what else needs me today".
-    # It reads local state only and never fails; if it cannot run, the message
-    # still goes with the part that matters.
-    board = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts" / "dashboard.py"),
-         "--status", "held", "--slug", slug, "--score", str(score)],
-        cwd=REPO_ROOT, capture_output=True, text=True)
-    body = "\n".join(lines)
-    if board.returncode == 0 and board.stdout.strip():
-        body += "\n\n" + board.stdout.strip()
     subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "notify.py"),
          "--subject", f"@suresilly held a deck: {slug} ({score}/100)",
-         "--body", body]
+         "--body", body, "--telegram-html", telegram_html]
         + (["--attach", str(sheet)] if sheet.is_file() else []),
         cwd=REPO_ROOT, capture_output=True, text=True)
 

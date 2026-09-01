@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-telegram_review.py — read the owner's reply and act on it.
+telegram_review.py — act on the owner's reply, and say what happened.
 
 A deck the reviewer scored below the bar is held and sent to Telegram. This is
 the other way to answer it: you reply in the chat instead of opening GitHub.
@@ -11,6 +11,22 @@ the other way to answer it: you reply in the chat instead of opening GitHub.
 
 Both ways in call release.py. Two code paths that post to Instagram is how you
 end up with two different ideas of what has already gone out.
+
+TWO ENTRY POINTS, ONE act()
+
+    --reply <verb> <slug>   act on a reply the webhook already parsed, and send
+                            the answer back. This is the live path: Telegram
+                            pushes the reply to the Cloudflare Worker the instant
+                            it is sent, the Worker dispatches review.yml, and
+                            review.yml calls this. Nothing polls.
+
+    main() (no args)        the old path: poll getUpdates, parse each message,
+                            act. Kept because it carries the chat-id security
+                            model and its regression test, but nothing runs it on
+                            a schedule anymore — the webhook replaced the poll.
+
+Both go through act(), so there is still one place that decides what a reply
+does and one place that talks to release.py.
 
 WHO IS ALLOWED TO SAY THIS
 
@@ -35,6 +51,8 @@ replays a command or loses one.
 
 from __future__ import annotations
 
+import argparse
+import html
 import json
 import os
 import re
@@ -113,33 +131,47 @@ def parse(text: str) -> tuple[str, str] | None:
 
 
 def act(verb: str, slug: str) -> str:
-    """Do it, and return the line to send back."""
+    """Do it, and return the HTML line to send back.
+
+    The reply is Telegram HTML: the outcome is bold, and a deck id is a <code>
+    tap-to-copy box, matching the held-deck message the owner is answering. Every
+    dynamic value is escaped and no tag spans a newline. The literal words are
+    kept ("Nothing held …", "Posted …", "Dropped …") because a test asserts them
+    and because they are what a person reads at a glance.
+    """
+    def esc(text) -> str:
+        return html.escape(str(text))
+
+    def row(r: dict) -> str:
+        return f"  <code>{esc(r['slug'])}</code>  {esc(r['score'])}/100"
+
     if verb == "list":
         waiting = release.held()
         if not waiting:
             return "Nothing is held."
-        return "Held:\n" + "\n".join(
-            f"  {r['slug']}  {r['score']}/100" for r in waiting)
+        return "<b>Held</b>\n" + "\n".join(row(r) for r in waiting)
 
     if not slug:
         waiting = release.held()
         if not waiting:
             return "Nothing is held right now."
         if len(waiting) > 1:
-            return ("More than one deck is held, so tell me which:\n" +
-                    "\n".join(f"  {r['slug']}  {r['score']}/100" for r in waiting))
+            return ("<b>More than one deck is held</b>, so tell me which:\n" +
+                    "\n".join(row(r) for r in waiting))
         slug = waiting[0]["slug"]
 
     record = release.find(slug)
     if record is None:
-        return f"Nothing held matching {slug!r}."
+        return f"Nothing held matching <code>{esc(slug)}</code>."
     if verb == "publish":
-        return (f"Posted {record['slug']}, held at {record['score']}/100."
+        return (f"<b>Posted</b> <code>{esc(record['slug'])}</code>, "
+                f"held at {esc(record['score'])}/100."
                 if release.publish(record) == 0
-                else f"Could not post {record['slug']}. The run log has the reason.")
+                else f"<b>Could not post</b> <code>{esc(record['slug'])}</code>. "
+                     f"The run log has the reason.")
     release.drop(record)
-    return (f"Dropped {record['slug']}, held at {record['score']}/100. "
-            f"Tonight's run builds a fresh one.")
+    return (f"<b>Dropped</b> <code>{esc(record['slug'])}</code>, "
+            f"held at {esc(record['score'])}/100. Tonight's run builds a fresh one.")
 
 
 def main() -> int:
@@ -175,7 +207,10 @@ def main() -> int:
         verb, slug = command
         reply = act(verb, slug)
         print(f"  {verb} {slug or '(unnamed)'} -> {reply.splitlines()[0]}")
-        _api(token, "sendMessage", {"chat_id": chat, "text": reply})
+        # parse_mode=HTML because act() returns HTML now — the outcome is bold and
+        # the slug is a <code> tap-to-copy box. Sent plain, the tags would show as
+        # literal <b>…</b> in the chat.
+        _api(token, "sendMessage", {"chat_id": chat, "text": reply, "parse_mode": "HTML"})
         acted += 1
 
     remember(highest + 1)
@@ -183,5 +218,41 @@ def main() -> int:
     return 0
 
 
+def reply(verb: str, slug: str) -> int:
+    """The live path. The Worker already authenticated the push, matched the chat
+    id and parsed the command; review.yml hands us the mapped verb and the slug.
+    So there is no getUpdates, no cursor and no chat-id gate here — those belong
+    to the poller, and the Worker did the gate. We act and send the one answer.
+
+    The verb is already mapped (publish/drop/list). A safety net anyway: if some
+    other word arrives, run it through VERBS so this can never do something the
+    reply did not name.
+    """
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+    chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    mapped = VERBS.get(verb.lower(), verb.lower())
+    if mapped not in ("publish", "drop", "list"):
+        print(f"unknown decision {verb!r}, nothing done")
+        return 0
+    answer = act(mapped, slug)
+    print(f"  {mapped} {slug or '(unnamed)'} -> {answer.splitlines()[0]}")
+    if token and chat:
+        _api(token, "sendMessage", {"chat_id": chat, "text": answer, "parse_mode": "HTML"})
+    else:
+        print("no Telegram credentials, acted but did not send the reply")
+    return 0
+
+
+def cli(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Act on a Telegram reply.")
+    ap.add_argument("--reply", nargs=2, metavar=("VERB", "SLUG"),
+                    help="act on one reply the webhook already parsed and send the "
+                         "answer back; SLUG may be empty (pass '')")
+    a = ap.parse_args(argv)
+    if a.reply is not None:
+        return reply(a.reply[0], a.reply[1])
+    return main()
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli())

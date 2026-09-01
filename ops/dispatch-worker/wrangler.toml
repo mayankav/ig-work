@@ -1,0 +1,23 @@
+# Deploy:  npx wrangler deploy
+# Secrets: npx wrangler secret put GH_DISPATCH_TOKEN
+#          npx wrangler secret put TRIGGER_KEY
+# Or do all of it in the Cloudflare dashboard with no local tooling — see
+# README.md, which is the recommended path.
+
+name = "suresilly-dispatch"
+main = "src/index.js"
+# Any date from 2022 on works for this Worker (it uses only fetch/URL/ESM). Bump
+# it freely; it is pinned low so an older wrangler never calls it "in the future".
+compatibility_date = "2024-11-01"
+
+# Cloudflare's clock, in UTC — the whole point is that it is not GitHub's.
+#   30 2  * * *  = 02:30 UTC = 08:00 IST
+#   30 14 * * *  = 14:30 UTC = 20:00 IST
+[triggers]
+crons = ["30 2 * * *", "30 14 * * *"]
+
+# No routes, no custom domain: this Worker is a timer, not a website. It still
+# gets a <name>.<subdomain>.workers.dev URL, which the fetch handler uses only
+# as a secret-gated "post now" button. GH_DISPATCH_TOKEN and TRIGGER_KEY are
+# secrets (encrypted), set with `wrangler secret put` or in the dashboard —
+# never written here and never committed.

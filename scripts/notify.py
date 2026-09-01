@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import html
 import os
 import sys
 from pathlib import Path
@@ -85,35 +86,52 @@ def _env(name: str) -> str:
     return os.environ.get(name, "").strip()
 
 
-def _telegram(subject: str, body: str, attach: Path | None) -> tuple[bool, str]:
+def _telegram(subject: str, body: str, attach: Path | None,
+              parse_mode: str | None = None) -> tuple[bool, str]:
     """Send via a bot.
 
     sendDocument, not sendPhoto. sendPhoto recompresses, and the contact sheet is
     the thing you squint at to decide whether nine slides read as one deck.
+
+    When parse_mode is "HTML", `subject` and `body` are already valid, escaped
+    HTML and the subject is emphasised as the title. The one rule the caller must
+    keep is that NO TAG SPANS A NEWLINE — split_for_caption only ever cuts at a
+    newline, so if that holds, both the caption and the follow-up stay valid HTML
+    and Telegram parses each on its own. A tag straddling the cut would make
+    Telegram reject the whole message, not just trim it.
     """
     token = _env("TELEGRAM_BOT_TOKEN")
     chat = _env("TELEGRAM_CHAT_ID")
     if not (token and chat):
         return False, "not configured"
 
-    text = f"{subject}\n\n{body}".strip()
+    if parse_mode == "HTML":
+        text = f"<b>{html.escape(subject)}</b>\n\n{body}".strip()
+    else:
+        text = f"{subject}\n\n{body}".strip()
     base = f"https://api.telegram.org/bot{token}"
+
+    def _mode(data: dict) -> dict:
+        if parse_mode:
+            data["parse_mode"] = parse_mode
+        return data
+
     try:
         if attach and attach.is_file():
             caption, rest = split_for_caption(text)
             with attach.open("rb") as handle:
                 response = requests.post(
                     f"{base}/sendDocument",
-                    data={"chat_id": chat, "caption": caption},
+                    data=_mode({"chat_id": chat, "caption": caption}),
                     files={"document": (attach.name, handle, "image/png")},
                     timeout=TIMEOUT)
             if response.ok and rest:
                 requests.post(f"{base}/sendMessage",
-                              data={"chat_id": chat, "text": rest[:4000]},
+                              data=_mode({"chat_id": chat, "text": rest[:4000]}),
                               timeout=TIMEOUT)
         else:
             response = requests.post(f"{base}/sendMessage",
-                                     data={"chat_id": chat, "text": text[:4000]},
+                                     data=_mode({"chat_id": chat, "text": text[:4000]}),
                                      timeout=TIMEOUT)
         if response.ok:
             return True, "sent"
@@ -160,14 +178,24 @@ def _resend(subject: str, body: str, attach: Path | None, to: str) -> tuple[bool
         return False, f"{type(exc).__name__}: {exc}"
 
 
-def notify(subject: str, body: str, attach: Path | None, to: str) -> int:
-    """Send on every configured channel. Returns a process exit code."""
+def notify(subject: str, body: str, attach: Path | None, to: str,
+           *, telegram_html: str | None = None) -> int:
+    """Send on every configured channel. Returns a process exit code.
+
+    `telegram_html`, when given, is sent to Telegram instead of `body` with
+    parse_mode=HTML, so the alert on your phone can be formatted (bold, and
+    tap-to-copy code lines) while email keeps the plain `body`. Email is a plain
+    reader — tags there would be noise — so `_resend` always gets `body`. The two
+    channels carry the same facts, one styled for a phone and one for an archive.
+    """
     if requests is None:
         print("::warning::notify: the requests package is missing, nothing was sent")
         return 0
 
     results = {
-        "telegram": _telegram(subject, body, attach),
+        "telegram": (_telegram(subject, telegram_html, attach, parse_mode="HTML")
+                     if telegram_html is not None
+                     else _telegram(subject, body, attach)),
         "email": _resend(subject, body, attach, to),
     }
 
@@ -198,6 +226,9 @@ def main() -> None:
     ap.add_argument("--body", default="")
     ap.add_argument("--attach", help="usually the contact sheet")
     ap.add_argument("--to", default=_env("EMAIL_TO") or "mayankmacav@gmail.com")
+    ap.add_argument("--telegram-html",
+                    help="formatted HTML body for Telegram only; email keeps --body. "
+                         "Must be valid Telegram HTML with no tag spanning a newline.")
     args = ap.parse_args()
 
     body = args.body
@@ -205,7 +236,7 @@ def main() -> None:
         body = sys.stdin.read()
 
     raise SystemExit(notify(args.subject, body, Path(args.attach) if args.attach else None,
-                            args.to))
+                            args.to, telegram_html=args.telegram_html))
 
 
 if __name__ == "__main__":

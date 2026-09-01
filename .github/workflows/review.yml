@@ -36,17 +36,28 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: What is waiting
-        run: python .agents/skills/suresilly-carousel/scripts/release.py --list
+      # release.py is stdlib-only, but publishing a held deck shells out to
+      # post_to_ig.py, which needs requests. Install it always so `publish` never
+      # dies on an import after the owner has already said yes.
+      - name: Install
+        run: pip install --quiet requests
 
-      - name: Do it
-        if: inputs.decision != 'list'
+      # One step now, for every decision. telegram_review.py --reply runs the
+      # action through the SAME act() the webhook path uses and sends the answer
+      # back on Telegram — bold outcome, tap-to-copy slug. list, publish, drop and
+      # the "which one?" disambiguation all reply, so there are no `!= 'list'`
+      # guards: the point of a reply is that every reply gets an answer.
+      #
+      # The verb is already mapped by the Worker (publish/drop/list). It is passed
+      # verbatim; --reply maps it again through VERBS as a safety net, so this can
+      # never do something the reply did not name.
+      - name: Act on the reply, and say what happened
         run: |
-          python .agents/skills/suresilly-carousel/scripts/release.py \
-            --${{ inputs.decision }} "${{ inputs.slug }}"
+          python .agents/skills/suresilly-carousel/scripts/telegram_review.py \
+            --reply "${{ inputs.decision }}" "${{ inputs.slug }}"
 
       - name: Record the decision
-        if: inputs.decision != 'list'
+        if: always() && inputs.decision != 'list'
         run: |
           git config user.name  "suresilly-bot"
           git config user.email "bot@suresilly.local"
@@ -55,11 +66,5 @@ jobs:
           # only way insights.py can ever measure it. state/ alone loses it.
           git add state/ carousels/
           git diff --staged --quiet || git commit -m "review: ${{ inputs.decision }} ${{ inputs.slug }} [skip ci]"
+          git pull --rebase --quiet || true
           git push
-
-      - name: Say what happened
-        if: always() && inputs.decision != 'list'
-        run: |
-          python scripts/notify.py \
-            --subject "@suresilly ${{ inputs.decision }}: ${{ inputs.slug }}" \
-            --body "Decision recorded from GitHub Actions: ${{ inputs.decision }} ${{ inputs.slug }}. Job status ${{ job.status }}."

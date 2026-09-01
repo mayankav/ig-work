@@ -132,17 +132,71 @@ Everything runs on free allowances. Check what is left:
 
 ---
 
-## When a deck is held
+## Operating the account
 
-Scored out of 100. Above the bar it posts itself. Below, it is finished and waits for you in Telegram with the score and a preview.
+Day to day there is nothing to do. The account posts on its own and only speaks to you when a deck needs an answer.
+
+### The clocks
+
+Two posts a day, fired by a Cloudflare Worker, not by GitHub. GitHub's own `schedule:` is best-effort — it has delivered a slot five hours late and dropped one entirely — so an independent timer holds the clock and dispatches the run.
+
+| When (UTC) | When (IST) | What |
+|---|---|---|
+| 02:30 | 08:00 | Build and publish |
+| 14:30 | 20:00 | Build and publish |
+
+Post one right now, from a phone, without waiting for a slot:
+
+```bash
+curl "https://suresilly-dispatch.mayankav.workers.dev/?key=<TRIGGER_KEY>&mode=publish"
+```
+
+Drop `&mode=publish` to build one and look at it without posting.
+
+### When a deck is held
+
+Scored out of 100. Above the bar it posts itself. Below, it is finished and waits for you in Telegram with the score, the reason, and a preview. You answer with one word and an id:
 
 ```
-publish 79262b     post it
-rerun 79262b       bin it, tonight builds another
+publish 79262b     post it as it is
+rerun 79262b       bin it — tonight's run builds another
 list               what is waiting
 ```
 
-**Harm never reaches you.** Dangerous advice, a made-up statistic, a real person named — those stop the deck outright. There is no approve button for them.
+The last six characters of the slug are enough. `publish`, `post`, `approve`, `ship` all post; `rerun`, `drop`, `reject`, `discard` all bin it. Your reply reaches GitHub in seconds — Telegram pushes it to the Worker, which dispatches the action; nothing polls a queue.
+
+**Plain replies do nothing on purpose.** `ok`, `yes`, `no`, `sure` — the words that turn up in ordinary chat — are ignored, because one of them landing on a held deck would post it by accident. Only the verbs above act.
+
+**Harm never reaches you.** Dangerous advice, a made-up statistic, a real person named — those stop the deck outright, before it is ever held. There is no approve button for them.
+
+### If Telegram is not an option
+
+The reply is a convenience on top of a button. The same three decisions live at
+
+<https://github.com/mayankav/ig-work/actions/workflows/review.yml>
+
+— press **Run workflow**, pick `list` / `publish` / `drop`, and paste the id. This is the fallback if the Worker is ever down: a lost reply is never a lost deck, because the deck waits in `state/pending` for up to 14 days.
+
+### What happens after a post
+
+Three days on, `scripts/insights.py` records how many people saw, saved and shared it. **It only ever reports.** No number it writes is allowed back into the pipeline — a metric that started picking hooks is how "code decides" would quietly stop being true.
+
+### First-time setup (once, by the owner)
+
+The reply path needs the Worker to know two things and Telegram to know where to push. Set on the Worker (`wrangler secret put …`, or the Cloudflare dashboard):
+
+- `TELEGRAM_WEBHOOK_SECRET` — any random string, e.g. `openssl rand -hex 32`
+- `TELEGRAM_CHAT_ID` — the same chat id the workflows already use
+
+Then point Telegram at the Worker (this also turns polling off — `setWebhook` and `getUpdates` are mutually exclusive):
+
+```bash
+curl "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
+  --data-urlencode "url=https://suresilly-dispatch.mayankav.workers.dev/telegram" \
+  --data-urlencode "secret_token=<WEBHOOK_SECRET>"
+```
+
+Confirm with `…/getWebhookInfo`, then send `list` in the chat and watch a `review.yml` run appear within seconds.
 
 ---
 

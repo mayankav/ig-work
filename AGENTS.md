@@ -26,7 +26,9 @@ Kill switch: `SS_HALT=1` or a file at `state/HALT`.
   tests/            27 suites, CI runs every one
 scripts/            NOT the engine's. Jobs around it, never imported by it:
                     post_to_ig · prune_slides · insights · notify · capacity · dashboard
-.github/workflows/  auto-post (08:00, 20:00 IST) · insights · review · telegram-review
+.github/workflows/  auto-post (08:00, 20:00 IST) · insights · review
+                    (Telegram replies push to the Cloudflare Worker, which
+                    dispatches review — no polling workflow anymore)
 carousels/          carousel.md + contact_sheet.png per deck
 state/              what has been used. Committed.
 research/           ⚠ 02_account_database and 05_hooks_database hold invented numbers

@@ -1,0 +1,14 @@
+{
+  "name": "suresilly-dispatch",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Off-GitHub Cron Trigger that fires the @suresilly auto-post workflow via workflow_dispatch.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --test-scheduled",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
