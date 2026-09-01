@@ -290,15 +290,16 @@
         "burnout"
       ],
       "claims": [
-        "Chronic work stress leads directly to emotional exhaustion and depersonalization toward clients."
+        "Chronic work stress leads directly to emotional exhaustion and depersonalization toward clients.",
+        "Chronic work stress leads directly to emotional exhaustion and detachment from clients."
       ],
       "phrase": "depersonalization",
       "verified": {
         "catalogue": "openlibrary",
-        "scanned_hits": 56733,
+        "scanned_hits": 17463,
         "proposed_by": "gemini",
         "checked_by": "cloudflare",
-        "at": "2026-09-01T05:28:21Z"
+        "at": "2026-09-01T05:57:02Z"
       }
     }
   ]

@@ -3,7 +3,8 @@
     "20260830_kitchen-at-11pm_800736",
     "20260830_bed-stood-outside_803474",
     "20260830_bed-sat-on_4d84f6",
-    "20260830_bed-sat-on_ad2ba8"
+    "20260830_bed-sat-on_ad2ba8",
+    "20260901_door-unlocked-the_572b21"
   ],
   "anchors": {
     "action": [
@@ -35,6 +36,12 @@
     ],
     "stared": [
       "20260830_bed-sat-on_ad2ba8"
+    ],
+    "6:45pm": [
+      "20260901_door-unlocked-the_572b21"
+    ],
+    "door": [
+      "20260901_door-unlocked-the_572b21"
     ]
   }
 }

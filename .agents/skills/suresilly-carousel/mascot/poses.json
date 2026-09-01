@@ -3088,6 +3088,105 @@
       "framing": "full",
       "figures": 1,
       "source": "imported"
+    },
+    "faces_closed_door_eyes_e05f": {
+      "tags": [
+        "closed",
+        "door",
+        "eyes",
+        "faces",
+        "faces closed door eyes e05f",
+        "generated",
+        "half",
+        "night",
+        "shut"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "looks_directly_ahead_while_a197": {
+      "tags": [
+        "ahead",
+        "directly",
+        "empty",
+        "generated",
+        "hallway",
+        "looks",
+        "looks directly ahead while a197",
+        "quietly",
+        "standing"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "stands_facing_closed_wooden_7186": {
+      "tags": [
+        "closed",
+        "door",
+        "facing",
+        "floor",
+        "generated",
+        "head",
+        "lowered",
+        "stands",
+        "stands facing closed wooden 7186",
+        "wooden"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "stands_nose_pressed_gently_fe12": {
+      "tags": [
+        "against",
+        "frame",
+        "generated",
+        "gently",
+        "nose",
+        "pressed",
+        "stands",
+        "stands nose pressed gently fe12",
+        "thick",
+        "wooden"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "stares_blankly_blank_wall_c1c9": {
+      "tags": [
+        "back",
+        "blank",
+        "blankly",
+        "ears",
+        "generated",
+        "slightly",
+        "stares",
+        "stares blankly blank wall c1c9",
+        "turned",
+        "wall"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "turns_head_away_from_05be": {
+      "tags": [
+        "away",
+        "dark",
+        "empty",
+        "generated",
+        "head",
+        "room",
+        "table",
+        "turns",
+        "turns head away from 05be"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
     }
   },
   "role_default": {
