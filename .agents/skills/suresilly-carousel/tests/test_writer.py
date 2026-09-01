@@ -187,8 +187,8 @@ def run() -> int:
                 failures.append(f"REPEAT {deck.parent.name} blocked for crediting a source: {fault}")
 
     # ── the angles ──
-    if writer.combinations() != 2688:
-        failures.append(f"expected 2688 structural combinations, got {writer.combinations()}")
+    if writer.combinations() != 34944:
+        failures.append(f"expected 34944 structural combinations, got {writer.combinations()}")
     if writer.draw_axes(MOMENT) != writer.draw_axes(MOMENT):
         failures.append("the same moment planned two different ways, so a rerun is not reproducible")
     spread = {tuple(writer.draw_axes(f"moment number {i}").values()) for i in range(60)}
@@ -259,8 +259,16 @@ def run() -> int:
         failures.append("PLAN rejected a valid second claim")
 
     # ── hooks ──
-    if not writer.hook_ok({"h1": "You woke at 2:17am and watched the [[clock]].", "h2": "(the maths)"}):
-        failures.append("HOOK a good hook was refused")
+    #
+    # The subtitle here used to be "(the maths)", a parenthetical label written
+    # back when h2 was decoration. It is refused now, and correctly: two words in
+    # brackets neither absolve the reader nor promise them anything, which are the
+    # only two jobs an h2 has. The negative cases below keep it, because a hook
+    # already broken by its headline does not need a working subtitle to prove it.
+    if not writer.hook_ok({"h1": "You woke at 2:17am and watched the [[clock]].",
+                           "h2": "It costs you the whole morning."}):
+        failures.append(f"HOOK a good hook was refused: "
+                        f"{writer.hook_faults({'h1': 'You woke at 2:17am and watched the [[clock]].', 'h2': 'It costs you the whole morning.'})}")
     for h1, h2, why in [
         ("Why you wake at 2:17am every [[night]]", "(the maths)", "banned opener"),
         ("You woke at [[2:17am]]", "Your heart was a drum solo in the dark tonight", "long subtitle"),
@@ -280,14 +288,23 @@ def run() -> int:
     repeated = {"h1": "Execution freeze. You remain anchored to the [[bed]] even when awake.",
                 "h2": "Execution freeze. Anchored to the bed."}
     faults = writer.hook_faults(repeated, "Execution freeze")
-    if not any("only repeats h1" in f for f in faults):
+    # Was "only repeats h1", from the subset check this replaced. A subset only
+    # fires when the overlap is total, so it caught this pair and nothing milder;
+    # the count says how far short the subtitle fell and survives paraphrase.
+    if not any("new words" in f for f in faults):
         failures.append(f"HOOK a subtitle repeating the headline was accepted: {faults}")
     if not any("again" in f for f in faults):
         failures.append(f"HOOK a subtitle repeating the name was accepted: {faults}")
-    adds = dict(repeated, h2="The morning goes while you stand.")
-    if writer.hook_faults(adds, "Execution freeze"):
-        failures.append(f"HOOK a subtitle that adds something was refused: "
-                        f"{writer.hook_faults(adds, 'Execution freeze')}")
+    # This headline fails on two counts, and the second one only became visible
+    # once plain words were measured: "Execution" is four syllables on the cover.
+    # So the working-subtitle case cannot ask for zero faults — it asks that the
+    # h2 is no longer one of them, and that the h1 is still caught.
+    adds = writer.hook_faults(dict(repeated, h2="The morning goes while you stand."),
+                              "Execution freeze")
+    if any("new words" in f or "h2" in f for f in adds):
+        failures.append(f"HOOK a subtitle that adds something was refused: {adds}")
+    if not any("execution" in f for f in adds):
+        failures.append(f"HOOK a four-syllable word on the cover was not caught: {adds}")
 
     # One deck, one name. The same deck led with "Execution freeze" and coined
     # "the traction gap" on slide 4, so a reader had two handles and kept none.
@@ -480,7 +497,7 @@ def run() -> int:
             print(f"  {line}")
         return 1
     print(f"writer: {total}/{total} passed "
-          f"(2688 angles, {len(cases)} plan faults, hooks, mascots, accents, round trip)")
+          f"(34944 angles, {len(cases)} plan faults, hooks, mascots, accents, round trip)")
     return 0
 
 

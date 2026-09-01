@@ -46,7 +46,7 @@ Every word of copy must pass through these voice dials:
 | Dial | Setting | What It Sounds Like |
 |---|---|---|
 | **Warmth** | 8/10 | Compassionate, validating, non-judgmental. Never cold or clinical. |
-| **Intellectual sharpness** | 9/10 | Psychologically accurate, well-sourced, rigorous. Never dumbed-down. |
+| **Intellectual sharpness** | 9/10 | Simple words, sharp idea. Psychologically accurate, well-sourced, rigorous, and said in vocabulary a nine-year-old owns. Never simplify the thinking; always simplify the words. Enforced: `readability.py` refuses any four-syllable word a reader can see. |
 | **Self-deprecation** | 6/10 | Lighthearted, relatable group-chat energy. "we're all a little cooked." |
 | **Clinical jargon** | 1/10 | Translate textbook psychology into everyday human English. Say "shutting down" not "deactivating attachment strategies." |
 | **Humor register** | Dry/deadpan | Observational, never slapstick. Think: "ah yes, the classic 'I'm fine' followed by 4 hours of silence." |

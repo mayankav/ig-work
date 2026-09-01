@@ -19,6 +19,7 @@ SKILL_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = SKILL_DIR.parent.parent.parent
 sys.path.insert(0, str(SKILL_DIR / "scripts"))
 
+import readability  # noqa: E402
 import render  # noqa: E402
 
 
@@ -147,8 +148,12 @@ def audit(path: Path) -> list[str]:
         pass
     if hook.get("h2") and len(words(hook["h2"])) > 7:
         issues.append(f"slide 1 subtitle is {len(words(hook['h2']))} words; max is 7")
-    if re.match(r"(?i)^(why|how to|the reason|what nobody|most people|here'?s)", clean(hook.get("h1", ""))):
-        issues.append("slide 1 opens like an explanation; stage a scene instead")
+    # "How to" is deliberately absent from this list — see the note on
+    # writer.BANNED_OPENERS. It was banned from taste; 43% of the covers on the
+    # reference account use it. The two lists have to agree, because a hook this
+    # one refuses is a hook the plan already accepted.
+    if re.match(r"(?i)^(why|the reason|what nobody|most people|here'?s)", clean(hook.get("h1", ""))):
+        issues.append("slide 1 opens by delaying the noun; stage a scene instead")
     # No second-person diagnosis: "you have/are X" where X is clinical term
     # Noun form ("waiting mode", "functional freeze") is allowed; diagnosis as identity is not
     h1_lower = clean(hook.get("h1", "")).lower()
@@ -277,6 +282,22 @@ def audit(path: Path) -> list[str]:
     repeats = duplicated_mascot_briefs(path, slides)
     for brief in repeats:
         issues.append(f"repeated mascot brief: {brief[:90]}")
+
+    # ── Plain words — the axis nothing measured ──
+    #
+    # Seventy-eight checks in this engine asked whether a line held exactly one
+    # accent, named something a camera could point at, or shared a word with
+    # slide 3. Not one asked whether it was written in words a reader does not
+    # have to decode, so a deck could satisfy every gate here and still read
+    # like a textbook. Every one of the seven decks published before this landed
+    # fails it, three to six lines each.
+    #
+    # Here rather than in writer.verify_draft, which calls this function: one
+    # call site covers the repair loop and a human running this file by hand.
+    graded = [(f"slide {i}", slide_text(s)) for i, s in enumerate(slides, 1)]
+    if caption:
+        graded.append(("the caption", caption))
+    issues += readability.deck_faults(graded)
 
     if not caption:
         issues.append("missing caption section")

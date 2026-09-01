@@ -135,7 +135,9 @@ One "why", three tools. Re-hook on slides 4 and 6.
 | Usable in 24h | It needs googling, a new app, motivation, or inventing anything |
 | Words, not why | Fewer than 2 slides are copy-paste scripts |
 | Stealable | No single line could be sent alone in a DM and still land |
-| `audit_copy.py` | Any hook-gate, length or AI-pattern failure |
+| Simple words | Any line a reader sees carries a four-syllable word, or the deck grades above 6 |
+| The h2 has a job | The subtitle neither absolves nor promises, or adds fewer than 2 words to the h1 |
+| `audit_copy.py` | Any hook-gate, length, readability or AI-pattern failure |
 
 ### Script format
 

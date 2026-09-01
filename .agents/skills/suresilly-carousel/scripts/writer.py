@@ -17,7 +17,7 @@ one slide cannot quietly break the story.
 Two things the model is not allowed to do.
 
 It does not choose the angle. A planner draws that here, from a fixed set of
-2,688 combinations, because a model left to pick its own approach converges on
+34,944 combinations, because a model left to pick its own approach converges on
 the same few ideas no matter how the temperature is set. The angle arrives as
 instructions about what to write, never as a request to be original.
 
@@ -40,6 +40,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bibliography  # noqa: E402
 import coherence  # noqa: E402
 import llm  # noqa: E402
+import memory  # noqa: E402
+import readability  # noqa: E402
 import safety  # noqa: E402
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
@@ -48,12 +50,19 @@ HASHTAGS_PATH = SKILL_DIR / "references" / "hashtags.json"
 
 # ─────────────────────────── the angles ────────────────────────────
 #
-# Five axes that change what the deck SAYS, not how it is decorated. Combined
-# they give 2,688 starting positions, and the planner draws one per run from the
+# Six axes that change what the deck SAYS, not how it is decorated. Combined
+# they give 34,944 starting positions, and the planner draws one per run from the
 # moment's own fingerprint so the same moment could never be written twice the
 # same way. Each value is phrased as an instruction, because a constraint the
 # model is told to satisfy changes the writing and a label it is merely shown
 # does not.
+#
+# NOT ONE OF THEM SHOWS A LINE OF COPY. That is the whole reason this is an axis
+# and not a library of examples. Invariant 20 was written after five of seven
+# published decks were caught carrying a run of words lifted straight out of the
+# prompt, including a sentence the prompt quoted in order to forbid it. An
+# example is a template; a job is not. So the model is handed a job and code
+# picks which job, and there is nothing here for it to converge on.
 
 AXES = {
     "angle": {
@@ -64,6 +73,42 @@ AXES = {
         "contrarian": "open by refusing the obvious explanation",
         "promise": "open on what changes tonight if they read to the end",
         "collective": "open on how many people are doing this at the same hour",
+    },
+    # The sixth axis, and the one that changes the cover.
+    #
+    # Measured on the reference account: 18 of its 42 covers, 43%, run a How-to
+    # or a list shape, at 65k followers on 75 posts. None of them run it in the
+    # headline. The h1 is a flat human claim and THE FORMULA SITS IN THE H2,
+    # doing the benefit job. Our covers named a problem and never once said what
+    # the reader gets, and that was the gap — not a missing hook library.
+    #
+    # Every value here is a job for the H2, which is what keeps this axis
+    # orthogonal to `angle`: angle owns how slide 1 opens, formula owns what the
+    # second line does about it. Each job either absolves or promises, and
+    # nothing else is on offer.
+    #
+    # WHAT IS DELIBERATELY ABSENT, each for a reason and not for taste. No
+    # quantified timeline, because "fixed in thirty days" is a health-outcome
+    # claim and invariant 12 exists so this account never prints one. No
+    # invented social proof, because two files under research/ already hold
+    # invented numbers and AGENTS.md has to warn about them. No manufactured
+    # deadline, because there are zero instances of one across those 42 covers
+    # and the growth engine here is a DM-share, which a pressured reader does
+    # not send to their sister. And no "one weird trick", which reads as 2013.
+    "formula": {
+        "exact-words": "the h2 promises the exact wording, and slide 8 has to print wording that matches",
+        "without-the-cost": "the h2 promises the result and names the effort they do not have to spend on it",
+        "smallest-version": "the h2 promises the smallest usable version, the one that fits in a spare minute",
+        "one-of-these": "the h2 promises that one of the moves further in is the one that will sting, without saying which",
+        "craft-name": "the h2 hands over a short name for the behaviour, said as though it were a skill worth having",
+        "who-this-is": "the h2 names who this is for by something they do, never by something they are",
+        "what-it-costs": "the h2 names what it costs to carry on not knowing this, with no deadline attached",
+        "refuse-their-reason": "the h2 refuses the explanation the reader has already been handed about themselves",
+        "give-the-reason": "the h2 gives the reason the behaviour made sense, so it stops reading as a flaw",
+        "who-else": "the h2 says who else does this, as a kind of person the reader can picture, never as a count",
+        "what-stops": "the h2 promises what stops happening, not what starts",
+        "the-part-left-out": "the h2 promises the piece missing from the advice they were already given, without claiming nobody said it",
+        "how-it-breaks": "the h2 promises the ways this goes wrong, so the reader can check themselves against them",
     },
     "lens": {
         "body-first": "explain through what the body did before the thought arrived",
@@ -122,20 +167,79 @@ carries two names on purpose: yours, which they repeat, and this one, which
 they look up."""
 
 
-def draw_axes(seed: str) -> dict:
+# How many decks a formula stays taken for once it is used. Eight, matching
+# SHAPE_WINDOW in compose.py, because the two are the same kind of memory and a
+# reader scrolling a profile sees them in the same grid. Thirteen values minus
+# eight leaves five free at the worst moment, so the window can never starve the
+# draw.
+FORMULA_WINDOW = 8
+
+
+def draw_axes(seed: str, recent: list[str] | None = None) -> dict:
     """Pick one value per axis, deterministically from the moment.
 
     Deterministic on purpose: the same moment always plans the same way, so a
     rerun reproduces a deck exactly and a reported problem can be looked at
     rather than guessed at. Different moments land in different corners because
     the hash spreads them, not because anything is random.
+
+    Each axis gets its own hash of its own name, rather than byte i of one
+    digest. Byte-by-position meant adding an axis silently moved every axis
+    after it in the dict, so a sixth axis would have changed what the other five
+    drew for every moment that already existed. Now a new axis disturbs nothing.
+
+    `recent` is the formulas the last few decks were built on, oldest first.
+    Given one, the hash pick is walked forward in sorted order until it lands on
+    a formula outside the window — deterministic, so a rerun with the same
+    history still reproduces the deck. Only the formula axis gets this. The
+    other five are old enough to have their variety measured elsewhere, and this
+    is the axis that decides what the cover's second line does, so repeating it
+    is what would make two decks sound alike.
     """
-    digest = hashlib.sha256(seed.encode()).digest()
     chosen = {}
-    for i, (axis, options) in enumerate(AXES.items()):
+    for axis, options in AXES.items():
         keys = sorted(options)
-        chosen[axis] = keys[digest[i] % len(keys)]
+        digest = hashlib.sha256(f"{axis}\x00{seed}".encode()).digest()
+        chosen[axis] = keys[digest[0] % len(keys)]
+    if recent:
+        taken = set(recent[-FORMULA_WINDOW:])
+        keys = sorted(AXES["formula"])
+        start = keys.index(chosen["formula"])
+        for step in range(len(keys)):
+            candidate = keys[(start + step) % len(keys)]
+            if candidate not in taken:
+                chosen["formula"] = candidate
+                break
     return chosen
+
+
+def recent_formulas(history: list[str] | None = None) -> list[str]:
+    """Which formula each past deck was built on, oldest last.
+
+    Replayed rather than recorded. `state/used.jsonl` stores the moment text and
+    not the axes, and invariant 16 says state is one thing in one place — so the
+    choice is between adding a field to a ledger that already exists for another
+    purpose, or deriving it from the ledger every run. Deriving it costs one
+    hash per past deck and cannot fall out of step with `draw_axes`, because it
+    IS `draw_axes`.
+
+    Chained on purpose: each step is replayed with the list as it stood at that
+    point, which is the only way the reconstruction matches the sequence that
+    actually ran.
+
+    Honest about what this is. Decks written before the formula axis existed did
+    not use one, so their entry here is not a record of anything. It is a
+    deterministic function of the history, which is all the window needs to
+    spread the next thirteen.
+
+    `history` is injectable because a test may not read `state/`.
+    """
+    if history is None:
+        history = memory.used_texts()
+    seen: list[str] = []
+    for text in history:
+        seen.append(draw_axes(text, seen)["formula"])
+    return seen
 
 
 def combinations() -> int:
@@ -195,7 +299,9 @@ Relief is where the deck ENDS, on slide 9. It is not what the deck is built on.
 THE NAME IS THE POST. Before the beats, decide what this pattern is CALLED:
 a short noun phrase a reader can repeat, search for, and send to somebody with
 "this is you". Two or three words. "Waiting mode". "The bird test". "Bowl
-washing". Not a sentence, not a feeling, not a diagnosis.
+washing". Not a sentence, not a feeling, not a diagnosis. SHORT WORDS: nothing
+in it may run to four syllables, because a handle is repeated out loud and the
+ones that spread are two plain words each.
 
   This is the single biggest thing that decides whether a post travels. A name
   can be looked up, argued with, and used as an accusation, a confession or a
@@ -281,16 +387,34 @@ RULES
   point at, and it recognises those words and no others. A hook built on
   "doorway" when the list says "door" is refused, and so is a hook built on a
   feeling.
-  HOOKS. Give at least 4. Each is used on slide 1 exactly as written, so every
-  rule here is checked and a hook that breaks one is thrown away.
+  HOOKS. Give at least 8. Each is used on slide 1 exactly as written, so every
+  rule here is checked and a hook that breaks one is thrown away. Eight because
+  most of them will break something and one usable hook is the whole deck.
     h1  at most 12 words. Exactly one [[accent]], wrapping the last stressed
-        word. Never open with Why, How to, The reason, What nobody, Most
-        people, or Here is.
-    h2  at most 7 words. No [[accent]] at all. It says something the h1 did
-        NOT, and it never repeats the name — the headline already gave it. A
-        deck that posted put the name and the same image in both lines, which
-        is the same sentence twice on the only slide most people see. The h2
-        is a subtitle: it moves the reader on, it does not agree with the h1.
+        word. Never open with Why, The reason, What nobody, Most people, or
+        Here is: each of those delays the noun, and the first three words are
+        the ones that carry it.
+    h2  at most 7 words. No [[accent]] at all. It never repeats the name — the
+        headline already gave it.
+
+        THE H2 EITHER ABSOLVES OR PROMISES. Those are the only two jobs, and
+        HOW THIS DECK IS BUILT tells you which one this deck's h2 has.
+          absolves   it takes the thing the h1 just caught the reader doing and
+                     removes the shame from it. Not comfort: a reason.
+          promises   it names what the reader gets, or gets to stop doing, if
+                     they read on. A gain, in plain words, and no number and no
+                     deadline attached to it.
+        An h2 that agrees with the h1 is thrown away. A deck that posted put
+        the name and the same image in both lines, which is the same sentence
+        twice on the only slide most people see. It is a subtitle: it moves the
+        reader on, it does not nod along. Say it flat, with the hedges cut:
+        "maybe", "sort of", "a bit", "can sometimes" all cost it its job.
+
+    BOTH LINES, SIMPLE WORDS. No word of four syllables or more in either one.
+    This is a cover, read at a scroll, and a word that has to be decoded is a
+    thumb that keeps moving. It is not permission to soften the idea — the idea
+    stays as sharp as you can make it, the vocabulary gets easy. Give eight
+    hooks and this is the rule that will disqualify most of them.
     h1 CONTAINS THE NAME, and one thing a camera could point at. Both. The
     name is what gets sent on; the thing is what makes it a picture rather
     than a slogan. "Ticket blindness. The envelope stays on the [[shelf]] for
@@ -336,6 +460,7 @@ THE THINGS IN THIS MOMENT, and the only words that count as one:
   {things}
 
   hook angle        {angle}
+  the subtitle      {formula}
   explain through   {lens}
   advice leads with {protocol}
   saved card is     {cheat_shape}
@@ -398,7 +523,12 @@ PLAN_SCHEMA = {
             },
         },
         "hooks": {
-            "type": "array", "minItems": 4, "maxItems": 8,
+            # Eight, not four. The playbook has said "generate 8, ship 1" since it
+            # was written and this schema said four, so the floor and the brief
+            # disagreed. It matters more now: the h2 has a job it can fail at, so
+            # more of the candidates get thrown away, and a plan that offered the
+            # minimum four could arrive with nothing left standing.
+            "type": "array", "minItems": 8, "maxItems": 12,
             "items": {
                 "type": "object",
                 "additionalProperties": False,
@@ -413,7 +543,17 @@ PLAN_SCHEMA = {
     },
 }
 
-BANNED_OPENERS = re.compile(r"^(why|how to|the reason|what nobody|most people|here'?s)\b", re.I)
+# "How to" was on this list and is now off it. Counted on the reference account
+# the page is aiming at: eighteen of its forty-two covers — forty-three percent —
+# are How-to or list shapes, at sixty-five thousand followers on seventy-five
+# posts. The ban was written from taste, and the measurement disagreed with the
+# taste. What was actually wrong with "How to" was never the opener: it was a
+# headline that promises a result the deck cannot deliver, and that is refused
+# by its own rules further down, not by banning two words.
+#
+# "Why", "The reason", "What nobody", "Most people" and "Here's" stay banned.
+# Each delays the noun, which is the fault the list was built to catch.
+BANNED_OPENERS = re.compile(r"^(why|the reason|what nobody|most people|here'?s)\b", re.I)
 EARLY_JARGON = ("nervous system", "attachment", "regulation", "regulated", "cortisol",
                 "polyvagal", "trauma response", "fawn response", "hypervigilance",
                 "emotional flashback", "somatic", "neuroception")
@@ -422,6 +562,37 @@ SEESAW = re.compile(r"(?i)\b(it'?s|you'?re|you were|you weren'?t)\s+not\b.*\b(it
 
 def _words(text: str) -> list[str]:
     return re.findall(r"[A-Za-z0-9']+", re.sub(r"\[\[|\]\]", " ", text))
+
+
+# How many words of its own the subtitle has to bring. See hook_faults for the
+# measurement behind the number.
+H2_NEW_WORDS = 2
+
+# Function words, so "adds something" cannot be satisfied with "and why the".
+# Only closed-class words are here — pronouns, articles, prepositions, auxiliary
+# verbs, the small numbers. Nothing that could carry a claim, because a list that
+# grew to include ordinary verbs and nouns would start refusing real subtitles.
+STOPWORDS = frozenset("""
+a an the and or but so if then than that this these those of in on at to for from with
+without into onto over under about after before while when where how why what who whom
+whose which is are was were be been being am do does did doing done have has had having
+will would can could shall should may might must not no nor never you your yours
+yourself i me my mine we us our ours they them their theirs he him his she her hers it
+its as by up down out off again once here there all any both each few more most other
+some such only own same too very just now even still yet also because until unless
+during through against between among one two three four five six seven eight nine ten
+""".split())
+
+
+def _content_words(text: str) -> set[str]:
+    """The words in this line that carry the claim, lowercased.
+
+    Accents and fill-in brackets stripped first: a [[word]] the renderer paints
+    is still the writer's word, and a [blank] is the reader's, so it is not a
+    contribution the subtitle gets credit for.
+    """
+    return {w.lower() for w in readability.words_in(text)
+            if w.lower() not in STOPWORDS}
 
 
 def pick_hashtags(topic: str, seed: str) -> list[str]:
@@ -489,11 +660,31 @@ def hook_faults(hook: dict, name: str = "") -> list[str]:
     # posted opened "Execution freeze. You remain anchored to the bed even when
     # awake." and put "Execution freeze. Anchored to the bed." underneath it —
     # the same words twice, on the only slide most people see.
-    if {w.lower() for w in _words(h2)} and \
-            {w.lower() for w in _words(h2)} <= {w.lower() for w in _words(h1)}:
-        faults.append("h2 only repeats h1. It has to add something")
+    #
+    # That used to be caught by asking whether h2's words were a subset of h1's,
+    # which only fires when the overlap is total. The h2 now has a job — it
+    # absolves or it promises, and the formula axis says which — and a line
+    # doing either brings words the headline did not have. So the check counts
+    # them, with function words removed because "and why the" is not a
+    # contribution.
+    #
+    # Two, measured. Across the seven decks published so far the failing deck
+    # above scores zero and every other h2 scores three or four, so two catches
+    # the real failure with a word of headroom and refuses nothing that shipped.
+    new_content = _content_words(h2) - _content_words(h1)
+    if len(new_content) < H2_NEW_WORDS:
+        faults.append(
+            f"h2 adds {len(new_content)} new words to h1, needs {H2_NEW_WORDS}. It has "
+            f"one job: absolve the reader or promise them something. Either one "
+            f"brings words the headline did not have")
     if name and name.lower() in h2.lower():
         faults.append(f"h2 says {name!r} again. The headline already named it")
+    # Plain words, checked here rather than only on the finished deck. Slide 1 is
+    # this hook written on unchanged, so a hook carrying a four-syllable noun is
+    # a cover that fails the readability gate after the draft has been paid for.
+    # Caught here, the plan simply picks one of its other seven hooks.
+    faults += readability.line_faults(h1, "h1")
+    faults += readability.line_faults(h2, "h2")
     # Slide 1 is checked for a thing a camera could point at, and slide 1 IS
     # this hook, written on unchanged. Catching it here means the PLAN retries,
     # which can choose a different hook; catching it later meant the draft loop
@@ -541,6 +732,16 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
     if not 1 <= len(name.split()) <= 4:
         problems.append(f"the pattern name is {len(name.split())} words. A handle a reader "
                         f"repeats is two or three: 'waiting mode', 'bowl washing'")
+    elif readability.hard_words(name):
+        # The handle is the one phrase meant to be repeated out loud and sent on,
+        # so it is the last place a word a reader has to decode belongs. A deck
+        # led with "Execution freeze"; the ones that worked were "waiting mode"
+        # and "bowl washing", which is two plain words each.
+        problems.append(
+            f"the pattern name {name!r} is built on "
+            f"{', '.join(repr(w) for w in readability.hard_words(name))}. A handle is "
+            f"repeated out loud, so it is made of short words: 'waiting mode', "
+            f"'bowl washing'")
     elif name.rstrip(".").endswith((" is", " are", " you", " it")) or "." in name.rstrip("."):
         problems.append(f"the pattern name {name!r} is a sentence. It has to be a thing "
                         f"with a name, not a claim")
@@ -705,7 +906,7 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     Two attempts. A plan that fails its own chain check twice is a signal about
     the moment, not about the model, and the feed has thousands more moments.
     """
-    axes = draw_axes(moment)
+    axes = draw_axes(moment, recent_formulas())
 
     # A book is looked up fresh for this deck, from any book of any year, and
     # put through the five gates in bibliography.py before it can be offered.
@@ -742,6 +943,7 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
         moment=moment, topic=topic.replace("_", " "),
         things=", ".join(things) if things else "(nothing recognised)",
         angle=AXES["angle"][axes["angle"]],
+        formula=AXES["formula"][axes["formula"]],
         lens=AXES["lens"][axes["lens"]],
         protocol=AXES["protocol"][axes["protocol"]],
         cheat_shape=AXES["cheat_shape"][axes["cheat_shape"]],
@@ -874,7 +1076,7 @@ HARD RULES, each one checked by code after you finish
   No em dash or en dash. Use a period or a comma.
   Never write "it is not X, it is Y" or "you are not X, you are Y". Say what it IS.
   No emoji. No hashtags inside slides. No slide numbers. No handle inside copy.
-  Never open slide 1 with Why, How to, The reason, What nobody, Most people, Here is.
+  Never open slide 1 with Why, The reason, What nobody, Most people, Here is.
   No diagnosis words on slides 1 or 2: nervous system, attachment, regulation,
   regulated, cortisol, polyvagal, trauma response, fawn response, hypervigilance,
   emotional flashback, somatic, neuroception.
@@ -883,6 +1085,13 @@ HARD RULES, each one checked by code after you finish
   Slide 2 must work alone as a cover, for someone who never saw slide 1.
   Slide 8 adds nothing new. It recaps slides 4 to 7 only.
   Bodies stay under 220 characters. The closing thought stays under 180.
+  SIMPLE WORDS, SHARP IDEA. No word of four syllables or more, anywhere a reader
+  can see it. Not in a body, not in a bullet, not in the caption. This is the
+  rule most likely to send a draft back, and it is not a request to simplify the
+  argument: keep the argument exactly as hard as it is and say it in words a
+  nine-year-old already owns. Every long noun has a short one that means the
+  same, and the long one is almost never the only word that would do. A word
+  inside [square brackets] is the reader's, so it is not counted.
 
 THE CTA, slide 9. This exact shape, and nothing longer than 11 words:
     Send this to the [kind of person] who [does the thing in the moment].
@@ -1012,6 +1221,13 @@ HOW THIS DECK IS WRITTEN:
   explain through   {lens}
   middle slides     {rehook}
   saved card is     {cheat_shape}
+
+WHAT THE H2 ABOVE PROMISED, which the deck now has to keep:
+  {formula}
+
+That subtitle is a debt. Whatever it said the reader would get, some slide has
+to hand it over, and slide 8 is where a reader looks for it. A deck that made
+the promise and never paid it is the one that gets unfollowed.
 
 THE SCENE. These are the only concrete things in this person's evening:
   {scene}
@@ -1593,6 +1809,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         lens=AXES["lens"][axes["lens"]],
         rehook=AXES["rehook"][axes["rehook"]],
         cheat_shape=AXES["cheat_shape"][axes["cheat_shape"]],
+        formula=AXES["formula"][axes["formula"]],
     )
     # The whole draft is rewritten on a repair rather than the failing slides
     # being spliced back in. Splicing saves a few thousand tokens and costs the
@@ -1695,8 +1912,18 @@ def _ngrams(text: str, size: int) -> set[str]:
 
 
 def prompt_ngrams(size: int = LEAK_N) -> set[str]:
-    """Every run of words the model was shown. Computed, never maintained."""
-    shown = " ".join((PLAN_SYSTEM, PLAN_USER, DRAFT_SYSTEM, DRAFT_USER))
+    """Every run of words the model was shown. Computed, never maintained.
+
+    The four templates are joined RAW, with their placeholders unexpanded, which
+    left a hole: the axis instructions arrive through {angle} and {lens} and the
+    rest, so the one part of the prompt written to steer the wording was the one
+    part the leak gate could not see. Every axis value is added here instead of
+    only the drawn one, so the set does not depend on which deck is being
+    checked. Measured against all seven published decks: 450 new runs of words,
+    zero of them already in use, so nothing that shipped would have been refused.
+    """
+    shown = " ".join((PLAN_SYSTEM, PLAN_USER, DRAFT_SYSTEM, DRAFT_USER,
+                      *(value for axis in AXES.values() for value in axis.values())))
     return _ngrams(shown, size)
 
 
