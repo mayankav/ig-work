@@ -373,8 +373,31 @@ def write_deck(markdown: str, slug: str) -> Path:
     happened, and every novelty check from here on compares against it. So this
     is called once, after every gate has already said yes, and there is no
     second destination to write to speculatively.
+
+    It refuses to write over a deck that has already gone out. Invariant 18 says
+    the host is not the archive and the repo is, which means these two files are
+    the only surviving record of what a live post said. On 2026-09-01 this
+    function overwrote both for media 17972776875125960, because the slug comes
+    from the moment and the moment had been re-claimed; `memory.claim` now stops
+    that upstream, and this is the second lock on the same door. A deck already
+    published is finished, and nothing this script is doing is worth its record.
     """
     folder = CAROUSELS / slug
+    # Written by scripts/post_to_ig.py at the moment Instagram accepts a deck.
+    # Named as a literal rather than imported: those scripts are jobs around the
+    # engine and the engine never imports one.
+    posted = folder / "published.json"
+    if posted.is_file():
+        try:
+            record = json.loads(posted.read_text(encoding="utf-8"))
+            went_out = f"as media {record.get('media_id')} on {record.get('published_at')}"
+        except (json.JSONDecodeError, OSError):
+            went_out = "already"
+        raise Stop(
+            f"carousels/{slug}/ holds a deck that was published {went_out}. Its "
+            f"carousel.md and contact_sheet.png are the only record of what went "
+            f"out, so this run will not write over them. The moment behind this "
+            f"slug has been used before")
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / "carousel.md"
     path.write_text(markdown, encoding="utf-8")
@@ -638,6 +661,13 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
     except memory.ClaimHeld as reason:
         print(f"\n  stopped: {reason}")
         return 1
+    except memory.AlreadyUsed as reason:
+        # Not a crash and not a refusal: the work was already done. Exit 0, the
+        # same as the halt switch, so the scheduled workflow does not report a
+        # failure for a run that correctly declined to duplicate a live post.
+        print(f"\n  stopped: {reason}")
+        print("  nothing was written. No moment was used and no deck was touched.")
+        return 0
     except Stop as reason:
         print(f"\n  stopped: {reason}")
         return 1

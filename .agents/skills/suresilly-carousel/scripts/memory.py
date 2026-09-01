@@ -279,6 +279,10 @@ class ClaimHeld(Exception):
     """Another run is working on a moment and its claim has not expired."""
 
 
+class AlreadyUsed(Exception):
+    """This moment has already been consumed by a deck that exists."""
+
+
 def read_claim() -> dict | None:
     if not CLAIM_PATH.is_file():
         return None
@@ -297,7 +301,28 @@ def claim(moment: Moment, run_id: str) -> dict:
     Written before a single word is generated. If the run dies after this, the
     claim is what tells the next run that work was in flight, and the used list
     is what stops the moment being consumed twice.
+
+    That second sentence was a docstring and nothing else. `is_used` existed
+    with no caller, the filtering happened upstream in `pick_moment` against
+    whatever `state/used.jsonl` held at the time, and `check_state_is_current`
+    was what kept that copy honest. On 2026-09-01 it reported "current" and run
+    local-1788242062 claimed m-572b219023b990a8 anyway — a moment already
+    published to Instagram as media 17972776875125960 six hours earlier. The
+    slug is derived from the moment, so the second deck was written straight
+    over the archive of a live post, and only an unrelated merge preferring the
+    remote side put it back.
+
+    So the check moved to the one line every run goes through, and it reads the
+    ledger on disk rather than asking git anything. A freshness heuristic that
+    can say "current" about a stale file is not a guard; the ledger is. This is
+    invariant 25: a rule enforced only in prose fires one commit too late.
     """
+    if is_used(moment.id):
+        raise AlreadyUsed(
+            f"moment {moment.id} has already been used. It is in state/used.jsonl, "
+            f"so a deck was built from it and the slug it would write to is taken. "
+            f"Pull state/ if this copy is behind, or let the next run pick a fresh "
+            f"moment — do not rebuild this one over a deck that exists")
     held = read_claim()
     if held and held.get("expires_at", 0) > _now() and held.get("run_id") != run_id:
         raise ClaimHeld(

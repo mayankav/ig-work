@@ -101,12 +101,37 @@ def run() -> int:
         except memory.ClaimHeld:
             failures.append("an expired claim still blocked a later run")
 
+        # ── a used moment can never be claimed again ──
+        #
+        # This is the case that got through. `is_used` existed with no caller,
+        # the filtering lived upstream in pick_moment against whatever the
+        # ledger on disk happened to say, and the git freshness check was what
+        # kept that copy honest. It reported "current" on a stale copy and run
+        # local-1788242062 rebuilt a moment already live on Instagram, over the
+        # only archive of it. The ledger decides now, not git.
+        memory.CLAIM_PATH.unlink(missing_ok=True)
+        try:
+            memory.claim(wake, run_id="run-e")
+            failures.append("claim took a moment that is already in the used list")
+        except memory.AlreadyUsed as refusal:
+            if wake.id not in str(refusal):
+                failures.append(f"AlreadyUsed did not name the moment: {refusal}")
+
+        # Refusing must not leave a claim behind for the next run to trip on.
+        if memory.CLAIM_PATH.is_file():
+            failures.append("a refused claim still wrote a claim file")
+
+        # And the refusal is specific to that moment, not a wedged claim path.
+        memory.claim(other, run_id="run-f")
+        if memory.read_claim() is None:
+            failures.append("a fresh moment could not be claimed after a refusal")
+
     if failures:
         print(f"memory: {len(failures)} failed")
         for line in failures:
             print(f"  {line}")
         return 1
-    print("memory: 12/12 passed (used list, reposts, reserve, claims)")
+    print("memory: 16/16 passed (used list, reposts, reserve, claims, a used moment refused)")
     return 0
 
 
