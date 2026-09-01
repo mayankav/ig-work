@@ -48,6 +48,18 @@ SYLLABLES = {
     "impossible": 4, "execution": 4, "appeasement": 3, "hesitation": 4,
     "automatically": 6, "communication": 5, "everywhere": 3, "everybody": 4,
     "table": 2, "candle": 2, "gentle": 2, "possible": 3,
+    # A past tense "-ed" is a beat only after t or d. Both halves are pinned
+    # here, because a rule that only ever subtracts is as wrong as one that
+    # never does: "unfinished" came back as four and there is no shorter word
+    # for it, and "wanted" must stay at two.
+    "unfinished": 3, "finished": 2, "walked": 1, "closed": 1, "missed": 1,
+    "published": 2, "unnoticed": 3, "remembered": 3, "considered": 3,
+    "overwhelmed": 3, "determined": 3, "answered": 2,
+    "wanted": 2, "needed": 2, "started": 2, "decided": 3, "exhausted": 3,
+    "agreed": 2, "worried": 2, "studied": 2, "tried": 1,
+    # Still four, so still refused. The fix must not buy an easy pass for a
+    # word that is genuinely out of reach.
+    "complicated": 4, "disappointed": 4, "interrupted": 4, "automated": 4,
 }
 
 # Words pulled out of the seven published decks. Each one shipped, and each one
@@ -67,7 +79,11 @@ SHIPPED_OFFENDERS = ("automatically", "environment", "ambiguity", "enthusiastic"
 # this list if refusing it would cost the voice something.
 MUST_PASS = ("tomorrow", "remember", "another", "yesterday", "everywhere",
              "family", "different", "probably", "comfortable", "everyone",
-             "table", "candle", "people", "simple", "trouble")
+             "table", "candle", "people", "simple", "trouble",
+             # Run local-1788240340 was told seven times to find a shorter word
+             # than "unfinished". There is not one. These five are the -ed class
+             # that the phantom beat put over the cap.
+             "unfinished", "remembered", "considered", "overwhelmed", "unnoticed")
 
 
 def run() -> int:

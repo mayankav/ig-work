@@ -282,6 +282,24 @@
         "checked_by": "cloudflare",
         "at": "2026-09-01T04:31:44Z"
       }
+    },
+    {
+      "id": "maslach-1982",
+      "line": "— Christina Maslach, *Burnout, the Cost of Caring* (1982)",
+      "pillars": [
+        "burnout"
+      ],
+      "claims": [
+        "Chronic work stress leads directly to emotional exhaustion and depersonalization toward clients."
+      ],
+      "phrase": "depersonalization",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 56733,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-01T05:28:21Z"
+      }
     }
   ]
 }

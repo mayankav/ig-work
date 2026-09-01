@@ -139,6 +139,22 @@ def syllables(word: str) -> int:
     # would have refused a word on a rule the word does not break.
     if w.endswith("ment") and len(w) > 6 and w[-5] == "e" and w[-6] not in VOWELS:
         count -= 1
+    # A past tense "-ed" is its own beat only after t or d — "wanted", "needed".
+    # Everywhere else it is silent: "walked" is one beat, "finished" is two,
+    # "unfinished" is three. The heuristic did not know that and handed a
+    # phantom beat to the entire class, so run local-1788240340 spent seven
+    # attempts being told to find a shorter word than "unfinished". There is no
+    # shorter word than "unfinished", which is invariant 21's stopped engine.
+    #
+    # "remembered", "considered", "unnoticed" and "overwhelmed" were all one
+    # too high for the same reason, and the first three were over the cap — this
+    # gate was one deck away from refusing three ordinary words.
+    #
+    # The letter before "ed" has to be a consonant. In "agreed", "worried" and
+    # "studied" that letter is a vowel and the beat is real.
+    if (w.endswith("ed") and len(w) > 3 and count > 1
+            and w[-3] not in VOWELS and w[-3] not in "td"):
+        count -= 1
     return max(1, count)
 
 

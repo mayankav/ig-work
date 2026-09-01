@@ -11,7 +11,7 @@
     "calls": 0,
     "last": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "neurons": 0.0,
-    "text_calls": 1,
-    "text_neurons": 22.63
+    "text_calls": 2,
+    "text_neurons": 45.9
   }
 }
