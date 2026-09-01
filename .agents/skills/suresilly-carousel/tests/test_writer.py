@@ -370,8 +370,11 @@ def run() -> int:
     # ── accents ──
     if not writer.check_accents("### Slide 1 · Hook\n- **H1:** You woke at 2:17am.\n"):
         failures.append("ACCENT accepted a slide with none")
-    if not writer.check_accents("### Slide 1 · Hook\n- **H1:** You [[woke]] at [[2:17am]].\n"):
+    two = writer.check_accents("### Slide 1 · Hook\n- **H1:** You [[woke]] at [[2:17am]].\n")
+    if not two:
         failures.append("ACCENT accepted two in one field")
+    elif "H1" not in two[0]:
+        failures.append(f"ACCENT complained without naming the field: {two[0]!r}")
     if writer.check_accents("### Slide 1 · Hook\n- **H1:** You woke at [[2:17am]].\n"):
         failures.append("ACCENT refused a correct slide")
 
@@ -391,7 +394,10 @@ def run() -> int:
         "sustain": {"h2": "Three small [[moves]].", "bullets": ["Clock to the [[wall]] before bed",
                                                                 "One warm [[lamp]], no ceiling light",
                                                                 "Out of bed after twenty [[minutes]]"]},
-        "cheat": {"h2": "Your 2:17am [[card]].", "callout": "Save this for tonight",
+        # Two accents, deliberately. The callout renders as a plain pill, and a
+        # run died on this exact fault after seven attempts.
+        "cheat": {"h2": "Your 2:17am [[card]].",
+                  "callout": "Save this for [[tonight]], before [[bed]]",
                   "bullets": ["Say it: waking is [[ordinary]]", "Clock to the [[wall]] before bed",
                               "If awake past twenty minutes, then sit in low [[light]]"]},
         "cta": {"cta1": "Send this to the friend who does maths at [[2:17am]].",
@@ -423,10 +429,16 @@ def run() -> int:
                 failures.append("ASSEMBLE the old and new script lines did not survive")
         if writer.check_accents(markdown):
             failures.append(f"ASSEMBLE accents broke in assembly: {writer.check_accents(markdown)}")
+        callout = [l for l in markdown.splitlines() if l.startswith("- **Callout:**")]
+        if len(callout) != 1 or "[[" in callout[0]:
+            failures.append(f"ASSEMBLE the callout kept accent markup the pill cannot "
+                            f"show: {callout}")
+        if slides and "[[" in str(slides[7].get("callout", "")):
+            failures.append("ASSEMBLE accent markup reached the renderer's callout")
     finally:
         path.unlink(missing_ok=True)
 
-    total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5
+    total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5 + 3
     # ── the field's name, on a concept deck ──
     #
     # A deck built from a proved concept carries a second name: the plain handle

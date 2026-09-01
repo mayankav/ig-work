@@ -822,7 +822,8 @@ MARKUP, the rule that gets broken most, so read it twice
   Wrong:  "You [[searched]] for it for [[thirty]] minutes."   two accents
 
   This applies to every h2, every body, every old and new line, every bullet,
-  every callout, the CTA and the closing thought. Nine slides, every field.
+  the CTA and the closing thought. Nine slides, every field but one: slide 8's
+  callout prints as a solid pill in a single colour, so it takes no accent.
 
   [bracket] marks a blank the reader fills in, inside a script. Not the same
   thing, and a field can carry both.
@@ -1048,7 +1049,12 @@ DRAFT_SCHEMA = {
         "cheat": {"type": "object", "additionalProperties": False,
                   "required": ["h2", "callout", "bullets"],
                   "properties": {"h2": {"type": "string", "maxLength": 60},
-                                 "callout": {"type": "string", "maxLength": 140},
+                                 # Printed as a pill, in one colour. An accent
+                                 # here renders as nothing, so it is stripped.
+                                 "callout": {"type": "string", "maxLength": 140,
+                                             "description": "Slide 8's bottom pill. "
+                                                            "No [[accent]] — it prints in "
+                                                            "one colour."},
                                  "bullets": {"type": "array", "minItems": 3, "maxItems": 4,
                                              "items": {"type": "string", "maxLength": 170}}}},
         "cta": {"type": "object", "additionalProperties": False, "required": ["cta1", "closing"],
@@ -1122,6 +1128,27 @@ def ensure_accent(text: str) -> str:
     return " ".join(words) + punctuation + tail
 
 
+def no_accent(text: str) -> str:
+    """Strip accent markup from a line the renderer prints without colour.
+
+    Slide 8's callout is a pill, and render.py writes it through plain(), so
+    [[markup]] there never becomes colour — it is invisible in the PNG either
+    way. It was still the one field of copy that went into the markdown raw
+    while every other went through ensure_accent, and check_accents counted it.
+
+    A live run died on it: "slide 8 has two accents in one field", seven
+    attempts, faults 7, 3, 1, 1, 1, 1, 1. The model could not fix it because
+    the complaint did not name the field and the JSON it was repairing looked
+    fine; ensure_accent had quietly cleaned every other field on that slide.
+    A whole deck, the plan, the judge and the composer, thrown away over markup
+    that renders as nothing.
+
+    Stripping here also keeps carousel.md honest: what the file says is on the
+    card is what the card shows.
+    """
+    return re.sub(r"\[\[|\]\]", "", text)
+
+
 LAYOUTS = {"hook": "Template A", "cost": "Template A", "source": "Template F",
            "name": "Template B", "script": "Template C", "action": "Template C",
            "sustain": "Template D", "cheat": "Template D", "cta": "Template E"}
@@ -1190,7 +1217,7 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         "### Slide 8 · Cheat Sheet",
         f"- **Layout:** {LAYOUTS['cheat']}",
         f"- **H2:** {ensure_accent(copy['cheat']['h2'])}",
-        f"- **Callout:** {copy['cheat']['callout']}",
+        f"- **Callout:** {no_accent(copy['cheat']['callout'])}",
         "- **Bullets:**",
     ]
     out += [f"  • {ensure_accent(b)}" for b in copy["cheat"]["bullets"]]
@@ -1614,18 +1641,33 @@ def check_accents(markdown: str) -> list[str]:
     The renderer colours [[the accent]], and a slide without one renders flat
     while a field with two renders as a mess. Neither is something a schema can
     express, so it is checked on the assembled text.
+
+    Which field, and which words. "slide 8 has two accents in one field" ran a
+    draft out of all seven attempts: the model was repairing its own JSON, where
+    the fault was invisible, because assemble() had normalised every field on
+    that slide except the one that actually broke. A complaint that does not say
+    where to look cannot be repaired, which is the same lesson check_repeats
+    learned.
+
+    Both faults should now be unreachable from model output: assemble() puts
+    every line of copy through ensure_accent or no_accent, and the hook gate
+    settles slide 1. This stays as the backstop that says so.
     """
     problems = []
     slides = re.split(r"(?m)^### Slide ", markdown)[1:]
     for slide in slides:
         number = slide.split("·")[0].strip()
-        fields = re.findall(r"(?m)^-\s+\*\*(?!Layout|Mascot|Badge|Handle|Source:)[^:]+:\*\*\s*(.+)$", slide)
-        fields += re.findall(r"(?m)^\s*•\s+(.+)$", slide)
-        total = sum(len(re.findall(r"\[\[.+?\]\]", f)) for f in fields)
+        fields = re.findall(
+            r"(?m)^-\s+\*\*(?!Layout|Mascot|Badge|Handle|Source:)([^:]+):\*\*\s*(.+)$", slide)
+        fields += [("bullet", b) for b in re.findall(r"(?m)^\s*•\s+(.+)$", slide)]
+        total = sum(len(re.findall(r"\[\[.+?\]\]", text)) for _, text in fields)
         if total == 0:
             problems.append(f"slide {number} has no [[accent]]")
-        for field in fields:
-            if len(re.findall(r"\[\[.+?\]\]", field)) > 1:
-                problems.append(f"slide {number} has two accents in one field")
-                break
+        for label, text in fields:
+            marks = re.findall(r"\[\[.+?\]\]", text)
+            if len(marks) > 1:
+                problems.append(
+                    f"slide {number}'s {label} line has {len(marks)} accents and needs "
+                    f"exactly one. Keep one of {', '.join(marks)} and unwrap the rest: "
+                    f"{text[:64]!r}")
     return problems
