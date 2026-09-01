@@ -56,7 +56,7 @@ from pathlib import Path
 import cv2
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cutout import QAFailure, auto_chroma_matte  # noqa: E402
+from cutout import QAFailure, assert_has_pupils, auto_chroma_matte  # noqa: E402
 from imaging import drop_neighbour_bleed, tight_crop  # noqa: E402
 
 PER_POSE_TIMEOUT = 60          # seconds; the library pose is waiting, so do not wait long
@@ -172,6 +172,19 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
             flux.assert_no_text(arr, f"slide {number}")
             arr = flux.correct_palette(arr)
             rgba = _matte(arr)
+            # Invariant 3's other gate on the artwork, and the one this path
+            # shipped without. poses_flux.check() has always called it; this
+            # function does not go through check() — a scene has several pieces
+            # and check() is tuned for one standing figure — and in taking its
+            # own route it took only one of the three gates with it. That is
+            # how 20260901_door-pushed-the_572b21 went out with a blank white
+            # oval for slide 3's left eye: not a gate that failed, a gate that
+            # was never called. Measured on that slide, the two eye whites are
+            # 38x37 and 41x40 and the left one has no pupil — assert_has_pupils
+            # refuses that frame outright, and the slide would have fallen back
+            # to its library pose. It runs on the MATTED figure because it
+            # reads alpha to know what is artwork.
+            assert_has_pupils(rgba, f"slide {number}")
 
             dest = out_dir / f"{number:02d}_fresh.png"
             ok, buf = cv2.imencode(".png", rgba)

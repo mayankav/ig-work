@@ -253,11 +253,30 @@ jobs:
             echo "held deck $slug: keeping its slides in git until it is answered"
             git add -f "carousels/$slug/slides"
           done
-          git add state carousels .agents/skills/suresilly-carousel/mascot/usage_history.json \
-                  .agents/skills/suresilly-carousel/palette_history.json \
-                  .agents/skills/suresilly-carousel/citation_history.json \
-                  .agents/skills/suresilly-carousel/references/citations.json \
-                  .agents/skills/suresilly-carousel/concept_history.json || true
+          # One pathspec at a time, and only the ones that exist.
+          #
+          # `git add a b missing.json` does not add a and b and grumble about
+          # the third — it exits 128 having staged NOTHING. That is one command
+          # with `|| true` on the end, so the run went on to commit an empty
+          # index, print "nothing to record" and push nothing. On 2026-09-01 it
+          # posted a deck to Instagram and committed neither the deck, nor its
+          # novelty fingerprint, nor the moment being retired in used.jsonl, nor
+          # a day of the neuron ledger — so the moment is still unretired and
+          # can be drawn again, and the deck is absent from the novelty
+          # blocklist it is supposed to join. The absent pathspec was
+          # concept_history.json, a file that has never existed in this repo.
+          #
+          # A history file that does not exist yet is legitimate and skipped. An
+          # add that genuinely fails is not, and must not be swallowed.
+          for path in state carousels \
+                      .agents/skills/suresilly-carousel/mascot/usage_history.json \
+                      .agents/skills/suresilly-carousel/palette_history.json \
+                      .agents/skills/suresilly-carousel/citation_history.json \
+                      .agents/skills/suresilly-carousel/references/citations.json \
+                      .agents/skills/suresilly-carousel/concept_history.json; do
+            [ -e "$path" ] || continue
+            git add "$path"
+          done
           git commit -m "auto: ${{ steps.build.outputs.slug || 'no deck' }} [skip ci]" || echo "nothing to record"
           git pull --rebase --quiet || true
           git push || echo "push failed, next run will retry"

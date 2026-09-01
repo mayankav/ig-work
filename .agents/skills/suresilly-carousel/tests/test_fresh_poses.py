@@ -149,6 +149,73 @@ def test_a_frame_with_text_in_it_is_refused_and_falls_back(monkeypatch, tmp_path
     assert any("no_text" in r for r in stats["reasons"])
 
 
+def _frame_with_eyes(left_pupil: bool, right_pupil: bool,
+                     right_size: int = 28) -> bytes:
+    """A magenta-backdrop frame holding a green figure with two eye whites."""
+    frame = np.full((512, 512, 3), (255, 0, 255), np.uint8)
+    cv2.rectangle(frame, (150, 100), (370, 400), (90, 150, 60), -1)
+    for cx, size, pupil in ((215, 28, left_pupil), (305, right_size, right_pupil)):
+        cv2.circle(frame, (cx, 170), size, (255, 255, 255), -1)
+        if pupil:
+            cv2.circle(frame, (cx, 170), max(4, size // 3), (25, 25, 25), -1)
+    ok, buf = cv2.imencode(".png", frame)
+    assert ok
+    return buf.tobytes()
+
+
+def test_a_blank_eye_is_refused_and_falls_back(monkeypatch, tmp_path):
+    """The bug that published 20260901_door-pushed-the_572b21.
+
+    Slide 3 went out with a plain white oval where the left eye should have
+    been. assert_has_pupils refuses that frame and always would have — measured
+    on the published slide, the two whites are 38x37 and 41x40 and the left one
+    holds no pupil, which is a matched pair with one blank and the oldest case
+    this gate handles. It shipped because THIS function never called the gate.
+
+    poses_flux.check() calls all three of invariant 3's gates. generate_for_deck
+    does not go through check() — a scene is not one standing figure — and in
+    taking its own route it carried only assert_no_text across. So the test is
+    not "does the gate work" (test_poses_flux.py owns that) but "is the gate
+    wired into the path that publishes".
+    """
+    mod = fake_flux(generate=lambda *a, **k: (
+        _frame_with_eyes(left_pupil=False, right_pupil=True), 1.0))
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux", mod)
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                              log=lambda *a: None)
+    assert out == given, "a blank-eyed pose must leave the library pose in place"
+    assert stats["generated"] == 0
+    assert any("pupil" in r for r in stats["reasons"]), stats["reasons"]
+
+
+def test_a_lopsided_blank_eye_is_refused_and_falls_back(monkeypatch, tmp_path):
+    """The neighbouring hole, wired through the same path: a blank eye that is
+    also the WRONG SIZE is not a matched pair, and used to be waved through by
+    the branch that exists for winks and profiles."""
+    mod = fake_flux(generate=lambda *a, **k: (
+        _frame_with_eyes(left_pupil=True, right_pupil=False, right_size=14), 1.0))
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux", mod)
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                              log=lambda *a: None)
+    assert out == given
+    assert any("pupil" in r for r in stats["reasons"]), stats["reasons"]
+
+
+def test_two_good_eyes_are_still_generated_for(monkeypatch, tmp_path):
+    """The gate must not be so eager that generation stops happening. Same
+    frame, both eyes drawn properly, and the pose is used."""
+    mod = fake_flux(generate=lambda *a, **k: (
+        _frame_with_eyes(left_pupil=True, right_pupil=True), 1.0))
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux", mod)
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                              log=lambda *a: None)
+    assert stats["generated"] == 2, stats["reasons"]
+    assert out[1] != given[1] and out[1].is_file()
+
+
 def test_a_slide_with_no_brief_is_not_generated_for(monkeypatch, tmp_path):
     """Nothing to draw from, so nothing is spent and the library pose stands."""
     calls = []

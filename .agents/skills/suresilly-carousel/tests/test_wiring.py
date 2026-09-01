@@ -149,7 +149,51 @@ def run() -> int:
     if runner.anchor_words(empty) != set():
         failures.append("ANCHOR a moment with no anchors produced words")
 
-    total = 3 + 3 + 3 + 2 + 4 + 5
+    # ── the record step actually stages what the run produced ──
+    #
+    # Not a grep. The add loop is lifted out of auto-post.yml and RUN against a
+    # throwaway repo shaped like this one, with one of its pathspecs absent —
+    # which is the state the real repo is in, because concept_history.json has
+    # never existed here.
+    #
+    # `git add a b missing` stages NOTHING and exits 128. With `|| true` after
+    # it, the run committed an empty index, said "nothing to record" and pushed
+    # nothing, having already posted the deck to Instagram. The deck, its
+    # novelty fingerprint and the retired moment were all lost, so the moment
+    # came back the next morning.
+    import re
+    import subprocess
+    workflow = (pathlib.Path(__file__).resolve().parents[4]
+                / ".github" / "workflows" / "auto-post.yml").read_text(encoding="utf-8")
+    step = workflow.split("Record what happened", 1)[-1].split("- name:", 1)[0]
+    loop = re.search(r"^(\s*)for path in .*?^\1done", step, re.S | re.M)
+    if loop is None:
+        failures.append("RECORD the add loop is gone from auto-post.yml")
+    else:
+        script = "\n".join(line[len(loop.group(1)):] for line in loop.group(0).splitlines())
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = pathlib.Path(tmpdir)
+            git = ["git", "-C", str(repo)]
+            subprocess.run(git + ["init", "-q", "."], check=True)
+            subprocess.run(git + ["config", "user.email", "t@t"], check=True)
+            subprocess.run(git + ["config", "user.name", "t"], check=True)
+            for rel in ("state/used.jsonl",
+                        "carousels/20260901_deck/carousel.md",
+                        ".agents/skills/suresilly-carousel/palette_history.json"):
+                path = repo / rel
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("new\n", encoding="utf-8")
+            subprocess.run(["bash", "-c", script], cwd=repo, check=False,
+                           capture_output=True)
+            staged = subprocess.run(git + ["diff", "--cached", "--name-only"],
+                                    capture_output=True, text=True).stdout.split()
+            for want in ("state/used.jsonl", "carousels/20260901_deck/carousel.md"):
+                if want not in staged:
+                    failures.append(
+                        f"RECORD {want} was not staged — one absent pathspec "
+                        f"emptied the whole add again (staged: {staged})")
+
+    total = 3 + 3 + 3 + 2 + 4 + 5 + 2
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:

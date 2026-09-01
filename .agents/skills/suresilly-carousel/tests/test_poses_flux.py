@@ -850,3 +850,58 @@ def test_posture_references_are_never_mirrored_or_pair_scenes():
         for name, _ in pf.pick_references(brief=brief):
             assert not name.endswith("_m")
             assert pf._library_poses().count(name) == 1
+
+
+def _face(left: tuple[int, bool], right: tuple[int, bool]):
+    """A green figure with two eye whites, each given as (half-width, has_pupil)."""
+    import numpy as np
+    rgba = np.zeros((500, 400, 4), np.uint8)
+    rgba[..., :3] = (80, 150, 70)
+    rgba[..., 3] = 255
+    for cx, (size, pupil) in ((150, left), (260, right)):
+        rgba[130 - size:130 + size, cx - size:cx + size, :3] = (255, 255, 255)
+        if pupil:
+            k = max(3, size // 3)
+            rgba[130 - k:130 + k, cx - k:cx + k, :3] = (25, 25, 25)
+    return rgba
+
+
+def test_a_blank_eye_the_wrong_size_is_refused():
+    """The hole draft two left, and the reason the unit cannot be only the
+    MATCHED pair.
+
+    Two whites of unequal size are not a matched pair; no matched pair is found;
+    and "no pair found" is the branch that returns clean for winks and profiles.
+    So a face got safer to ship the more wrongly it was drawn. Measured by
+    blanking one eye and growing it 1.6x across the 100 library poses with a
+    plain two-eye face, draft two missed 32 of them.
+
+    The position tests still have to hold and exactly one of the two whites must
+    carry a pupil — that is what anchors one blob as a real eye and keeps a lone
+    prop from being judged as its partner.
+    """
+    from cutout import QAFailure
+    try:
+        pf.assert_has_pupils(_face(left=(30, True), right=(14, False)), "lopsided")
+    except QAFailure as why:
+        assert "blank" in str(why)
+    else:
+        raise AssertionError("a blank eye escaped by being the wrong size")
+
+
+def test_a_matched_pair_of_good_eyes_is_still_clean():
+    """The same builder, drawn correctly, must not raise — or the test above is
+    measuring the builder rather than the gate."""
+    pf.assert_has_pupils(_face(left=(30, True), right=(28, True)), "two good eyes")
+
+
+def test_two_mismatched_blank_whites_are_left_alone():
+    """The deliberate limit, and the train-window case it comes from.
+
+    Two blank whites of different sizes are what a pair of PROPS looks like — a
+    window and a plate, a sink and a fridge. Judging them would put this gate
+    back in the business of guessing which objects in a scene are eyes, which is
+    what draft two was written to stop. One of the two has to be a confirmed eye
+    before the other is asked anything, so this passes on purpose.
+    """
+    pf.assert_has_pupils(_face(left=(30, False), right=(14, False)), "two props")

@@ -457,6 +457,73 @@ def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
     return (x + inset_x + float(xs.mean()), y + inset_y + float(ys.mean()))
 
 
+def _matched_size(a: tuple[int, int, int, int, int],
+                  b: tuple[int, int, int, int, int]) -> bool:
+    """Are these two whites the same size, the way a pair of eyes is?"""
+    _, _, aw, ah, _ = a
+    _, _, bw, bh, _ = b
+    return (abs(ah - bh) <= 0.40 * max(ah, bh)
+            and abs(aw - bw) <= 0.40 * max(aw, bw))
+
+
+def _side_by_side(a: tuple[int, int, int, int, int],
+                  b: tuple[int, int, int, int, int]) -> bool:
+    """Do these two whites sit at the same height, next to each other?
+
+    Stacked, far apart, or one above the other is not a face.
+    """
+    ax, ay, aw, ah, _ = a
+    bx, by, bw, bh, _ = b
+    if abs(ay - by) > 0.60 * max(ah, bh):
+        return False
+    gap = max(ax, bx) - min(ax + aw, bx + bw)
+    return -0.20 * max(aw, bw) < gap < 2.6 * max(aw, bw)
+
+
+def _assert_not_lopsided(grey: np.ndarray, boxes: list, what: str) -> None:
+    """The defect that used to hide inside "no pair found".
+
+    Draft three. Found while investigating the blank eye published on
+    2026-09-01, though it is NOT what let that deck out — that was
+    fresh_poses.py never calling this gate at all, and those two eyes were the
+    same size, so draft two would have caught them. This is the neighbouring
+    hole the investigation walked into.
+
+    The hole: the defect DISABLES the detector. Two whites of unequal size are
+    not a matched pair, no matched pair is found, and "no pair found" is the
+    branch that returns clean for winks and profiles. So the wronger the eye
+    is, the more certainly it passed. Measured by blanking one eye and growing
+    it 1.6x on the 100 library poses that carry a plain two-eye face, draft two
+    missed 32 and this catches 99.
+
+    So a lopsided pair is judged here rather than skipped. The position tests
+    still have to hold — same height, side by side, both eye-shaped and
+    eye-sized against the figure — and on top of that exactly one of the two
+    must carry a pupil. That last condition is what keeps a prop out: it
+    anchors one blob as a real eye and asks what is sitting beside it. Two
+    blank whites stay unjudged, because that is the train-window case from
+    draft two and a pair of props is exactly what it looks like.
+
+    Measured against all 188 library poses, this check refuses none of them.
+    The three the gate does refuse — `guarded`, `chasing`, `lab_coat` — are
+    draft two's known cost and are unchanged by this.
+    """
+    for i, a in enumerate(boxes):
+        for b in boxes[i + 1:]:
+            if _matched_size(a, b) or not _side_by_side(a, b):
+                continue
+            pa, pb = _pupil_centre(grey, a), _pupil_centre(grey, b)
+            if (pa is None) == (pb is None):
+                continue                       # both blank, or both fine
+            blank, seeing = (a, b) if pa is None else (b, a)
+            raise QAFailure(
+                f"pupils: {what} has two eye whites side by side at the same "
+                f"height, {blank[2]}x{blank[3]} and {seeing[2]}x{seeing[3]}, and "
+                f"the {blank[2]}x{blank[3]} one is blank. A face with one eye "
+                f"drawn wrong is still a face with one eye drawn wrong. "
+                f"Re-roll with another seed.")
+
+
 def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
     """Refuse a pose whose eyes came back blank, mismatched or crooked.
 
@@ -481,11 +548,15 @@ def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
     crooked pupils are the other way a generated face reads as wrong, and
     draft two could not see them at all.
 
-    When no pair is found the gate passes. That is deliberate and it is the
-    limit of what this can honestly claim: a closed-eye pose, a wink and a
-    profile all legitimately show no pair, and refusing them would refuse good
-    art to catch bad art. The gate's promise is narrow and complete — IF a pair
-    of eye whites is visible, THEN both are correct.
+    Draft three is _assert_not_lopsided below, and it closes the hole draft two
+    left: "no matched pair" was treated as "nothing to judge", so an eye drawn
+    the wrong SIZE disabled the very check that would have caught it.
+
+    When no pair of any kind is found the gate still passes. That is deliberate
+    and it is the limit of what this can honestly claim: a closed-eye pose, a
+    wink and a profile all legitimately show no pair, and refusing them would
+    refuse good art to catch bad art. The gate's promise is narrow and complete
+    — IF two eye whites are visible side by side, THEN both are correct.
     """
     if rgba.shape[2] < 4:
         return
@@ -495,22 +566,19 @@ def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
     pair = None
     for i, a in enumerate(boxes):
         for b in boxes[i + 1:]:
-            ax, ay, aw, ah, _ = a
-            bx, by, bw, bh, _ = b
-            tall = max(ah, bh)
-            if abs(ah - bh) > 0.40 * tall or abs(aw - bw) > 0.40 * max(aw, bw):
+            if not _matched_size(a, b):
                 continue                       # eyes are a matched pair
-            if abs(ay - by) > 0.60 * tall:
-                continue                       # and sit at the same height
-            gap = max(ax, bx) - min(ax + aw, bx + bw)
-            if not (-0.20 * max(aw, bw) < gap < 2.6 * max(aw, bw)):
-                continue                       # side by side, not stacked or far apart
-            pair = (a, b) if ax < bx else (b, a)
+            if not _side_by_side(a, b):
+                continue                       # at the same height, not stacked or far apart
+            pair = (a, b) if a[0] < b[0] else (b, a)
             break
         if pair:
             break
 
     if pair is None:
+        # Not "clean" — only "no matched pair". An eye drawn the wrong SIZE
+        # lands here too, and it used to leave unjudged.
+        _assert_not_lopsided(grey, boxes, what)
         return                                  # closed, winking or in profile
 
     left, right = pair
