@@ -1,95 +1,90 @@
-# Carousel: I unlocked the front door at 6:45pm and
+# Carousel: I unlocked the door at 5:30pm and walked
 
 **Pattern:** Hidden Mechanism · **Content Pillar:** Burnout · **Core Emotion:** Recognition
-**DM-Share Hypothesis:** A reader will send this to a partner or colleague who checks their phone during dinner, because the term task bleed puts a precise name on the way work refuses to stay at the office.
+**DM-Share Hypothesis:** Share this with someone who always seems to be running on empty
 
 ### Slide 1 · Hook
 - **Layout:** Template A
-- **H1:** Task bleed. You walk through the [[door]] and keep working.
-- **H2:** For anyone whose day has no ending.
-- **Mascot:** A small donkey stands facing a closed wooden door with its head lowered toward the floor.
+- **H1:** Door habits. The [[door]] is your boundary
+- **H2:** between work and home
+- **Mascot:** Donkey standing at a doorway, looking thoughtful, one hoof gently touching the frame.
 
 ### Slide 2 · Agitation
 - **Layout:** Template A
-- **H2:** You sit by the [[door]] while your head stays at work.
-- **Body:** It is 6:45pm. You are holding your [[coat]].
-- **Mascot:** A small donkey sits by a front entrance holding a winter coat in its teeth.
+- **H2:** The [[cost]] of staying on
+- **Body:** You get home. The day is done. Your mind is still at work. You walk past the [[closed]] door, carrying the day. This can wear a person down.
+- **Mascot:** Donkey standing outside a closed door, looking tired, shoulders slumped. A small bag hangs from its hoof.
 
 ### Slide 3 · Source Anchor
 - **Layout:** Template F
-- **Source:** — Sophie Leroy, *Why Is It So Hard to Do My Work?* (2009)
-- **Source Claim:** Leroy found that an unfinished job keeps taking a piece of your attention.
-- **What This Explains Here:** Leroy found that an unfinished job keeps taking a piece of your attention. Task bleed is the exact name for this continuous [[pull]].
-- **Mascot:** A small donkey stares blankly at a blank wall with its ears turned slightly back.
+- **Source:** — Christina Maslach, *The Truth About Burnout* (1997)
+- **Source Claim:** Maslach found that burnout comes from the job not fitting the person, not from weakness.
+- **What This Explains Here:** This means your evening routine feels hard because your door habits make it a [[struggle]], not a rest.
+- **Mascot:** Donkey holding a large, open textbook, looking at a diagram with a focused expression.
 
 ### Slide 4 · Value Step 1
 - **Layout:** Template B
 - **Badge:** 01
-- **H2:** The [[unfinish]]
-- **Body:** Task bleed is the half-life of a workday that refuses to end when you cross the [[threshold]].
-- **Mascot:** A small donkey stands still in a dim hallway with its weight shifted to one side.
+- **H2:** Why this [[happens]]
+- **Body:** When the boundary between work and home is blurry, your mind keeps working. This leads to a feeling of being always on, and it can make a [[person]] feel quite worn out.
+- **Mascot:** Donkey with a faint line drawn on the ground in front of it, looking confused about which side to stand on.
 
 ### Slide 5 · Value Step 2
 - **Layout:** Template C
-- **H2:** The [[script]]
-- **When:** When the [[screen]] stays lit on the table after hours, taking your attention away.
-- **Say:** "The project stays open until I close the [[lid]]."
-- **Mascot:** A small donkey looks at a closed laptop sitting flat on a wooden bench.
+- **H2:** Say this out [[loud]]
+- **When:** I am still thinking about [task], feeling the [[job]] is not done.
+- **Say:** "I am home now, and I will [[breathe]]."
+- **Mascot:** Donkey with its mouth slightly open, as if about to speak, a small thought bubble above its head with a single breath cloud.
 
 ### Slide 6 · Value Step 3
 - **Layout:** Template C
-- **H2:** The [[intention]]
-- **When:** At 6:45pm in the [[kitchen]], I put the phone inside the drawer.
-- **Say:** "At 6:45pm near the [[door]], I drop the keys in the dish and do not touch them again."
-- **Body:** Task bleed fades when the [[tool]] stops moving.
-- **Mascot:** A small donkey turns its head away from a dark table in an empty room.
+- **H2:** Your one [[move]]
+- **When:** You unlock the door and head straight for the next [[task]].
+- **Say:** "When I unlock the door, I will take a [[minute]] to unwind."
+- **Body:** If it's 5:30pm, then take a deep breath. This small shift helps your mind know the [[job]] day is truly over.
+- **Mascot:** Donkey standing at an open door, one hoof raised, about to step through but pausing to take a visible deep breath.
 
 ### Slide 7 · Value Step 4
 - **Layout:** Template D
-- **H2:** The [[if_then]]
-  • If I walk past the [[desk]] after dinner, then I turn the chair away from the screen.
-  • Shut the laptop lid before you take your coat off so [[work]] stays put.
-  • Put the [[screen]] on the shelf and leave it closed until morning.
-- **Mascot:** A small donkey stands with its nose pressed gently against a thick wooden frame.
+- **H2:** Keep it [[going]]
+  • Find a small, clear signal to mark the end of your [[work]] day.
+  • This helps your brain feel the shift from one part of your [[person]] to the next.
+  • Repeat your chosen action each time you walk through the [[door]].
+- **Mascot:** Donkey holding a small, smooth stone, looking at it with a steady gaze, as if it's a marker.
 
 ### Slide 8 · Cheat Sheet
 - **Layout:** Template D
-- **H2:** The [[sequence]]
-- **Callout:** Leave the screen closed, turn the phone down, and shut the door.
+- **H2:** Your [[quick]] guide
+- **Callout:** For when you walk in the door at 5:30pm.
 - **Bullets:**
-  • Drop the keys in the dish by the [[door]] when you arrive.
-  • Keep the [[screen]] shut until morning comes.
-  • Leave the [[work]] where you left your coat.
-- **Mascot:** A small donkey faces a closed door with its eyes half shut for the night.
+  • Your mind needs a clear [[end]] to the work day.
+  • Say "I am home now, and I will [[breathe]]."
+  • When you unlock the door, take a [[minute]] to unwind.
+  • Repeat this small step each [[door]] moment.
+- **Mascot:** Donkey holding a small, folded piece of paper, looking at it with a knowing, confident look.
 
 ### Slide 9 · CTA
 - **Layout:** Template E
-- **Primary CTA:** Send this to the friend who answers work messages at the [[dinner]] table.
-- **Closing thought:** Save this [[post]] for the next time you bring the office home with you.
+- **Primary CTA:** Send this to the person who always seems to be [[running]] on empty.
+- **Closing thought:** Your evening can be a place of true rest, not just a [[pause]] between tasks.
 - **Handle:** @suresilly
-- **Mascot:** A small donkey looks directly ahead while standing quietly in an empty hallway.
+- **Mascot:** Donkey extending a hoof forward, as if offering something to an unseen friend, with a gentle, supportive expression.
 
 ## Caption
-Task bleed costs you your quiet nights. It turns plain hours into a shift that never ends.
-
-Most people think this is about poor time use or a lack of self-control. It is actually just an open loop your brain refuses to drop.
-
-You are not failing to rest. Your tools are simply keeping the door open.
-
-Save this for the next time you find yourself working past six.
+Door habits describe the way we handle the shift from work to rest, and ignoring them can cost you your peace of mind. Many people mistake this feeling of being "always on" for a lack of focus or not trying hard enough. But it is often about how we set our daily boundaries, not about personal drive. It can make it hard to truly connect with others after work. This is not a failure of your will or your effort. It is a natural response to unclear shifts. Save this post for the next time you walk through your door and feel the day still clinging to you.
 
 ## Hashtags
-#restisresistance #workplaceburnout #burnoutrecovery #restisproductive #mentalhealthmatters
+#workstress #compassionfatigue #emotionalexhaustion #chronicstress #relationshipadvice
 
 ## Alt Text
-Slide 1: A small donkey stands facing a closed wooden door with its head lowered toward the floor.
-Slide 2: A small donkey sits by a front entrance holding a winter coat in its teeth.
-Slide 3: A small donkey stares blankly at a blank wall with its ears turned slightly back.
-Slide 4: A small donkey stands still in a dim hallway with its weight shifted to one side.
-Slide 5: A small donkey looks at a closed laptop sitting flat on a wooden bench.
-Slide 6: A small donkey turns its head away from a dark table in an empty room.
-Slide 7: A small donkey stands with its nose pressed gently against a thick wooden frame.
-Slide 8: A small donkey faces a closed door with its eyes half shut for the night.
-Slide 9: A small donkey looks directly ahead while standing quietly in an empty hallway.
+Slide 1: A small donkey stands at a doorway, looking inward with a thoughtful expression. One hoof rests gently on the door frame.
+Slide 2: A small donkey stands outside a closed door, looking tired with slumped shoulders. A small bag is gently held by one hoof.
+Slide 3: A small donkey holds a large, open textbook, studying a diagram with a focused and serious expression.
+Slide 4: A small donkey with a faint line drawn on the ground in front of it, looking confused about which side to stand on.
+Slide 5: A small donkey has its mouth slightly open, as if ready to speak. A small, simple breath cloud appears in a thought bubble above its head.
+Slide 6: A small donkey stands at an open door, with one hoof raised. It pauses, taking a visible deep breath before stepping through.
+Slide 7: A small donkey holds a smooth, small stone, looking at it with a steady gaze, as if it represents a marker.
+Slide 8: A small donkey holds a small, folded piece of paper, looking at it with a confident and knowing expression.
+Slide 9: A small donkey extends a hoof forward, as if offering something to a friend. Its expression is gentle and supportive.
 
-**DM-Share Hypothesis:** A reader will send this to a partner or colleague who checks their phone during dinner, because the term task bleed puts a precise name on the way work refuses to stay at the office.
+**DM-Share Hypothesis:** Share this with someone who always seems to be running on empty

@@ -385,14 +385,14 @@
     "head_tilt"
   ],
   "20260901_door-unlocked-the_572b21": [
-    "face_down",
-    "scarf",
-    "thumb_back",
-    "holding_up",
-    "sitting",
+    "bathrobe",
+    "slow_blink",
+    "knees_hugged",
     "standing_by_dark_kitchen_5a57",
-    "pressing",
-    "on_back",
-    "looking_far"
+    "point_up",
+    "point_right",
+    "walking",
+    "hero_stance",
+    "self_hug"
   ]
 }

@@ -251,18 +251,20 @@
       "id": "beattie-1986",
       "line": "— Melody Beattie, *Codependent No More* (1986)",
       "pillars": [
-        "people_pleasing"
+        "people_pleasing",
+        "burnout"
       ],
       "claims": [
-        "People struggling with codependency often prioritize others' needs while neglecting their own authentic desires."
+        "People struggling with codependency often prioritize others' needs while neglecting their own authentic desires.",
+        "Overcoming codependent patterns is essential for preventing exhaustion from over-giving and self-neglect."
       ],
       "phrase": "codependency",
       "verified": {
         "catalogue": "openlibrary",
-        "scanned_hits": 13777,
+        "scanned_hits": 209,
         "proposed_by": "gemini",
         "checked_by": "cloudflare",
-        "at": "2026-08-30T20:25:31Z"
+        "at": "2026-09-01T07:56:32Z"
       }
     },
     {
