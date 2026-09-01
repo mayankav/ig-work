@@ -394,5 +394,16 @@
     "walking",
     "hero_stance",
     "self_hug"
+  ],
+  "20260901_door-washed-the_cd4b3a": [
+    "stands_facing_closed_wooden_7186",
+    "point_down",
+    "looks_directly_ahead_while_a197",
+    "caregiver",
+    "turns_head_away_from_05be",
+    "faces_closed_door_eyes_e05f",
+    "thumb_back",
+    "point_down_m",
+    "lantern_bearer"
   ]
 }
