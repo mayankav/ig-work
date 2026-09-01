@@ -19,7 +19,7 @@ Kill switch: `SS_HALT=1` or a file at `state/HALT`.
 ```
 .agents/skills/suresilly-carousel/   the engine
   SKILL.md          entry point
-  references/       voice · playbook · design system · concepts.json
+  references/       voice · voice-target ⚠ never prompted · playbook · design system
   mascot/           poses + CHARACTER.md
   scripts/          run.py · compose · safety · writer · critic · render · build
   tests/            25 suites, CI runs every one
@@ -57,7 +57,8 @@ Every one of these is here because it already broke in production. Do not relax 
 | 16 | **One entry point, one state.** Any run that makes a deck uses up its moment. State lives in `state/` and is committed. **`flux_neurons.json` and `vendor_quotas.json` are opposites and must never be merged** — a ledger only rises, a quota snapshot is always replaced. |
 | 17 | **What we publish is measured; the measurement never decides.** `insights.py` may import nothing from the pipeline and nothing may import it. A missing metric is recorded as missing, never as zero. |
 | 18 | **The host is not the archive.** Host keeps 14 days (`prune_slides.py`, after the post, never before). Repo keeps `carousel.md` and `contact_sheet.png`. `slides/*.png` and `carousels/*/mascot/` are gitignored. Pending decks are protected by name. **Keep `keep_files: true`** — the pruner owns deletion. |
-| 19 | **A new seed does not make a new moment, and an example in a prompt is a template.** Four checks in `compose.py`: same words, same opening verb, same room, and copying the worked example. Examples rotate and the answer is measured against the one shown. |
+| 19 | **A new seed does not make a new moment.** Four checks in `compose.py`: same words, same opening verb, same room, and copying the worked example. Examples rotate and the answer is measured against the one shown. |
+| 20 | **An example in a prompt is a template, and an on-subject example is copy.** Measured: five of seven published decks carried a run of words lifted from the prompt, including a sentence the prompt quotes in order to forbid it. Every example that was set on the page's own ground got copied within a week; the off-subject ones never were. So **every example in `PLAN_SYSTEM` and `DRAFT_SYSTEM` is about dentists, parking tickets, library books and bicycles**, and `writer.check_leak` fails any draft sharing four consecutive words with the prompt. `references/voice-target.md` is the deck the engine is aiming at and **must never be loaded into a prompt** — it is on-subject, so it would be a template. |
 
 ## Tests
 

@@ -176,6 +176,13 @@ def citations_for(topic: str, avoid: list[str] | None = None) -> list[dict]:
 PLAN_SYSTEM = """You plan a nine-slide Instagram carousel for a page about ordinary
 relational psychology. You are planning only. Do not write slide copy yet.
 
+EVERY EXAMPLE BELOW IS ABOUT PARKING TICKETS, DENTISTS, LIBRARY BOOKS AND
+BICYCLES. That is deliberate and it is not this page's subject. The examples
+show you a SHAPE. Not one of their words, objects, rooms or hours may appear in
+what you return, and this is checked by counting shared runs of words. Measured
+on this engine's own output: every example set on the page's own ground was
+copied into a deck within a week, and no off-subject example ever was.
+
 The page sounds like a smart friend who reads the textbooks. Never a therapist,
 never a guru, never a brand. Dry, warm, specific. A reader should want to send it
 to one person rather than agree with it in public.
@@ -204,37 +211,42 @@ THE NINE BEATS, in order, each one earning the next:
   3 source   the citation, then ONE sentence connecting it to the name.
              The citation line is written for you and you do not touch it.
 
-             YOUR SENTENCE BEGINS WITH THE NAME. Literally the first words.
-             Then say what the finding explains about it, in your own words.
-             This is the single fault that stalls more drafts than any other,
-             and it is the easiest to avoid: start typing the name.
-               claim    "Walker found that keeping the peace becomes automatic."
-               yours    "Peace keeping is why the sink still has you at 11pm."
+             YOUR SENTENCE CONTAINS THE NAME AND SAYS SOMETHING NEW.
+             The name has to be in it. It may NOT be the subject of the
+             sentence. "<name> explains why ..." and "<name> happens because
+             ..." are the name plus filler, and they read as a machine filling
+             in a form. Say what the finding costs the person in the moment,
+             then let the name land.
+               claim    "Ferrand found that a queue with no visible end is
+                         judged twice as long as one with a sign."
+               weak     "Queue blindness explains why the queue feels long."
+               yours    "You are not waiting badly. You are waiting without a
+                         sign. That is queue blindness."
              Copying the claim under a second heading is the fastest way to
              look broken, and it is checked.
   4 name     EXPLAIN the name slide 1 gave. Never coin a second one. A deck
-             that posted led with "Execution freeze" and then invented "the
-             traction gap" here, so a reader was handed two names and carried
-             away neither. One deck, one name; this is where it is unpacked.
+             that posted led with one name and coined a second one here, so a
+             reader was handed two and carried away neither. One deck, one
+             name; this is where it is unpacked.
   5 script   a condition, then the words. Two fields, two different jobs:
 
-               When: You are standing in the hallway, cup still in your hand.
-               Say:  "I will move the cup to the sink."
+               When: The library book has been by the front door nine days.
+               Say:  "The book goes in the [bag] before I sit down."
 
              WHEN is something the reader can check against themselves right
              now — am I doing that? It is not speech and it takes no quotation
              marks. Second person is right here: it is about them.
 
              SAY is a line they say out loud, in their own voice, with a
-             [bracket] to fill in. Never narrate them in it, and never ask them
-             a question: "What is the smallest action you can take?" is the page
-             talking, not the reader.
+             [bracket] to fill in. Never narrate them in it, and never ask
+             them a question. A question in SAY is the page coaching rather
+             than a person speaking, and it is checked.
 
-             These printed under WHAT YOU SAY and TRY THIS INSTEAD until a deck
-             went out with "You stand up and walk to the hallway." in quotes
-             under a label saying the reader said it. The playbook had already
-             called that out: it puts words in their mouth and loses everybody
-             who does not happen to say that exact sentence.
+             These printed under WHAT YOU SAY and TRY THIS INSTEAD until a
+             deck went out with a stage direction about the reader, in
+             quotation marks, under a label claiming they had said it. The
+             playbook had already called that out: it puts words in their
+             mouth and loses everybody who does not say that exact sentence.
 
   6 action   one move, with a time and a place named
   7 sustain  what makes it survive tomorrow
@@ -247,12 +259,12 @@ under two minutes, while anxious, with no app and no googling.
 
   script     under 20 words, said out loud or sent, and it MUST contain one
              [square bracket] the reader fills in.
-             e.g.  The shape only: The [thing] is done. I am going in now.
-  intention  MUST be exactly this shape, with a real time and a real place:
-             I will [do the thing] at [time] in [place]
-             e.g.  The shape only: I will [do it] at [8pm] in [the hallway]
-  if_then    MUST contain the words if and then, and name a time or a place
-             e.g.  The shape only: If [the trigger], then [the two minute move]
+  intention  ONE move, carrying a real time or a real place. It does not have
+             to begin "I will" and it is better when it does not: a filled-in
+             template reads like a form rather than like a person. Shape only,
+             never these words: <the small move>, <when or where>.
+  if_then    MUST contain the words if and then, and name a time or a place.
+             Shape only, never these words: If <trigger>, then <small move>.
   menu       three tiny options, each a physical move someone could film
 
   The examples above show SHAPE ONLY. Never reuse their words or their subject.
@@ -276,25 +288,24 @@ RULES
         people, or Here is.
     h2  at most 7 words. No [[accent]] at all. It says something the h1 did
         NOT, and it never repeats the name — the headline already gave it. A
-        deck that posted opened "Execution freeze. You remain anchored to the
-        bed even when awake." and put "Execution freeze. Anchored to the bed."
-        underneath, which is the same words twice on the only slide most
-        people see. "The morning goes while you stand" is a subtitle.
+        deck that posted put the name and the same image in both lines, which
+        is the same sentence twice on the only slide most people see. The h2
+        is a subtitle: it moves the reader on, it does not agree with the h1.
     h1 CONTAINS THE NAME, and one thing a camera could point at. Both. The
     name is what gets sent on; the thing is what makes it a picture rather
-    than a slogan. "Peace keeping. You cannot leave the [[sink]] until every
-    cup is done" has the name and has the sink.
+    than a slogan. "Ticket blindness. The envelope stays on the [[shelf]] for
+    weeks" has the name and has the envelope.
     Write about what always happens, not about one evening that happened.
     "You" means anybody, in the present. It does not mean one person doing one
     thing at one hour.
-      Right:  Bowl washing. You cannot sit down until the counter is [[clear]].
+      Right:  Return drift. The parcel rides in the boot of the [[car]].
               (11 words. Count them before you return it — every hook in one
                rejected plan ran to 14 and 15, and the cap is 12.)
-      Right:  Waiting mode. The whole day gets held for one [[appointment]].
-              (11 words.)
-      Wrong:  You stood in the kitchen at 11pm washing bowls that were [[clean]].
+      Right:  Ticket blindness. The envelope stays on the [[shelf]] for weeks.
+              (10 words.)
+      Wrong:  You put the ticket on the shelf last Tuesday and [[forgot]].
     The wrong one reads as somebody else's Tuesday. The reader has their own
-    kitchen and their own hour, and an invented one competes with the real
+    room and their own hour, and an invented one competes with the real
     memory and loses. Say the thing that is always true and let them supply
     the evening.
     Do not promise a result, do not sell a trick, do not name a condition.
@@ -801,14 +812,42 @@ VOICE
 A smart friend who reads the textbooks. Dry, warm, specific. Never a therapist,
 never a guru, never a brand.
 
-These examples are deliberately about subjects this page never covers. Copy the
-rhythm. Never copy the subject.
+EVERY EXAMPLE IN THIS PROMPT IS ABOUT DENTISTS, PARKING TICKETS, LIBRARY BOOKS
+AND BICYCLES. That is deliberate and it is not this page's subject. Copy the
+rhythm, never the words. Not one object, room, hour or phrase from an example
+below may appear in what you return, and this is checked by counting shared
+runs of words. Measured on this engine's own output: every example that was set
+on the page's own ground got copied into a published deck within a week, and no
+off-subject example ever did.
   "You have had the dentist's number in your phone for nine days. You have opened
    the contact. You have not pressed call."
-  "The parking ticket is on the counter. You walk past it. You have developed a
-   small route around the counter."
+  "The parking ticket is on the windowsill. You walk past it. You have developed
+   a small route around the windowsill."
   "The library book is four weeks late. Returning it now feels like a confession,
    so you keep it, which is worse, which you know."
+
+EVERY SLIDE TURNS. This is the difference between a deck people finish and a
+deck people leave on slide 3. Nine slides, nine things the reader did not have
+a moment earlier. A slide that restates the slide before it in fresh words is
+the slide they stop on, and it is the commonest way a finished deck is dead.
+
+  A turn is small. A consequence they had not connected, a second meaning, a
+  flat admission, the same fact seen from the other side. Never a joke, never
+  a twist, never a bigger claim.
+
+  SAY THE NAME TWICE IN NINE SLIDES. Slide 1 gives it. One later slide uses
+  it. Everywhere else the deck is about the person, not about the label. A
+  name printed on every slide reads as a machine holding on to the only handle
+  it has, and a reader who has already learned the name is being told nothing.
+
+  SAY THE FINDING ONCE. Slide 3 puts it in plain words and that is the end of
+  it. The researcher's surname appears on the citation line and nowhere else
+  in the deck, caption included. Slides 4 to 7 carry the IDEA. They may reuse
+  one word from slide 3. They may never reuse its sentence.
+
+  NAME THE THING IN THE ROOM TWO OR THREE TIMES, not nine. The object anchors
+  the deck; it does not run it. Once it has done its work on slides 1 and 2 it
+  should mostly get out of the way.
 
 MARKUP, the rule that gets broken most, so read it twice
 
@@ -816,10 +855,13 @@ MARKUP, the rule that gets broken most, so read it twice
   important word. Not most lines. Every line. The renderer colours that word,
   and a line without one prints flat and grey.
 
-  Right:  "You searched for it for [[thirty]] minutes."
-  Right:  "I am not looking again until [[morning]]."
-  Wrong:  "You searched for it for thirty minutes."      no accent
-  Wrong:  "You [[searched]] for it for [[thirty]] minutes."   two accents
+  Right:  "The renewal has been open in a tab since [[Tuesday]]."
+  Right:  "I am not renewing it again before [[Friday]]."
+  Wrong:  "The renewal has been open in a tab since Tuesday."     no accent
+  Wrong:  "The [[renewal]] has been open since [[Tuesday]]."      two accents
+
+  The accent wraps a WHOLE word. "[[decide]]d" and "[[script]]ed" print as a
+  word broken in half, and one of each has shipped.
 
   This applies to every h2, every body, every old and new line, every bullet,
   the CTA and the closing thought. Nine slides, every field but one: slide 8's
@@ -844,31 +886,34 @@ HARD RULES, each one checked by code after you finish
 
 THE CTA, slide 9. This exact shape, and nothing longer than 11 words:
     Send this to the [kind of person] who [does the thing in the moment].
-  e.g.  Send this to the friend who loses their [[keys]] every morning.
+  e.g.  Send this to the friend who has never returned that [[book]].
   It must contain the word "send" or "share", and name who. Not "share if you
   relate", not "tag someone". A named kind of person.
 
 SLIDES 1 AND 2 EACH NAME A THING. Not a feeling, not a pattern — a thing in the
-room, or the hour on the clock. The moment hands you a door, a coat, a kettle,
-11pm: put one of them on slide 1 and one on slide 2.
+room, or the hour on the clock. The moment hands you its own objects and its
+own hour: put one of them on slide 1 and a DIFFERENT one on slide 2.
 
   Slide 1 without a thing is a caption, and it is checked.
   Slide 2 is served on its own to people who never saw slide 1, so it has to
   set its own scene rather than refer back to one.
 
-  Weak, and refused:  "You said yes when you meant no."
-  Right:              "You said it at the [[door]], still in your coat."
+  Weak, and refused:  "The form went unread before it was signed."
+  Right:              "You signed it standing up, still holding the [[helmet]]."
 
 THE PROTOCOL GOES ON THE SLIDES. The plan hands you an "intention" line and an
-"if_then" line, already written. One of slides 4 to 7 must carry the intention
-almost word for word, keeping its time and its place, and another must carry the
-if-then. A reader has to be able to do the thing tomorrow without looking
-anything up, and code checks that one of those two shapes survived:
+"if_then" line. One of slides 4 to 7 carries the intention, keeping its move
+and keeping its time or its place. Another carries the if-then, and that one
+keeps the words "if" and "then" because code looks for them.
 
-    I will [do the thing] at [time] in [place]
-    If [the trigger], then [the response]
+The intention does NOT have to begin "I will", and it is better when it does
+not. A filled-in template reads like a form somebody completed rather than
+like a person deciding something. One shipped deck filled the shape in twice
+over and produced an instruction naming a room the moment never contained.
+Say the move, say when. That is the whole requirement.
 
-Reword them only enough to fit the slide. Do not summarise them away.
+The reader must be able to act on it tomorrow with nothing looked up.
+Reword to fit the slide. Do not summarise the move away.
 
 THE THREAD, slides 4 to 7. This is the rule drafts fail most often, and it is
 never obvious from a single slide.
@@ -878,10 +923,10 @@ never obvious from a single slide.
   wording. One word is enough. All four slides need one, not three of them.
 
   Carry the IDEA, never the sentence. Do not paste the claim into a slide and do
-  not name the researcher again — they are credited on slide 3 and nowhere else.
-  A deck once told its reader to stand in the kitchen and say "Walker found that
-  leaving is learned where it worked" out loud, which is not a thing a person
-  says. Take the word. Leave the citation.
+  not name the researcher again — they are credited on slide 3 and nowhere else,
+  the caption included. A deck once printed a sentence beginning with the
+  researcher's surname inside a line the reader was told to say out loud, which
+  is not a thing any person says. Take the word. Leave the citation.
 
   Every field in the deck says something the deck has not said yet. The three
   lines on slide 3 are three different sentences: what the source says, what
@@ -906,24 +951,17 @@ it used to be and nobody reads it twice.
   2  Two or three sentences saying something the slides did NOT say. Where
      this shows up in an ordinary week, or what it is usually mistaken for.
      This is the paragraph that earns the caption its space.
-  3  Who this is not about. One line that lets somebody off: "This is not a
-     discipline problem and it was never laziness."
-  4  Ask them to save it. "Save this for the next 6am you spend standing by
-     the bed."
+  3  Who is let off. One line naming the thing this was never a failure of.
+  4  Ask them to save it, and say what they are saving it for. Name the next
+     time this will happen to them. Use your own words for both.
 
   Never a summary of the slides. Somebody reading the caption has already seen
   them, or is deciding whether to.
 
-  Asking for a save moves saves by about 90 percent, and asking for a like
-  slightly lowers likes, so ask for the save and never for the like. Slide 9
-  already asks them to send it, and one post gets one action out of a person,
-  so there are exactly two asks in the whole deck: send on the slide, save in
-  the caption.
-
 You do not write hashtags. Code picks them from a vetted list, the same way it
 picks the citation, because a model asked for a label produces something
-label-shaped: a deck went out tagged #transitionfreeze, a name we had coined an
-hour earlier that nobody has ever searched for.
+label-shaped: a deck went out tagged with a name this engine had coined an
+hour earlier, which nobody has ever searched for.
 
   Asking for a save moves saves by about 90 percent, and asking for a like
   slightly lowers likes, so ask for the save and never for the like. Slide 9
@@ -949,10 +987,10 @@ MASCOT BRIEFS
   one prop at most. Describe what the body is doing, never an emotion word.
   No text, letters, numbers, signs, screens or labels anywhere in the artwork.
   This is refused more often than any other rule, and always the same way: the
-  moment involves a phone, so the brief says "looking at the screen". A picture
-  of a screen is a picture of writing. Show the phone face down on the duvet, or
-  held against the chest, or being pushed away — the object, never its display.
-  Same for a clock: the donkey turns it to the wall, it never shows a time.
+  moment involves a phone, so the brief describes it being looked at. A picture
+  of a screen is a picture of writing. Put the device face down, or held
+  against the body, or pushed away: the object, never its display. Same for a
+  clock, which is turned to the wall and never shows a time.
 
 Return only a JSON object with the fields you are asked for."""
 
@@ -1024,9 +1062,10 @@ DRAFT_SCHEMA = {
         # and the instruction was three hundred lines away talking about
         # "slide 3's last line".
         "explains": {"type": "string", "maxLength": 280,
-                     "description": "Slide 3's last line. MUST BEGIN with the pattern name "
-                                    "from the plan, word for word, then say what the finding "
-                                    "explains about it. Never restate the source claim."},
+                     "description": "Slide 3's last line. Contains the pattern name from the "
+                                    "plan, but never as the sentence's subject. Says what the "
+                                    "finding costs the person in this moment. Never restates "
+                                    "the source claim."},
         "name": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 60},
                                 "body": {"type": "string", "maxLength": 220}}},
@@ -1232,7 +1271,19 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
         f"- **Mascot:** {mascots[8]}",
         "",
         "## Caption",
-        copy["caption"].strip(),
+        # The caption is READ, never rendered. Instagram prints the characters
+        # it is given, so [[markup]] arrives as [[markup]] — 20260901's post
+        # went out with twenty-one pairs of brackets in its first paragraph.
+        #
+        # This was the last line of copy still going into the file raw, which
+        # is the same hole the slide 8 callout was in: the model is taught
+        # [[accent]] as the house markup for every line it writes, so sooner or
+        # later it uses it everywhere, and only the fields that pass through
+        # ensure_accent or no_accent are normalised. Nothing downstream caught
+        # it either — check_accents reads only ### Slide sections and
+        # audit_copy wants an accent PER SLIDE, so a bracketed caption broke no
+        # rule anyone had written down.
+        no_accent(copy["caption"].strip()),
         "",
         # A heading, and a # on every tag.
         #
@@ -1443,6 +1494,7 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
     import render
 
     problems = check_accents(markdown)
+    problems += check_leak(markdown)
     problems += check_repeats(markdown)
     problems += check_spoken(markdown)
     problems += check_spelling(markdown)
@@ -1510,8 +1562,11 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     schema = json.loads(json.dumps(DRAFT_SCHEMA))
     if name:
         schema["properties"]["explains"]["description"] = (
-            f'Slide 3\'s last line. MUST BEGIN with the exact words "{name}", then say what '
-            f'the finding explains about {name}. Never restate the source claim.')
+            f'Slide 3\'s last line. It MUST contain the words "{name}", and "{name}" MUST '
+            f'NOT be the subject of the sentence: a line beginning "{name} explains why" or '
+            f'"{name} happens because" is the name plus filler and reads as a filled-in '
+            f'form. Say what the finding costs the person in this moment, in your own '
+            f'words, and let the name land inside or at the end. Never restate the claim.')
 
     # Same treatment for the other two rules that stall a draft. Both were
     # stated in the system prompt and both were missed for five attempts
@@ -1604,6 +1659,87 @@ MASCOT_FEELING = re.compile(
     r"depressed|excited|relaxed|frustrated|lonely|scared|ashamed|hopeful)\b", re.I)
 
 
+# ── Nothing from the prompt may appear in the deck ────────────────────────
+#
+# The engine's largest single defect, measured rather than suspected. Of the
+# seven decks on disk, three carried "the hallway" — the filler in an example
+# intention — including one set in a kitchen and one set on a bed. One carried
+# "move the cup to the sink", the example script, verbatim. One carried a
+# sentence the prompt quotes in full while forbidding it. One printed the
+# researcher's surname inside a line the reader was told to say out loud, which
+# is the exact failure the prompt describes two paragraphs earlier.
+#
+# The pattern in every case: an example set on the page's own ground. The three
+# VOICE examples have always been about dentists, parking tickets and library
+# books, and not one word of them has ever reached a deck. So the rule is not
+# "use fewer examples". It is that an on-subject example IS a template, and the
+# only reliable enforcement is to count.
+#
+# Four words, because three matches ordinary English constantly ("a piece of
+# your") and five misses "am going in now". Anything the deck is ORDERED to
+# reproduce is exempt: the CTA shape and the if-then words are dictated by the
+# prompt and are supposed to come back.
+LEAK_N = 4
+#
+# The exemptions are the CTA and nothing else, and each one is load-bearing:
+# the prompt DICTATES "Send this to the [kind of person] who [does the thing]",
+# so those words coming back is the rule working rather than a model borrowing.
+# An exemption that matches no prompt n-gram is a hole with nothing behind it,
+# so five speculative ones were deleted rather than left in place.
+LEAK_ALLOWED = ("send this to", "this to the", "to the friend")
+
+
+def _ngrams(text: str, size: int) -> set[str]:
+    words = re.findall(r"[a-z']+", text.lower())
+    return {" ".join(words[i:i + size]) for i in range(len(words) - size + 1)}
+
+
+def prompt_ngrams(size: int = LEAK_N) -> set[str]:
+    """Every run of words the model was shown. Computed, never maintained."""
+    shown = " ".join((PLAN_SYSTEM, PLAN_USER, DRAFT_SYSTEM, DRAFT_USER))
+    return _ngrams(shown, size)
+
+
+def copy_lines(markdown: str) -> list[tuple[str, str]]:
+    """Only what a reader sees. Layout names and the citation line are ours."""
+    out = []
+    for slide in re.split(r"(?m)^### Slide ", markdown)[1:]:
+        number = slide.split("\u00b7")[0].strip()
+        for label, text in re.findall(
+                r"(?m)^-\s+\*\*(?!Layout|Mascot|Badge|Handle|Source:|Source Claim:)"
+                r"([^:]+):\*\*\s*(.+)$", slide):
+            out.append((f"slide {number} {label}", text))
+        for bullet in re.findall(r"(?m)^\s*\u2022\s+(.+)$", slide):
+            out.append((f"slide {number} bullet", bullet))
+    caption = re.search(r"(?ms)^## Caption\n(.+?)(?=\n---|\n## |\Z)", markdown)
+    if caption:
+        out.append(("the caption", caption.group(1)))
+    return out
+
+
+def check_leak(markdown: str, shown: set[str] | None = None) -> list[str]:
+    """Copy that was lifted out of the prompt instead of written.
+
+    A model under thirty-five simultaneous constraints reaches for the nearest
+    text in its context, and the nearest text is whatever the prompt spelled
+    out. Counting has no opinion about whether the borrowing was deliberate.
+    """
+    if shown is None:
+        shown = prompt_ngrams()
+    problems = []
+    for where, text in copy_lines(markdown):
+        line = re.sub(r"\[\[|\]\]", "", text)
+        for gram in sorted(_ngrams(line, LEAK_N) & shown):
+            if any(ok in gram for ok in LEAK_ALLOWED):
+                continue
+            problems.append(
+                f"{where} copies {gram!r} straight out of this prompt. That is an example "
+                f"showing you a shape, not words you may use. Write the line from the "
+                f"moment you were given")
+            break
+    return problems
+
+
 def check_mascots(briefs: list[str]) -> list[str]:
     """Mascot briefs are artwork instructions, and two rules are absolute.
 
@@ -1664,6 +1800,11 @@ def check_accents(markdown: str) -> list[str]:
         if total == 0:
             problems.append(f"slide {number} has no [[accent]]")
         for label, text in fields:
+            for broken in re.findall(r"\w\[\[.+?\]\]|\[\[.+?\]\]\w", text):
+                problems.append(
+                    f"slide {number}'s {label} line accents half a word ({broken!r}). The "
+                    f"renderer colours exactly what is inside the brackets, so this prints "
+                    f"as one word broken in two. Wrap the whole word")
             marks = re.findall(r"\[\[.+?\]\]", text)
             if len(marks) > 1:
                 problems.append(

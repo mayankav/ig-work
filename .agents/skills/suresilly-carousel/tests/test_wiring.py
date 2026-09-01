@@ -131,6 +131,49 @@ def run() -> int:
     if "Execution freeze" not in posted:
         failures.append("CAPTION the caption itself did not reach Instagram")
 
+    # ── the deck's markup does not reach Instagram ──
+    #
+    # [[accent]] is an instruction to the renderer about which word the slide
+    # colours. Instagram has no renderer; it prints the characters. 20260901
+    # posted a caption reading "the [[cost]] of carrying the [[street]] across
+    # the [[threshold]]" — twenty-one pairs of brackets, because the caption was
+    # the one line of copy assemble() wrote into the file raw, and nothing
+    # between there and the API looked at it.
+    #
+    # Checked on both sides. The writer must stop putting markup in the file,
+    # AND the poster must strip whatever it is handed — a held deck is posted
+    # days later from a file an older engine wrote, and carousel.md gets edited
+    # by hand.
+    marked = assembled.replace(
+        "Execution freeze is the cost of waiting for readiness.",
+        "Execution freeze is the [[cost]] of waiting, and it was "
+        "[[never]] **laziness** or an [[unfinish]]ed thought.")
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False,
+                                     encoding="utf-8") as handle:
+        handle.write(marked)
+        marked_path = pathlib.Path(handle.name)
+    try:
+        posted = post_to_ig.parse_caption(marked_path)
+    finally:
+        marked_path.unlink(missing_ok=True)
+    for token in ("[[", "]]", "**"):
+        if token in posted:
+            failures.append(
+                f"CAPTION {token!r} reached Instagram: {posted[:120]!r}")
+    for word in ("cost", "never", "laziness", "unfinished"):
+        if word not in posted:
+            failures.append(
+                f"CAPTION stripping the markup ate {word!r}: {posted[:120]!r}")
+
+    # The writer's side of the same rule: the caption goes through no_accent,
+    # the way every other line of copy goes through it or ensure_accent.
+    source = pathlib.Path(
+        pathlib.Path(__file__).resolve().parent.parent / "scripts" / "writer.py"
+    ).read_text(encoding="utf-8")
+    if 'no_accent(copy["caption"]' not in source:
+        failures.append(
+            "CAPTION the writer is putting the caption into carousel.md raw again")
+
     # And the writer has to produce that shape. A hashtag without its # is a
     # word, and the section heading is what the poster searches for.
     body = writer.assemble.__doc__ or ""
@@ -193,7 +236,7 @@ def run() -> int:
                         f"RECORD {want} was not staged — one absent pathspec "
                         f"emptied the whole add again (staged: {staged})")
 
-    total = 3 + 3 + 3 + 2 + 4 + 5 + 2
+    total = 3 + 3 + 3 + 2 + 4 + 5 + 2 + 3
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:
