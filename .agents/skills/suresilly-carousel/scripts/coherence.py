@@ -61,6 +61,49 @@ LABEL = re.compile(r"\[\[([a-z][a-z \-]{2,28})\]\]")
 # step; "2:50pm" is somebody else's afternoon.
 CLOCK_TIME = re.compile(r"\b(?:[01]?\d|2[0-3]):[0-5]\d\s?(?:a\.?m\.?|p\.?m\.?)?\b|\b\d{1,2}\s?(?:am|pm)\b")
 
+# ─────────────────── when a move happens, and where ───────────────────
+#
+# An intention is only usable if it says WHEN and WHERE. Both live here, in the
+# module that already owns the scene vocabulary, because `writer.validate_plan`
+# is not the only thing that will ever want to ask (invariant 3: a gate belongs
+# in the shared module, not in whichever one needed it first).
+#
+# WHEN is deliberately wider than CLOCK_TIME. A cue does not have to be a clock:
+# "before you reply" and "when the room goes quiet" are better cues than 8pm,
+# because they fire on something the reader will actually notice. Requiring a
+# clock would have refused five of the eight intentions this engine has already
+# published.
+WHEN = re.compile(
+    r"\b(tonight|today|tomorrow|yesterday|morning|afternoon|evening|night|noon|"
+    r"midnight|bedtime|breakfast|lunch|dinner|monday|tuesday|wednesday|thursday|"
+    r"friday|saturday|sunday|weekend|before|after|when|whenever|while|"
+    r"next time|as soon as|first thing|halfway)\b", re.I)
+
+# PLACE is NOT `CONCRETE`, and the difference is the point. CONCRETE lists the
+# things in a scene — a phone, a mug, a jaw — and a body part is not somewhere
+# you can stand. Reusing it made "my chest tight" count as a location and let a
+# bare number ("at 8pm" matching `\d{1,3}`) satisfy the place test on its own.
+#
+# "room" heads the list because SKILL.md step 2 is "one clock time, one room, one
+# body" and CONCRETE never had the word. Without it, "tonight in the living room"
+# named no place.
+PLACE = re.compile(
+    r"\b(rooms?|kitchens?|bedrooms?|bathrooms?|hallways?|landings?|offices?|"
+    r"desks?|beds?|sofas?|couch(?:es)?|chairs?|tables?|floors?|doors?|doorways?|"
+    r"stairs?|sinks?|showers?|cars?|buses|trains?|streets?|gardens?|balcon(?:y|ies)|"
+    r"home|house|work|outside|upstairs|downstairs|windows?|mirrors?|fridges?)\b",
+    re.I)
+
+
+def when_in(text: str) -> bool:
+    """Does this line say when the move happens."""
+    return bool(CLOCK_TIME.search(text) or WHEN.search(text))
+
+
+def place_in(text: str) -> bool:
+    """Does this line say where the move happens."""
+    return bool(PLACE.search(text))
+
 DECORATIVE = {
     "kit", "card", "sheet", "reset", "now", "this", "next", "you", "yours",
     "here", "stop", "one", "two", "three", "again", "yet", "good", "enough",

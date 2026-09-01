@@ -264,6 +264,24 @@
         "checked_by": "cloudflare",
         "at": "2026-08-30T20:25:31Z"
       }
+    },
+    {
+      "id": "kolk-2014",
+      "line": "— Bessel van der Kolk, *The Body Keeps the Score* (2014)",
+      "pillars": [
+        "sleep"
+      ],
+      "claims": [
+        "Some people meet fear by keeping other people happy, instead of fighting or leaving."
+      ],
+      "phrase": "fawn response",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 11,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-01T04:31:44Z"
+      }
     }
   ]
 }

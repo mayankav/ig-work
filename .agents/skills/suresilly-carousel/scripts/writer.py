@@ -365,10 +365,15 @@ under two minutes, while anxious, with no app and no googling.
 
   script     under 20 words, said out loud or sent, and it MUST contain one
              [square bracket] the reader fills in.
-  intention  ONE move, carrying a real time or a real place. It does not have
-             to begin "I will" and it is better when it does not: a filled-in
-             template reads like a form rather than like a person. Shape only,
-             never these words: <the small move>, <when or where>.
+  intention  ONE move, saying both WHEN it happens and WHERE. The when may be a
+             clock time, or the thing that sets it off — the moment before some
+             everyday act, or the moment after it. The second kind is better,
+             because it fires on something the reader will notice instead of on a
+             number they have to remember. The where is a room, or the piece of
+             furniture they will be standing at. It does not have to begin "I
+             will" and it is better when it does not: a filled-in template reads
+             like a form rather than like a person. Shape only, never these
+             words: <the small move>, <when or where>.
   if_then    MUST contain the words if and then, and name a time or a place.
              Shape only, never these words: If <trigger>, then <small move>.
   menu       three tiny options, each a physical move someone could film
@@ -805,8 +810,36 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
     protocol = plan["protocol"]
     if "[" not in protocol["script"] or "]" not in protocol["script"]:
         problems.append("the script has no [bracket] to fill in")
-    if not re.search(r"\bat\b.*\bin\b|\bin\b.*\bat\b", protocol["intention"], re.I):
-        problems.append("the intention names no time and place")
+
+    # When and where, measured as content rather than as grammar.
+    #
+    # This asked for the literal words "at" and "in", in either order, and it is
+    # the check that stopped run local-1788236906: four attempts, faults going
+    # 2, 1, 1, 1, and nothing posted. The same signature as the scene token
+    # above, and the same two causes.
+    #
+    # It contradicted its own prompt. The spec says "a real time OR a real
+    # place" and the gate demanded both, so a model that followed the
+    # instruction exactly was faulted for it and had no way to see why. The
+    # prompt now asks for both, which is what slide 6 is for.
+    #
+    # And it graded grammar. Measured over the eight intentions this engine has
+    # published: ONE passed. That one — "move the cup to the sink at 11:45pm in
+    # the hallway" — is the filled-in-template shape the prompt tells the model
+    # not to write, while "I will start the first step at 6am by the [[bed]]"
+    # names a real time and a real place and was refused for missing an "in".
+    # A gate that rewards the one bad shape and refuses seven good ones is not
+    # strict, it is measuring the wrong thing. Prepositions are not places.
+    # On the same eight, when and where catch the two that deserve it: "I will
+    # check my calendar and let you know" and "I will take a slow breath".
+    missing = ([] if coherence.when_in(protocol["intention"]) else ["when it happens"]) + \
+              ([] if coherence.place_in(protocol["intention"]) else ["where it happens"])
+    if missing:
+        problems.append(
+            f"the intention does not say {' or '.join(missing)}. It reads: "
+            f"{protocol['intention'][:120]!r}. Name a time the reader will notice "
+            f"— a clock time, or before/after/when something happens — and the room "
+            f"or thing they will be standing at")
     if not re.search(r"\bif\b.*\bthen\b", protocol["if_then"], re.I):
         problems.append("the if-then is not an if-then")
     for option in protocol["menu"]:

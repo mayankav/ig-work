@@ -161,6 +161,29 @@ def long_words(text: str) -> list[str]:
     return sorted({w.lower() for w in words_in(text) if syllables(w) == LONG_SYLLABLES})
 
 
+# ──────────────────────── words out of a paper ────────────────────────
+#
+# Syllables do not catch these. "arousal" and "schema" are three beats and two,
+# so every cap in this module passes them, and they are still the words that make
+# slide 3 read like an abstract. The list is short and it is a list of STEMS, so
+# "dysregulat" covers the four words that grow out of it.
+#
+# It lived in `test_writer.py`, which meant it could only complain after a claim
+# was already saved. On 2026-09-01 a run verified Bessel van der Kolk, wrote the
+# claim "Trauma survivors use the fawn response to appease others", and the test
+# caught it — one commit too late to stop it reaching the file. So it moved here,
+# beside the syllable caps, and `bibliography` asks before it writes.
+JARGON = ("appeas", "residue", "rehearsal", "standby", "circuit", "salience",
+          "arousal", "latency", "schema", "mechanism", "attunement", "dysregulat",
+          "modality", "construct", "cognitive", "affective", "survival style")
+
+
+def jargon_words(text: str) -> list[str]:
+    """Words out of a paper, not out of a conversation. Stems, so match on substring."""
+    low = strip_markup(text).lower()
+    return [stem for stem in JARGON if stem in low]
+
+
 def grade_level(text: str) -> float:
     """Flesch-Kincaid, for a whole deck rather than a line.
 

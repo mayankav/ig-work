@@ -44,6 +44,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import readability  # noqa: E402
+
 SKILL_DIR = Path(__file__).resolve().parent.parent
 
 SEARCH_URL = "https://openlibrary.org/search.json"
@@ -342,6 +344,22 @@ def check_claim_is_falsifiable(claim: str) -> None:
             raise Unverified(
                 f"the claim leans on {hit.group(0)!r}, a statistic no reader can check. "
                 "Say what the book found, not what a study allegedly measured")
+
+    # And it has to be sayable. Slide 3 is the one card a reader must understand
+    # on the first read, and code puts this sentence there, so nothing downstream
+    # can soften it. Syllables do not catch these words — "schema" is two beats —
+    # which is why the list is separate from the caps.
+    #
+    # This was only ever checked by a test, so it fired after the claim was in
+    # the file rather than before. A run on 2026-09-01 saved "Trauma survivors
+    # use the fawn response to appease others and avoid conflict" and the suite
+    # went red on data a gate should have refused.
+    jargon = readability.jargon_words(claim)
+    if jargon:
+        raise Unverified(
+            f"the claim says {', '.join(repr(w) for w in jargon)}, which is out of a paper "
+            f"rather than out of a conversation. Say the same thing the way you would say "
+            f"it to a friend. The claim reads: {claim[:100]!r}")
 
 
 # ─────────────────────────── gate 3 ────────────────────────────

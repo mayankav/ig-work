@@ -23,6 +23,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
+import readability  # noqa: E402
 import render  # noqa: E402
 import writer  # noqa: E402
 
@@ -90,9 +91,14 @@ SHIPPED_BROKEN = """### Slide 1 · Hook
 # before you have decided anything", and that sentence came from our own
 # citations file, not from a model. Half the claims in that file were over
 # twenty words with a clause hung off a clause.
-PAPER_WORDS = ("appeas", "residue", "rehearsal", "standby", "circuit", "salience",
-               "arousal", "latency", "schema", "mechanism", "attunement", "dysregulat",
-               "modality", "construct", "cognitive", "affective", "survival style")
+#
+# The list itself now lives in `readability`, and `bibliography` asks it before a
+# claim is written rather than after. It was kept here as a local tuple, so it
+# could only fail the suite once the claim was already in the file: on 2026-09-01
+# a run saved a van der Kolk claim using "appease" and this test went red on data
+# no gate had refused. Importing it is the point — one list, and the copy the
+# test checks is the copy the pipeline enforces.
+PAPER_WORDS = readability.JARGON
 CLAIM_WORD_CAP = 18
 
 
@@ -234,7 +240,16 @@ def run() -> int:
         ("a script with no bracket to fill in",
          broken(**{"protocol.script": "The waking is here. I am not checking."}), "bracket"),
         ("an intention with no time or place",
-         broken(**{"protocol.intention": "I will turn the clock away"}), "time and place"),
+         broken(**{"protocol.intention": "I will turn the clock away"}), "when it happens"),
+        # Where does not have to be a room. A named room with no cue is still a
+        # miss, and the message has to say WHICH half is missing or the repair
+        # loop is back to guessing.
+        ("an intention that says where but never when",
+         broken(**{"protocol.intention": "I will turn the clock to the wall in the bedroom"}),
+         "does not say when it happens"),
+        ("an intention that says when but never where",
+         broken(**{"protocol.intention": "I will turn the clock away at 10pm"}),
+         "does not say where it happens"),
         ("an if-then that is not one",
          broken(**{"protocol.if_then": "Leave the clock turned away when you wake"}), "if-then"),
         ("a menu option that is not a move",
@@ -257,6 +272,36 @@ def run() -> int:
     # A claim index of 1 is valid for espie-2006, so that case should pass.
     if writer.validate_plan(broken(claim_index=1), MOMENT, "sleep"):
         failures.append("PLAN rejected a valid second claim")
+
+    # ── an intention is judged on content, not on prepositions ──
+    #
+    # These are real published intentions and plausible rewrites of them. Every
+    # one names a time and a place, and every one was refused by the gate this
+    # replaced, which searched for the literal words "at" and "in". Seven of the
+    # eight intentions this engine has published failed it. The single one that
+    # passed was the filled-in-template shape the prompt tells the model not to
+    # write, so the gate was rewarding the only bad example in the set.
+    #
+    # That is what stopped run local-1788236906: four attempts, faults 2, 1, 1, 1.
+    for good in ("I will start the first step at 6am by the [[bed]]",
+                 "I will fold the blanket tonight in the living room",
+                 "I will put my phone face down at my [desk] before I send any reply",
+                 "Before dinner I will step outside the kitchen door",
+                 "I will say it tomorrow morning in the kitchen"):
+        faults = [f for f in writer.validate_plan(
+            broken(**{"protocol.intention": good}), MOMENT, "sleep") if "intention" in f]
+        if faults:
+            failures.append(f"PLAN refused a usable intention {good!r}: {faults}")
+
+    # And the vague ones still go. "I will work on my boundaries" is the shape
+    # this gate exists to stop, and the old one let it through whenever the
+    # sentence happened to contain an "at" and an "in".
+    for vague in ("I will work on my boundaries going forward",
+                  "I will try to be kinder to myself at times in general",
+                  "I will check my calendar and let you know"):
+        if not any("intention" in f for f in writer.validate_plan(
+                broken(**{"protocol.intention": vague}), MOMENT, "sleep")):
+            failures.append(f"PLAN accepted a vague intention: {vague!r}")
 
     # ── hooks ──
     #
