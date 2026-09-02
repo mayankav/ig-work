@@ -67,6 +67,24 @@ async function ghDispatch(env, workflow, inputs, label) {
   return { status: res.status, body };
 }
 
+// A quick "on it…" so a reply is not met with silence while the runner spins up
+// (~20-40s before review.yml can answer). Best-effort and fire-and-forget: if the
+// token is missing or the call fails, the real answer still lands later, so this
+// must never block or throw. Telegram's own typing indicator expires in ~5s and
+// the Worker returns immediately, so a real message is the only honest signal.
+async function ack(env, text) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text }),
+    });
+  } catch (e) {
+    console.log(`ack failed (ignored): ${e}`);
+  }
+}
+
 function dispatch(env, cron, mode = "publish") {
   // The auto-post clock. Cron passes no mode, so it publishes; the manual button
   // passes mode explicitly and defaults to a safe build.
@@ -155,6 +173,12 @@ export default {
       console.log("telegram: not a command, ignored");
       return new Response("ok", { status: 200 });
     }
+
+    // A reply the instant it is understood, so the ~20-40s of runner spin-up is
+    // not silence. The real answer ("Posted …", "Dropped …", the held list) comes
+    // from review.yml afterwards and replaces this in your reading of the chat.
+    const what = command.slug ? `${command.decision} ${command.slug}` : command.decision;
+    await ack(env, `⏳ on it — ${what}…`);
 
     const r = await ghDispatch(env, REVIEW_WORKFLOW,
       { decision: command.decision, slug: command.slug },
