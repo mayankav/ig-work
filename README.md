@@ -262,6 +262,12 @@ The repo keeps `carousel.md` and `contact_sheet.png`. Full-size PNGs and per-dec
 
 ---
 
+## Build one like it
+
+Want to stand up your own account this way — the clock, the held-deck replies, the free-tier wiring? [`docs/SETUP.md`](docs/SETUP.md) is a from-scratch tutorial: Telegram bot, GitHub secrets, the Cloudflare Worker, Instagram Graph API, and turning on instant replies, step by step.
+
+---
+
 ## The rules
 
 `AGENTS.md`. Each one exists because it already broke once.
