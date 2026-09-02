@@ -5,7 +5,8 @@
     "20260830_bed-sat-on_4d84f6",
     "20260830_bed-sat-on_ad2ba8",
     "20260901_door-unlocked-the_572b21",
-    "20260901_door-washed-the_cd4b3a"
+    "20260901_door-washed-the_cd4b3a",
+    "20260902_6pm-picked-up_068b42"
   ],
   "anchors": {
     "action": [
@@ -56,6 +57,12 @@
     ],
     "sink": [
       "20260901_door-washed-the_cd4b3a"
+    ],
+    "6pm": [
+      "20260902_6pm-picked-up_068b42"
+    ],
+    "doorway": [
+      "20260902_6pm-picked-up_068b42"
     ]
   }
 }
