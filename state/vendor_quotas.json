@@ -3,13 +3,18 @@
     "day": "2026-09-02",
     "models": {
       "gemini-2.5-flash": {
-        "made": 11
+        "made": 13,
+        "out_of_quota_at": "2026-09-02T14:38:18Z"
       },
       "gemini-2.5-flash-lite": {
-        "made": 1
+        "made": 14,
+        "out_of_quota_at": "2026-09-02T14:40:07Z"
+      },
+      "gemini-3.5-flash-lite": {
+        "made": 10
       }
     },
-    "observed_at": "2026-09-02T07:19:24Z",
+    "observed_at": "2026-09-02T14:40:15Z",
     "source": "counted",
     "zone": "America/Los_Angeles"
   },

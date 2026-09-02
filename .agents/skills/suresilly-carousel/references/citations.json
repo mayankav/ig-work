@@ -315,6 +315,24 @@
         "checked_by": "cloudflare",
         "at": "2026-09-01T05:57:02Z"
       }
+    },
+    {
+      "id": "forward-1996",
+      "line": "— Susan Forward, *Chantaje Emocional/Emotional Blackmail* (1996)",
+      "pillars": [
+        "burnout"
+      ],
+      "claims": [
+        "Fear, obligation, and guilt drive people into emotional blackmail when trying to please others."
+      ],
+      "phrase": "emotional blackmail",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 16662,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-02T14:39:15Z"
+      }
     }
   ]
 }

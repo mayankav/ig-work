@@ -16,9 +16,9 @@
   },
   "2026-09-02": {
     "calls": 9,
-    "last": "deck-slide-9",
+    "last": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     "neurons": 1129.32,
-    "text_calls": 6,
-    "text_neurons": 552.01
+    "text_calls": 8,
+    "text_neurons": 592.29
   }
 }
