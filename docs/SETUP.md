@@ -32,14 +32,19 @@ Three services, each doing the one thing it is best at:
 
 ## Before you start
 
-You'll create accounts on four services. All free:
+You'll create accounts on some free services. Three are the backbone; the rest depend on how far you're taking it.
 
+**Required — the backbone:**
 - [GitHub](https://github.com) — host the repo, run the workflows
 - [Cloudflare](https://dash.cloudflare.com/sign-up) — the Worker (clock + reply inbox)
-- [Telegram](https://telegram.org) — the alert channel
-- A **Meta / Instagram** account set up for the Graph API (the fiddliest part — [Part 5](#part-5--instagram-posting))
+- [Telegram](https://telegram.org) — the alert channel and where you reply
 
-Optional, for the writing engine itself (skip if you only want the infra): API keys from [Google AI Studio](https://aistudio.google.com/apikey) (Gemini), [Groq](https://console.groq.com/keys), and Cloudflare Workers AI.
+**Required only if you want it to post to Instagram:**
+- A **Meta / Instagram** account set up for the Graph API (the fiddliest part — [Part 5](#part-5--instagram-posting)). Skip it while you're testing the wiring; the build still runs and holds decks without ever posting.
+
+**Optional — good to have, not needed:**
+- API keys for the writing engine itself: [Google AI Studio](https://aistudio.google.com/apikey) (Gemini), [Groq](https://console.groq.com/keys), Cloudflare Workers AI. Only if you're running *this* generator rather than wiring the infra to your own.
+- A [Resend](https://resend.com) key for a second alert channel by email (Telegram alone is fine).
 
 ---
 
@@ -76,12 +81,16 @@ You now have `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
 
 In your repo: **Settings → Secrets and variables → Actions → New repository secret**. Add each one you have:
 
-| Secret | For |
-|---|---|
-| `TELEGRAM_BOT_TOKEN` | Alerts and replies |
-| `TELEGRAM_CHAT_ID` | The one chat allowed to reply |
-| `IG_USER_ID`, `IG_ACCESS_TOKEN` | Posting to Instagram (Part 5) |
-| *(engine keys: `GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, …)* | The writing engine |
+| Secret | For | |
+|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | Alerts and replies | required |
+| `TELEGRAM_CHAT_ID` | The one chat allowed to reply | required |
+| `IG_USER_ID`, `IG_ACCESS_TOKEN` | Posting to Instagram (Part 5) | required to post |
+| `GEMINI_API_KEY`, `GROQ_API_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | The writing engine (two vendors minimum, so the critic isn't the writer) | required to build |
+| `GEMINI_API_KEY_2` | A second Google project = a second daily allowance | *optional* |
+| `RESEND_API_KEY`, `EMAIL_FROM` | A second alert channel by email, searchable in a year | *optional* |
+
+The engine keys are only "required" if you're running the writing engine too. If you only want the **infrastructure** (clock + held-deck replies) wired to your own generator, the two Telegram secrets are the only ones this guide strictly needs.
 
 ### Add the kill switch
 
@@ -119,7 +128,13 @@ Any long random string — it guards the manual "post now" URL so the public add
 
 Another random string — Telegram sends it back on every push so the Worker knows the request is really from Telegram. Generate with `openssl rand -hex 32`. This becomes `TELEGRAM_WEBHOOK_SECRET`.
 
-### 4d. Deploy the Worker (dashboard, no tooling)
+### 4d. *(Optional)* An instant "on it…" reply
+
+The runner takes ~20–40s to spin up before it can answer, so a reply is met with a short silence. If you also give the Worker the **bot token**, it sends an instant `⏳ on it…` the moment your reply is understood, and the real answer replaces it when the runner finishes.
+
+**Optional — skip it and everything still works;** you just get the answer after a short wait instead of an immediate acknowledgement. To enable it, add one more secret in 4e below: `TELEGRAM_BOT_TOKEN` = your bot token (Part 2). If it's absent, the Worker stays silent here and the code degrades cleanly.
+
+### 4e. Deploy the Worker (dashboard, no tooling)
 
 1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Compute (Workers)** → **Create** → **Create Worker.** Name it (e.g. `suresilly-dispatch`), Deploy the starter, then **Edit code**.
 2. Delete the starter, paste the contents of [`src/index.js`](../ops/dispatch-worker/src/index.js), **Deploy**.
@@ -128,12 +143,13 @@ Another random string — Telegram sends it back on every push so the Worker kno
    - `TRIGGER_KEY` = the random string (4b)
    - `TELEGRAM_WEBHOOK_SECRET` = the random string (4c)
    - `TELEGRAM_CHAT_ID` = your chat id (Part 2)
+   - *(optional)* `TELEGRAM_BOT_TOKEN` = your bot token — only if you want the instant ack from 4d
    Then **Deploy** again so the secrets attach.
 4. **Settings → Triggers → Cron Triggers → Add**, once each (UTC): your two post times, e.g. `30 2 * * *` and `30 14 * * *`.
 
 > **Deploying is not the same as `git push`.** The Worker runs a copy of the code that Cloudflare holds, *not* your repo. Every time you change `index.js`, you must redeploy (paste + Deploy, or `npx wrangler deploy`) or the live Worker keeps running the old version.
 
-### 4e. Test the clock (no post)
+### 4f. Test the clock (no post)
 
 Open in a browser — build only, safe, does not publish:
 ```
