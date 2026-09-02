@@ -3,24 +3,30 @@
     "day": "2026-09-02",
     "models": {
       "gemini-2.5-flash": {
-        "made": 13,
-        "out_of_quota_at": "2026-09-02T14:38:18Z"
+        "made": 15,
+        "out_of_quota_at": "2026-09-02T17:59:50Z"
       },
       "gemini-2.5-flash-lite": {
-        "made": 14,
-        "out_of_quota_at": "2026-09-02T14:40:07Z"
+        "made": 17,
+        "out_of_quota_at": "2026-09-02T18:00:02Z"
+      },
+      "gemini-3.1-flash-lite": {
+        "made": 4
+      },
+      "gemini-3.5-flash": {
+        "made": 1
       },
       "gemini-3.5-flash-lite": {
-        "made": 10
+        "made": 22
       }
     },
-    "observed_at": "2026-09-02T14:40:15Z",
+    "observed_at": "2026-09-02T18:05:59Z",
     "source": "counted",
     "zone": "America/Los_Angeles"
   },
   "groq": {
     "model": "openai/gpt-oss-120b",
-    "observed_at": "2026-09-02T07:18:24Z",
+    "observed_at": "2026-09-02T18:04:47Z",
     "requests": {
       "limit": 1000,
       "remaining": 999,
@@ -29,8 +35,8 @@
     "source": "reported",
     "tokens": {
       "limit": 8000,
-      "remaining": 2997,
-      "reset_seconds": 37.522
+      "remaining": 2101,
+      "reset_seconds": 44.242
     }
   }
 }
