@@ -113,8 +113,16 @@
       ],
       "claims": [
         "The Nagoskis found the body needs a clear sign that the hard part is over.",
-        "The Nagoskis found that the problem ending and your body settling are two separate things."
-      ]
+        "The Nagoskis found that the problem ending and your body settling are two separate things.",
+        "Emotional exhaustion stems from completing stress cycles without adequate recovery time."
+      ],
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 17308,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-02T02:35:22Z"
+      }
     },
     {
       "id": "maslach-1997",
@@ -259,15 +267,16 @@
       "claims": [
         "People struggling with codependency often prioritize others' needs while neglecting their own authentic desires.",
         "Overcoming codependent patterns is essential for preventing exhaustion from over-giving and self-neglect.",
-        "The book describes caretaking behavior as an attempt to control others' lives and feelings."
+        "The book describes caretaking behavior as an attempt to control others' lives and feelings.",
+        "Codependency describes losing self in another's problems, often leading to poor personal boundaries."
       ],
       "phrase": "codependency",
       "verified": {
         "catalogue": "openlibrary",
-        "scanned_hits": 1122,
+        "scanned_hits": 13666,
         "proposed_by": "gemini",
         "checked_by": "cloudflare",
-        "at": "2026-09-01T17:58:38Z"
+        "at": "2026-09-02T07:16:34Z"
       }
     },
     {
@@ -296,15 +305,34 @@
       ],
       "claims": [
         "Chronic work stress leads directly to emotional exhaustion and depersonalization toward clients.",
-        "Chronic work stress leads directly to emotional exhaustion and detachment from clients."
+        "Chronic work stress leads directly to emotional exhaustion and detachment from clients.",
+        "Chronic work stress often triggers severe depersonalization toward clients and colleagues."
       ],
       "phrase": "depersonalization",
       "verified": {
         "catalogue": "openlibrary",
-        "scanned_hits": 17463,
+        "scanned_hits": 56760,
         "proposed_by": "gemini",
         "checked_by": "cloudflare",
-        "at": "2026-09-01T05:57:02Z"
+        "at": "2026-09-02T18:00:36Z"
+      }
+    },
+    {
+      "id": "forward-1996",
+      "line": "— Susan Forward, *Chantaje Emocional/Emotional Blackmail* (1996)",
+      "pillars": [
+        "burnout"
+      ],
+      "claims": [
+        "Fear, obligation, and guilt drive people into emotional blackmail when trying to please others."
+      ],
+      "phrase": "emotional blackmail",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 16662,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-02T14:39:15Z"
       }
     }
   ]
