@@ -77,10 +77,12 @@ itself; run it by hand only to re-render a deck you have edited.
 
 | Path | When | Cost |
 |---|---|---|
-| **Draw fresh** | Default on `run.py`. One pose per slide from that slide's own brief. | ~126 neurons each, free tier |
+| **Draw fresh** | Default on `run.py`. One pose per slide from that slide's own brief. Needs a vendor that can look at a picture: with none reachable, nothing is drawn at all. | ~126 neurons each, free tier |
 | **Library** | The fallback. Every failure lands here, and `--no-fresh` picks it outright. | nothing, no key, no network |
 | `poses_flux.py` | Offline tool to grow the library in bulk. | free |
 | `--generate` | Obsolete. Gemini image generation has no free tier. | fails without billing |
+
+A drawn pose passes four gates before it reaches a slide — no text, on palette, has pupils, and `cutout.qa()` — and is then shown to a model **once per deck**, as one numbered 3×3 sheet, which may only veto: any panel it faults falls back to its library pose, and the file is deleted rather than offered to the library. Nothing anywhere counts limbs deterministically, because two-donkey poses make that impossible (invariant 28). The veto **fails closed**: no vendor, a timeout or an unreadable reply throws away every drawn pose, so a bad afternoon at a vendor costs library art and never a deck.
 
 The library holds about 190 poses, 32 of them two-donkey scenes, matched to a slide by the words in its brief and never repeated inside a deck. **Do not quote a count from this file** — every run imports new poses, up to 18 a day. Count them:
 
@@ -92,7 +94,7 @@ python3 -c "import json;print(len(json.load(open('mascot/poses.json'))['poses'])
 
 Hand-drawn 6-up sheets still work: `mascot/GENERATION_PROMPTS.md`, then `scripts/import_poses.py`.
 
-Vendors are called over plain REST, in order: Gemini → Groq → Cloudflare. No MCP. **Two must be configured**, because the critic may not be the model that wrote the deck.
+Vendors are called over plain REST, in order: Gemini → Groq → Cloudflare. No MCP. **Two must be configured**, because the critic may not be the model that wrote the deck. `llm.look()` is the same walk for a picture: Gemini's buckets are already multimodal, Groq and Cloudflare each need their own vision model id — and both of those ids are ⚠ **unverified**, so run `scripts/probe_vision.py` before trusting one.
 
 ---
 

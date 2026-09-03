@@ -119,10 +119,14 @@ PLACE_WINDOW = 3
 def settings_in(text: str) -> set[str]:
     """Where this moment happens.
 
-    Read from screen.shape's own anchors rather than a second list of rooms.
-    That extractor is already maintained, already used by the shape filter, and
+    Read from screen's own anchors rather than a second list of rooms. That
+    extractor is already maintained, already used by the shape filter, and
     already knows words a narrower list missed — "office" is a place to it and
     is not in coherence.CONCRETE at all.
+
+    screen.places_in, not the raw anchors, because two words for one room have
+    to compare equal here. They did not until 2026-09-02, and the engine posted
+    three door decks in a row through the gap: see PLACE_SYNONYM in screen.py.
 
     It is approximate, and that is accepted. "I stood outside the building at
     6am ... too tired to go back to bed" is recorded as a bed. The cost of that
@@ -130,7 +134,7 @@ def settings_in(text: str) -> set[str]:
     kitchens in twelve.
     """
     try:
-        return set(screen.shape(text)["anchors"].get("place") or [])
+        return screen.places_in(text)
     except Exception:                                  # noqa: BLE001
         # A place we cannot read must never be the thing that stops a deck.
         return set()

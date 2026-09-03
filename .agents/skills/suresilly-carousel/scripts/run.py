@@ -81,8 +81,11 @@ def slide_text(slide: dict) -> str:
     return " ".join([str(slide[k]) for k in TEXT_KEYS if k in slide] + slide.get("bullets", []))
 
 
-class Stop(Exception):
-    """A layer said no. The reason is written for whoever reads the alert."""
+# Stop and Refused live in outcomes.py, not here. writer.py raises Refused too
+# and cannot import this module — run.py imports writer, so the arrow only goes
+# one way. Re-exported under the old name because `run.Stop` is what the suites
+# and the rest of this file already say.
+from outcomes import Refused, Stop  # noqa: E402,F401
 
 
 class Skip(Exception):
@@ -184,7 +187,11 @@ def draw() -> dict:
     if not result["ok"]:
         if result["route"] == "reserve":
             raise Stop(f"the feed is unreachable and the reserve is empty ({result['note']})")
-        raise Stop(f"nothing usable in {result['fetched']} posts fetched")
+        # Amber, not red. The harvest ran and the screen refused everything it
+        # brought back, which is a strict gate on a thin morning rather than
+        # anything being broken. The unreachable-feed case above IS red: that
+        # one is a dependency that did not answer.
+        raise Refused(f"nothing usable in {result['fetched']} posts fetched")
     return result
 
 
@@ -203,8 +210,12 @@ def draw_concept() -> dict:
     """
     chosen = discovery.pick()
     if not chosen:
-        raise Stop("no unused concept in the vocabulary. Run discovery.py "
-                   "--refresh to prove more, or use the feed for this run")
+        # The one amber ending a retry cannot fix. The pool only refills when
+        # the topup job runs, so offering "reply retry" here would be offering
+        # a button that does nothing.
+        raise Refused("no unused concept in the vocabulary. Run discovery.py "
+                      "--refresh to prove more, or use the feed for this run",
+                      retry=False)
     return {"candidates": [chosen], "route": "concept", "fetched": 1,
             "tally": {}, "note": None}
 
@@ -584,7 +595,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
             # judge is the harvest, or a judge that has gone strict.
             where = ", ".join(f"{refusals.count(k)} at the {k}"
                               for k in ("compose", "judge") if refusals.count(k))
-            raise Stop(f"no moment survived {tried} attempts ({where})")
+            raise Refused(f"no moment survived {tried} attempts ({where})")
 
         print(f"\n  moment  {moment.text}\n")
         say("safety judge", f"allowed by {judge_provider}, subject {topic}")
@@ -616,7 +627,10 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         # HELD, and a person decides what happens to it. That is the whole
         # difference between a gate and a prosecutor.
         if outcome == "block":
-            raise Stop(f"the reviewer stopped this deck: {reason}")
+            # Amber. Nothing shipped and the content genuinely was wrong, so it
+            # is not green — but no vendor failed and nothing needs repairing,
+            # so it is not red either. The next moment is a different deck.
+            raise Refused(f"the reviewer stopped this deck: {reason}")
         say("review", f"score {score}/100, {len(objections)} note(s), "
                       f"{'ready' if outcome == 'publish' else 'holding for you'}")
         check_critic_canary(memory.used_count(), wrote_by)
@@ -646,7 +660,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         # different evenings.
         repeats = novelty.check(fingerprint)
         if repeats:
-            raise Stop("this deck is too close to one we published: " + "; ".join(repeats[:3]))
+            raise Refused("this deck is too close to one we published: " + "; ".join(repeats[:3]))
         say("novelty", "clear of the last 30 decks and every scene match")
 
         novelty.record(fingerprint)
@@ -676,6 +690,18 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
     except NotWired as reason:
         print(f"\n  stopped: {reason}")
         print("  everything before this point ran. Nothing was posted and no moment was used.")
+        return 0
+    except Refused as reason:
+        # AMBER, and the reason this exception type exists. Every gate in the
+        # engine can say no, and a gate saying no is the engine working. Exiting
+        # 1 for it put those runs in the same red bucket as an unreachable
+        # vendor, and a red that fires for the ordinary case is a red nobody
+        # reads. Caught BEFORE llm.ModelRefused on purpose: a vendor failure
+        # inside llm.ask() still raises ModelRefused and must still land below.
+        print(f"\n  stopped: {reason}")
+        print("  a gate refused. No vendor problem, and no moment was used up.")
+        if reason.retry:
+            print("  reply `retry` in Telegram to try again now with a fresh moment.")
         return 0
     except critic.NoReview as why:
         # No critic could be reached. Not the same as a deck being refused, and

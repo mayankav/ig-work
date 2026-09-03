@@ -38,6 +38,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import poses_flux as pf  # noqa: E402
+import cutout  # noqa: E402
 from cutout import QAFailure  # noqa: E402
 
 MAGENTA = pf.CHROMA_BGR
@@ -67,6 +68,35 @@ def caption(img: np.ndarray, y: float, x: float = 0.12, scale: float = 0.9,
     out = img.copy()
     cv2.putText(out, "2. Deadpan", (int(img.shape[1] * x), int(img.shape[0] * y)),
                 cv2.FONT_HERSHEY_SIMPLEX, scale, colour, 2, cv2.LINE_AA)
+    return out
+
+
+def bubble(img: np.ndarray, words: str = "", *, at=(0.34, 0.44),
+           pad=(255, 255, 255), ink=(25, 25, 25), scale: float = 1.6,
+           kind: str = "bubble") -> np.ndarray:
+    """A speech bubble or a held card ON the figure, optionally carrying words.
+
+    The shape the 2026-09-02 deck shipped: the lettering is INSIDE the subject,
+    so it is holes in one component rather than pieces of picture beside it.
+
+    Draw these on a 1024px figure, the size poses_flux actually generates. On a
+    512px one the antialiased strokes of adjacent letters touch and "I'm out"
+    becomes two blobs — a real limit of the gate, not a quirk of the helper, and
+    one that costs nothing because no generator hands back a 512px frame.
+    """
+    out = img.copy()
+    H, W = out.shape[:2]
+    font, thick = cv2.FONT_HERSHEY_SIMPLEX, 2
+    (tw, th), _ = cv2.getTextSize(words or "MM", font, scale, thick)
+    px, py = int(tw * 0.30), int(th * 0.9)
+    x, y = int(W * at[0]), int(H * at[1])
+    if kind == "bubble":
+        cv2.ellipse(out, (x + tw // 2, y + th // 2), (tw // 2 + px, th // 2 + py),
+                    0, 0, 360, pad, -1)
+    else:
+        cv2.rectangle(out, (x - px, y - py), (x + tw + px, y + th + py), pad, -1)
+    if words:
+        cv2.putText(out, words, (x, y + th), font, scale, ink, thick, cv2.LINE_AA)
     return out
 
 
@@ -193,6 +223,80 @@ def test_the_old_style_sheets_are_refused_as_references():
     for sheet in sheets:
         with pytest.raises(QAFailure, match="no_text"):
             pf.pick_references([str(sheet)])
+
+
+# ───────────── 2b · invariant 3, lettering written ON the figure ─────────────
+#
+# Deck 20260902_6pm-picked-up_068b42 published a mascot saying "I'm out" in a
+# speech bubble and another holding a card reading "Exit Block". The detached
+# detector scored both frames zero: their subjects were single components at
+# 89.7% and 92.2% of the frame, so the letters were holes IN the figure. Every
+# threshold below was measured before it landed — 720 synthetic positives and
+# all 194 library poses at both scales — and the numbers are in
+# cutout.enclosed_runs.
+
+@pytest.mark.parametrize("kind", ["bubble", "card"])
+@pytest.mark.parametrize("words", ["I'm out", "Exit Block", "later"])
+def test_lettering_inside_the_figure_is_rejected(kind, words):
+    with pytest.raises(QAFailure, match="no_text"):
+        pf.assert_no_text(bubble(figure(1024), words, kind=kind), "test")
+
+
+def test_pale_lettering_inside_the_figure_is_rejected_too():
+    """The gate keys on CONTRAST against the pad, not on darkness, so grey ink
+    on white is still writing. Measured: caught at every ink tone through 175."""
+    with pytest.raises(QAFailure, match="no_text"):
+        pf.assert_no_text(bubble(figure(1024), "later", ink=(175, 175, 175)), "test")
+
+
+def test_a_blank_bubble_is_not_text():
+    """blank_card and holding_board are real poses. An empty pad is a prop."""
+    pf.assert_no_text(bubble(figure(1024)), "test")
+
+
+def test_two_marks_in_a_pad_are_not_a_run():
+    """Eyes in a pale face. assert_has_pupils REQUIRES this shape, so a gate
+    that called two marks lettering would fight the gate beside it."""
+    img = bubble(figure(1024))
+    for x in (0.40, 0.47):
+        cv2.circle(img, (int(1024 * x), 470), 10, (20, 20, 20), -1)
+    pf.assert_no_text(img, "test")
+
+
+def test_a_low_contrast_shadow_inside_a_pad_is_not_ink():
+    """Why INK_DROP is 40 and not 30. lantern_bearer's lamp glow holds three
+    aligned shadows 26 levels below the glow — shading, not writing. Ink starts
+    at 40; the pale end of real lettering only begins to be missed at 50."""
+    shade = 200 - cutout.INK_DROP // 2          # inside the pad, well above ink
+    img = bubble(figure(1024), pad=(230, 230, 230))
+    for x in (0.36, 0.42, 0.48):
+        cv2.circle(img, (int(1024 * x), 466), 10, (shade,) * 3, -1)
+    pf.assert_no_text(img, "test")
+
+
+def test_the_whole_real_library_carries_no_enclosed_runs():
+    """The false-positive half, named for the detector it guards. The first
+    attempt at this used a morphological close to find holes and called 126 of
+    these 194 poses text, because closing a rounded pad fills its own convexity
+    and the antialiased rim comes back as a row of marks."""
+    poses = [p for p in sorted(pf.LIBRARY.glob("*.png")) if not p.stem.startswith("_")]
+    assert len(poses) > 100, "library looks wrong; this test is meaningless without it"
+    rejected = []
+    for path in poses:
+        img = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        flat = pf._flatten_onto_key(img) if img.shape[2] == 4 else img[:, :, :3]
+        if cutout.enclosed_runs(flat):
+            rejected.append(path.stem)
+    assert rejected == [], f"{len(rejected)} good poses called text: {rejected[:8]}"
+
+
+def test_both_detectors_share_one_size_band_and_one_run_test():
+    """Invariant 3 puts gates in the shared module; this keeps the two halves
+    from drifting apart inside it. If a future change gives the enclosed path
+    its own band, "the same test" stops being true and nobody finds out."""
+    source = (ROOT / "scripts" / "cutout.py").read_text(encoding="utf-8")
+    for shared in ("_letter_shaped", "_baseline_runs"):
+        assert source.count(f"{shared}(") >= 3, f"{shared} is no longer shared"
 
 
 # ─────────────────────────── 4 · the other gates ─────────────────────────────

@@ -76,10 +76,23 @@ TIMEOUT = 30
 # Deliberately no "ok", "yes", "no" or "sure". Those are words that turn up in
 # an ordinary chat by accident, and one of them would post to Instagram. Every
 # verb here is one somebody had to mean.
+#
+# This table is mirrored in ops/dispatch-worker/src/index.js, which is where a
+# reply is actually parsed now. Kept in step deliberately, so the same word means
+# the same thing whichever half reads it.
+#
+# NOTE "rerun" means DROP, and always has. It reads like "run it again" and does
+# the opposite, which is why "retry" is spelled out separately rather than folded
+# into the obvious synonym set. Do not add "rerun"/"again"/"redo" to retry.
 VERBS = {
     "publish": "publish", "post": "publish", "approve": "publish", "ship": "publish",
     "rerun": "drop", "drop": "drop", "reject": "drop", "discard": "drop",
     "list": "list", "held": "list", "pending": "list", "status": "list",
+    # Known here so the word is understood rather than treated as chatter, but
+    # this script cannot carry it out: retry means "build a fresh deck", which is
+    # a workflow dispatch, and only the Worker holds a token for that. Both paths
+    # below decline it explicitly — see act() and reply().
+    "retry": "retry", "tryagain": "retry",
 }
 COMMAND = re.compile(r"^\s*(?P<verb>[a-z]+)\s*(?P<slug>[\w-]*)\s*$", re.I)
 
@@ -145,6 +158,18 @@ def act(verb: str, slug: str) -> str:
     def row(r: dict) -> str:
         return f"  <code>{esc(r['slug'])}</code>  {esc(r['score'])}/100"
 
+    # Fail closed, and before anything is read or resolved. The way out of this
+    # function used to be an unguarded `release.drop(record)`, which made "any
+    # verb that is not list or publish" mean DESTROY THE DECK. `retry` was about
+    # to become such a verb: it is in VERBS so the word is understood, but the
+    # Worker dispatches it to auto-post.yml and it must never arrive here. If it
+    # ever does, the answer is to do nothing and say so — not to drop a held deck
+    # because a branch was missing.
+    if verb not in ("list", "publish", "drop"):
+        return (f"I don't act on <b>{esc(verb)}</b> here — "
+                f"that one starts a fresh build, which the Worker dispatches. "
+                f"Reply publish, drop or list.")
+
     if verb == "list":
         waiting = release.held()
         if not waiting:
@@ -169,9 +194,14 @@ def act(verb: str, slug: str) -> str:
                 if release.publish(record) == 0
                 else f"<b>Could not post</b> <code>{esc(record['slug'])}</code>. "
                      f"The run log has the reason.")
-    release.drop(record)
-    return (f"<b>Dropped</b> <code>{esc(record['slug'])}</code>, "
-            f"held at {esc(record['score'])}/100. Tonight's run builds a fresh one.")
+    if verb == "drop":
+        release.drop(record)
+        return (f"<b>Dropped</b> <code>{esc(record['slug'])}</code>, "
+                f"held at {esc(record['score'])}/100. Tonight's run builds a fresh one.")
+
+    # Unreachable: the guard at the top of this function already narrowed verb to
+    # the three below. Here so the function has no implicit last action at all.
+    return f"I don't act on <b>{esc(verb)}</b> here."
 
 
 def main() -> int:
@@ -227,10 +257,19 @@ def reply(verb: str, slug: str) -> int:
     The verb is already mapped (publish/drop/list). A safety net anyway: if some
     other word arrives, run it through VERBS so this can never do something the
     reply did not name.
+
+    `retry` is a known verb that deliberately does not belong to this script — it
+    means "build a fresh deck", which is a workflow dispatch the Worker performs
+    directly against auto-post.yml. Reaching here means the routing broke, so say
+    that rather than calling it unknown.
     """
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
     mapped = VERBS.get(verb.lower(), verb.lower())
+    if mapped == "retry":
+        print("retry is dispatched to auto-post by the Worker, not acted on here; "
+              "nothing done")
+        return 0
     if mapped not in ("publish", "drop", "list"):
         print(f"unknown decision {verb!r}, nothing done")
         return 0

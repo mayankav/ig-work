@@ -72,7 +72,7 @@ from cutout import (  # noqa: E402
     CREAM_MAX_S, CREAM_MIN_V, EYE_MAX_SAT, GREEN_HUE_RANGE, LIBRARY_CREAM_HUE,
     LIBRARY_GREEN_SAT, QAFailure, assert_has_pupils, assert_no_text,
     assert_on_palette, auto_chroma_matte, backdrop_mask, correct_palette,
-    detect_key_colour, glyph_runs, qa,
+    detect_key_colour, enclosed_runs, glyph_runs, qa,
 )
 from imaging import drop_neighbour_bleed, tight_crop  # noqa: E402
 # The ledger and the budget constants live in neurons.py: llm.py records the

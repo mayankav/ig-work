@@ -79,6 +79,86 @@ if OLD.is_dir():
             print(f"  ✓  {f.stem:14s} rejected")
 
 
+# ── lettering written ON the figure ────────────────────────────────────────
+#
+# glyph_runs counts a mark only when it is a SEPARATE PIECE OF PICTURE — its own
+# connected region of non-backdrop. Letters inside a white speech bubble, or on a
+# card the donkey is holding, are holes within one component, so it cannot see
+# them at all. That is how tiles 7 and 8 of the 2026-09-02 sheet shipped: one
+# donkey saying "I'm out", one holding a card reading "Exit Block".
+#
+# enclosed_runs is the second detector. Same shape of test as the first — a run
+# of similar-height marks on a shared baseline — read from the holes of the main
+# component instead of from its neighbours.
+print("\n=== lettering inside a bubble or on a held card ===")
+
+
+def frame(marks, held):
+    """A green donkey on the magenta key, with a white bubble or card attached."""
+    img = np.zeros((600, 600, 3), np.uint8)
+    img[:] = (255, 0, 255)
+    cv2.circle(img, (300, 250), 150, (88, 152, 114), -1)
+    cv2.rectangle(img, (215, 360), (385, 600), (88, 152, 114), -1)
+    if held:
+        cv2.rectangle(img, (395, 300), (560, 420), (245, 245, 245), -1)
+        cv2.rectangle(img, (380, 340), (400, 370), (88, 152, 114), -1)   # the arm
+        y0, x0, step = 345, 415, 34
+    else:
+        cv2.ellipse(img, (410, 140), (120, 70), 0, 0, 360, (245, 245, 245), -1)
+        cv2.fillPoly(img, [np.array([[330, 175], [360, 200], [300, 215]])], (245, 245, 245))
+        y0, x0, step = 125, 340, 34
+    for k in range(marks):
+        cv2.rectangle(img, (x0 + k * step, y0), (x0 + k * step + 16, y0 + 32), (25, 25, 25), -1)
+    return img
+
+
+from cutout import enclosed_runs, glyph_runs  # noqa: E402
+
+for held in (False, True):
+    what = "held card" if held else "speech bubble"
+    for marks, expect in ((0, "accept"), (2, "accept"), (4, "reject")):
+        got = "reject" if enclosed_runs(frame(marks, held)) else "accept"
+        ok = "\u2713" if got == expect else "\u2717\u2717"
+        if got != expect:
+            FAILURES.append(f"enclosed_{marks}_{what.replace(' ', '_')}")
+        print(f"  {ok} {what:14s} {marks} mark(s)   expected {expect:6s} got {got}")
+# Two marks are two eyes, not a word. The whole reason assert_has_pupils can
+# coexist with this gate is that a run needs three.
+
+# ── every pose in the library, through both detectors ──────────────────────
+#
+# A gate that rejects real artwork is worse than no gate: it fails safe to the
+# library pose, so a false positive is silent and permanent. The threshold was
+# measured against all 194 poses before it landed, and this is the measurement,
+# run again on every commit.
+#
+# Both backdrops, because the two are different pictures to a contrast detector:
+# generation happens on the magenta key, which is what assert_no_text actually
+# sees, and white is the worst case for a light-on-light mark.
+LIB = pathlib.Path(__file__).resolve().parent.parent / "mascot" / "library"
+poses = sorted(f for f in LIB.glob("*.png") if not f.name.startswith("_"))
+print(f"\n=== {len(poses)} library poses, neither detector may fire ===")
+if len(poses) < 190:
+    FAILURES.append("library_sweep_found_nothing")
+    print(f"  \u2717\u2717 only {len(poses)} poses found — the sweep is proving nothing")
+for backdrop, bgr in (("magenta key", (255, 0, 255)), ("white", (255, 255, 255))):
+    hits = []
+    for f in poses:
+        img = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)
+        if img is None or img.shape[2] != 4:
+            continue
+        alpha = img[:, :, 3:4].astype(np.float32) / 255.0
+        back = np.zeros_like(img[:, :, :3], np.float32)
+        back[:] = bgr
+        flat = (img[:, :, :3].astype(np.float32) * alpha + back * (1 - alpha)).astype(np.uint8)
+        if enclosed_runs(flat):
+            hits.append(f.stem)
+    ok = "\u2713" if not hits else "\u2717\u2717"
+    if hits:
+        FAILURES.append(f"library_false_positive_on_{backdrop.replace(' ', '_')}")
+    print(f"  {ok} on {backdrop:12s} {len(hits)} false reject(s)"
+          + (f": {', '.join(hits[:6])}" if hits else ""))
+
 print()
 if FAILURES:
     raise SystemExit(f"FAILED: {len(FAILURES)} case(s): {', '.join(FAILURES)}")

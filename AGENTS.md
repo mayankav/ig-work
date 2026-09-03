@@ -23,12 +23,16 @@ Kill switch: `SS_HALT=1` or a file at `state/HALT`.
   mascot/           poses + CHARACTER.md
   scripts/          run.py · compose · safety · writer · critic · render · build
                     readability · bibliography · discovery · coherence · memory
-  tests/            27 suites, CI runs every one
+                    outcomes (green/amber/red) · probe_vision ⚠ offline only
+  tests/            28 suites, CI runs every one
 scripts/            NOT the engine's. Jobs around it, never imported by it:
                     post_to_ig · prune_slides · insights · notify · capacity · dashboard
 .github/workflows/  auto-post (08:00, 20:00 IST) · insights · review
                     (Telegram replies push to the Cloudflare Worker, which
                     dispatches review — no polling workflow anymore)
+ops/dispatch-worker/  the Cloudflare Worker: the clock, and the Telegram webhook.
+                    Deploying it is `wrangler deploy` — a commit alone changes
+                    nothing. `test/parse-reply.test.mjs` runs in CI under node.
 carousels/          carousel.md + contact_sheet.png per deck
 state/              what has been used. Committed.
 research/           ⚠ 02_account_database and 05_hooks_database hold invented numbers
@@ -68,6 +72,8 @@ Every one of these is here because it already broke in production. Do not relax 
 | 24 | **A gate measures content, never grammar, and never contradicts its own prompt.** The intention check searched for the literal words `at` and `in` while the prompt asked for "a real time **or** a real place" — so a model that obeyed the instruction was faulted for it, with a message naming nothing. Run `local-1788236906` spent four attempts there, faults `2, 1, 1, 1`, and posted nothing. Measured on the eight intentions this engine has published: **one passed**, and it was the filled-in-template shape the prompt forbids, while `at 6am by the [[bed]]` was refused for missing an `in`. Prepositions are not places. `coherence.when_in` and `coherence.place_in` replace it and take 6 of 8, refusing only the two that name neither. |
 | 25 | **A rule enforced only by a test fires one commit too late.** `PAPER_WORDS` lived in `test_writer.py`, so on 2026-09-01 a run verified van der Kolk, wrote a claim using `appease`, saved it, and turned the suite red on data no gate had refused. The list is `readability.JARGON` now — syllables cannot catch it, since `schema` is two beats — `bibliography` asks before it writes, and the test imports the same tuple. **A test may confirm a gate; it may not be the gate.** |
 | 26 | **A guard for the case where another guard was wrong cannot read the same signal.** `check_state_is_current` asks git whether `state/` is dirty or behind. On 2026-09-01 it answered `current` about a stale copy, so `pick_moment` filtered against a ledger missing a line and run `local-1788242062` re-claimed `m-572b219023b990a8` — already live as media `17972776875125960`, posted `08:02:38Z`. The slug comes from the moment (`moment_id` hashes the source post, not the composed text), so the second deck was written straight onto the `carousel.md` and `contact_sheet.png` of a real post. Invariant 18 makes those two files the only surviving record of it; it survived because an unrelated merge happened to prefer the remote side. **Luck is not a guard.** Two locks now, and neither asks git: `memory.claim` refuses any id in `used.jsonl` — that check was already promised in its own docstring while `is_used` sat with zero callers, which is invariant 25 again — and `write_deck` refuses a folder holding `published.json`, failing closed even when that file is corrupt, because the guard's reliability must not depend on the shape of a file another script writes. An already-used moment exits **0**, like the halt switch: declining to duplicate a live post is not a failure. A folder with no marker is still rebuildable, or every held deck would be unrepeatable. |
+| 27 | **A gate refusing is the engine working, and it exits 0.** Three endings, not two: **green** a deck went out, **amber** nothing shipped and nothing broke, **red** something is broken. A gate that refused every draft and a vendor nobody could reach were both `llm.ModelRefused` and both exited 1, so run `33583495343` sat red in the actions list while its own Telegram message read "a gate refusing, which is the system working". **A red that fires for the ordinary case is a red that stops being read**, which is the state a real outage slips through. `outcomes.Refused` is amber and `outcomes.Stop` stays red; they live in `outcomes.py` because `writer.py` raises the first and cannot import `run.py`, which is invariant 3 again. The two are told apart by type alone while travelling the same path out of the writer loop, so **neither may ever subclass the other** — `test_outcomes.py` pins that, both raise sites, and all five exit codes. In CI only an explicit `success` claims amber: a suite failing above skips the build, and `skipped` is red, because a build that never ran is not a gate saying no. `retry` is the Telegram verb that starts a fresh run — **never `rerun`, which has always meant drop** — and it is offered only when trying again could work (`retry=False` on an empty concept pool). |
+| 28 | **A gate must be able to see the shape the fault arrives in.** Every slop defect on 2026-09-02 walked past a gate that existed and reported `passed`. `MASCOT_TEXT` matched `\bsays?\b` and `\bword\b`, so `saying 'I'm out'` and `a card with the words 'Exit Block'` — the two briefs that most plainly ask for lettering — were the two it could not read, and both shipped. `glyph_runs` counts a mark only as *a separate piece of picture*, so letters inside a speech bubble are holes in one component and score **zero** on frames whose subject fills 89.7% and 92.2% of them; `enclosed_runs` finds them and `INK_DROP=40` is measured, not chosen — 720 positives caught from drop 0 through 45, false rejects clearing at 30, across all 194 library poses at two scales. `door` was an **object** while `doorway` was a **place**, so a door moment reported no setting at all and three door decks posted in a row under two tokens; `PLACE_SYNONYM` folds them and the replay over all seven used moments goes from refusing 2 to 4, unchanged at the other windows. The duplicate-brief check compared raw words at 0.6 and **never once fired**, because `"A small donkey"` opens every brief the engine has ever written and boilerplate shared by all nine drags every pair up from below: on content words the acceptable decks score 0.11–0.20 and the slop decks 0.33–0.40, so the cap sits at 0.27, in the middle of the gap. Slide 9's CTA and closing thought were byte-identical and `check_repeats` could not see it — `Primary CTA` was not in its field list, so the pair was watched from one side only. **Measure the threshold against the corpus before the gate lands**, and put the number in the module as a named constant the test imports (invariant 25). A limb count was measured and *rejected*: 25 library poses have three or more silhouette runs because two-donkey poses are correct, so no threshold exists and the check is a vision **veto** instead — which may only take a pose away, never approve one (invariant 11), and fails closed to the library when no vendor answers. |
 
 ## Tests
 
@@ -77,6 +83,13 @@ Two styles, and each is **silent** when run the wrong way. Four suites are pytes
 for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
   if grep -q '^import pytest' "$t"; then python -m pytest "$t" -q; else python "$t"; fi
 done
+```
+
+The Worker is JavaScript and that loop cannot see it. It decides what a Telegram
+reply does, and `rerun` means **drop** while `retry` means **build again**:
+
+```bash
+node ops/dispatch-worker/test/parse-reply.test.mjs
 ```
 
 No test may write to `state/`. CI enforces it.

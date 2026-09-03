@@ -24,10 +24,18 @@ const REF = "main";
 // instead of being polled by a GitHub runner, so the parse has to live here too.
 // Deliberately no "ok", "yes", "no" or "sure" — those turn up in ordinary chat by
 // accident and one of them would publish. Every verb is one somebody had to mean.
+//
+// NOTE "rerun" means DROP, and always has. It reads like "run it again" and does
+// the opposite, which is why "retry" is spelled out separately below rather than
+// folded into the obvious synonym set. Do not add "rerun"/"again"/"redo" to retry.
 const VERBS = {
   publish: "publish", post: "publish", approve: "publish", ship: "publish",
   rerun: "drop", drop: "drop", reject: "drop", discard: "drop",
   list: "list", held: "list", pending: "list", status: "list",
+  // The only verb that does not go to review.yml. A run that stopped on a gate
+  // has no held deck to act on — there is nothing to publish or drop — so this
+  // starts a fresh auto-post instead. See telegram() below.
+  retry: "retry", tryagain: "retry",
 };
 // One known word, then an optional deck id, and nothing else. Anything that is
 // not this shape is not a command and is ignored — the message text is data.
@@ -40,6 +48,11 @@ function parseReply(text) {
   if (!decision) return null;
   return { decision, slug: match[2].trim() };
 }
+
+// Named alongside the default export purely so test/parse-reply.test.mjs can
+// reach them. Cloudflare loads the default export and ignores these; a Worker is
+// allowed other named exports (that is how Durable Objects are declared).
+export { parseReply, VERBS };
 
 async function ghDispatch(env, workflow, inputs, label) {
   const res = await fetch(
@@ -171,6 +184,18 @@ export default {
       // Ordinary chatter, or a word that is not a verb. Nothing to do — and that
       // includes "ok"/"yes"/"no"/"sure", which are excluded on purpose.
       console.log("telegram: not a command, ignored");
+      return new Response("ok", { status: 200 });
+    }
+
+    // retry is the one verb that is not a decision about a HELD deck, so it does
+    // not go to review.yml. A run that stopped on a gate produced nothing to
+    // publish or drop; what you want is another attempt at today's slot, which
+    // means auto-post with mode=publish. The auto-post run sends its own report
+    // when it finishes, which replaces the ack in your reading of the chat.
+    if (command.decision === "retry") {
+      await ack(env, "⏳ on it — retrying…");
+      const r = await dispatch(env, null, "publish");
+      console.log(`telegram: dispatched auto-post retry status=${r.status}`);
       return new Response("ok", { status: 200 });
     }
 

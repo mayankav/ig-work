@@ -3,10 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "description": "Off-GitHub Cron Trigger that fires the @suresilly auto-post workflow via workflow_dispatch.",
+  "type": "module",
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "test": "node test/parse-reply.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4"

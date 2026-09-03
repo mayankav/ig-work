@@ -26,6 +26,8 @@ break because something upstream changed its packaging.
 
 from __future__ import annotations
 
+import base64
+import functools
 import json
 import os
 import re
@@ -54,6 +56,20 @@ GEMINI_MODELS = (
     "gemini-3.5-flash",
 )
 GROQ_MODEL = "openai/gpt-oss-120b"
+
+# The vision half. Gemini needs no entry here: its text buckets above are all
+# multimodal, so a picture rides the same models, the same five daily
+# allowances and the same bucket walk. Groq's gpt-oss and Cloudflare's
+# llama-3.3 are text-only, so each needs its own id.
+#
+# ⚠ These two are UNVERIFIED. Nobody on this repo has watched either accept an
+# image, and the memory rule is to measure vendor limits rather than trust
+# docs — so run scripts/probe_vision.py, which sends one tiny picture to each
+# and prints what came back. Getting one wrong costs a failed attempt and the
+# next vendor, never a deck: a vision call that finds no vendor is read as a
+# veto, and the nine slides keep their library poses.
+GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+CLOUDFLARE_VISION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct"
 
 # Gemini models whose DAILY quota is gone. Per-model and per-day, so one being
 # empty says nothing about the next; per-minute limits are not recorded here
@@ -445,13 +461,21 @@ def _tally(fn: str, *args) -> None:
         pass
 
 
-def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
+def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None,
+                image: bytes | None = None) -> str:
     keys = resolve_keys("GEMINI_API_KEY") or resolve_keys("GOOGLE_API_KEY")
     if not keys:
         raise ModelRefused("no Gemini key")
+    parts: list[dict] = [{"text": user}]
+    if image is not None:
+        # Gemini's models are all multimodal, so a picture rides the same five
+        # buckets, the same daily allowances and the same walk down the list as
+        # text. Nothing below this line knows whether there is an image.
+        parts.append({"inline_data": {"mime_type": "image/jpeg",
+                                      "data": base64.b64encode(image).decode("ascii")}})
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
-        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "contents": [{"role": "user", "parts": parts}],
         "generationConfig": {"temperature": temperature, "responseMimeType": "application/json"},
     }
     if schema:
@@ -554,22 +578,38 @@ def _groq_format(schema: dict | None, strict: bool = True) -> dict:
             "json_schema": {"name": "reply", "strict": True, "schema": _strict(schema)}}
 
 
-def call_groq(system: str, user: str, temperature: float, schema: dict | None = None) -> str:
+def call_groq(system: str, user: str, temperature: float, schema: dict | None = None,
+              image: bytes | None = None) -> str:
     key = resolve_key("GROQ_API_KEY")
     if not key:
         raise ModelRefused("no Groq key")
     _pace("groq")
+    content: str | list = user
+    model = GROQ_MODEL
+    if image is not None:
+        model = GROQ_VISION_MODEL
+        content = [
+            {"type": "text", "text": user},
+            {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,"
+                                                + base64.b64encode(image).decode("ascii")}},
+        ]
     payload = {
-        "model": GROQ_MODEL,
+        "model": model,
         "temperature": temperature,
         # json_object generates freely and validates afterwards, returning 400
         # when the model produced broken JSON. That is what our 400 was: not a
         # quota error, which is always 429. Constrained decoding cannot produce
         # invalid JSON in the first place, so it is tried first.
-        "response_format": _groq_format(schema),
+        #
+        # Except with a picture. Strict mode is not offered by every model, and
+        # the vision model is a different model from the writer's, so the strict
+        # attempt would be a 400 we have to pay for before the retry below. A
+        # picture costs enough tokens that the wasted call is worth avoiding;
+        # our own validator checks the reply either way.
+        "response_format": _groq_format(schema, strict=image is None),
         "messages": [
             {"role": "system", "content": system + _field_note(schema)},
-            {"role": "user", "content": user},
+            {"role": "user", "content": content},
         ],
     }
     # Every Groq response — including the 429 that says the allowance is gone —
@@ -588,8 +628,10 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
                          capture=headers)
         except ModelRefused as refused:
             # Strict mode has limited model support. If it is refused, fall back
-            # to the looser mode rather than losing the provider entirely.
-            if "400" not in str(refused):
+            # to the looser mode rather than losing the provider entirely. Not
+            # when there is a picture: that request was never strict, so the
+            # same call again would buy the same 400 at image prices.
+            if "400" not in str(refused) or image is not None:
                 raise
             payload["response_format"] = _groq_format(schema, strict=False)
             data = _post(GROQ_URL, payload, {"Authorization": f"Bearer {key}"},
@@ -597,7 +639,7 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
     finally:
         try:
             import quotas
-            quotas.record("groq", GROQ_MODEL, headers)
+            quotas.record("groq", model, headers)
         except Exception:                                      # noqa: BLE001
             pass    # a quota file that cannot be written must never fail a deck
 
@@ -611,7 +653,7 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
 
 
 def call_cloudflare(system: str, user: str, temperature: float,
-                    schema: dict | None = None) -> str:
+                    schema: dict | None = None, image: bytes | None = None) -> str:
     """Workers AI, the third vendor.
 
     Two vendors is one short. The critic may not be whoever wrote the deck, so
@@ -645,6 +687,17 @@ def call_cloudflare(system: str, user: str, temperature: float,
         payload["response_format"] = {
             "type": "json_schema", "json_schema": _strict(schema)}
 
+    model = CLOUDFLARE_MODEL
+    if image is not None:
+        # Workers AI's vision models take the raw bytes as a list of integers
+        # rather than base64, and a single `prompt` rather than a conversation.
+        # That makes this the heaviest body of the three by a wide margin — a
+        # 200KB grid arrives as roughly a megabyte of JSON — which is one more
+        # reason it is third in the chain and not first.
+        model = CLOUDFLARE_VISION_MODEL
+        payload = {"image": list(image), "prompt": system + "\n\n" + user,
+                   "temperature": temperature, "max_tokens": 1024}
+
     # Text and pictures come out of ONE 10,000-neuron daily allowance, and
     # until this was recorded only the pictures were. The split everyone quoted
     # — 6,000 for pictures, the rest for writing — was an assumption nobody
@@ -655,13 +708,13 @@ def call_cloudflare(system: str, user: str, temperature: float,
     # deck that cannot be written is a day with no post, so text is never
     # turned away to protect a picture budget.
     headers: dict = {}
-    data = _post(CLOUDFLARE_URL.format(account=account, model=CLOUDFLARE_MODEL),
+    data = _post(CLOUDFLARE_URL.format(account=account, model=model),
                  payload, {"Authorization": f"Bearer {token}"}, capture=headers)
     try:
         billed = headers.get("cf-ai-neurons")
         if billed is not None:
             import neurons
-            neurons.Ledger().spend_text(float(billed), note=CLOUDFLARE_MODEL)
+            neurons.Ledger().spend_text(float(billed), note=model)
     except Exception:                                          # noqa: BLE001
         pass        # a ledger that cannot be written must never fail a deck
     result = data.get("result") or {}
@@ -758,3 +811,41 @@ def ask(system: str, user: str, schema: dict, temperature: float = 0.6,
             except (KeyError, TypeError, ValueError) as exc:
                 trouble.append(f"{name}: unreadable reply ({exc})")
     raise ModelRefused(" | ".join(trouble))
+
+
+def look(system: str, user: str, schema: dict, image: bytes,
+         temperature: float = 0.2, providers=PROVIDERS) -> tuple[dict, str]:
+    """Ask about a PICTURE, and get the same guarantees as asking about text.
+
+    Deliberately not a second copy of ask(). Everything ask() does — one retry
+    per vendor, handing a schema complaint back verbatim, treating a rate limit
+    as a vendor to skip rather than a wait to sit through, honouring
+    SS_PROVIDERS so the fallback can be proven — is exactly what a vision call
+    needs, and a parallel loop is a second place for that behaviour to drift.
+    So the image is bound to each caller and ask() runs unchanged. The vendor
+    names survive the binding, which is what keeps SS_PROVIDERS working here.
+
+    Cooler than ask() by default. This is a judgement about what is in a frame,
+    not a piece of writing, and the same frame should get the same verdict
+    twice.
+
+    The picture must be JPEG. All three vendors accept it, it is what the grid
+    is encoded as, and a format argument nobody varies is a format argument
+    somebody eventually gets wrong.
+    """
+    bound = tuple((name, functools.partial(call, image=image)) for name, call in providers)
+    return ask(system, user, schema, temperature, providers=bound)
+
+
+def vision_ready() -> bool:
+    """Is there a vendor here that could look at a picture?
+
+    Asked BEFORE any art is generated. The vision check is a veto, so with no
+    vendor to run it every generated pose would be discarded — and it would be
+    discarded after about 1,130 neurons had been spent drawing it. Nine library
+    poses cost nothing and are the same answer.
+
+    Honours SS_PROVIDERS through chain(), so pinning a run to a vendor with no
+    credentials turns generation off rather than turning the veto off.
+    """
+    return any(configured(name) for name, _ in chain(PROVIDERS))

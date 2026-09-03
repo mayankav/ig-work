@@ -269,6 +269,54 @@ def backdrop_mask(bgr: np.ndarray, tolerance: int = 44) -> np.ndarray:
     return (np.abs(bgr.astype(np.int16) - med).max(2) <= tolerance)
 
 
+# A pad is a large light region — a speech bubble, a held card, a sign. Marks
+# inside one are lettering if they are appreciably darker than the pad itself.
+# All three measured against the whole 194-pose library at both scales; see
+# enclosed_runs for the numbers.
+PAD_LIGHT = 200
+PAD_MIN_FRACTION = 0.002
+INK_DROP = 40
+
+
+def _letter_shaped(area: float, w: int, h: int,
+                   total: float, W: int, H: int) -> bool:
+    """The size and proportion a mark must have to be letter-like.
+
+    One band, used by both detectors below, so "the same test" is a fact about
+    the code and not a claim in a docstring.
+    """
+    if not (0.00002 * total <= area <= 0.006 * total):
+        return False
+    if not (0.008 * H <= h <= 0.12 * H):
+        return False
+    return not (w > 0.25 * W or w > 6 * h)
+
+
+def _baseline_runs(marks: list) -> list[list[tuple[int, int, int, int]]]:
+    """Marks grouped into runs: >=3 of similar height on a shared baseline,
+    spread across x rather than stacked.
+
+    Each mark arrives as (baseline, height, left, box). Shared, for the same
+    reason the size band is.
+    """
+    runs = []
+    used: set[tuple[int, int, int, int]] = set()
+    for base, h, _, box in sorted(marks):
+        if box in used:
+            continue
+        row = [g for g in marks if abs(g[0] - base) <= max(3, 0.5 * h)]
+        if len(row) < 3:
+            continue
+        heights = sorted(g[1] for g in row)
+        med = heights[len(heights) // 2]
+        similar = [g for g in row if med / 2.0 <= g[1] <= med * 2.0]
+        xs = sorted(g[2] for g in similar)          # spread across x, not a stack
+        if len(similar) >= 3 and (xs[-1] - xs[0]) >= 2 * med:
+            runs.append([g[3] for g in similar])
+            used.update(g[3] for g in similar)
+    return runs
+
+
 def glyph_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
     """Runs of small, similar-height marks sitting on one baseline, detached
     from the figure: the shape of text. Each run is a list of bounding boxes.
@@ -298,6 +346,11 @@ def glyph_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
     came from a model we prompted, so the whole frame is fair game: a watermark
     across the middle or a signature in a corner is just as fatal and cutout's
     version would not see either. Superset, never a relaxation.
+
+    What "separate piece of picture" cannot see is lettering INSIDE the figure —
+    words in a speech bubble, a card held at the chest — because those are holes
+    in one component, not components of their own. That is enclosed_runs below,
+    and assert_no_text runs both.
     """
     H, W = bgr.shape[:2]
     total = float(H * W)
@@ -315,29 +368,110 @@ def glyph_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
         area = stats[i, cv2.CC_STAT_AREA]
         h, w = stats[i, cv2.CC_STAT_HEIGHT], stats[i, cv2.CC_STAT_WIDTH]
         top, left = stats[i, cv2.CC_STAT_TOP], stats[i, cv2.CC_STAT_LEFT]
-        if not (0.00002 * total <= area <= 0.006 * total):
-            continue
-        if not (0.008 * H <= h <= 0.12 * H):
-            continue
-        if w > 0.25 * W or w > 6 * h:
+        if not _letter_shaped(area, w, h, total, W, H):
             continue
         glyphs.append((top + h, h, left, (left, top, w, h)))
 
+    return _baseline_runs(glyphs)
+
+
+def _holes_of(mask: np.ndarray) -> np.ndarray:
+    """Every enclosed hole in a binary mask, painted solid.
+
+    A hole is a topological fact, so ask the contour hierarchy: a contour with a
+    parent is inside something. The obvious shortcut — close the mask and
+    subtract it — instead calls 126 of the 194 library poses text, because
+    closing a rounded bubble fills its own convexity and the antialiased rim
+    comes back as a row of marks.
+    """
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_CCOMP,
+                                           cv2.CHAIN_APPROX_SIMPLE)
+    out = np.zeros_like(mask)
+    if hierarchy is None:
+        return out
+    for i, node in enumerate(hierarchy[0]):
+        if node[3] != -1:                       # has a parent, so it is a hole
+            cv2.drawContours(out, contours, i, 1, -1)
+    return out
+
+
+def enclosed_runs(bgr: np.ndarray) -> list[list[tuple[int, int, int, int]]]:
+    """The same runs, but INSIDE the figure rather than detached from it.
+
+    Deck 20260902_6pm-picked-up_068b42 published a mascot saying "I'm out" in a
+    speech bubble and another holding a card reading "Exit Block". glyph_runs
+    scored both frames zero: their subjects are single components filling 89.7%
+    and 92.2% of the frame, so the letters were holes in the figure, not pieces
+    of picture beside it. Invariant 3 says not a letter, and the gate could not
+    see these.
+
+    Find the pads first — light regions that are part of the main component —
+    take their topological holes, and hand those to the same size band and the
+    same run test glyph_runs uses.
+
+    The one condition that is new is INK_DROP: a mark must be at least 40 grey
+    levels darker than the pad it sits in. That number is doing all the work
+    here, and it is measured. Against 720 positives — six poses x four phrases x
+    three text sizes x bubble and card x five ink tones from near-black to a
+    pale 175-on-white — and all 194 library poses at both the scale they are
+    stored at and the 1024px scale a generator hands back:
+
+        drop      0    25    30    40    45    50    60
+        caught  720   720   720   720   720   701   694
+        false     2     1     0     0     0     0     0
+
+    The false side clears at 30 (a shadow inside lantern_bearer's lamp glow, 26
+    levels down) and the true side is whole through 45 (pale grey lettering
+    starts being missed at 50). 40 is the middle of that window, with 14 levels
+    of margin below and 10 above.
+
+    Word-splitting on wide gaps, and dropping the x-spread condition, were both
+    tried: with INK_DROP in place all four combinations score exactly
+    720/720 and zero, so neither earns its complexity and the run test stays
+    literally the one above.
+    """
+    H, W = bgr.shape[:2]
+    total = float(H * W)
+    subject = (~backdrop_mask(bgr)).astype(np.uint8)
+    subject = cv2.morphologyEx(subject, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(subject, 8)
+    if n <= 1:
+        return []
+    main = max(range(1, n), key=lambda i: stats[i, cv2.CC_STAT_AREA])
+    body = (labels == main).astype(np.uint8)
+
+    grey = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+    pads = ((grey >= PAD_LIGHT).astype(np.uint8) & body)
+    pn, plabels, pstats, _ = cv2.connectedComponentsWithStats(pads, 8)
+
     runs = []
-    used: set[tuple[int, int, int, int]] = set()
-    for base, h, _, box in sorted(glyphs):
-        if box in used:
+    for p in range(1, pn):
+        if pstats[p, cv2.CC_STAT_AREA] < PAD_MIN_FRACTION * total:
             continue
-        row = [g for g in glyphs if abs(g[0] - base) <= max(3, 0.5 * h)]
-        if len(row) < 3:
+        x, y = pstats[p, cv2.CC_STAT_LEFT], pstats[p, cv2.CC_STAT_TOP]
+        w, h = pstats[p, cv2.CC_STAT_WIDTH], pstats[p, cv2.CC_STAT_HEIGHT]
+        pad = (plabels[y:y + h, x:x + w] == p).astype(np.uint8)
+        holes = _holes_of(pad)
+        if not holes.any():
             continue
-        heights = sorted(g[1] for g in row)
-        med = heights[len(heights) // 2]
-        similar = [g for g in row if med / 2.0 <= g[1] <= med * 2.0]
-        xs = sorted(g[2] for g in similar)          # spread across x, not a stack
-        if len(similar) >= 3 and (xs[-1] - xs[0]) >= 2 * med:
-            runs.append([g[3] for g in similar])
-            used.update(g[3] for g in similar)
+        region = grey[y:y + h, x:x + w]
+        tone = float(np.median(region[pad > 0]))
+        hn, hlabels, hstats, _ = cv2.connectedComponentsWithStats(holes, 8)
+        marks = []
+        for k in range(1, hn):
+            area = hstats[k, cv2.CC_STAT_AREA]
+            mh, mw = hstats[k, cv2.CC_STAT_HEIGHT], hstats[k, cv2.CC_STAT_WIDTH]
+            top, left = hstats[k, cv2.CC_STAT_TOP], hstats[k, cv2.CC_STAT_LEFT]
+            if not _letter_shaped(area, mw, mh, total, W, H):
+                continue
+            # A letter is small against the thing it is written on. Without
+            # this an eye is a mark inside a face.
+            if mh > 0.6 * h or mw > 0.6 * w:
+                continue
+            if tone - float(np.median(region[hlabels == k])) < INK_DROP:
+                continue
+            marks.append((y + top + mh, mh, x + left, (x + left, y + top, mw, mh)))
+        runs.extend(_baseline_runs(marks))
     return runs
 
 
@@ -347,6 +481,9 @@ def assert_no_text(bgr: np.ndarray, what: str) -> None:
     Runs on the frame BEFORE matting, because matting a captioned image throws
     the caption away and then the artwork looks clean. cutout.qa()'s component
     gates are the net that catches text after matting. Both have to hold.
+
+    Two detectors, because lettering arrives two ways: printed on the backdrop
+    beside the figure, or written on something the figure is holding or saying.
     """
     runs = glyph_runs(bgr)
     if runs:
@@ -355,6 +492,13 @@ def assert_no_text(bgr: np.ndarray, what: str) -> None:
             f"{sum(len(r) for r in runs)} detached, similar-height marks on a "
             f"shared baseline — this is what lettering looks like, and no "
             f"mascot artwork may carry any")
+    inside = enclosed_runs(bgr)
+    if inside:
+        raise QAFailure(
+            f"no_text: {what} contains {len(inside)} run(s) of "
+            f"{sum(len(r) for r in inside)} similar-height marks written ON the "
+            f"figure — a speech bubble or a held sign. No mascot artwork may "
+            f"carry a letter, and a bubble is the way it usually arrives")
 
 # ── palette correction ───────────────────────────────────────────────────────
 #

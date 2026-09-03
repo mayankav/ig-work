@@ -108,6 +108,14 @@ jobs:
           done
           exit $failed
 
+      # The Worker is JavaScript and lives outside the engine, so the loop above
+      # cannot see it — but it decides what a Telegram reply does, and "rerun"
+      # means DROP while "retry" means build again. Those two being swapped would
+      # discard a held deck on a request for another attempt. Node is already on
+      # the runner and the check has no dependencies, so this costs a second.
+      - name: Check the Telegram verbs
+        run: node ops/dispatch-worker/test/parse-reply.test.mjs
+
       # A test may never write committed state. state/ carries what has been
       # used and what a vendor last said it had left; a suite that manufactures
       # an exhausted quota to check the fallback must not leave that reading
@@ -284,6 +292,14 @@ jobs:
       # Two channels on purpose. Telegram is the alert that reaches a phone;
       # email is the archive that is still searchable in a year. A channel that
       # only runs when the other has failed is a channel nobody notices is broken.
+      #
+      # THREE outcomes, not two. A gate refusing and a vendor being unreachable
+      # used to arrive here identically — both with an empty slug, both with the
+      # build step red — so both were reported the same way and both showed the
+      # same red dot in the actions list. A red that fires for the ordinary case
+      # is a red that stops being read, which is the exact state in which a real
+      # outage goes unnoticed. run.py exits 0 for the benign ones now, so
+      # steps.build.outcome is the signal and no marker file is needed.
       - name: Report the result
         if: always()
         run: |
@@ -303,12 +319,29 @@ jobs:
             BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
             HTML=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL" --format html)
             ATTACH="carousels/$SLUG/contact_sheet.png"
-          else
+            echo "### ✅ posted \`$SLUG\`" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.build.outcome }}" = "success" ]; then
+            # AMBER. The build ran and exited 0 with no deck, which only happens
+            # when a gate said no. The warning annotation is as close to an amber
+            # dot as Actions gets: the run stays green, and the summary says why.
             SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
-            NOTE="No deck was built. This is usually a gate refusing, which is the system working."
+            NOTE="No deck was built. A gate refused, which is the system working. Reply retry to try again now with a fresh moment."
             BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE")
             HTML=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" --format html)
             ATTACH=""
+            echo "::warning::no deck today — a gate refused. Nothing is broken; reply retry to try again."
+            echo "### ⚠️ nothing today — a gate refused, nothing is broken" >> "$GITHUB_STEP_SUMMARY"
+          else
+            # RED, and note what reaches here: `failure` AND `skipped`. A suite
+            # failing above skips the build, and a skipped build is not a gate
+            # refusing — it is CI red with nobody told. Amber is claimed only by
+            # an explicit success, so every other outcome, named or not, is red.
+            SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d)"
+            NOTE="The build did not finish (${{ steps.build.outcome }}). A vendor or the critic was unreachable, a layer refused outright, or a gate suite failed before the build ran. This one needs you."
+            BODY=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE")
+            HTML=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" --format html)
+            ATTACH=""
+            echo "### ❌ broken (build ${{ steps.build.outcome }}) — see the log" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
             python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML" --attach "$ATTACH"

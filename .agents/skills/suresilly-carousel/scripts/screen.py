@@ -175,7 +175,9 @@ ANCHORS = {
     ),
     "place": re.compile(
         r"\b(kitchen|bathroom|mirror|car|driveway|stairs|couch|sofa|mattress|sink|"
-        r"desk|doorway|hallway|elevator|bus\s+stop|platform|office|shower|bed)\b"
+        r"desk|doorway|door|hallway|hall|corridor|landing|porch|elevator|"
+        r"bus\s+stop|platform|office|shower|bed|bedroom|window|table|armchair|"
+        r"wardrobe|garden|balcony|utility\s+room|garage|pavement|street)\b"
     ),
     "object": re.compile(
         r"\b(phone|laptop|inbox|kettle|fridge|door|keys|screen|message|text|email|"
@@ -248,6 +250,50 @@ MODAL = re.compile(r"\b(would|could|should|might)\s+(?!not\b|n'?t\b)|\bif i ever
 
 PASS_SCORE = 5
 HARD_ANCHORS = ("clock", "body", "place", "object", "action")
+
+
+# ── One room, one name ────────────────────────────────────────────────────
+#
+# Two rooms are the same room whatever the moment happened to call them, and
+# until 2026-09-02 nothing said so. `door` was listed as an OBJECT while
+# `doorway` was a PLACE, so a moment about unlocking the door reported no place
+# at all, and a moment set in a doorway reported one that shared no token with
+# it. compose's place check compares those sets, so it saw three consecutive
+# door decks as three different scenes: state/fp_index.json records
+# `door -> ['572b21', 'cd4b3a']` and `doorway -> ['068b42']`, posted 09-01,
+# 09-01 and 09-02. The reader saw the same picture three times running.
+#
+# `door` is now a place as well as an object — it is legitimately both, and the
+# anchors do not have to be disjoint — and the words that name one room fold to
+# one token here. Folding is separate from matching on purpose: the regex above
+# decides whether a moment is filmable, which is a question about how much is
+# in shot, and two words for one room should both count there.
+# Only words that unambiguously name the SAME room. An earlier draft folded
+# `sink` into `kitchen`, which is wrong at every bathroom sink, and `utility
+# room` into `kitchen`, which is wrong in any house that has both. A fold that
+# is right most of the time silently refuses moments that were fine.
+PLACE_SYNONYM = {
+    "doorway": "door",
+    "hall": "hallway", "corridor": "hallway", "landing": "hallway",
+    "sofa": "couch",
+    "mattress": "bed", "bedroom": "bed",
+    "pavement": "street",
+}
+
+
+def places_in(text: str) -> set[str]:
+    """The rooms this text is set in, each under one canonical name.
+
+    The place anchors, folded. Callers comparing one moment's scene against
+    another's want this and not the raw matches, or "the doorway" and "the
+    door" read as two different places.
+    """
+    raw = shape(text)["anchors"].get("place") or []
+    out = set()
+    for match in raw:
+        word = re.sub(r"\s+", " ", match.strip().lower())
+        out.add(PLACE_SYNONYM.get(word, word))
+    return out
 
 
 def shape(text: str) -> dict:

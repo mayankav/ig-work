@@ -41,6 +41,7 @@ import bibliography  # noqa: E402
 import coherence  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
+from outcomes import Refused  # noqa: E402
 import readability  # noqa: E402
 import safety  # noqa: E402
 
@@ -1027,7 +1028,12 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
             + "\n\nReturn that plan again with exactly those fixed and everything else "
               "left as it is."
         )
-    raise llm.ModelRefused(
+    # Refused, not llm.ModelRefused. Both used to be the same type, so an
+    # unreachable vendor and a plan the gates simply would not pass turned CI
+    # red in exactly the same way. The vendor case still raises ModelRefused —
+    # from inside llm.ask(), which propagates straight out of this loop — so the
+    # two are told apart by where they originate. See outcomes.py.
+    raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
         f"[faults per attempt: {', '.join(str(n) for n in history)}]")
 
@@ -1132,6 +1138,12 @@ THE CTA, slide 9. This exact shape, and nothing longer than 11 words:
   It must contain the word "send" or "share", and name who. Not "share if you
   relate", not "tag someone". A named kind of person.
 
+  The closing thought on that same slide is NOT the CTA again. Two lines, two
+  jobs: the CTA asks the reader to pass it on, the closing thought is the one
+  sentence they keep. It is addressed to the reader and it does not mention
+  sending. A deck once printed the identical sentence in both, so the last card
+  a reader saw asked twice and gave nothing, and it is checked now.
+
 SLIDES 1 AND 2 EACH NAME A THING. Not a feeling, not a pattern — a thing in the
 room, or the hour on the clock. The moment hands you its own objects and its
 own hour: put one of them on slide 1 and a DIFFERENT one on slide 2.
@@ -1233,6 +1245,15 @@ MASCOT BRIEFS
   of a screen is a picture of writing. Put the device face down, or held
   against the body, or pushed away: the object, never its display. Same for a
   clock, which is turned to the wall and never shows a time.
+  Nothing in quotation marks, ever. A brief that quotes a spoken line is asking
+  for a speech bubble, and a speech bubble is lettering: not "saying 'not
+  today'", but ears flat and one hoof already turning away. A named object is
+  fine, the words on it never are — a parking ticket tucked under a wiper is a
+  picture, a parking ticket with the fine written on it is not.
+  Nine different things happening, not one thing in nine spots. Change the VERB
+  first: standing nine times with the scenery moved around is one picture. And
+  vary how the briefs begin — if all nine open on the same three words you have
+  filled in a template, so start most of them on the action or the place.
 
 Return only a JSON object with the fields you are asked for."""
 
@@ -1603,6 +1624,14 @@ def check_repeats(markdown: str) -> list[str]:
     both "SOURCE SAYS" and "THIS EXPLAINS" — a reader sees the same line twice
     on one card and stops trusting the page.
 
+    `Primary CTA` was missing from the field list until 2026-09-02, when a deck
+    posted with slide 9's two lines byte-identical: "Send this to the friend
+    caught at the [[doorway]] past 6pm." twice, one above the other, on the last
+    card a reader sees. `Closing thought` was already listed, so the pair was
+    half-watched — the duplicate could only be seen from the side that was not
+    being read. Both are listed now, and check_last_slide covers the near miss
+    this exact-match test cannot.
+
     The second half is a fault this file caused. Slides 4 to 7 were told to
     reuse slide 3's words, and the cheapest way to satisfy that is to paste the
     citation, so the script slide told a reader to stand in their kitchen and
@@ -1621,7 +1650,8 @@ def check_repeats(markdown: str) -> list[str]:
             slide = int(heading.group(1))
             continue
         field = re.match(r"^- \*\*(H1|H2|Body|Source Claim|What This Explains Here|"
-                         r"❌ Old Reaction|✅ Regulated Response|Callout|Closing thought)"
+                         r"❌ Old Reaction|✅ Regulated Response|Callout|Primary CTA|"
+                         r"Closing thought)"
                          r":\*\* (.+)$", line)
         if not field:
             continue
@@ -1650,6 +1680,45 @@ def check_repeats(markdown: str) -> list[str]:
                             f"says are their own")
     return problems
 
+
+# Slide 9 is the last thing a reader sees and it has two lines with two jobs:
+# the CTA asks for the share, the closing thought is what they take away. On
+# 2026-09-02 they were the same sentence, so the card asked twice and gave
+# nothing — and check_repeats could not see it, because `Primary CTA` was not in
+# its field list. It is now, but exact matching only catches the exact case; a
+# closing thought that rewords the CTA is the same empty card.
+#
+# Measured on all ten decks, word overlap between the two lines: the nine that
+# read acceptably score 0.00, 0.00, 0.00, 0.04, 0.05, 0.05, 0.05, 0.11, 0.13.
+# The 2026-09-02 deck scores 1.00. There is no data anywhere between 0.13 and
+# 1.00, so the cap goes at the middle of that emptiness rather than just above
+# the highest passing deck.
+LAST_SLIDE_SAME = 0.5
+
+
+def check_last_slide(markdown: str) -> list[str]:
+    """The CTA and the closing thought may not be the same thought twice."""
+    cta = re.search(r"(?m)^- \*\*Primary CTA:\*\* (.+)$", markdown)
+    closing = re.search(r"(?m)^- \*\*Closing thought:\*\* (.+)$", markdown)
+    if not (cta and closing):
+        return []
+
+    def bag(text: str) -> set[str]:
+        # Accents are ours and a tag is a routing label, so the brackets and the
+        # hash come off before the words are compared — otherwise "[[doorway]]"
+        # and "doorway" would read as two different words and hide a repeat.
+        return set(re.findall(r"[a-z']+", re.sub(r"[\[\]#]", " ", text.lower())))
+
+    a, b = bag(cta.group(1)), bag(closing.group(1))
+    if not (a and b):
+        return []
+    overlap = len(a & b) / len(a | b)
+    if overlap <= LAST_SLIDE_SAME:
+        return []
+    return [f"slide 9's CTA and closing thought are the same thought "
+            f"({overlap:.0%} of the words are shared). The CTA asks the reader to "
+            f"send it to someone; the closing thought is what they keep. Write the "
+            f"closing thought about the reader, not about sending"]
 
 # Words a dictionary will not know and we use on purpose: the handle, British
 # spellings, and the vocabulary of this particular subject. Grown by running the
@@ -1745,6 +1814,7 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
     problems = check_accents(markdown)
     problems += check_leak(markdown)
     problems += check_repeats(markdown)
+    problems += check_last_slide(markdown)
     problems += check_spoken(markdown)
     problems += check_spelling(markdown)
     explains = re.search(r"(?m)^- \*\*What This Explains Here:\*\* (.+)$", markdown)
@@ -1894,19 +1964,75 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
               "stays word for word as it is above. Do not improve anything you were not "
               "asked about — a line you rewrite unasked is a new fault."
         )
-    raise llm.ModelRefused(
+    # Refused, not llm.ModelRefused — see the matching raise at the end of
+    # plan_deck for why. The draft the gates would not pass is an amber ending.
+    raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
         f"[faults per attempt: {', '.join(str(n) for n in history)}]")
 
 
 # ─────────────────────────── checking the draft ────────────────────────────
 
+# A brief may not ask for text, and this is where that is refused — before any
+# art is drawn, not after (invariant 3: the pixel gates in cutout.py are the
+# second line, and they only see what the drawing actually contains).
+#
+# The old pattern read `\b(reads?|says?|…|word|letter|…)\b|\d` and let both of
+# these through on 2026-09-02, into a published deck:
+#
+#     Slide 7: A small donkey stands at the doorway, saying 'I'm out'.
+#     Slide 8: A small donkey holds a card with the words 'Exit Block' on it.
+#
+# `\bsays?\b` does not match "saying" and `\bword\b` does not match "words", so
+# the two briefs that most plainly ask for lettering were the two it could not
+# see. Both slides shipped with printed text on the mascot.
+#
+# Three signals were added, chosen because they are what an instruction to draw
+# text actually looks like: a QUOTED STRING (the words to print, verbatim), the
+# phrase THE WORD/WORDS/LETTER(S)/NUMBER(S)/PHRASE/MESSAGE (naming lettering as
+# a thing the picture contains), and the -ING speech and writing verbs the old
+# stem-anchored list missed. Measured over the 90 briefs in the ten decks on
+# disk: it newly catches exactly those two and nothing else.
+#
+# What it deliberately does NOT match is the bare noun `card` or `list`. An
+# earlier draft did, and flagged "a blank white paper card, offering it forward"
+# and "holds up three fingers, arranged in an orderly list" — two briefs asking
+# for no text at all. A gate that refuses a blank card is a fault nothing can
+# answer (invariant 21), so the noun is allowed and only the lettering is not.
 MASCOT_TEXT = re.compile(
-    r"\b(reads?|says?|labell?ed|written|text|sign|screen|display|caption|number|"
-    r"word|letter|clock face showing|showing \d)\b|\d", re.I)
+    r"""
+      ['"‘“][^'"’”]{2,}['"’”]
+    | \bthe\s+(?:word|words|letter|letters|number|numbers|phrase|message)\b
+    | \b(?:saying|reading|writing|labell?ing|spelling|scrawling|inscribing)\b
+    | \b(?:reads?|says?|labell?ed|written|text|sign|signage|screen|display|
+          caption|slogan|banner|headline|title)\b
+    | \bclock\s+face\s+showing\b
+    | \bshowing\s+\d
+    | \d
+    """, re.I | re.X)
 MASCOT_FEELING = re.compile(
     r"\b(anxious|sad|happy|distressed|worried|calm|angry|upset|nervous|"
     r"depressed|excited|relaxed|frustrated|lonely|scared|ashamed|hopeful)\b", re.I)
+
+# Words that carry no picture. Function words, plus the four that open literally
+# every brief this engine has ever written ("a small donkey" and its "the"), which
+# is why they have to come out before two briefs can be compared at all — see
+# check_mascots for the measurement.
+BRIEF_NOISE = frozenset("""
+a an the of in on at to by for with from and or but so as into onto over under
+up down out off about is are was were be been being it its his her their this
+that these those there here while when then than very just also both each
+small donkey donkeys
+""".split())
+# Where the cap sits, and why it is a named constant: it was measured, so a test
+# imports the same number rather than restating it (invariant 25).
+MASCOT_SAME = 0.27
+
+
+def _brief_content(brief: str) -> set[str]:
+    """The words in a brief that describe a picture. Nothing else."""
+    words = re.findall(r"[a-z]+", brief.lower())
+    return {w for w in words if w not in BRIEF_NOISE and len(w) > 2}
 
 
 # ── Nothing from the prompt may appear in the deck ────────────────────────
@@ -2011,23 +2137,74 @@ def check_mascots(briefs: list[str]) -> list[str]:
     And no emotion words. "Looks anxious" gives the pose picker nothing to match
     on and gives an illustrator nothing to draw; "ears flat, head turned away"
     gives both something.
+
+    Then: nine briefs have to be nine PICTURES. The duplicate check here used to
+    compare raw word sets at 0.6, which cannot work, because every brief opens
+    "A small donkey" — five words of boilerplate shared by all nine inflate every
+    pair towards the threshold from below and the real overlap is invisible under
+    it. Measured over the ten decks on disk, raw scores are 0.15–0.59 and the
+    ceiling was never once reached, including by the deck whose nine briefs were
+    the same donkey in the same doorway nine times.
+
+    Content words only, then, function words and the boilerplate dropped. That
+    separates: every deck that shipped acceptably scores 0.11–0.20 and the three
+    slop decks score 0.33, 0.33 and 0.40. The cap sits at 0.27, in the middle of
+    the widest gap the measurement offers, so it is not tuned to one deck.
     """
     problems = []
     for i, brief in enumerate(briefs, 1):
         found = MASCOT_TEXT.search(brief)
         if found:
             problems.append(f"mascot {i} puts text or a number in the artwork: "
-                            f"{found.group(0)!r} in {brief[:60]!r}")
+                            f"{found.group(0)!r} in {brief[:60]!r}. Describe what the "
+                            f"donkey DOES instead — no quoted words, no lettering")
         feeling = MASCOT_FEELING.search(brief)
         if feeling:
             problems.append(f"mascot {i} names a feeling instead of a posture: {feeling.group(0)!r}")
 
-    lowered = [re.sub(r"[^a-z ]", " ", b.lower()) for b in briefs]
-    for i in range(len(lowered)):
-        for j in range(i + 1, len(lowered)):
-            a, b = set(lowered[i].split()), set(lowered[j].split())
-            if a and b and len(a & b) / len(a | b) > 0.6:
-                problems.append(f"mascots {i + 1} and {j + 1} describe the same picture")
+    content = [_brief_content(b) for b in briefs]
+    same = []
+    for i in range(len(content)):
+        for j in range(i + 1, len(content)):
+            a, b = content[i], content[j]
+            if not (a and b):
+                continue
+            overlap = len(a & b) / len(a | b)
+            if overlap > MASCOT_SAME:
+                same.append((overlap, i + 1, j + 1, sorted(a & b)))
+    # ONE fault, however many pairs there are. The bed deck has seven, and seven
+    # separate lines all asking for the same thing is how a repair loop stalls:
+    # the prompt caps at twelve problems, so seven of them crowd out the other
+    # faults, and each attempt fixes one pair and re-reports the rest. Invariant
+    # 21's lesson is that a fault has to be answerable, and "these two are the
+    # same, and six other pairs are too" is answerable in one pass. The worst
+    # pair is named concretely because a complaint with nowhere to look cannot
+    # be repaired — the same lesson check_repeats and check_accents both learned.
+    if same:
+        same.sort(reverse=True)
+        _, i, j, shared = same[0]
+        crowd = ""
+        if len(same) > 1:
+            slides = sorted({n for _, x, y, _ in same for n in (x, y)})
+            crowd = (f", and {len(same) - 1} other pair(s) among slides "
+                     f"{', '.join(str(n) for n in slides)}")
+        problems.append(
+            f"mascots {i} and {j} describe the same picture — both are about "
+            f"{', '.join(shared[:4])}{crowd}. Nine slides need nine different "
+            f"things happening: change what the donkey is DOING, not just where "
+            f"it is standing")
+
+    # And they may not all begin the same way. Five of the ten decks on disk have
+    # all nine briefs opening on the identical three words, which is the shape of
+    # a set written by filling a template rather than by imagining nine pictures.
+    # A fault has to be answerable (invariant 21) and this one is answerable by
+    # rewriting one opening, so it names that as the fix.
+    opens = {tuple(b.lower().split()[:3]) for b in briefs if b.split()}
+    if len(briefs) > 2 and len(opens) == 1:
+        problems.append(
+            f"every mascot brief opens {' '.join(next(iter(opens)))!r}. Nine identical "
+            f"openings is one picture written nine times — start most of them on the "
+            f"donkey's action or on where it is, not all on the same three words")
     return problems
 
 

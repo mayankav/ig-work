@@ -20,6 +20,7 @@ Three of these cases exist because the live model actually did the thing.
 """
 import copy as copymod
 import pathlib
+import re as _re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
@@ -182,15 +183,36 @@ def run() -> int:
 
     # And it must not fire on decks that name the researcher in the ordinary
     # way, in the alt text or in passing. All three hand-written decks do.
-    import pathlib as _p
-    decks = sorted((_p.Path(__file__).resolve().parents[3] / "carousels").glob("*/carousel.md"))
+    #
+    # parents[4], not [3]. It was [3] — `.agents/carousels`, which has never
+    # existed — so this swept an empty list and reported a pass having read
+    # nothing, for as long as it has been here. A test that is silent when it
+    # finds nothing is the same defect as a test that only runs under the wrong
+    # runner, which is the first thing AGENTS.md warns about, so the count is
+    # asserted rather than assumed.
+    decks = sorted((pathlib.Path(__file__).resolve().parents[4] / "carousels")
+                   .glob("*/carousel.md"))
+    if not decks:
+        failures.append("DECKS the on-disk deck sweep found no carousel.md at all, so every "
+                        "check that reads the published decks proved nothing")
+    # One deck on disk genuinely has the fault: 20260830_kitchen-at-11pm printed
+    # `"Say out loud: The ceramic bowl is done. Walker found that leaving is
+    # learned where it worked."` as a regulated response, which is the sentence
+    # SHIPPED_BROKEN above was cut from and the reason this gate exists. So the
+    # sweep asserts both directions on real published data: that deck must trip
+    # it, and no other may.
+    KNOWN_QUOTES_A_RESEARCHER = "20260830_kitchen-at-11pm_800736"
     for deck in decks:
         text = deck.read_text(encoding="utf-8")
         if "Slide 5" not in text:
             continue
-        for fault in writer.check_repeats(text):
-            if "out loud" in fault:
-                failures.append(f"REPEAT {deck.parent.name} blocked for crediting a source: {fault}")
+        spoken = [f for f in writer.check_repeats(text) if "out loud" in f]
+        if spoken and deck.parent.name != KNOWN_QUOTES_A_RESEARCHER:
+            failures.append(f"REPEAT {deck.parent.name} blocked for crediting a "
+                            f"source: {spoken[0]}")
+        if not spoken and deck.parent.name == KNOWN_QUOTES_A_RESEARCHER:
+            failures.append(f"REPEAT {KNOWN_QUOTES_A_RESEARCHER} puts a researcher inside "
+                            f"a spoken script and no longer trips the gate that caught it")
 
     # ── the angles ──
     if writer.combinations() != 34944:
@@ -429,6 +451,104 @@ def run() -> int:
     if not any("same picture" in p for p in writer.check_mascots(same)):
         failures.append("MASCOT accepted nine identical briefs")
 
+    # ── gate A: a brief may not ask for lettering ──
+    #
+    # The 2026-09-02 deck shipped a mascot saying "I'm out" in a speech bubble
+    # and another holding a card reading "Exit Block". Both briefs are here
+    # verbatim, and both passed the old MASCOT_TEXT: `\bsays?\b` does not match
+    # "saying" and `\bword\b` does not match "words". Those two words are the
+    # whole hole, and this is the corpus that proves it closed.
+    SLOP_BRIEFS = [
+        "A small donkey stands by the doorway, looking out.",
+        "A small donkey holds a coat, ready to leave.",
+        "A small donkey looks at a clock, its face turned away.",
+        "A small donkey steps into the hall, turning to face the doorway.",
+        "A small donkey puts hand on the door handle, looking back.",
+        "A small donkey turns body to face the exit, taking a step forward.",
+        "A small donkey stands at the doorway, saying 'I'm out'.",
+        "A small donkey holds a card with the words 'Exit Block' on it.",
+        "A small donkey sends a message to a friend, with a concerned expression.",
+    ]
+    for index in (7, 8):
+        if not writer.MASCOT_TEXT.search(SLOP_BRIEFS[index - 1]):
+            failures.append(f"GATE-A brief {index} still asks for lettering and passed: "
+                            f"{SLOP_BRIEFS[index - 1]!r}")
+
+    # The other half, and the reason the gate does not simply ban the nouns
+    # `card` and `list`. An earlier draft did, and refused both of these — two
+    # briefs asking for no text whatsoever. A gate that refuses a blank card is
+    # a fault nothing can answer (invariant 21).
+    for legitimate in [
+        "A small donkey holds up a blank white paper card, offering it forward.",
+        "A small donkey holds up three fingers, arranged in an orderly list.",
+        "a donkey standing in a doorway with its ears back, one hoof raised",
+        "a donkey holding a mug with both hooves, shoulders dropped",
+    ]:
+        found = writer.MASCOT_TEXT.search(legitimate)
+        if found:
+            failures.append(f"GATE-A a brief asking for no text was refused for "
+                            f"{found.group(0)!r}: {legitimate!r}")
+
+    # ── gate F: nine briefs have to be nine pictures ──
+    #
+    # The old duplicate check compared raw word sets at 0.6 and never fired,
+    # because "A small donkey" is five words every brief shares and boilerplate
+    # drags every pair towards the cap from below. Content words separate them.
+    faults = writer.check_mascots(SLOP_BRIEFS)
+    if not any("same picture" in p for p in faults):
+        failures.append("GATE-F the nine doorway briefs read as nine different pictures")
+    if not any("opens" in p for p in faults):
+        failures.append("GATE-F nine identical openings were accepted")
+    # One fault for the duplicates however many pairs there are: the prompt caps
+    # at twelve problems and seven separate lines asking for the same thing
+    # crowd out every other fault, which is how a repair loop stalls.
+    if sum("same picture" in p for p in faults) != 1:
+        failures.append(f"GATE-F the duplicate pairs were reported as "
+                        f"{sum('same picture' in p for p in faults)} faults, not one")
+
+    # And the decks that read acceptably must survive it. Both halves matter:
+    # a threshold tuned until today's deck fails is worth nothing if it also
+    # refuses the hand-written ones.
+    for deck in decks:
+        briefs = _re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", deck.read_text(encoding="utf-8"))
+        if len(briefs) != 9:
+            continue
+        for fault in writer.check_mascots(briefs):
+            if "puts text" in fault:
+                failures.append(f"GATE-A {deck.parent.name}: {fault[:90]}")
+    # The two decks measured at 0.33 and 0.40 on content words are exactly the
+    # ones a reader called the same picture nine times; the cap sits at 0.27,
+    # in the middle of the gap above the 0.20 the hand-written decks reach.
+    if not (0.20 < writer.MASCOT_SAME < 0.33):
+        failures.append(f"GATE-F the cap moved to {writer.MASCOT_SAME}, out of the gap "
+                        f"between the decks that read well and the ones that did not")
+
+    # ── gate E: slide 9 may not say the same sentence twice ──
+    #
+    # The 2026-09-02 deck printed one sentence as both the CTA and the closing
+    # thought, byte for byte. Nine earlier decks score 0.00–0.13 on the same
+    # measure, so the cap sits in open space rather than just above the best
+    # passing deck.
+    SLIDE_NINE = ("- **Primary CTA:** Send this to the friend caught at the "
+                  "[[doorway]] past 6pm.\n"
+                  "- **Closing thought:** Send this to the friend caught at the "
+                  "[[doorway]] past 6pm.\n")
+    if not writer.check_last_slide(SLIDE_NINE):
+        failures.append("GATE-E slide 9 printed the identical sentence twice and passed")
+    # Accents and tags come off before the words are compared, or "[[doorway]]"
+    # and "doorway" would read as two different words and hide a repeat.
+    if not writer.check_last_slide(
+            "- **Primary CTA:** Send this to the friend caught at the doorway past 6pm.\n"
+            "- **Closing thought:** Send this to the friend caught at the "
+            "[[doorway]] past 6pm.\n"):
+        failures.append("GATE-E the accent markup hid a repeat")
+    for deck in decks:
+        for fault in writer.check_last_slide(deck.read_text(encoding="utf-8")):
+            failures.append(f"GATE-E {deck.parent.name}: {fault[:90]}")
+    if not (0.13 < writer.LAST_SLIDE_SAME < 1.0):
+        failures.append(f"GATE-E the cap moved to {writer.LAST_SLIDE_SAME}, outside the "
+                        f"empty band between 0.13 and 1.00 where it was measured")
+
     # ── accents ──
     if not writer.check_accents("### Slide 1 · Hook\n- **H1:** You woke at 2:17am.\n"):
         failures.append("ACCENT accepted a slide with none")
@@ -500,7 +620,10 @@ def run() -> int:
     finally:
         path.unlink(missing_ok=True)
 
-    total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5 + 3
+    # 13 named cases for the three anti-slop gates, plus a sweep of every deck
+    # on disk through gates A and E — the half that proves a measured threshold
+    # did not just get tuned until one bad deck failed.
+    total = 22 + 3 + 1 + len(cases) + 1 + 5 + 3 + 3 + 5 + 3 + 13 + 2 * len(decks)
     # ── the field's name, on a concept deck ──
     #
     # A deck built from a proved concept carries a second name: the plain handle
@@ -542,7 +665,8 @@ def run() -> int:
             print(f"  {line}")
         return 1
     print(f"writer: {total}/{total} passed "
-          f"(34944 angles, {len(cases)} plan faults, hooks, mascots, accents, round trip)")
+          f"(34944 angles, {len(cases)} plan faults, hooks, mascots, accents, round trip, "
+          f"lettering + duplicate briefs + slide 9 across {len(decks)} decks on disk)")
     return 0
 
 

@@ -11,7 +11,9 @@ thing the prohibition was protecting.
 
 Every one of them answers the same question: when generation cannot happen, does
 a deck still come out, made of the poses the library already chose? Nothing here
-touches the network.
+touches the network — the anatomy check is stubbed by an autouse fixture, and
+the first version of these tests proved why that fixture has to exist: three of
+them went out to three vendors and took a minute to fail.
 """
 import sys
 import pathlib
@@ -31,6 +33,24 @@ SLIDES = [
     {"mascot": "sitting on the edge of a bed with his head lowered"},
     {"mascot": "standing square with both hooves raised in a shrug"},
 ]
+
+
+@pytest.fixture(autouse=True)
+def offline_vision(monkeypatch):
+    """No vendor, and no test that quietly needs one.
+
+    Only the two functions that reach the network are replaced, so
+    anatomy_faults, contact_grid and the reply parsing are the real ones in
+    every test in this file.
+
+    vision_ready is pinned as well as look. It answers from whatever keys
+    happen to be on the machine, so without this a suite that passes here would
+    take a different path on a runner with no .env — and the path it would take
+    is "draw nothing", which is silent and green.
+    """
+    monkeypatch.setattr(fresh_poses.llm, "vision_ready", lambda: True)
+    monkeypatch.setattr(fresh_poses.llm, "look",
+                        lambda *a, **k: ({"faults": []}, "stub"))
 
 
 def fallback(tmp_path) -> dict[int, pathlib.Path]:
@@ -244,8 +264,159 @@ def test_a_clean_frame_replaces_the_library_pose(monkeypatch, tmp_path):
     assert out[1] != given[1] and out[1].is_file()
 
 
-# ─────────────────── build.py only reaches it when asked ─────────────────────
+# ─────────────────── the anatomy veto ────────────────────────────────────────
+#
+# A limb count cannot be written as a gate. Measured across all 194 library
+# poses, 25 have three or more silhouette runs through the leg band because
+# hugging, high_five, laughing_together and five others are TWO-donkey poses
+# where four legs is correct. No threshold separates those from a malformed
+# donkey, and a fault nothing can answer is a stopped engine — invariant 21.
+# So a model looks, and the only thing it is allowed to do is take a pose away.
 
+
+def clean_frame() -> bytes:
+    """A magenta-backdrop frame holding one plain green figure."""
+    frame = np.full((512, 512, 3), (255, 0, 255), np.uint8)
+    cv2.rectangle(frame, (150, 120), (360, 400), (90, 150, 60), -1)
+    ok, buf = cv2.imencode(".png", frame)
+    assert ok
+    return buf.tobytes()
+
+
+def vetoing(*faults, seen=None):
+    """A stand-in for llm.look that reports the faults a test asks for."""
+    def look(system, user, schema, image, **k):
+        if seen is not None:
+            seen.append(image)
+        return {"faults": [{"panel": p, "fault": f} for p, f in faults]}, "stub"
+    return look
+
+
+def test_a_faulted_pose_falls_back_to_its_library_pose(monkeypatch, tmp_path):
+    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((1, "six legs")))
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                               log=lambda *a: None)
+    assert out[1] == given[1], "the vetoed slide must go back to the library"
+    assert out[2] != given[2], "the clean slide must keep its generated pose"
+    assert stats["vetoed"] == [1]
+    assert stats["generated"] == 1 and stats["fell_back"] == 1
+    assert any("six legs" in r for r in stats["reasons"]), stats["reasons"]
+
+
+def test_a_vetoed_pose_is_deleted_from_the_deck_and_from_the_candidates(
+        monkeypatch, tmp_path):
+    """Undone completely, not just unlinked.
+
+    A vetoed file left in the deck folder is one the next thing to read that
+    folder finds. A vetoed file left in the candidates folder is a malformed
+    donkey offered to the library — where every deck after this one could
+    select it, which turns one bad afternoon into a permanent one.
+    """
+    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((1, "an extra arm")))
+    given = fallback(tmp_path)
+    keep = tmp_path / "candidates"
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    out_dir = tmp_path / "o"
+    _, stats = fresh_poses.generate_for_deck(SLIDES, given, out_dir,
+                                             keep_dir=keep, log=lambda *a: None)
+    assert not (out_dir / "01_fresh.png").exists()
+    assert (out_dir / "02_fresh.png").is_file()
+    assert len(stats["kept"]) == 1, "the vetoed pose is not offered to the library"
+    surviving = fresh_poses.pose_name(SLIDES[1]["mascot"])
+    assert stats["kept"] == [surviving]
+    assert not (keep / f"{fresh_poses.pose_name(SLIDES[0]['mascot'])}.png").exists()
+    assert not (keep / f"{fresh_poses.pose_name(SLIDES[0]['mascot'])}.brief.txt").exists()
+
+
+def test_an_unreachable_checker_vetoes_everything(monkeypatch, tmp_path):
+    """Fails closed, in the uncomfortable direction, on purpose.
+
+    The alternative is publishing unchecked art whenever a vendor has a bad
+    afternoon, which is the exact failure this was built for. Being wrong here
+    costs nine library poses and the deck still goes out.
+    """
+    def down(*a, **k):
+        raise RuntimeError("all three vendors refused")
+    monkeypatch.setattr(fresh_poses.llm, "look", down)
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                               log=lambda *a: None)
+    assert out == given
+    assert stats["generated"] == 0 and sorted(stats["vetoed"]) == [1, 2]
+
+
+def test_nothing_is_drawn_when_no_vendor_can_check(monkeypatch, tmp_path):
+    """The pre-flight. Generating and then discarding all nine costs about
+    1,130 neurons for the deck we would have had anyway."""
+    monkeypatch.setattr(fresh_poses.llm, "vision_ready", lambda: False)
+    calls = []
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: calls.append(1) or (clean_frame(), 1.0)))
+    given = fallback(tmp_path)
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                               log=lambda *a: None)
+    assert calls == [], "art was drawn that nothing could check"
+    assert out == given and stats["fell_back"] == len(given)
+
+
+def test_the_whole_deck_costs_one_vision_call(monkeypatch, tmp_path):
+    """Forced by measured quota, not by neatness. state/vendor_quotas.json
+    shows 2026-09-01 emptying gemini-2.5-flash at 28 calls and
+    gemini-2.5-flash-lite at 18 in a day that made two decks; eighteen more
+    would push the writer out of quota to catch a fault that has never stopped
+    a deck."""
+    seen = []
+    monkeypatch.setattr(fresh_poses.llm, "look", vetoing(seen=seen))
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    fresh_poses.generate_for_deck(SLIDES, fallback(tmp_path), tmp_path / "o",
+                                  log=lambda *a: None)
+    assert len(seen) == 1, f"{len(seen)} calls for one deck"
+    assert seen[0][:2] == b"\xff\xd8", "the sheet must be a JPEG"
+
+
+def test_a_fault_for_a_panel_that_was_never_drawn_is_ignored(monkeypatch, tmp_path):
+    """A confused reply must cost nothing. Panel 9 exists in no two-slide deck."""
+    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((9, "six legs")))
+    given = fallback(tmp_path)
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+                                               log=lambda *a: None)
+    assert stats["vetoed"] == [] and stats["generated"] == 2
+    assert out[1] != given[1]
+
+
+def test_the_sheet_is_numbered_by_slide_number(monkeypatch, tmp_path):
+    """The number drawn on a panel IS the slide number, so a reply saying
+    'panel 3' takes slide 3's pose away with no table in between to drift."""
+    art = np.zeros((300, 200, 4), np.uint8)
+    art[:, :] = (90, 150, 60, 255)
+    assert fresh_poses.contact_grid({3: art}) != fresh_poses.contact_grid({7: art})
+    sheet = cv2.imdecode(np.frombuffer(fresh_poses.contact_grid({1: art, 2: art}),
+                                       np.uint8), cv2.IMREAD_COLOR)
+    assert sheet.shape[:2] == (fresh_poses.VISION_TILE, 2 * fresh_poses.VISION_TILE)
+
+
+def test_the_checker_can_veto_and_can_never_approve():
+    """Invariant 11. There is no field in the reply that means 'this one is
+    fine' — the deterministic gates already decided that, and a model that can
+    approve is a model that can wave through what they refused."""
+    assert set(fresh_poses.VISION_SCHEMA["properties"]) == {"faults"}
+    assert fresh_poses.VISION_SCHEMA["required"] == ["faults"]
+    fault = fresh_poses.VISION_SCHEMA["properties"]["faults"]["items"]
+    assert set(fault["properties"]) == {"panel", "fault"}
+    # Ranged, so a reply about panel 47 is a complaint rather than a silent no-op.
+    assert fault["properties"]["panel"]["maximum"] == 9
+
+
+# ─────────────────── build.py only reaches it when asked ─────────────────────
 def test_build_does_not_import_the_generator_at_module_scope():
     """The reachability that matters is at import time. build.py imports
     fresh_poses inside the --fresh branch, so merely importing or running a

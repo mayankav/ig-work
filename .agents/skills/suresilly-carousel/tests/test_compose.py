@@ -206,6 +206,69 @@ def run() -> int:
         if any("same place" in p for p in compose.repetition_faults(SAME_ROOM, older)):
             failures.append("REPEAT a room was banned beyond its window")
 
+        # ── gate D: replayed over every moment this engine has published ──
+        #
+        # The place check reads screen's own anchors, and `door` was listed as an
+        # OBJECT while `doorway` was a PLACE. So a moment about unlocking the door
+        # reported no place at all, and a moment set in a doorway reported one
+        # sharing no token with it. state/fp_index.json records what that cost:
+        # `door -> ['572b21', 'cd4b3a']`, `doorway -> ['068b42']`, posted 09-01,
+        # 09-01 and 09-02. Three door decks running, and the reader saw the same
+        # picture three times.
+        #
+        # This is not a fixture. It is state/used.jsonl in order, every moment the
+        # account has published, replayed against the moments that preceded it —
+        # which is the only way to know a vocabulary change would have caught the
+        # thing it was written for rather than merely being able to.
+        USED = [
+            ("At 11pm I stood in the kitchen and washed all his heavy ceramic bowls "
+             "by hand, feeling deeply tired.", False),
+            ("I stood outside the building at 6am with my coat on, too tired to go "
+             "back to bed and too awake to stay there.", False),
+            ("I sat on the edge of the bed at 11:45pm and stared at the dark hallway, "
+             "too tired to stand up and finish the dishes.", True),
+            ("I sat on the edge of the bed at 11:45pm and stared at the dark hallway, "
+             "dreading the morning shift I agreed to take for my colleague.", True),
+            ("I unlocked the door at 5:30pm and walked straight to the armchair. My "
+             "coat was still on, and I closed my eyes, feeling completely drained.", False),
+            # The two the old vocabulary let through. This one is a back door one
+            # day after a front door; the next is a doorway one day after that.
+            ("I washed the muddy boots at 7:15pm in the utility sink and felt annoyed "
+             "because my partner left them by the back door again.", True),
+            ("I picked up my coat at 6pm to leave, but she blocked the doorway and "
+             "started another conversation. I felt annoyed.", True),
+        ]
+        for index, (moment, want_refused) in enumerate(USED):
+            faults = [f for f in compose.repetition_faults(moment, [m for m, _ in USED[:index]])
+                      if "same place" in f]
+            if bool(faults) != want_refused:
+                verb = "was accepted" if want_refused else "was refused"
+                failures.append(f"PLACE moment {index + 1} {verb} on its setting, against the "
+                                f"replay: {moment[:60]}")
+        # 4 of 7, up from 2 of 7, and the two newly refused are exactly the two
+        # decks a reader saw as a repeat. Nothing at index 0, 1 or 4 changed —
+        # a vocabulary wide enough to catch the door must not start refusing the
+        # kitchen and the bed, and this is what says so.
+        refused = sum(1 for i, (m, _) in enumerate(USED)
+                      if any("same place" in f for f in
+                             compose.repetition_faults(m, [x for x, _ in USED[:i]])))
+        if refused != 4:
+            failures.append(f"PLACE the replay now refuses {refused} of 7 published moments, "
+                            f"not the 4 this vocabulary was measured at")
+
+        # Two words for one room compare equal, or the fold is doing nothing.
+        # This is the exact pair that got through: an object token and a place
+        # token naming one doorway.
+        if not (compose.settings_in("I unlocked the door at 5:30pm and left my coat on")
+                & compose.settings_in("she blocked the doorway and started another conversation")):
+            failures.append("PLACE a door and a doorway are still two different places")
+        # And a fold that is right most of the time silently refuses moments that
+        # were fine. A sink is not a kitchen — there is one in every bathroom.
+        if (compose.settings_in("I stood at the bathroom sink at 11pm")
+                & compose.settings_in("At 11pm I stood in the kitchen and washed the bowls")):
+            failures.append("PLACE a sink was folded into the kitchen, which is wrong in "
+                            "every bathroom")
+
         # The push, not just the refusal. It must name the posture to avoid and
         # must never quote the moment it learned that from — invariant 10.
         brief = compose.variety_brief([BED], 3)
@@ -255,7 +318,9 @@ def run() -> int:
     if any("worked example" in p for p in compose.verify(SEED, BORROWED, previous=[])):
         failures.append("SYSTEM the example check fired when no example was shown")
 
-    total = (22 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
+    # +10: the seven published moments replayed against their own history, the
+    # 4-of-7 count that replay has to produce, and the two fold checks.
+    total = (32 + len(MUST_REJECT_EMPTY) + len(MUST_REJECT) + len(MUST_ACCEPT) + len(MUST_REJECT_NAMED)
              + len(MUST_ACCEPT_NAMED) + len(MUST_REJECT_PERSON) + len(MUST_ACCEPT_PERSON))
     if failures:
         print(f"compose: {len(failures)}/{total} failed")
@@ -263,7 +328,8 @@ def run() -> int:
             print(f"  {line}")
         return 1
     print(f"compose: {total}/{total} passed (copied words, handles, drift, lost feeling, "
-          f"names whatever their origin, the other person kept, alone left alone)")
+          f"names whatever their origin, the other person kept, alone left alone, "
+          f"the 7 published moments replayed for their setting)")
     return 0
 
 

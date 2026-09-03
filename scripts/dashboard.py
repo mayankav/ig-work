@@ -47,7 +47,11 @@ REPO = Path(__file__).resolve().parent.parent
 SKILL = REPO / ".agents" / "skills" / "suresilly-carousel"
 STATE = REPO / "state"
 
-ICON = {"ok": "✅", "held": "⏸", "stopped": "🛑", "error": "❌"}
+# Three colours, and the icons carry them. `stopped` was 🛑, which is a red
+# octagon — the wrong signal for the one outcome that means a gate did its job
+# and nothing is wrong. Amber now, so the phone can be read at a glance:
+# ✅ posted · ⏸ waiting for you · ⚠️ nothing today, nothing broken · ❌ broken.
+ICON = {"ok": "✅", "held": "⏸", "stopped": "⚠️", "error": "❌"}
 
 
 def _safe(fn, default="unknown"):
