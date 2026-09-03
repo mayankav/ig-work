@@ -198,8 +198,16 @@
       ],
       "claims": [
         "Neff found that being kind to yourself helps you keep going. Being hard on yourself stops you.",
-        "Neff found it helps more to know other people struggle too than to blame yourself."
-      ]
+        "Neff found it helps more to know other people struggle too than to blame yourself.",
+        "A self-compassion break helps individuals respond to suffering with kindness, not harsh self-judgment."
+      ],
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 21,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-03T07:20:12Z"
+      }
     },
     {
       "id": "clear-2018",

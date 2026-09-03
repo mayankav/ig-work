@@ -6,7 +6,8 @@
     "20260830_bed-sat-on_ad2ba8",
     "20260901_door-unlocked-the_572b21",
     "20260901_door-washed-the_cd4b3a",
-    "20260902_6pm-picked-up_068b42"
+    "20260902_6pm-picked-up_068b42",
+    "20260903_6pm-carried-the_ca942f"
   ],
   "anchors": {
     "action": [
@@ -59,10 +60,17 @@
       "20260901_door-washed-the_cd4b3a"
     ],
     "6pm": [
-      "20260902_6pm-picked-up_068b42"
+      "20260902_6pm-picked-up_068b42",
+      "20260903_6pm-carried-the_ca942f"
     ],
     "doorway": [
       "20260902_6pm-picked-up_068b42"
+    ],
+    "plate": [
+      "20260903_6pm-carried-the_ca942f"
+    ],
+    "waited": [
+      "20260903_6pm-carried-the_ca942f"
     ]
   }
 }
