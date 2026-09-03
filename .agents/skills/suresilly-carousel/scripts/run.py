@@ -10,6 +10,12 @@ runs end up with two different ideas of what has already been used.
     run.py --no-post     build, do not post      (still uses up the moment)
     run.py --dry-run     look only, write nothing
     run.py --no-post --no-fresh    as above, but do not generate artwork
+    run.py --no-post --force       build past a copy-craft gate, and HOLD it
+
+`--force` is the owner standing in for a style check, this run only. It is never
+passed by the scheduled job, it cannot reach a safety gate, an artwork gate, a
+citation or the novelty check, and the deck it produces is always held for a
+second, separate `publish` reply. See main() for what it may and may not relax.
 
 Poses are GENERATED from each slide's own brief by default. Add --no-fresh to
 take them from the library instead, which is worth doing when you are building
@@ -36,7 +42,6 @@ that owns it, and this script only sequences them and stops on the first no.
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import os
 import re
@@ -85,7 +90,20 @@ def slide_text(slide: dict) -> str:
 # and cannot import this module — run.py imports writer, so the arrow only goes
 # one way. Re-exported under the old name because `run.Stop` is what the suites
 # and the rest of this file already say.
+import outcomes  # noqa: E402
 from outcomes import Refused, Stop  # noqa: E402,F401
+
+# Which gate stopped which run. Append-only, one line per refusing run, and
+# NOTHING in the pipeline reads it — invariant 17's rule, applied to a second
+# measurement: what we publish is measured, and the measurement never decides.
+# `dashboard.py` counts a fault's lines to say "this check has blocked 3 runs",
+# and that sentence is its entire purpose. It exists because "the engine keeps
+# refusing" is not actionable and "has_specific_recipient blocked 6 of the last
+# 9 runs" is — it turns a mood into a ranked list of which gate to fix next.
+#
+# A ledger only rises, so it sits with flux_neurons.json and never with
+# vendor_quotas.json, which is a snapshot and is always replaced (invariant 16).
+GATE_FAULTS = REPO_ROOT / "state" / "gate_faults.jsonl"
 
 
 class Skip(Exception):
@@ -266,7 +284,8 @@ PENDING = REPO_ROOT / "state" / "pending"
 
 
 def hold_for_review(slug: str, path: Path, score: int, reason: str,
-                    objections: list[dict]) -> None:
+                    objections: list[dict],
+                    overridden: list[str] | None = None) -> None:
     """Keep a deck back and tell the owner it is waiting.
 
     A held deck is finished — written, checked and rendered — and it is not
@@ -274,8 +293,13 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
     moment is used up either way, the same as any other run that produced a
     deck, so a held deck can never come round again as a duplicate.
 
+    `overridden` is the copy-craft faults the owner stood down with `force`. They
+    are recorded and shown FIRST, above the reviewer's own notes, because they are
+    the ones nothing checked — everything else on this deck passed.
+
     Nothing here decides anything. It writes a record and sends a message.
     """
+    overridden = list(overridden or [])
     PENDING.mkdir(parents=True, exist_ok=True)
     record = {
         "slug": slug,
@@ -284,6 +308,10 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
         "reason": reason,
         "notes": [f"{o['category']} slide {o['slide']} (severity {o['severity']}): {o['why']}"
                   for o in objections],
+        # Kept in the record, not only in the message. A year from now the one
+        # question about a held deck is "why was this one allowed through", and
+        # the message will be long gone.
+        "overridden": overridden,
         "held_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     (PENDING / f"{slug}.json").write_text(json.dumps(record, indent=2) + "\n",
@@ -300,6 +328,9 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
     plain = [f"Held for you: {slug}",
              f"Score {score} of 100, and the bar is {critic.PUBLISH_AT}.",
              "", reason[:400], ""]
+    if overridden:
+        plain += ["You stood these checks down with `force`:"]
+        plain += [f"  {o}" for o in overridden[:6]] + [""]
     if record["notes"]:
         plain += ["What the reviewer said:"] + [f"  {n}" for n in record["notes"][:6]] + [""]
     plain += ["Reply to this message with one of these:",
@@ -311,33 +342,19 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
               "purpose — only the words above act."]
     body = "\n".join(plain)
 
-    # Telegram: the same facts formatted for a phone. Bold headers separate the
-    # sections; each command is its own <code> line, which Telegram renders as a
-    # tap-to-copy box. Every dynamic value is escaped, and NO TAG SPANS A NEWLINE
-    # — that is the rule notify.split_for_caption relies on to cut a long caption
-    # without landing inside a tag and getting the whole message rejected.
-    def esc(text: str) -> str:
-        return html.escape(str(text))
-
-    html_lines = [f"<b>Score {score} of 100</b> — the bar is {critic.PUBLISH_AT}.",
-                  "", f"<i>{esc(reason[:400])}</i>", ""]
-    if record["notes"]:
-        html_lines += ["<b>What the reviewer said</b>"]
-        html_lines += [f"• {esc(n)}" for n in record["notes"][:6]]
-        html_lines += [""]
-    html_lines += [
-        "<b>Reply with one of these</b>",
-        f"<code>publish {esc(short)}</code>",
-        f"<code>rerun {esc(short)}</code>",
-        "<code>list</code>",
-        "",
-        f"Tap a line to copy, then send it. For example, send "
-        f"<code>publish {esc(short)}</code> to post the deck as it is.",
-        "",
-        '<i>Plain replies like "ok", "yes", "no" or "sure" do nothing on '
-        "purpose — only the words above act.</i>",
-    ]
-    telegram_html = "\n".join(html_lines)
+    # Telegram: ONE template, built by dashboard.build, the same helper the
+    # posted, stopped and broken messages use. This block used to hand-build its
+    # own HTML — it was the only message with a reply list and the only one that
+    # said plain replies do nothing, and the other three never got either. Two
+    # templates means the owner learns two shapes; the second one always rots.
+    #
+    # The reviewer's objections are already sentences about the deck, so they go
+    # in as-is. The overridden faults go first: they are what makes this deck
+    # different from an ordinary held one.
+    notes = [_shorten(o) for o in overridden] + \
+            [_shorten(o["why"]) for o in objections]
+    telegram_html = _report("held", slug=slug, score=str(score),
+                            objections=notes, reply_id=short)
 
     sheet = REPO_ROOT / path.parent / "contact_sheet.png"
     subprocess.run(
@@ -346,6 +363,46 @@ def hold_for_review(slug: str, path: Path, score: int, reason: str,
          "--body", body, "--telegram-html", telegram_html]
         + (["--attach", str(sheet)] if sheet.is_file() else []),
         cwd=REPO_ROOT, capture_output=True, text=True)
+
+
+def _shorten(text: str, limit: int = 90) -> str:
+    """One objection, short enough to sit in a caption.
+
+    A held deck carries the contact sheet, so the whole message has to fit inside
+    Telegram's caption limit — and Telegram REJECTS an over-long caption outright
+    rather than truncating it, so a long note does not arrive clipped, it stops
+    the message arriving at all. Cut at a word.
+    """
+    clean = " ".join(str(text).split())
+    if len(clean) <= limit:
+        return clean
+    return clean[:limit].rsplit(" ", 1)[0] + "…"
+
+
+def _report(status: str, **fields) -> str:
+    """The Telegram HTML for one message, from the one template.
+
+    dashboard.py is a job around the engine and is never imported by it — the
+    arrow only goes the other way (invariant 17). This is a subprocess boundary
+    for exactly that reason: run.py asks for a rendered message the way it asks
+    notify.py to send one, and dashboard.py stays outside.
+
+    A failure here costs the formatting, never the alert. If the helper cannot be
+    reached the caller still has its plain-text body, which says the same things
+    in the same order.
+    """
+    argv = [sys.executable, str(REPO_ROOT / "scripts" / "dashboard.py"),
+            "--status", status, "--format", "html"]
+    for name in ("slug", "score", "run-url", "reply-id", "note"):
+        value = fields.get(name.replace("-", "_"))
+        if value:
+            argv += [f"--{name}", str(value)]
+    for note in (fields.get("objections") or [])[:6]:
+        argv += ["--objection", note]
+    if fields.get("retry") is False:
+        argv += ["--no-retry"]
+    done = subprocess.run(argv, cwd=REPO_ROOT, capture_output=True, text=True)
+    return done.stdout.strip() if done.returncode == 0 else ""
 
 
 def check_critic_canary(index: int, written_by: str) -> None:
@@ -493,6 +550,72 @@ def publish(path: Path, slug: str) -> None:
         raise Stop("Instagram refused the post: " + " | ".join(tail))
 
 
+def record_faults(run_id: str, reason: str, history: list[int], mode: str) -> None:
+    """One line in the gate-fault ledger. Never raises.
+
+    Called only when a gate refused. It writes and it stops — nothing reads this
+    back inside a run, so a corrupt line, a full disk or a read-only checkout can
+    cost the measurement but must never cost the report that follows it. The run
+    is already over by the time this is called; there is nothing left to protect
+    but the message.
+
+    A dry run writes nothing, the same as everything else it touches.
+    """
+    if mode == "dry-run":
+        return
+    try:
+        GATE_FAULTS.parent.mkdir(parents=True, exist_ok=True)
+        shape, _ = outcomes.trajectory(history)
+        line = json.dumps({
+            "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "run": run_id,
+            # Split the way dashboard.py splits it, so a fault counted here is the
+            # same string the message keys on. Two different splits would count
+            # one thing and show another.
+            "faults": [part.strip() for part in
+                       re.sub(r"\[faults per attempt:[^\]]*\]", "", reason).split(";")
+                       if part.strip()],
+            "history": list(history),
+            "shape": shape,
+        }, ensure_ascii=False)
+        with open(GATE_FAULTS, "a", encoding="utf-8") as handle:
+            handle.write(line + "\n")
+    except Exception:                                              # noqa: BLE001
+        pass
+
+
+def emit(**fields: object) -> None:
+    """Tell the caller what happened, in a form a workflow step can read.
+
+    Written to $GITHUB_OUTPUT in the `name<<EOF` heredoc form, ALWAYS, even for a
+    value with no newline in it. A refusal reason carries semicolons, quotes,
+    arrows and sometimes a newline, and the one-line `name=value` form silently
+    truncates at the first newline — which is exactly how the real reason would
+    have been lost a second time.
+
+    This exists because the reason was thrown away. run.py has printed it since
+    the day it was written; the report step in auto-post.yml never read stdout, so
+    the owner got a constant sentence — "a gate refused, which is the system
+    working" — twice in one day, for two entirely different faults. A value the
+    workflow cannot read is a value that does not exist.
+
+    An empty or None field is skipped rather than written blank: a workflow tests
+    `if [ -n "$REASON" ]`, and an empty string that exists reads the same as one
+    that does not, so writing it buys nothing and costs a branch.
+    """
+    output = os.environ.get("GITHUB_OUTPUT")
+    if not output:
+        return
+    with open(output, "a", encoding="utf-8") as handle:
+        for name, value in fields.items():
+            if value is None or value == "":
+                continue
+            # A delimiter the value cannot contain. GitHub rejects the whole file
+            # if the value holds its own terminator, and a reason is model text.
+            end = f"EOF_{name.upper()}_{os.urandom(4).hex()}"
+            handle.write(f"{name}<<{end}\n{value}\n{end}\n")
+
+
 def emit_slug(slug: str, path: Path) -> None:
     """Tell the caller what was built.
 
@@ -500,17 +623,15 @@ def emit_slug(slug: str, path: Path) -> None:
     later step can find the deck without guessing at the folder name.
     """
     print(f"\n  slug: {slug}")
-    output = os.environ.get("GITHUB_OUTPUT")
-    if output:
-        with open(output, "a", encoding="utf-8") as handle:
-            handle.write(f"slug={slug}\n")
-            handle.write(f"deck={path.relative_to(REPO_ROOT)}\n")
+    emit(slug=slug, deck=path.relative_to(REPO_ROOT))
 
 
-def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
+def run(mode: str, source: str = "feed", fresh: bool = True,
+        force: bool = False) -> int:
     run_id = os.environ.get("GITHUB_RUN_ID") or f"local-{int(time.time())}"
     poses = "generated" if fresh else "library"
-    print(f"\nrun {run_id}  mode {mode}  source {source}  poses {poses}\n")
+    print(f"\nrun {run_id}  mode {mode}  source {source}  poses {poses}"
+          f"{'  FORCED' if force else ''}\n")
 
     claimed: memory.Moment | None = None
     try:
@@ -607,7 +728,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         claimed = moment
         say("claimed", moment.id)
 
-        markdown, plan, axes, wrote_by = writer.write_deck(
+        markdown, plan, axes, wrote_by, overridden = writer.write_deck(
             moment.text, topic, title=moment.text[:40].rstrip(" .,"),
             pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
             moment_anchors=anchor_words(moment) | {plan_token(moment)},
@@ -615,8 +736,18 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
             # a concept deck different from a harvested one: without it the
             # concept only picks the subject and is then thrown away.
             term=best["term"] if source == "concept" else "",
+            # The owner standing in for a copy-craft gate, this run only, by an
+            # explicit typed verb. It cannot reach a safety gate, an artwork gate,
+            # the citation proof or the novelty check — those all run outside the
+            # draft loop — and check_leak and check_mascots still refuse inside
+            # it. Everything it does relax comes back here in `overridden` and is
+            # printed to the owner before they are asked to publish.
+            allow_faults=force,
         )
         say("written", f"by {wrote_by}, {', '.join(axes.values())}")
+        if overridden:
+            say("overridden", f"{len(overridden)} style fault(s) stand: "
+                              f"{'; '.join(overridden)[:120]}")
 
         # The critic must not be the vendor that wrote this. Passing the real
         # writer rather than assuming one is what keeps that true when a
@@ -675,9 +806,23 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         # Instagram fetches the images itself and cannot see a local file.
         emit_slug(slug, path)
 
-        if outcome == "review":
-            hold_for_review(slug, path, score, reason, objections)
-            say("held", f"scored {score}, below {critic.PUBLISH_AT}. Sent to you to decide")
+        # A forced deck is HELD, always, whatever the critic thought of it. The
+        # owner asked for a gate to be stood down; they did not ask for the result
+        # to go out unseen. Two replies, not one: `force` builds it, `publish`
+        # releases it, and between them is a picture they looked at.
+        if outcome == "review" or overridden:
+            hold_for_review(slug, path, score, reason, objections,
+                            overridden=overridden)
+            say("held", f"scored {score}, below {critic.PUBLISH_AT}. Sent to you to decide"
+                if outcome == "review" else
+                f"built with {len(overridden)} fault(s) you stood down. Sent to you to decide")
+            # Held, and the workflow has to be told that in a word it can branch
+            # on. Its report step reads `slug` alone, so a held deck read as a
+            # posted one and the owner got two messages about it: the real held
+            # message from hold_for_review, and a "POSTED" dashboard about a deck
+            # that was still sitting in state/pending. This is the second half of
+            # a fact that only ever existed in the log.
+            emit(verdict="held")
             return 0
 
         if mode == "publish":
@@ -685,11 +830,13 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
             say("posted", slug)
         else:
             say("not posted", "built only, and the moment is used up either way")
+        emit(verdict="built")
         return 0
 
     except NotWired as reason:
         print(f"\n  stopped: {reason}")
         print("  everything before this point ran. Nothing was posted and no moment was used.")
+        emit(reason=str(reason), verdict="not-wired")
         return 0
     except Refused as reason:
         # AMBER, and the reason this exception type exists. Every gate in the
@@ -702,6 +849,12 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         print("  a gate refused. No vendor problem, and no moment was used up.")
         if reason.retry:
             print("  reply `retry` in Telegram to try again now with a fresh moment.")
+        # The reason, out to the workflow. It was always printed and never read:
+        # auto-post.yml wrote its own sentence and the real one died with the log.
+        record_faults(run_id, str(reason), reason.history, mode)
+        emit(reason=str(reason), verdict="refused",
+             faults=",".join(str(n) for n in reason.history),
+             retry="true" if reason.retry else "false")
         return 0
     except critic.NoReview as why:
         # No critic could be reached. Not the same as a deck being refused, and
@@ -709,15 +862,18 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         # expired Groq key would have looked like the pipeline crashing.
         print(f"\n  stopped: {why}")
         print("  the deck was written but never reviewed, so it was not posted.")
+        emit(reason=str(why), verdict="no-review")
         return 1
     except llm.ModelRefused as refused:
         # A layer that could not get a usable answer out of any vendor. It is an
         # ordinary no, the same as any other gate saying no, and it was reaching
         # the top of the program as a stack trace that looked like a crash.
         print(f"\n  stopped: {str(refused)[:400]}")
+        emit(reason=str(refused)[:400], verdict="no-vendor")
         return 1
     except memory.ClaimHeld as reason:
         print(f"\n  stopped: {reason}")
+        emit(reason=str(reason), verdict="claim-held")
         return 1
     except memory.AlreadyUsed as reason:
         # Not a crash and not a refusal: the work was already done. Exit 0, the
@@ -725,9 +881,11 @@ def run(mode: str, source: str = "feed", fresh: bool = True) -> int:
         # failure for a run that correctly declined to duplicate a live post.
         print(f"\n  stopped: {reason}")
         print("  nothing was written. No moment was used and no deck was touched.")
+        emit(reason=str(reason), verdict="already-used")
         return 0
     except Stop as reason:
         print(f"\n  stopped: {reason}")
+        emit(reason=str(reason), verdict="stopped")
         return 1
     finally:
         # A run that ends without a deck gives the moment back. A run that
@@ -759,9 +917,24 @@ def main() -> None:
     # given.
     ap.add_argument("--no-fresh", action="store_true",
                     help="do not generate poses; use the library for every slide")
+    # The owner standing in for a copy-craft gate, for this run only. It exists
+    # because a gate that cannot be satisfied by any wording stops the account
+    # entirely — on 2026-09-03 both slots produced nothing and the owner's only
+    # button was `retry`, which walked into the same wall.
+    #
+    # It narrows invariant 4, and only there: gates still abort, but the owner may
+    # stand in for a COPY-CRAFT gate, by an explicit typed verb, and only into a
+    # held deck that a second reply must release. It cannot reach a safety gate, a
+    # citation, the novelty check or an artwork gate — none of those run inside
+    # the draft loop — and check_leak and check_mascots still refuse inside it. An
+    # unattended run never passes this flag and is byte-identical to before.
+    ap.add_argument("--force", action="store_true",
+                    help="build even if a copy-craft check refuses, and hold the "
+                         "deck for you to approve. Never posts on its own")
     args = ap.parse_args()
     mode = "publish" if args.publish else "no-post" if args.no_post else "dry-run"
-    raise SystemExit(run(mode, source=args.source, fresh=not args.no_fresh))
+    raise SystemExit(run(mode, source=args.source, fresh=not args.no_fresh,
+                         force=args.force))
 
 
 if __name__ == "__main__":

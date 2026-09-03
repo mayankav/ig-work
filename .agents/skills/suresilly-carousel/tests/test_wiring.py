@@ -81,6 +81,12 @@ def run() -> int:
             failures.append("WRITE the preview destination is back, and nothing takes it")
 
     # ── telling the next step what was built ──
+    #
+    # The heredoc form, not `name=value`. A refusal reason carries semicolons,
+    # quotes and sometimes a newline, and `name=value` cannot hold a newline at
+    # all — the workflow would read a truncated reason, or GitHub would refuse
+    # the whole file. So every field goes out as `name<<EOF_…`, and this asserts
+    # the shape as well as the value.
     with tempfile.TemporaryDirectory() as tmpdir:
         output = pathlib.Path(tmpdir) / "out.txt"
         import os
@@ -89,10 +95,30 @@ def run() -> int:
         try:
             runner.emit_slug("20260830_real", pathlib.Path(tmpdir) / "carousels" / "x" / "carousel.md")
             written = output.read_text()
-            if "slug=20260830_real" not in written:
+            if "slug<<" not in written or "20260830_real" not in written:
                 failures.append("EMIT the slug never reached the workflow output")
-            if "deck=" not in written:
+            if "deck<<" not in written:
                 failures.append("EMIT the deck path never reached the workflow output")
+
+            # The reason is the field this whole path exists for: it used to be a
+            # constant in the workflow, so the owner was told "a gate refused"
+            # and never which one. A multi-line one must survive intact.
+            output.write_text("")
+            runner.emit(reason="slide 9 names nobody;\nslide 4 is too long",
+                        verdict="refused", faults="13,5,4")
+            second = output.read_text()
+            if "slide 4 is too long" not in second:
+                failures.append("EMIT a reason with a newline in it was truncated")
+            if "verdict<<" not in second or "refused" not in second:
+                failures.append("EMIT the verdict never reached the workflow output")
+            # An empty field is skipped rather than written blank: the workflow
+            # tests these with `[ "$VERDICT" = "held" ]`, and a blank heredoc is
+            # an empty string that reads as "present but nothing", which is the
+            # shape that made a held deck get a POSTED message on top of it.
+            output.write_text("")
+            runner.emit(reason="", verdict=None)
+            if output.read_text().strip():
+                failures.append("EMIT an empty field was written instead of skipped")
         finally:
             os.environ.pop("GITHUB_OUTPUT", None)
 
@@ -236,7 +262,7 @@ def run() -> int:
                         f"RECORD {want} was not staged — one absent pathspec "
                         f"emptied the whole add again (staged: {staged})")
 
-    total = 3 + 3 + 3 + 2 + 4 + 5 + 2 + 3
+    total = 3 + 3 + 3 + 2 + 4 + 5 + 2 + 3 + 3
     if failures:
         print(f"wiring: {len(failures)}/{total} failed")
         for line in failures:

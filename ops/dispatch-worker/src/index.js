@@ -36,6 +36,11 @@ const VERBS = {
   // has no held deck to act on — there is nothing to publish or drop — so this
   // starts a fresh auto-post instead. See telegram() below.
   retry: "retry", tryagain: "retry",
+  // Also not about a held deck: this builds the deck the gate refused and holds
+  // it for you to look at. It cannot post — auto-post only publishes on a
+  // schedule or on mode=publish, and this dispatches mode=force — so the picture
+  // arrives and then waits for a separate `publish`.
+  force: "force", override: "force", build: "force",
 };
 // One known word, then an optional deck id, and nothing else. Anything that is
 // not this shape is not a command and is ignored — the message text is data.
@@ -137,7 +142,11 @@ export default {
         { status: key ? 403 : 200 },
       );
     }
-    const mode = url.searchParams.get("mode") === "publish" ? "publish" : "build";
+    // build is the default and publish is the only word that posts. force builds
+    // past a copy-craft gate and HOLDS the result, so it is offered here too —
+    // the URL button is the same set of choices as the Telegram reply.
+    const asked = url.searchParams.get("mode");
+    const mode = asked === "publish" ? "publish" : asked === "force" ? "force" : "build";
     const r = await dispatch(env, null, mode);
     const ok = r.status === 204;
     return new Response(
@@ -187,15 +196,22 @@ export default {
       return new Response("ok", { status: 200 });
     }
 
-    // retry is the one verb that is not a decision about a HELD deck, so it does
-    // not go to review.yml. A run that stopped on a gate produced nothing to
-    // publish or drop; what you want is another attempt at today's slot, which
-    // means auto-post with mode=publish. The auto-post run sends its own report
-    // when it finishes, which replaces the ack in your reading of the chat.
-    if (command.decision === "retry") {
-      await ack(env, "⏳ on it — retrying…");
-      const r = await dispatch(env, null, "publish");
-      console.log(`telegram: dispatched auto-post retry status=${r.status}`);
+    // retry and force are the two verbs that are not decisions about a HELD
+    // deck, so neither goes to review.yml. A run that stopped on a gate produced
+    // nothing to publish or drop; what you want is another attempt at today's
+    // slot, which means auto-post. The auto-post run sends its own report when it
+    // finishes, which replaces the ack in your reading of the chat.
+    //
+    // The mode is the whole difference. `retry` draws a fresh moment and every
+    // gate applies, so it publishes if it passes. `force` builds the deck the
+    // gate refused, and mode=force is NOT mode=publish — auto-post's publish step
+    // is gated on that word, so a forced deck is held and cannot go out until you
+    // reply publish to the picture.
+    if (command.decision === "retry" || command.decision === "force") {
+      const forced = command.decision === "force";
+      await ack(env, forced ? "⏳ on it — building it anyway…" : "⏳ on it — retrying…");
+      const r = await dispatch(env, null, forced ? "force" : "publish");
+      console.log(`telegram: dispatched auto-post ${command.decision} status=${r.status}`);
       return new Response("ok", { status: 200 });
     }
 

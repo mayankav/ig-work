@@ -39,19 +39,212 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 SKILL = REPO / ".agents" / "skills" / "suresilly-carousel"
 STATE = REPO / "state"
 
+# One direction only. This script reads the engine — outcomes.py for what a fault
+# trail means, capacity.py for what is left — and NOTHING in the engine imports
+# this. That is the same rule invariant 17 states for insights.py, for the same
+# reason: a report that can change a decision is not a report.
+sys.path.insert(0, str(SKILL / "scripts"))
+
+# India has no daylight saving, so the offset is a constant and no timezone
+# database is needed. Every schedule in this repo is stated in IST — the cron
+# comments, the workflow, these messages — while the runner's clock is UTC, and a
+# message that prints UTC and then says "the next run is 20:00" makes the reader
+# do arithmetic they will get wrong at least once.
+IST = timezone(timedelta(hours=5, minutes=30))
+
 # Three colours, and the icons carry them. `stopped` was 🛑, which is a red
 # octagon — the wrong signal for the one outcome that means a gate did its job
 # and nothing is wrong. Amber now, so the phone can be read at a glance:
 # ✅ posted · ⏸ waiting for you · ⚠️ nothing today, nothing broken · ❌ broken.
 ICON = {"ok": "✅", "held": "⏸", "stopped": "⚠️", "error": "❌"}
+
+# THE COLOUR KEY.
+#
+# Telegram's HTML has bold, italic and <code>. It has no coloured text. So the
+# colour in these messages is emoji, and an emoji only works as colour if it
+# means the same thing every time — a stray one makes the whole key mean less.
+# test_message.py asserts every emoji a message prints comes from here or from
+# REPLIES, because a key that is only a convention is one edit from being wrong.
+MARK = {
+    "ok": "🟢", "held": "🟠", "stopped": "🔴", "error": "🔴",
+    "pass": "✔", "fail": "✘", "look": "⚠️", "no": "🚫", "problem": "❌",
+    "what": "📝", "self": "🔁", "you": "💬", "idle": "⏰",
+    "logs": "🔗", "note": "ℹ️", "eye": "👆",
+    "pictures": "🖼", "writing": "✍️", "library": "📚",
+    "deck": "🎨", "queue": "📦", "review": "📥", "measured": "📈",
+}
+
+# The headline of each message. Says what happened, in words that need no
+# knowledge of how the engine works. "A gate refused" is not here on purpose:
+# the owner does not have to know what a gate is.
+TITLE = {
+    "ok": "POSTED",
+    "held": "READY — WAITING FOR YOU",
+    "stopped": "NOTHING WAS POSTED",
+    "error": "SOMETHING IS BROKEN",
+}
+
+# Every reply the owner may send, per outcome, with what it does. One list, one
+# order, every message — so the options are in the same place on the screen every
+# morning and can be found without reading.
+#
+# `{id}` is filled with the short deck id. A verb that cannot work keeps its line
+# and loses its emoji to 🚫: hiding the word would make the owner think it does
+# not exist, and they would go looking for it.
+REPLIES = {
+    "ok": [("📋", "list", "Show what waits for your answer.")],
+    "held": [("✅", "publish {id}", "Post it now, as it is."),
+             ("🗑", "rerun {id}", "Throw it away. Tonight builds another."),
+             ("📋", "list", "Show what else waits.")],
+    "stopped": [("🔨", "force", "Build it anyway. I send you the picture. "
+                                "Nothing goes out until you reply publish."),
+                ("📋", "list", "Show what waits for your answer."),
+                ("🔄", "retry", "Start again with a new idea.")],
+    "error": [("🔄", "retry", "Try the whole run again now."),
+              ("📋", "list", "Show what waits for your answer.")],
+}
+
+# What happens if the message is ignored. Asked on every alert this engine has
+# ever sent, and answered on none of them.
+IDLE = {
+    "ok": "Nothing to do. The next run is {next}.",
+    "held": "Nothing happens until you reply. It will not post on its own.",
+    "stopped": "The next run starts {next}. Nothing is lost.",
+    "error": "The next run starts {next} anyway. This one still needs a look.",
+}
+
+# A fault, said the way a person would say it.
+#
+# The fault strings are written for the model, because they are fed straight back
+# into the repair prompt — they name field labels and quote rules. That is right
+# for the model and wrong for a phone at breakfast.
+#
+# This table starts nearly empty ON PURPOSE and falls back to the raw fault text
+# when there is no entry. An entry is added only when state/gate_faults.jsonl
+# shows a check is actually blocking runs, so nothing here is written on a guess.
+# The match is a substring of the fault, lowercased.
+#
+# Each entry is (what the check wants, a good line, a bad line, why). The BAD line
+# is the one place in this file where a long word is allowed — quoting the word
+# the gate refused is how the owner learns which word, and test_message.py knows
+# that position is a quotation and skips it.
+PLAIN = {
+    "kind of person": (
+        "The last slide must name a kind of person to send it to.",
+        "Send this to the friend who always says yes.",
+        "Send this to anyone who relates.",
+        '"Anyone" is not a person.'),
+    "syllables or more": (
+        "One line uses a word that is too long to read fast.",
+        "the weight you carry",
+        "the emotional load you carry",
+        "Say it in short words. The idea stays sharp."),
+}
+
+
+def say_plainly(fault: str) -> list[str]:
+    """One fault, as lines a person can read. Falls back to the raw text.
+
+    The fallback is the important half. A gate added next month has no entry
+    here, and its fault must still reach the owner — badly worded beats missing.
+
+    Every line comes out already wrapped to phone width, including the fallback.
+    A gate writes its fault for a repair prompt, so it is one long line, and one
+    long line on a phone is the shape the eye skips.
+    """
+    low = fault.lower()
+    for needle, (what, good, bad, why) in PLAIN.items():
+        if needle in low:
+            return (_wrap(what)
+                    + _hang(f'{MARK["pass"]} "{good}"')
+                    + _hang(f'{MARK["fail"]} "{bad}"')
+                    + _wrap(why))
+    return _wrap(fault)
+
+
+def _hang(text: str, width: int = 36) -> list[str]:
+    """An example, indented, with its wrapped tail lined up under its first word
+    rather than under its ✔ — so the mark stays a column the eye can run down."""
+    return [f"   {part}" if i == 0 else f"     {part}"
+            for i, part in enumerate(_wrap(text, width))]
+
+
+RULE = "━━━━━━━━━━━━━━━━━━━━━━━"
+
+# What a held message must fit inside, and the only hard number in this file.
+#
+# A held deck carries the contact sheet, so its text is a CAPTION, and Telegram
+# caps a caption at 1024 and rejects an over-long one outright rather than
+# trimming it. notify.CAPTION_LIMIT is 1000 and spills the remainder into a
+# follow-up message, so nothing is ever lost — but the cut lands at a line
+# boundary near the end, which is exactly where the reply list is, and the reply
+# list is the only part of a held message that has to be read.
+#
+# Measured, not chosen. With a two-line reviewer note the message is 922
+# characters before a single objection, and each objection costs 30 to 55 more:
+# two of them reach 1005 and the cut fires. A fixed count of six could never have
+# been right, because what fits depends on how long each one is — so the count is
+# not fixed. `_fit_held` renders, measures, and drops the tail until it fits,
+# saying how many it dropped. test_message.py imports this number.
+CAPTION_BUDGET = 1000
+
+# The longest reviewer note a held caption will print.
+#
+# Measured on the rendered message, not estimated. A held message is 818
+# characters with no note and no objections; the note costs about one character
+# each and so does everything else. Holding the objections at the one summary
+# line — the shortest a held message can be while still saying something was
+# dropped — the floor fits up to a 145-character note and goes over at 153. So
+# 140, plus the one-character ellipsis, is the longest note that can never on its
+# own push the reply list into a second message.
+#
+# This is the lever the objection fitter does not have. Dropping every objection
+# still leaves the note, so a long note overflows alone: a realistic critic
+# paragraph rendered at 1101 characters and no amount of dropping brought it
+# back. Trimmed rather than dropped, because half a reason beats none, and the
+# message already ends with a link to the full log.
+NOTE_BUDGET = 140
+
+# The shape writer.write_deck puts on the end of a refusal reason:
+#
+#   slide 9 names nobody; slide 4 uses 'emotional' … [faults per attempt: 13, 5, 4]
+#
+# One string, because an exception carries one. It is split back apart here rather
+# than being carried as two fields, because the string is what survives the trip
+# out of the run and through $GITHUB_OUTPUT into the workflow — and the workflow
+# is where the message used to be a constant that could see none of it.
+TRAIL = re.compile(r"\[faults per attempt:\s*([\d,\s]+)\]")
+
+
+def read_trail(reason: str) -> list[int]:
+    """The fault count per attempt, out of a refusal reason. Empty if absent."""
+    match = TRAIL.search(reason or "")
+    if not match:
+        return []
+    return [int(n) for n in re.findall(r"\d+", match.group(1))]
+
+
+def split_faults(reason: str) -> list[str]:
+    """The individual faults out of a refusal reason.
+
+    Semicolons, because that is what write_deck joins them with. The trail is cut
+    off first so it does not arrive as a fourth fault, and a reason with no
+    semicolon is one fault, not zero — a single blocking check is the common case
+    and it was the one shape a naive split would have dropped.
+    """
+    body = TRAIL.sub("", reason or "").strip()
+    if not body:
+        return []
+    return [part.strip() for part in body.split(";") if part.strip()]
 
 
 def _safe(fn, default="unknown"):
@@ -218,53 +411,365 @@ def measured() -> str:
     return _safe(read)
 
 
+def blocked_runs(fault: str) -> int:
+    """How many runs this fault has already stopped, from the fault ledger.
+
+    Read-only, and it changes nothing. Invariant 17's rule applied to gates: the
+    count is reported so the owner knows which check to fix next, and no part of
+    the pipeline may read it or act on it. A missing ledger is 0 runs recorded,
+    which is not the same as a claim that the fault is new — it means nobody has
+    counted yet, and the caller only prints the line when the count is above 1.
+    """
+    def read():
+        path = STATE / "gate_faults.jsonl"
+        if not path.is_file():
+            return 0
+        key = fault.lower()[:60]
+        seen = 0
+        for line in path.open(encoding="utf-8"):
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if any(key in str(f).lower() for f in row.get("faults", [])):
+                seen += 1
+        return seen
+    return _safe(read, default=0)
+
+
+def next_slot(now: datetime | None = None) -> str:
+    """Which run comes next, in the owner's own clock. See IST above for why."""
+    ist = (now or datetime.now(timezone.utc)).astimezone(IST)
+    return "at 20:00 tonight" if ist.hour < 20 else "at 08:00 tomorrow"
+
+
+def stamp(now: datetime | None = None) -> str:
+    """Wednesday 3 September · 08:34 IST."""
+    ist = (now or datetime.now(timezone.utc)).astimezone(IST)
+    return f"{ist:%A %-d %B · %H:%M} IST"
+
+
 def build(status: str, slug: str | None, note: str, score: str | None,
-          run_url: str | None, fmt: str = "text") -> str:
+          run_url: str | None, fmt: str = "text", *,
+          history: list[int] | None = None, retry: bool = True,
+          objections: list[str] | None = None,
+          reply_id: str | None = None) -> str:
     """The report, as text (email, logs) or Telegram HTML.
+
+    ONE template, four outcomes. Every message answers the same five questions,
+    in the same order, in the same place on the screen:
+
+        what happened · what went wrong · can I fix it myself ·
+        what can you reply · what happens if you ignore this
+
+    Every message used to answer a different subset of those. The posted one was
+    a dashboard with no reply list; the held one was a decision with no dashboard;
+    the stopped one was a hardcoded sentence in a workflow file that could not see
+    the actual reason. So the owner had to learn three shapes and still could not
+    tell a stuck check from an unlucky draft.
 
     HTML mode bolds the head and the section labels and links the logs line, and
     escapes every dynamic value with html.escape. The tags it uses — <b> and a
     single-line <a> — never span a newline, which is the rule notify.py relies on
     to split a long caption safely: cut at a newline and both halves are still
-    valid HTML. The text mode is byte-for-byte what it always was.
+    valid HTML.
+
+    `history` is the fault count per attempt. `retry` is False when the count
+    stopped falling, and then the retry line is marked 🚫 with the reason rather
+    than removed — a verb hidden is a verb the owner goes looking for.
+    """
+    notes = list(objections or [])
+    if status == "held":
+        # Fit the objections to the caption budget before anything is sent. See
+        # CAPTION_BUDGET: a held message that overflows loses its reply list to a
+        # second message, and the reply list is the only part that has to be read.
+        #
+        # The note is trimmed first, because the fitter's only other lever is
+        # dropping objections and a long note overflows on its own — measured at
+        # 1101 characters on a realistic critic paragraph, which no number of
+        # dropped objections can bring back under the cap.
+        note = _clip(note, NOTE_BUDGET)
+    render = lambda keep: _assemble(                          # noqa: E731
+        status, slug, note, score, run_url, fmt, history=history,
+        retry=retry, objections=keep, reply_id=reply_id)
+    if status == "held":
+        notes = _fit_held(notes, render)
+    return render(notes)
+
+
+def _clip(text: str, limit: int) -> str:
+    """Cut at a word and mark the cut. Empty stays empty.
+
+    The marker is a word, not a bare ellipsis: `…` alone reads as a sentence
+    trailing off, which is what a critic's note does anyway, so nothing would
+    tell the owner there is more to read.
+    """
+    clean = " ".join(str(text or "").split())
+    if len(clean) <= limit:
+        return clean
+    return clean[:limit].rsplit(" ", 1)[0] + "…"
+
+
+def _fit_held(notes: list[str], render) -> list[str]:
+    """Drop objections from the end until the message fits the caption budget.
+
+    Rendering to measure, rather than counting characters, because the length
+    depends on wrapping, on HTML escaping and on how long the reviewer's note
+    was — three things a fixed cap cannot see. That is why the old `[:6]` could
+    never have been right: six short objections fit and two long ones do not.
+
+    The last line always says how many were dropped, so the message never quietly
+    shows three of five. Nothing is lost either way — the full list is in the run
+    log, and the link to it is in the message.
+
+    It can go all the way down to that one summary line, and it has to be able
+    to: a single objection long enough to blow the budget on its own is not
+    hypothetical, and a floor of "always show one" would put the reply list into
+    a second message to protect a line the owner cannot read anyway. The floor
+    that matters is the reply list, not the objections.
+    """
+    def summarised(shown: int) -> list[str]:
+        if shown >= len(notes):
+            return list(notes)
+        dropped = len(notes) - shown
+        return notes[:shown] + [f"and {dropped} more — see the full log"]
+
+    for shown in range(len(notes), -1, -1):
+        if len(render(summarised(shown))) <= CAPTION_BUDGET:
+            return summarised(shown)
+    # Even the bare summary line does not fit, which means the reviewer's own
+    # note is the thing over budget. Send the shortest form there is and let
+    # notify.py spill; it cuts at a line boundary, so the reply list survives
+    # whole in the follow-up rather than being cut through the middle.
+    return summarised(0)
+
+
+def _assemble(status: str, slug: str | None, note: str, score: str | None,
+              run_url: str | None, fmt: str = "text", *,
+              history: list[int] | None = None, retry: bool = True,
+              objections: list[str] | None = None,
+              reply_id: str | None = None) -> str:
+    """The template itself. build() is the door; this is the room.
+
+    Split out so a held message can be rendered, measured and rendered again with
+    fewer objections — see _fit_held. Nothing else calls this directly.
     """
     is_html = fmt == "html"
     esc = html.escape if is_html else (lambda s: s)
+    bold = (lambda s: f"<b>{s}</b>") if is_html else (lambda s: s)
+    code = (lambda s: f"<code>{s}</code>") if is_html else (lambda s: s)
 
-    def label(name: str) -> str:
-        # Text keeps the original column: every value begins at column 11, so the
-        # longest label ("THIS DECK", 9 chars) sets the pad and the rest align to
-        # it. HTML can't hold a column without <pre> (which would span newlines
-        # and break the caption split), so there the bold carries the separation.
-        return f"<b>{name}</b>  " if is_html else f"{name:<9}  "
+    short = reply_id or (slug.rsplit("_", 1)[-1] if slug and "_" in slug else slug) or ""
 
-    head = f"{ICON.get(status, 'ℹ')} {status.upper()}"
-    if slug:
-        head += f"  {esc(slug)}"
-    if score:
-        head += f"  ({esc(score)}/100)"
-    if is_html:
-        head = f"<b>{head}</b>"
+    lines: list[str] = []
 
-    lines = [head, f"{datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC", ""]
-    if note:
-        lines += [esc(note), ""]
-    head_writing, rows_writing = writing()
-    lines += [
-        f"{label('PICTURES')}{esc(pictures())}",
-        f"{label('WRITING')}{esc(head_writing)}",
-        *[esc(row) for row in rows_writing],
-        f"{label('LIBRARY')}{esc(library())}",
-        f"{label('THIS DECK')}{esc(poses_used(slug))}",
-        f"{label('QUEUE')}{esc(queue())}",
-        f"{label('REVIEW')}{esc(waiting())}",
-        f"{label('MEASURED')}{esc(measured())}",
-    ]
+    def rule() -> None:
+        """A divider, with exactly one blank line under it and none above it.
+
+        Every block ends with a spacer so the blocks inside it breathe, which used
+        to leave a gap above each divider and made the message look like it had
+        holes in it. The trim lives here, once, instead of in every block.
+        """
+        while lines and not lines[-1].strip():
+            lines.pop()
+        lines.extend([RULE, ""])
+
+    lines += [bold(f"{MARK.get(status, 'ℹ️')} {TITLE.get(status, status.upper())}"),
+              stamp()]
+    rule()
+
+    if status == "ok":
+        lines += _body_ok(slug, esc, bold)
+    elif status == "held":
+        lines += _body_held(note, score, objections or [], esc, bold)
+    else:
+        lines += _body_refused(status, note, history or [], retry, esc, bold)
+
+    rule()
+    lines += _replies(status, short, retry, esc, bold, code)
+    rule()
+    lines += [f"{bold(MARK['idle'] + ' IF YOU DO NOTHING')}"]
+    lines += _wrap(IDLE.get(status, "").format(next=next_slot()))
+    lines += [""]
+
+    # The one message that carries an attachment and a single reply does not need
+    # the footer twice. Everything else does: "ok" and "yes" arrive in this chat
+    # by accident, and one of them would publish, so they are excluded on purpose
+    # and the owner has to be told that or they will try one.
+    if status != "ok":
+        lines += [f"{MARK['note']} Only the words above work.",
+                  '   "ok", "yes" and "no" do nothing.', ""]
+
     if run_url:
-        logs = (f'logs: <a href="{esc(run_url)}">{esc(run_url)}</a>' if is_html
-                else f"logs: {run_url}")
-        lines += ["", logs]
-    return "\n".join(lines)
+        lines += [f'{MARK["logs"]} <a href="{esc(run_url)}">See the full log</a>'
+                  if is_html else f'{MARK["logs"]} See the full log: {run_url}']
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _body_ok(slug: str | None, esc, bold) -> list[str]:
+    """A deck went out. The dashboard, because this is the one message where
+    nothing needs deciding and there is room to say how the engine is holding up.
+
+    Kept to short rows: this message carries the contact sheet, so it is a caption
+    and Telegram caps a caption at 1024 and REJECTS an over-long one outright.
+    """
+    head_writing, rows_writing = writing()
+    out = [f"{MARK['pass']} {esc(slug or 'a deck')} is live.", ""]
+    out += [
+        f"{MARK['pictures']} {bold('Pictures')}  {esc(pictures())}",
+        f"{MARK['writing']} {bold('Writing')}   {esc(head_writing)}",
+        *[f"   {esc(row.strip())}" for row in rows_writing],
+        f"{MARK['library']} {bold('Library')}   {esc(library())}",
+        f"{MARK['deck']} {bold('This deck')} {esc(poses_used(slug))}",
+        f"{MARK['queue']} {bold('Queue')}     {esc(queue())}",
+        f"{MARK['review']} {bold('Waiting')}   {esc(waiting())}",
+        f"{MARK['measured']} {bold('Measured')}  {esc(measured())}",
+        "",
+    ]
+    return out
+
+
+def _body_held(note: str, score: str | None, objections: list[str],
+               esc, bold) -> list[str]:
+    """A finished deck, waiting for a person. The green block and the orange
+    block ARE the decision.
+
+    Green is what the owner cannot check by looking — whether the source is real,
+    whether the artwork is clean, whether the idea has been posted before. Orange
+    is what they can. Splitting them means the message says "the parts you have to
+    trust me on are fine; here is the part you are better at" in two glances.
+
+    `note` is the reviewer's one-line reason and it is printed. It used to be
+    accepted and dropped: `--note` is the flag that carries the real reason on
+    every other status, and a held deck that silently discarded it was the same
+    defect this whole change exists to fix, one status along.
+
+    Under 1000 characters, because the contact sheet is attached and the caption
+    limit is real. How many objections fit is not a number in this function —
+    build() measures the rendered message and hands over the ones that fit, plus
+    a line saying how many it dropped. See CAPTION_BUDGET and _fit_held.
+    """
+    out = ["I built this for you to judge.",
+           "It will NOT post on its own.", ""]
+    if score:
+        out += [esc(_score_line(score))]
+    if note:
+        out += [esc(part) for part in _wrap(note)]
+    if score or note:
+        out += [""]
+    out += [bold(f"{MARK['ok']} SAFETY CHECKS — all passed"),
+            f"   {MARK['pass']} The source is proved",
+            f"   {MARK['pass']} No text in the pictures",
+            f"   {MARK['pass']} This idea is new",
+            ""]
+    if objections:
+        out += [bold(f"{MARK['held']} STYLE CHECKS — {len(objections)} objection"
+                     f"{'s' if len(objections) != 1 else ''}")]
+        for note in objections:
+            out += [esc(part) for part in _hang(f"{MARK['fail']} {note}")]
+    else:
+        out += [bold(f"{MARK['held']} STYLE CHECKS — nothing to report")]
+    out += ["", f"{MARK['eye']} Look at the picture, then reply.", ""]
+    return out
+
+
+def _score_line(score: str) -> str:
+    """The critic's score, said once.
+
+    `run.py` passes the bare number it got from `critic.review`, but a person
+    typing `--score` on the command line writes `7.5/10`. Appending " of 100" to
+    either produced "Score 7.5/10 of 100", which is two scales in one sentence and
+    the reader has to work out which one is real. A value that already carries its
+    own denominator keeps it.
+    """
+    text = str(score).strip()
+    return f"Score {text}." if "/" in text or "%" in text else f"Score {text} of 100."
+
+
+def _body_refused(status: str, note: str, history: list[int], retry: bool,
+                  esc, bold) -> list[str]:
+    """Nothing was posted, or something is broken. Three blocks.
+
+    WHAT HAPPENED and CAN I FIX IT MYSELF the engine writes on its own, from the
+    attempt count and the fault trail. Only THE PROBLEM comes from a gate, and a
+    gate's fault is written for the model that has to repair it — so it goes
+    through say_plainly, which rewrites the ones we have measured as blockers and
+    passes the rest through unchanged rather than dropping them.
+    """
+    import outcomes
+
+    faults = split_faults(note)
+    trail = read_trail(note) or list(history)
+    out = [bold(f"{MARK['what']} WHAT HAPPENED")]
+    if status == "error":
+        # An error reason is raw vendor text — long, and with no newline in it. It
+        # gets wrapped like everything else, or it arrives as one unreadable slab
+        # on the one message that most needs reading.
+        out += [esc(part) for part in _wrap(note or "The run did not finish.")]
+        out += ["", bold(f"{MARK['self']} CAN I FIX IT MYSELF?")]
+        out += _wrap("Maybe. A vendor being unreachable is often a short outage.")
+        out += [""]
+        return out
+
+    tries = len(trail) if trail else 1
+    out += [f"I wrote the carousel {tries} time{'s' if tries != 1 else ''}.",
+            f"A quality check refused {'all ' + str(tries) if tries > 1 else 'it'}.",
+            ""]
+    if faults:
+        out += [bold(f"{MARK['problem']} THE PROBLEM")]
+        # Three at most. The fourth is the one nobody reads, and the reply list
+        # below it is the only part of this message that has to be read.
+        for fault in faults[:3]:
+            out += [esc(line) for line in say_plainly(fault)]
+            seen = blocked_runs(fault)
+            if seen > 1:
+                out += [f"   {MARK['look']} This check has blocked {seen} runs."]
+            out += [""]
+    out += [bold(f"{MARK['self']} CAN I FIX IT MYSELF?")]
+    shape, why = outcomes.trajectory(trail)
+    out += ["No." if shape == "stuck" else "Not this time."]
+    if trail:
+        out += [f"   {outcomes.arrow(trail)}"]
+    out += [f"   {esc(part)}" for part in _wrap(why, 40)]
+    return out
+
+
+def _replies(status: str, short: str, retry: bool, esc, bold, code) -> list[str]:
+    """Every reply the owner may send, and what each one does.
+
+    In the same place, in the same order, on every message. A verb that cannot
+    work keeps its line and loses its emoji to 🚫 — hiding it would make the owner
+    think the word does not exist and go looking for it. Only `retry` is ever
+    withheld, and only when the fault count stopped falling, which means a fresh
+    idea walks into the same check.
+    """
+    out = [bold(f"{MARK['you']} REPLY WITH ONE WORD"), ""]
+    for emoji, verb, what in REPLIES.get(status, []):
+        word = verb.format(id=short) if "{id}" in verb else verb
+        if verb == "retry" and not retry:
+            out += [f"{MARK['no']} {code(esc(word))}",
+                    "   Starts a new idea. Not advised —",
+                    "   the same check will stop it.", ""]
+            continue
+        out += [f"{emoji} {code(esc(word))}"]
+        out += [f"   {esc(part)}" for part in _wrap(what)]
+        out += [""]
+    return out
+
+
+def _wrap(text: str, width: int = 38) -> list[str]:
+    """Short lines. A phone is about 38 characters wide at a readable size, and a
+    line that wraps in the middle of a phrase is the difference between scanning
+    a message and reading it."""
+    out, line = [], ""
+    for word in text.split():
+        if line and len(line) + 1 + len(word) > width:
+            out.append(line)
+            line = word
+        else:
+            line = f"{line} {word}".strip()
+    if line:
+        out.append(line)
+    return out
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -273,14 +778,28 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--status", default="ok",
                     choices=["ok", "held", "stopped", "error"])
     ap.add_argument("--slug")
-    ap.add_argument("--note", default="")
+    ap.add_argument("--note", default="",
+                    help="the real reason, as run.py printed it. For a refusal "
+                         "this is the fault list and the per-attempt trail, and "
+                         "both are read back out of it")
     ap.add_argument("--score")
     ap.add_argument("--run-url")
+    ap.add_argument("--reply-id",
+                    help="the short deck id a reply names. Defaults to the last "
+                         "segment of the slug, which is what release.find matches")
+    ap.add_argument("--objection", action="append", default=[],
+                    help="one style objection on a held deck. Repeatable")
+    ap.add_argument("--no-retry", action="store_true",
+                    help="the fault count stopped falling, so a fresh idea walks "
+                         "into the same check. The retry line is marked 🚫 with "
+                         "the reason rather than removed")
     ap.add_argument("--format", default="text", choices=["text", "html"],
-                    help="html is Telegram-flavoured (bold labels, linked logs); "
-                         "text is for email and the run log")
+                    help="html is Telegram-flavoured (bold labels, tap-to-copy "
+                         "verbs, linked logs); text is for email and the run log")
     a = ap.parse_args(argv)
-    print(build(a.status, a.slug, a.note, a.score, a.run_url, a.format))
+    print(build(a.status, a.slug, a.note, a.score, a.run_url, a.format,
+                retry=not a.no_retry, objections=a.objection,
+                reply_id=a.reply_id))
     return 0
 
 

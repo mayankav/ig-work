@@ -9,11 +9,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "publish, or build only"
+        description: "publish, build only, or force past a style check"
         required: false
         default: "build"
         type: choice
-        options: ["build", "publish"]
+        # force builds a deck a copy-craft gate refused and HOLDS it. It is not
+        # publish, and the publish steps below test for that exact word, so a
+        # forced deck cannot go out until a separate `publish <id>` reply.
+        options: ["build", "publish", "force"]
 
 permissions:
   contents: write
@@ -135,7 +138,14 @@ jobs:
       - name: Build the deck
         id: build
         run: |
-          python .agents/skills/suresilly-carousel/scripts/run.py --no-post
+          # --force only when the run was dispatched with mode=force, which only
+          # a `force` reply or the manual button can set. A scheduled run cannot
+          # reach it: MODE is 'publish' on a schedule. The forced deck is held by
+          # run.py itself and every publish step below is gated on MODE ==
+          # 'publish', so there are two independent reasons it cannot post.
+          FORCE=""
+          if [ "$MODE" = "force" ]; then FORCE="--force"; fi
+          python .agents/skills/suresilly-carousel/scripts/run.py --no-post $FORCE
 
       # Instagram fetches the images itself, so they have to be public before
       # the post exists. This is why building and posting are separate steps
@@ -302,8 +312,16 @@ jobs:
       # steps.build.outcome is the signal and no marker file is needed.
       - name: Report the result
         if: always()
+        env:
+          # Read as data, never interpolated into the script. A ${{ }} expansion
+          # of model-written text lands inside the shell as code — a reason
+          # holding a backtick or a $( would run. As an env var it is a string.
+          SLUG: ${{ steps.build.outputs.slug }}
+          VERDICT: ${{ steps.build.outputs.verdict }}
+          REASON: ${{ steps.build.outputs.reason }}
+          CAN_RETRY: ${{ steps.build.outputs.retry }}
+          OUTCOME: ${{ steps.build.outcome }}
         run: |
-          SLUG="${{ steps.build.outputs.slug }}"
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           # The body is a dashboard, not a sentence. scripts/dashboard.py reads
           # local state only and cannot fail the step: every section it cannot
@@ -314,34 +332,58 @@ jobs:
           # logs line). Same facts, one styled for a phone and one for a year from
           # now. The HTML uses only single-line tags, so notify.py can split a
           # long caption at a newline without landing inside one.
-          if [ -n "$SLUG" ]; then
+          if [ "$VERDICT" = "held" ]; then
+            # hold_for_review already sent the owner the deck, the picture and the
+            # reply list. A second message here would be a "POSTED" dashboard
+            # about a deck still sitting in state/pending — which is what happened
+            # before `verdict` existed and the step read the slug alone.
+            echo "### ⏸ held \`$SLUG\` — waiting for a reply" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          elif [ -n "$SLUG" ]; then
             SUBJECT="[SILLY-OK] $SLUG"
             BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
             HTML=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL" --format html)
             ATTACH="carousels/$SLUG/contact_sheet.png"
             echo "### ✅ posted \`$SLUG\`" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ steps.build.outcome }}" = "success" ]; then
+          elif [ "$OUTCOME" = "success" ]; then
             # AMBER. The build ran and exited 0 with no deck, which only happens
             # when a gate said no. The warning annotation is as close to an amber
             # dot as Actions gets: the run stays green, and the summary says why.
+            #
+            # The note is the REASON THE RUN GAVE. It used to be a constant here —
+            # "a gate refused, which is the system working" — and on 2026-09-03
+            # the owner got that same sentence for two entirely different faults
+            # in one day, replied `retry` to a gate no wording could satisfy, and
+            # waited seven minutes for it to fail identically. run.py has printed
+            # the real reason since the day it was written; this step never read
+            # it. Fall back to the old sentence only if the output is missing.
             SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
-            NOTE="No deck was built. A gate refused, which is the system working. Reply retry to try again now with a fresh moment."
-            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE")
-            HTML=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" --format html)
+            NOTE="${REASON:-No deck was built. A quality check refused every attempt.}"
+            RETRY_FLAG=""
+            if [ "$CAN_RETRY" = "false" ]; then RETRY_FLAG="--no-retry"; fi
+            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG)
+            HTML=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG --format html)
             ATTACH=""
-            echo "::warning::no deck today — a gate refused. Nothing is broken; reply retry to try again."
+            echo "::warning::no deck today — a gate refused: ${NOTE:0:180}"
             echo "### ⚠️ nothing today — a gate refused, nothing is broken" >> "$GITHUB_STEP_SUMMARY"
+            echo "$NOTE" >> "$GITHUB_STEP_SUMMARY"
           else
             # RED, and note what reaches here: `failure` AND `skipped`. A suite
             # failing above skips the build, and a skipped build is not a gate
             # refusing — it is CI red with nobody told. Amber is claimed only by
             # an explicit success, so every other outcome, named or not, is red.
+            #
+            # A run.py handler that exits 1 writes its reason to $GITHUB_OUTPUT
+            # BEFORE it exits, and an output written before a non-zero exit
+            # survives — so the red path names the vendor too, and only falls back
+            # to the generic sentence when the build died before it could speak.
             SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d)"
-            NOTE="The build did not finish (${{ steps.build.outcome }}). A vendor or the critic was unreachable, a layer refused outright, or a gate suite failed before the build ran. This one needs you."
+            NOTE="${REASON:-The build did not finish ($OUTCOME). A gate suite failed before the build ran, or the run died before it could say why.}"
             BODY=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE")
             HTML=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" --format html)
             ATTACH=""
-            echo "### ❌ broken (build ${{ steps.build.outcome }}) — see the log" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ❌ broken (build $OUTCOME) — see the log" >> "$GITHUB_STEP_SUMMARY"
+            echo "$NOTE" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
             python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML" --attach "$ATTACH"

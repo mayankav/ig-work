@@ -53,6 +53,56 @@ class Refused(Exception):
     message offering a retry that cannot work is worse than no offer.
     """
 
-    def __init__(self, reason: str, retry: bool = True) -> None:
+    def __init__(self, reason: str, retry: bool = True,
+                 history: list[int] | None = None) -> None:
         super().__init__(reason)
         self.retry = retry
+        # The fault count per attempt. Carried because it is the one number that
+        # tells a stuck gate from an unlucky draft, and until now it existed only
+        # inside the reason string, where nothing could read it.
+        self.history = list(history or [])
+
+
+# ───────────────────────── reading the fault trail ─────────────────────────
+
+# Three identical counts in a row. Measured against the two real trails this
+# engine has recorded: a CI run went 6, 2, 1 and a local one 4, 4, 4, 2, 1 —
+# both were converging and both ended one attempt short of clean, so three
+# repeats must NOT call either of those stuck. Run local-1788395662 went
+# 13, 5, 4, 3, 3, 3, 3 and was: the same fault stood for four attempts because
+# the gate could not be satisfied by any wording.
+#
+# Two would have called 4, 4, 4, 2, 1 stuck at its third attempt and withheld a
+# retry from a run that was about to finish. Four never fires on a seven-attempt
+# loop until the sixth, which is too late to be worth saying.
+STUCK_AFTER = 3
+
+
+def trajectory(history: list[int]) -> tuple[str, str]:
+    """How the fault count moved, and one sentence about it for the owner.
+
+    Returns one of `converging`, `stuck` or `one-shot`, and a plain line naming
+    what that means for whoever is reading the alert at breakfast.
+
+    This decides ONE thing: whether the message offers `retry`. Invariant 27
+    already says a verb is offered only when trying again could work, and this is
+    the measurement behind that promise for the writer loop — a fault count that
+    stopped falling means a gate no wording will satisfy, and a fresh moment goes
+    straight back into it.
+    """
+    counts = list(history or [])
+    if len(counts) < 2:
+        return "one-shot", ("There was only one try, so there is nothing to "
+                            "compare it against.")
+    tail = counts[-STUCK_AFTER:]
+    if len(tail) >= STUCK_AFTER and len(set(tail)) == 1:
+        return "stuck", (f"The count stopped falling at {tail[0]}. "
+                         f"One check cannot be passed, so a new idea will stop "
+                         f"in the same place.")
+    return "converging", ("The count was still falling. It ran out of tries "
+                          "rather than running out of ideas.")
+
+
+def arrow(history: list[int]) -> str:
+    """The trail as one scannable line: 13 → 5 → 4 → 3 → 3 → 3 → 3."""
+    return " → ".join(str(n) for n in history) if history else "—"

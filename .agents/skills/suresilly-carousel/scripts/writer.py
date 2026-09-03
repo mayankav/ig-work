@@ -41,6 +41,7 @@ import bibliography  # noqa: E402
 import coherence  # noqa: E402
 import llm  # noqa: E402
 import memory  # noqa: E402
+import outcomes  # noqa: E402
 from outcomes import Refused  # noqa: E402
 import readability  # noqa: E402
 import safety  # noqa: E402
@@ -1033,9 +1034,15 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     # red in exactly the same way. The vendor case still raises ModelRefused —
     # from inside llm.ask(), which propagates straight out of this loop — so the
     # two are told apart by where they originate. See outcomes.py.
+    #
+    # Same trajectory rule as the draft loop below: a fault count that stopped
+    # falling is a gate no wording satisfies, and offering a retry into it wastes
+    # a run. The trail rides on the exception so the alert can print it.
+    shape, _ = outcomes.trajectory(history)
     raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
-        f"[faults per attempt: {', '.join(str(n) for n in history)}]")
+        f"[faults per attempt: {', '.join(str(n) for n in history)}]",
+        retry=shape != "stuck", history=history)
 
 
 # ─────────────────────────── the draft ────────────────────────────
@@ -1842,10 +1849,57 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
     return list(dict.fromkeys(problems))
 
 
+def hard_faults(markdown: str) -> list[str]:
+    """The faults in verify_draft that a human may not stand in for.
+
+    The owner can override a copy-craft gate — a hard word, a subtitle that
+    repeats the headline, a CTA aimed at nobody. Those are matters of taste that
+    a person looking at the deck is better placed to judge than a regex.
+
+    These two are not taste.
+
+      check_leak      the draft copied the prompt (invariant 20). Five of seven
+                      published decks carried a run of words lifted from their
+                      own instructions, including a sentence the prompt quotes
+                      in order to forbid it. A human saying "post it anyway"
+                      cannot make that stop being plagiarised from ourselves.
+      check_mascots   a brief asks for lettering in the artwork (invariants 3,
+                      28). It is refused here, before any art is drawn, and
+                      again at render by cutout.assert_no_text. Overriding this
+                      one would put text on the mascot.
+
+    Everything else genuinely dangerous is out of reach of an override already,
+    because it runs somewhere else entirely: the citation is proved in
+    bibliography before the draft loop starts, the safety screen runs at moment
+    selection, novelty runs in compose, the two claim locks run before drafting,
+    and the pixel gates run at render. So this list is short by construction —
+    it is only the non-craft checks that happen to live INSIDE this loop.
+    """
+    return check_leak(markdown) + check_mascots(
+        re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown))
+
+
 def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
                moment_anchors: set[str] | None = None,
-               term: str = "") -> tuple[str, dict, dict, str]:
-    """Plan, draft, assemble. Returns (markdown, plan, axes, who wrote it).
+               term: str = "",
+               allow_faults: bool = False) -> tuple[str, dict, dict, str, list[str]]:
+    """Plan, draft, assemble. Returns (markdown, plan, axes, who wrote it, faults).
+
+    The last element is the list of copy-craft faults the deck still carries. It
+    is EMPTY on every ordinary run, because an ordinary run does not return a
+    deck that has any. It is populated only under `allow_faults`, and then it is
+    what the owner has to be shown before they approve the deck.
+
+    `allow_faults` is the override the owner types as `force` in Telegram. It
+    returns the best draft the loop reached instead of refusing — but only after
+    hard_faults() comes back empty, so a draft that copied the prompt or asked
+    for lettering in the artwork still refuses, exactly as it does without the
+    flag. Read hard_faults for why those two and nothing else.
+
+    An overridden deck is HELD, never posted by the run that built it. Invariant
+    4 still holds for everything a gate protects on its own; what changed is that
+    the owner may stand in for a matter of taste, once, by name, into a deck a
+    second reply has to release.
 
     The provider is returned because the critic must not be the vendor that
     wrote the deck, and until now the caller assumed Gemini always did. When
@@ -1932,6 +1986,13 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     attempt_user = user
     best_copy: dict | None = None
     best_problems: list[str] | None = None
+    # The assembled markdown of the best attempt, and who wrote it. Kept because
+    # the override needs the deck itself, not just the copy dict — assemble() is
+    # deterministic, so re-running it would give the same bytes, but keeping the
+    # ones that were actually measured means the faults reported to the owner are
+    # about the file they are approving.
+    best_markdown: str | None = None
+    best_wrote: str = ""
     # Seven, not five. With the best draft carried forward the fault count
     # falls steadily — a CI run went 6, 2, 1 and a local one 4, 4, 4, 2, 1 —
     # and both ran out of attempts one short of clean. Each attempt is one call
@@ -1946,10 +2007,11 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
                             pick_hashtags(topic, plan.get("pattern_name", "") + moment))
         problems = verify_draft(markdown, moment_anchors, plan.get("pattern_name", ""))
         if not problems:
-            return markdown, plan, axes, wrote
+            return markdown, plan, axes, wrote, []
         history.append(len(problems))
         if best_problems is None or len(problems) < len(best_problems):
             best_copy, best_problems = copy, problems
+            best_markdown, best_wrote = markdown, wrote
         copy, problems = best_copy, best_problems
         # The draft itself goes back with the complaints. It said "your previous
         # draft was rejected" and then did not include the draft, so the model
@@ -1964,11 +2026,39 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
               "stays word for word as it is above. Do not improve anything you were not "
               "asked about — a line you rewrite unasked is a new fault."
         )
+    # Out of attempts. Two ways this ends.
+    #
+    # The owner asked for this deck anyway (`force` in Telegram, --force here).
+    # Hand back the best draft with its remaining faults attached, so the message
+    # they get lists exactly what they are approving. Only after hard_faults()
+    # comes back empty: a draft that copied the prompt or asked for lettering in
+    # the artwork is refused with or without the flag, because neither of those
+    # is a matter of taste a person is better placed to judge.
+    if allow_faults and best_markdown is not None:
+        blocking = hard_faults(best_markdown)
+        if not blocking:
+            return (best_markdown, plan, axes, best_wrote,
+                    list(dict.fromkeys(best_problems or [])))
+        # Refused for a different reason than running out of attempts, and the
+        # message has to say so — otherwise the owner types `force` again.
+        raise Refused(
+            "the override cannot apply to this deck: "
+            + "; ".join(dict.fromkeys(blocking))[:300]
+            + " [these two faults are never overridable]",
+            retry=True, history=history)
+
     # Refused, not llm.ModelRefused — see the matching raise at the end of
     # plan_deck for why. The draft the gates would not pass is an amber ending.
+    #
+    # The trail is carried on the exception as well as printed in the reason.
+    # `retry` is withheld when the count stopped falling, because a fresh moment
+    # goes into the same unsatisfiable check — invariant 27's promise that a verb
+    # is offered only when it could work, measured rather than assumed.
+    shape, _ = outcomes.trajectory(history)
     raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
-        f"[faults per attempt: {', '.join(str(n) for n in history)}]")
+        f"[faults per attempt: {', '.join(str(n) for n in history)}]",
+        retry=shape != "stuck", history=history)
 
 
 # ─────────────────────────── checking the draft ────────────────────────────

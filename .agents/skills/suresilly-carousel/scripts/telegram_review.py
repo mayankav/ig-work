@@ -89,10 +89,11 @@ VERBS = {
     "rerun": "drop", "drop": "drop", "reject": "drop", "discard": "drop",
     "list": "list", "held": "list", "pending": "list", "status": "list",
     # Known here so the word is understood rather than treated as chatter, but
-    # this script cannot carry it out: retry means "build a fresh deck", which is
-    # a workflow dispatch, and only the Worker holds a token for that. Both paths
-    # below decline it explicitly — see act() and reply().
+    # this script cannot carry either out: both mean "build a deck", which is a
+    # workflow dispatch, and only the Worker holds a token for that. Both paths
+    # below decline them explicitly — see act() and reply().
     "retry": "retry", "tryagain": "retry",
+    "force": "force", "override": "force", "build": "force",
 }
 COMMAND = re.compile(r"^\s*(?P<verb>[a-z]+)\s*(?P<slug>[\w-]*)\s*$", re.I)
 
@@ -160,11 +161,11 @@ def act(verb: str, slug: str) -> str:
 
     # Fail closed, and before anything is read or resolved. The way out of this
     # function used to be an unguarded `release.drop(record)`, which made "any
-    # verb that is not list or publish" mean DESTROY THE DECK. `retry` was about
-    # to become such a verb: it is in VERBS so the word is understood, but the
-    # Worker dispatches it to auto-post.yml and it must never arrive here. If it
-    # ever does, the answer is to do nothing and say so — not to drop a held deck
-    # because a branch was missing.
+    # verb that is not list or publish" mean DESTROY THE DECK. `retry` and
+    # `force` were about to become such verbs: both are in VERBS so the words are
+    # understood, but the Worker dispatches them to auto-post.yml and neither must
+    # ever arrive here. If one does, the answer is to do nothing and say so — not
+    # to drop a held deck because a branch was missing.
     if verb not in ("list", "publish", "drop"):
         return (f"I don't act on <b>{esc(verb)}</b> here — "
                 f"that one starts a fresh build, which the Worker dispatches. "
@@ -258,17 +259,17 @@ def reply(verb: str, slug: str) -> int:
     other word arrives, run it through VERBS so this can never do something the
     reply did not name.
 
-    `retry` is a known verb that deliberately does not belong to this script — it
-    means "build a fresh deck", which is a workflow dispatch the Worker performs
-    directly against auto-post.yml. Reaching here means the routing broke, so say
-    that rather than calling it unknown.
+    `retry` and `force` are known verbs that deliberately do not belong to this
+    script — both mean "build a deck", which is a workflow dispatch the Worker
+    performs directly against auto-post.yml. Reaching here means the routing
+    broke, so say that rather than calling either one unknown.
     """
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     chat = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
     mapped = VERBS.get(verb.lower(), verb.lower())
-    if mapped == "retry":
-        print("retry is dispatched to auto-post by the Worker, not acted on here; "
-              "nothing done")
+    if mapped in ("retry", "force"):
+        print(f"{mapped} is dispatched to auto-post by the Worker, not acted on "
+              f"here; nothing done")
         return 0
     if mapped not in ("publish", "drop", "list"):
         print(f"unknown decision {verb!r}, nothing done")

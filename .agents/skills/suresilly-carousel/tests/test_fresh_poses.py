@@ -539,17 +539,33 @@ def test_the_dashboard_survives_missing_state(tmp_path, monkeypatch):
     monkeypatch.setattr(dashboard, "STATE", tmp_path / "nothing-here")
     monkeypatch.setattr(dashboard, "SKILL", tmp_path / "also-nothing")
     text = dashboard.build("ok", "some_slug", "", None, None)
-    assert "PICTURES" in text and "QUEUE" in text
+    assert "Pictures" in text and "Queue" in text
     assert "unknown" in text                      # it degraded rather than raised
 
 
 def test_the_dashboard_reports_every_section():
+    """The posted message is the dashboard; the held message is a decision.
+
+    They used to be asserted as one shape, which is what let the held message go
+    out with no reply list for a year. Each is checked for the questions IT has
+    to answer — see dashboard.build's docstring for the five.
+    """
     sys.path.insert(0, str(ROOT.parents[2] / "scripts"))
     import dashboard
-    text = dashboard.build("held", "a_slug", "held because X", "62", "http://run")
-    for section in ("PICTURES", "LIBRARY", "THIS DECK", "QUEUE", "REVIEW", "MEASURED"):
-        assert section in text, f"{section} missing from the dashboard"
-    assert "held because X" in text and "62/100" in text and "http://run" in text
+
+    posted = dashboard.build("ok", "a_slug", "", None, "http://run")
+    for section in ("Pictures", "Library", "This deck", "Queue", "Waiting",
+                    "Measured"):
+        assert section in posted, f"{section} missing from the posted dashboard"
+
+    held = dashboard.build("held", "20260903_kitchen_a1b2c3", "held because X",
+                           "62", "http://run")
+    assert "held because X" in held and "62 of 100" in held and "http://run" in held
+    # The half that was missing: what to reply, and what silence does. The verb
+    # names the SHORT id, because that is what release.find matches — a reply
+    # quoting the full slug would be the owner copying more than they need to.
+    assert "publish a1b2c3" in held and "rerun a1b2c3" in held
+    assert "IF YOU DO NOTHING" in held
 
 
 def test_the_dashboard_never_feeds_numbers_back_into_the_pipeline():
