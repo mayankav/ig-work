@@ -85,16 +85,69 @@ def cta_text(slide: dict) -> str:
     return " ".join(str(slide.get(k, "")) for k in ("h1", "closing", "cta1", "cta2"))
 
 
+def cta_call_line(slide: dict) -> str:
+    """The one line of slide 9 that asks for the share, for quoting in a fault.
+
+    `cta_text` joins four fields with h1 first, so quoting the front of it hands
+    the model its own headline and asks why the headline has no recipient. The
+    line that matters is whichever field carries the verb.
+    """
+    fields = [str(slide.get(k, "")) for k in ("cta1", "closing", "h1", "cta2")]
+    for line in fields:
+        if any(v in clean(line).lower() for v in ("send ", "share ", "dm ", "forward ")):
+            return clean(line)
+    return clean(next((f for f in fields if f.strip()), ""))
+
+
+# A kind of person the deck may name outright, with nothing after it. Fifteen
+# words, and this used to be the ONLY way through — which made it a vocabulary
+# the model was never shown. DRAFT_SYSTEM dictates the shape as
+# "Send this to the [kind of person] who [does the thing in the moment]", an
+# open slot, so a moment set in an office asks for `manager`, `boss`,
+# `colleague` or `teammate` and the gate refused all four while its message
+# named none of them. Run local-1788395662 died there — faults 13, 5, 4, 3, 3,
+# 3, 3, flat for four attempts on a moment about a manager's extra shift — and
+# `coworker` was on the list all along. Invariant 24: a gate may not contradict
+# its own prompt. Invariant 21: a fault nothing can answer is a stopped engine.
+PERSON_WORDS = (
+    "partner", "friend", "person", "human", "overthinker", "peacekeeper", "ex",
+    "sibling", "parent", "favorite", "favourite", "coworker", "roommate",
+    "someone", "one",
+)
+
+# The opposite of a recipient. These pass any noun test and address nobody, so
+# they are refused on both routes — "send this to anyone who relates" is the
+# generic CTA this gate exists to catch, wearing a clause.
+VAGUE_RECIPIENT = (
+    "anyone", "everyone", "anybody", "everybody", "somebody", "whoever",
+    "people", "them", "us", "y'all", "everyone else",
+)
+
+# What actually makes a recipient specific is the clause that describes them,
+# which is the half of the prompt's shape the old regex never looked at. So any
+# kind of person qualifies, provided the deck says WHICH one.
+_NAMED = r"\b(?:to|with)\s+(?:your|the|a|an|my)\s+(" + "|".join(PERSON_WORDS) + r")\b"
+_DESCRIBED = (r"\b(?:to|with)\s+(?:your|the|a|an|my)\s+"
+              r"(?:[a-z'-]+\s+){0,2}([a-z'-]+)\s+(?:who|that|still|always|never)\b")
+
+
 def has_specific_recipient(text: str) -> bool:
+    """True when slide 9 says who to send it to, by name or by description.
+
+    Two routes, and the second is the one the prompt actually asks for. A word
+    on PERSON_WORDS stands alone — "send this to your partner" needs no clause.
+    Anything else must be described — "send this to the manager who books your
+    evening" — because a kind of person plus what they do is the specificity,
+    not the noun. `VAGUE_RECIPIENT` is refused on both routes.
+    """
     t = clean(text).lower()
     if not any(v in t for v in ("send ", "share ", "dm ", "forward ")):
         return False
-    return bool(re.search(
-        r"\b(to|with)\s+(your|the|a)\s+"
-        r"(partner|friend|person|human|overthinker|peacekeeper|ex|sibling|parent|"
-        r"favorite|favourite|coworker|roommate|someone|one)",
-        t,
-    ))
+    for pattern in (_NAMED, _DESCRIBED):
+        found = re.search(pattern, t)
+        if found and found.group(1) not in VAGUE_RECIPIENT:
+            return True
+    return False
 
 
 def source_is_specific(source: str) -> bool:
@@ -234,7 +287,14 @@ def audit(path: Path) -> list[str]:
             issues.append(f"generic CTA: {bad}")
             break
     if not has_specific_recipient(call):
-        issues.append("CTA must ask for a DM/share to a specific recipient")
+        # Names the shape, because "a specific recipient" is a fault nothing can
+        # answer — the model rewrites the same line differently wrong. Same rule
+        # as readability naming the word (invariant 21).
+        issues.append(
+            "the CTA must say who to send it to, in the shape 'Send this to the "
+            "[kind of person] who [does the thing in the moment]'. Any kind of person "
+            "works — friend, manager, sibling, roommate — but 'anyone' and 'everyone' "
+            f"are not a person. It currently says: {cta_call_line(last)[:80]!r}")
     if "closing" not in last:
         issues.append("CTA slide needs **Closing thought:**")
     # CTA safe zone — prevents last-page cutoff (render.py overflow). Long CTA + big handle + mascot must fit 1126px canvas.

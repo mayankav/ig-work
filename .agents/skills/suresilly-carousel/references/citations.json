@@ -334,6 +334,24 @@
         "checked_by": "cloudflare",
         "at": "2026-09-02T14:39:15Z"
       }
+    },
+    {
+      "id": "mate-2003",
+      "line": "— Gabor Maté, *When the Body Says No* (2003)",
+      "pillars": [
+        "people_pleasing"
+      ],
+      "claims": [
+        "Chronic compulsive caretaking stems from suppressing authentic needs to maintain attachment."
+      ],
+      "phrase": "compulsive caretaking",
+      "verified": {
+        "catalogue": "openlibrary",
+        "scanned_hits": 139,
+        "proposed_by": "gemini",
+        "checked_by": "cloudflare",
+        "at": "2026-09-03T00:38:25Z"
+      }
     }
   ]
 }
