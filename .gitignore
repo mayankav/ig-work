@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .venv/
 .next/
+node_modules/
 
 # Local credentials. Never committed. Create it yourself:
 #   printf 'GROQ_API_KEY=gsk_...\n' > .env.local

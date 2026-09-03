@@ -508,14 +508,18 @@ def run() -> int:
 
     # And the decks that read acceptably must survive it. Both halves matter:
     # a threshold tuned until today's deck fails is worth nothing if it also
-    # refuses the hand-written ones.
+    # refuses the hand-written ones. The 2026-09-02 deck genuinely carried
+    # lettering in briefs 7 and 8, so both directions are asserted on real data.
+    KNOWN_DEFECTS_20260902 = "20260902_6pm-picked-up_068b42"
     for deck in decks:
         briefs = _re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", deck.read_text(encoding="utf-8"))
         if len(briefs) != 9:
             continue
-        for fault in writer.check_mascots(briefs):
-            if "puts text" in fault:
-                failures.append(f"GATE-A {deck.parent.name}: {fault[:90]}")
+        text_faults = [f for f in writer.check_mascots(briefs) if "puts text" in f]
+        if text_faults and deck.parent.name != KNOWN_DEFECTS_20260902:
+            failures.append(f"GATE-A {deck.parent.name}: {text_faults[0][:90]}")
+        if not text_faults and deck.parent.name == KNOWN_DEFECTS_20260902:
+            failures.append(f"GATE-A {KNOWN_DEFECTS_20260902} shipped lettering and no longer trips the gate")
     # The two decks measured at 0.33 and 0.40 on content words are exactly the
     # ones a reader called the same picture nine times; the cap sits at 0.27,
     # in the middle of the gap above the 0.20 the hand-written decks reach.
@@ -543,8 +547,11 @@ def run() -> int:
             "[[doorway]] past 6pm.\n"):
         failures.append("GATE-E the accent markup hid a repeat")
     for deck in decks:
-        for fault in writer.check_last_slide(deck.read_text(encoding="utf-8")):
-            failures.append(f"GATE-E {deck.parent.name}: {fault[:90]}")
+        last_faults = writer.check_last_slide(deck.read_text(encoding="utf-8"))
+        if last_faults and deck.parent.name != KNOWN_DEFECTS_20260902:
+            failures.append(f"GATE-E {deck.parent.name}: {last_faults[0][:90]}")
+        if not last_faults and deck.parent.name == KNOWN_DEFECTS_20260902:
+            failures.append(f"GATE-E {KNOWN_DEFECTS_20260902} repeats slide 9 and no longer trips the gate")
     if not (0.13 < writer.LAST_SLIDE_SAME < 1.0):
         failures.append(f"GATE-E the cap moved to {writer.LAST_SLIDE_SAME}, outside the "
                         f"empty band between 0.13 and 1.00 where it was measured")
