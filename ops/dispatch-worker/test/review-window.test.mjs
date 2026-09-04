@@ -76,3 +76,26 @@ assert.equal(parseWindowReply('approve 4',preview.caption),null);
  assert.equal((await call(obj,'claim',{manifest,action_id:first.action.id})).state,'working');
 }
 console.log('review-window: all transition, receipt, timeout and stale-action checks passed');
+
+// Multi-image decisions are unambiguous; an invalid reply changes nothing.
+assert.deepEqual(parseWindowReply(`redo ${token} images 7,2,4`).slides,[2,4,7]);
+assert.deepEqual(parseWindowReply('redo images all',preview.caption).slides,[1,2,3,4,5,6,7,8,9]);
+for (const tail of ['images 0','images 10','images 2,2','images 2-4','images 2,','images 2 approve','all images'])
+ assert.equal(parseWindowReply(`redo ${token} ${tail}`),null);
+{
+ const {obj,storage}=object();
+ await call(obj,'register',{...preview,manual_required:true,issue_pages:['All findings']});
+ assert.equal(storage.alarm,null); now+=REVIEW_HOUR*2;await obj.alarm();
+ assert.equal((await call(obj,'status')).state,'waiting');
+ await call(obj,'decide',{request_id:'tg-100',decision:'redo_slide',slides:[2,4,7]});
+ assert.deepEqual((await call(obj,'status')).action.slides,[2,4,7]);
+}
+{
+ const original=globalThis.fetch;
+ globalThis.fetch=async(url,...args)=>url.endsWith('/sendMessage')?Response.json({ok:false}):original(url,...args);
+ const {obj,storage}=object();
+ assert.equal((await call(obj,'register',{...preview,issue_pages:['one issue']})).status,502);
+ assert.equal(storage.alarm,undefined);
+ assert.equal((await call(obj,'decide',decision(101))).status,409);
+ globalThis.fetch=original;
+}

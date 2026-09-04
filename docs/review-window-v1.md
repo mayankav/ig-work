@@ -87,3 +87,12 @@ Release `b3e2527` is on main; Worker version `ef3d00cf-8401-40fa-81b6-da232977ec
 A real Telegram `list` reply received a resource report. It showed Cloudflare's recorded 9,928.68 units used and 71.32 remaining, with reset on 5 September at 05:30 IST. Gemini counts and its 12:30 IST reset were shown. Groq's older request/token readings retained their actual observation and refill dates. Missing Instagram readings and unreported Telegram daily limits were labelled unknown. This verifies delivery of the report, not live account balances or Instagram publication.
 
 At 22:58 IST, recovery run `33899912272` stopped before preview: the independent reviewer found an unsupported claim on slide 6 that pausing reduces the threat response. No preview or Instagram upload was made. Telegram accepted the failure notification with its resource report. The run was not repeated. The writer still needs a bounded correction of unsupported effects before review; approval has not been requested for this rejected draft.
+
+
+## Consolidated review update
+
+Telegram now receives the contact sheet, every detected critic/style issue (with slide and quote when available), copy-ready commands and resource readings. Long reports are numbered pages; no issue is dropped to fit a caption. The entire issue report must be accepted by Telegram before the decision window opens. A partial delivery keeps posting paused.
+
+Source-support concerns are held for the owner's explicit decision, without an automatic deadline. They remain recorded as `owner_review`, not factual approval. Clean previews retain the one-hour deadline. Approval accepts all disclosed issues for the frozen version. Harm/safety and missing technical evidence still stop before a publishable preview; a reply cannot repair missing files or an unavailable API.
+
+Commands: `approve ID`, `disapprove ID`, `redo ID all`, `redo ID images 2,4,7`, `redo ID images all`. A direct Telegram reply to any review page may omit ID. Legacy `redo ID 4` still works. Lists require unique 1–9 numbers; ranges and mixed actions are rejected with instructions and no state change. Multiple images are budget-checked together, generated in a temporary folder, and installed only after the entire new render passes. Failed generation preserves the original preview and leaves its posting paused. Full redo changes text; image redo never does.

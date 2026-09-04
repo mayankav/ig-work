@@ -38,3 +38,12 @@ def test_passage_reaches_reviewer(deck):
 def test_style_notes_do_not_block_preview(deck):
     review.save(deck,'gemini','review',70,'Tone could improve',[],style_notes=['Repeated heading'])
     assert review.validate(deck)['style_notes']==['Repeated heading']
+
+
+def test_source_concern_can_reach_owner_but_harm_cannot(deck):
+    issues=[{'category':'H3_FALSE_PSYCH','slide':6,'quote':'A pause reduces threats','why':'No support'}]
+    assert review.owner_decidable('block',issues)
+    review.save(deck,'gemini','block',30,'No support',issues)
+    assert review.validate(deck)['outcome']=='owner_review'
+    assert not review.owner_decidable('block',issues+[{'category':'H1_HARM_ADVICE'}])
+    assert not review.owner_decidable('block',[])

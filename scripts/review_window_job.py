@@ -95,10 +95,14 @@ def register(deck):
     import resource_status
     resource_status.save_api()
     import dashboard
-    caption = dashboard.review_window_message(record['token'], base + '/caption.txt') + '\nReview notes: ' + base + '/review_notes.txt'
+    import review_report
+    checked = json.loads((deck / 'content_review.json').read_text())
+    pages = review_report.pages(record['token'], checked, base)
+    manual = checked['outcome'] == 'owner_review'
+    caption = review_report.caption(record['token'], manual)
     receipt = window.api(record['token'], 'register', {
         **{k: record[k] for k in ('token', 'slug', 'manifest')}, 'run_id': os.environ['GITHUB_RUN_ID'],
-        'sheet_url': base + '/contact_sheet.png', 'caption': caption, 'resources': __import__('resource_status').report()})
+        'sheet_url': base + '/contact_sheet.png', 'caption': caption, 'issue_pages': pages, 'manual_required': manual, 'resources': __import__('resource_status').report()})
     if receipt.get('state') != 'waiting' or not receipt.get('message_id'): raise ValueError('Telegram review window did not open')
     (deck / 'review_delivery.json').write_text(json.dumps(receipt, indent=2) + '\n')
     save_history(record['token'])
@@ -107,6 +111,9 @@ def register(deck):
 
 
 def redo_slide(deck, number):
+    numbers = [number] if isinstance(number, int) else sorted(number)
+    if not numbers or len(set(numbers)) != len(numbers) or any(type(n) is not int or n < 1 or n > 9 for n in numbers):
+        raise ValueError("Use unique slide numbers 1 to 9")
     import render
     import post_to_ig
     before = window.read(deck)
@@ -120,15 +127,20 @@ def redo_slide(deck, number):
         for key, proof in checks['artwork'].items():
             raw = owner_art.check(proof)
             path = staged / f'mascot-{key}.png'; path.write_bytes(raw); mascots[int(key)] = path
-        old = mascots[number].read_bytes()
-        mascots[number] = owner_art.generate_one(slides[number-1], staged / 'replacement.png', previous=old)
+        import poses_flux as flux
+        ledger = flux.Ledger()
+        ledger.check(len(numbers) * flux.estimate_neurons(1024, 1024, len(flux.ANCHORS)))
+        for number in numbers:
+            old = mascots[number].read_bytes()
+            mascots[number] = owner_art.generate_one(slides[number-1], staged / f'replacement-{number}.png', previous=old, ledger=ledger)
         rendered = render.render(staged / 'carousel.md', mascots, staged / 'slides', palette_override=checks['palette'])
         ordered = sorted((deck / 'slides').glob('*.png'))
         for index, path in enumerate(ordered, 1):
-            if index != number and path.read_bytes() != (staged / 'slides' / path.name).read_bytes():
+            if index not in numbers and path.read_bytes() != (staged / 'slides' / path.name).read_bytes():
                 raise ValueError(f'Redo would change untouched slide {index}')
-        if ordered[number-1].read_bytes() == (staged / 'slides' / ordered[number-1].name).read_bytes():
-            raise ValueError('The slide image did not change')
+        for number in numbers:
+            if ordered[number-1].read_bytes() == (staged / 'slides' / ordered[number-1].name).read_bytes():
+                raise ValueError(f'Slide {number} image did not change')
         render.contact_sheet(rendered, staged / 'contact_sheet.png')
         backup = deck / 'slides-before-redo'
         if backup.exists(): raise ValueError('An earlier interrupted replacement needs inspection')
@@ -211,7 +223,7 @@ def act(token, action_id, deck):
             notify('Cancelled this carousel. Future posts and generations are unchanged.')
             output(result='cancelled')
         elif decision == 'redo_slide':
-            revised = redo_slide(deck, record['action']['slide'])
+            revised = redo_slide(deck, record['action'].get('slides') or record['action']['slide'])
             stage(revised)
             output(result='replacement_ready', parent_token=token, parent_action=action_id)
         elif decision == 'redo':

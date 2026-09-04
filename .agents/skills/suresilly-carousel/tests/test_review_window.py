@@ -171,3 +171,37 @@ def test_publisher_uses_approved_caption_without_new_quality_decisions(deck,monk
     post.main()
     assert create.call_args.args[-1] == (deck/'caption.txt').read_text()
     forbidden.assert_not_called()
+
+
+def test_multi_image_failure_preserves_original(deck,monkeypatch):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import review_window_job as job, render, post_to_ig, poses_flux
+    (deck/'slides/checks.json').write_text(json.dumps({'artwork':{str(n):{} for n in range(1,10)},'palette':'x'}))
+    window.prepare(deck)
+    before={str(p.relative_to(deck)):p.read_bytes() for p in deck.rglob('*') if p.is_file()}
+    monkeypatch.setattr(post_to_ig,'check_export',lambda *a:None)
+    monkeypatch.setattr(render,'parse_markdown',lambda *a:[{}]*9)
+    monkeypatch.setattr(owner_art,'check',lambda *a:b'old')
+    monkeypatch.setattr(poses_flux,'Ledger',lambda:Mock())
+    calls=[]
+    def generate(slide,path,**kwargs):
+        calls.append(path)
+        if len(calls)==2:raise ValueError('service failed')
+        path.write_bytes(b'new');return path
+    monkeypatch.setattr(owner_art,'generate_one',generate)
+    with pytest.raises(ValueError,match='service failed'):job.redo_slide(deck,[2,4,7])
+    assert len(calls)==2
+    assert before=={str(p.relative_to(deck)):p.read_bytes() for p in deck.rglob('*') if p.is_file()}
+
+
+def test_multi_image_quota_checked_before_generation(deck,monkeypatch):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import review_window_job as job,render,post_to_ig,poses_flux
+    (deck/'slides/checks.json').write_text(json.dumps({'artwork':{str(n):{} for n in range(1,10)}}));window.prepare(deck)
+    monkeypatch.setattr(post_to_ig,'check_export',lambda *a:None)
+    monkeypatch.setattr(render,'parse_markdown',lambda *a:[{}]*9)
+    monkeypatch.setattr(owner_art,'check',lambda *a:b'old')
+    monkeypatch.setattr(poses_flux,'Ledger',lambda:Mock(check=Mock(side_effect=ValueError('quota'))))
+    generate=Mock();monkeypatch.setattr(owner_art,'generate_one',generate)
+    with pytest.raises(ValueError,match='quota'):job.redo_slide(deck,[2,4,7])
+    generate.assert_not_called()

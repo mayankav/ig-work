@@ -236,8 +236,8 @@ export default {
       return new Response("ok", {status: response.status >= 500 ? 502 : 200});
     }
     if (env.REVIEW_WINDOWS && (/Review ID:/i.test(message.reply_to_message?.caption || message.reply_to_message?.text || "") ||
-        /^\s*(approve|approval|disapprove|disapproval|cancel|reject|redo)(?:\s+[1-9])?\s*$/i.test(message.text || ""))) {
-      await ack(env, "Reply to the preview message, or include its Review ID. Use approve, disapprove, redo, or redo 4.");
+        /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)\b/i.test(message.text || ""))) {
+      await ack(env, "No change made. Reply to a review or include its ID. Use one action: approve ID; disapprove ID; redo ID all; redo ID images 2,4,7; redo ID images all. Use unique numbers 1–9. Ranges and mixed actions are not accepted.");
       return new Response("ok");
     }
     const command = parseReply(message.text);

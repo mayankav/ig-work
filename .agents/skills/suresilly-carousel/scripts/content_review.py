@@ -27,8 +27,15 @@ def contract():
     return hashlib.sha256((Path(critic.__file__).read_text() + Path(__file__).read_text()).encode()).hexdigest()
 
 
+def owner_decidable(outcome, objections):
+    return outcome == 'block' and any(item.get('category') == 'H3_FALSE_PSYCH' for item in objections) and all(
+        item.get('category') not in critic.STOPS or item.get('category') == 'H3_FALSE_PSYCH'
+        for item in objections)
+
+
 def save(deck, writer, outcome, score, reason, objections, style_notes=None):
-    if outcome not in ('publish', 'review'): raise ValueError('The whole-deck review did not pass')
+    if owner_decidable(outcome, objections): outcome = 'owner_review'
+    if outcome not in ('publish', 'review', 'owner_review'): raise ValueError('The whole-deck review did not pass')
     markdown = (Path(deck) / 'carousel.md').read_text()
     record = {'version': 1, 'contract': contract(), 'markdown_sha256': hashlib.sha256(markdown.encode()).hexdigest(),
               'source_sha256': source_record(markdown)['sha256'], 'written_by': writer,
@@ -40,7 +47,7 @@ def validate(deck):
     try:
         record = json.loads((Path(deck) / 'content_review.json').read_text())
         markdown = (Path(deck) / 'carousel.md').read_text()
-        if (record['version'] != 1 or record['contract'] != contract() or record['outcome'] not in ('publish', 'review')
+        if (record['version'] != 1 or record['contract'] != contract() or record['outcome'] not in ('publish', 'review', 'owner_review')
                 or record['markdown_sha256'] != hashlib.sha256(markdown.encode()).hexdigest()
                 or record['source_sha256'] != source_record(markdown)['sha256']):
             raise ValueError('Whole-deck source review changed or failed')

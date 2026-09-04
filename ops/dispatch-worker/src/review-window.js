@@ -7,15 +7,21 @@ const SLUG = /^[a-zA-Z0-9_-]{1,140}$/;
 const json = (value, status = 200) => Response.json(value, { status });
 
 export function parseWindowReply(text, replyText = '') {
-  const match = /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)\s*(?:([a-f0-9]{16}))?(?:\s+(all|[1-9]))?\s*$/i.exec(text || '');
+  const match = /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)(?:\s+([a-f0-9]{16}))?(?:\s+(.+?))?\s*$/i.exec(text || '');
   if (!match) return null;
   const token = match[2] || /Review ID:\s*([a-f0-9]{16})/i.exec(replyText)?.[1];
   if (!token) return null;
-  const verb = match[1].toLowerCase();
-  if (verb !== 'redo' && match[3]) return null;
-  return {token, decision: verb === 'redo' ? (match[3] && match[3] !== 'all' ? 'redo_slide' : 'redo')
-    : ['approve', 'approval', 'publish'].includes(verb) ? 'publish' : 'drop',
-    slide: verb === 'redo' && /^[1-9]$/.test(match[3] || '') ? Number(match[3]) : 0};
+  const verb = match[1].toLowerCase(), tail = (match[3] || '').toLowerCase();
+  if (verb !== 'redo') return tail ? null : {token, decision:['approve','approval','publish'].includes(verb)?'publish':'drop', slide:0};
+  if (!tail || tail === 'all') return {token, decision:'redo', slide:0};
+  const list = tail.replace(/^images\s+/, '');
+  let slides;
+  if (tail === 'images all') slides = [1,2,3,4,5,6,7,8,9];
+  else if (/^[1-9](?:\s*,\s*[1-9])*$/.test(list)) slides = list.split(',').map(Number);
+  else return null;
+  if (new Set(slides).size !== slides.length) return null;
+  slides.sort((a,b)=>a-b);
+  return {token, decision:'redo_slide', slide:slides[0], slides};
 }
 
 export class ReviewWindow {
@@ -54,6 +60,21 @@ export class ReviewWindow {
         record.state = 'delivery_failed'; await this.ctx.storage.put('review', record);
         return json({error: 'Telegram did not confirm the preview. No automatic posting.'}, 502);
       }
+      // All issue pages must arrive before any decision or posting timer opens.
+      try {
+        const pages = input.issue_pages || [];
+        if (!Array.isArray(pages) || pages.some(p=>typeof p !== 'string' || p.length > 3900)) throw new Error('Invalid issue pages');
+        record.issue_receipts ||= [];
+        for (let i=record.issue_receipts.length; i<pages.length; i++) {
+          const response = await fetch(`https://api.telegram.org/bot${this.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method:'POST', headers:{'Content-Type':'application/json'}, signal:AbortSignal.timeout(10000),
+            body:JSON.stringify({chat_id:this.env.TELEGRAM_CHAT_ID,text:pages[i],parse_mode:'HTML',link_preview_options:{is_disabled:true}})});
+          const receipt = await response.json();
+          if (!response.ok || receipt.ok !== true || !Number.isSafeInteger(receipt.result?.message_id)) throw new Error('No issue receipt');
+          record.issue_receipts.push(receipt.result.message_id);
+          await this.ctx.storage.put('review',record);
+        }
+      } catch {record.state='delivery_failed';await this.ctx.storage.put('review',record);return json({error:'Issue report delivery failed. Posting remains paused.'},502);}
       // Resource delivery is informational: it cannot reopen or veto approval.
       try {
         const summary = typeof input.resources === 'string' && input.resources.length <= 3000 ? input.resources : await resources(this.env);
@@ -64,24 +85,30 @@ export class ReviewWindow {
         record.resources_accepted = response.ok && quotaReceipt.ok === true;
       } catch { record.resources_accepted = false; }
       record.message_id = receipt.result.message_id;
-      record.delivered_at = Date.now(); record.deadline = record.delivered_at + REVIEW_HOUR;
+      record.delivered_at = Date.now(); record.deadline = (input.manual_required === true ? null : record.delivered_at + REVIEW_HOUR);
       record.state = 'waiting';
       await this.ctx.storage.put('review', record);
-      await this.ctx.storage.setAlarm(record.deadline);
+      if (record.deadline) await this.ctx.storage.setAlarm(record.deadline);
+      else await this.ctx.storage.deleteAlarm();
       return json(record);
     }
     if (!record) return json({error: 'Unknown review'}, 404);
     if (route === '/status') return json(record);
     if (route === '/decide') {
+      if (input.decision === 'redo_slide') {
+        input.slides ||= [input.slide];
+        if (!Array.isArray(input.slides) || !input.slides.length || input.slides.length > 9 || new Set(input.slides).size !== input.slides.length || input.slides.some(n=>!Number.isInteger(n)||n<1||n>9)) return json({error:'Use unique slide numbers 1 to 9'},400);
+        input.slide = input.slides[0];
+      }
       if (!/^tg-[0-9]+$/.test(input.request_id || '') || !['publish', 'drop', 'redo', 'redo_slide'].includes(input.decision) ||
           (input.decision === 'redo_slide' && (!Number.isInteger(input.slide) || input.slide < 1 || input.slide > 9))) return json({error: 'Invalid decision'}, 400);
       if (record.seen[input.request_id]) return json({state: record.state, duplicate: true});
-      if (!['waiting', 'queued', 'held', 'dispatch_failed'].includes(record.state)) return json({error: 'This preview is closed or work has started', state: record.state}, 409);
+      if (!['waiting', 'queued', 'held', 'dispatch_failed'].includes(record.state)) return json({error: 'No change made. This review is closed or work has started. Use the newest review message. An Instagram upload already in progress cannot be cancelled.', state: record.state}, 409);
       if (Object.keys(record.seen).length >= 100) return json({error: 'Too many decisions for one preview'}, 409);
       record.seen[input.request_id] = true;
       record.history.push({at: Date.now(), decision: input.decision, request_id: input.request_id});
       record.state = input.decision === 'drop' ? 'cancelled' : 'queued';
-      record.action = {id: `rv-${record.token}-${input.request_id}`, decision: input.decision, slide: input.slide || 0, attempts: 0};
+      record.action = {id: `rv-${record.token}-${input.request_id}`, decision: input.decision, slide: input.slide || 0, slides:input.slides || [], attempts: 0};
       await this.ctx.storage.deleteAlarm();
       await this.ctx.storage.put('review', record); // A redo/cancel stops timeout posting before dispatch.
       return json(await this.dispatch(record));
@@ -141,6 +168,7 @@ export class ReviewWindow {
         return;
       }
       if (record.state === 'waiting') {
+        if (!record.deadline) return;
         if (Date.now() < record.deadline) { await this.ctx.storage.setAlarm(record.deadline); return; }
         record.state = 'queued';
         record.action = {id: `rv-${record.token}-timeout`, decision: 'publish', slide: 0, attempts: 0};

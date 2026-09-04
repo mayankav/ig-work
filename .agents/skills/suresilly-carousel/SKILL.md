@@ -45,6 +45,12 @@ The preview freezes its caption, nine PNGs and evidence. Approval publishes thos
 
 Telegram messages include resource data, units, observation times and reset/refill dates. Unknown limits stay unknown. Resource reporting cannot veto approval.
 
+## Consolidated owner decisions (owner update, 4 September 2026)
+
+A source-support concern (`H3_FALSE_PSYCH`) is now an explicit owner decision: retain the concern and exact quote, render the review, and hold without a timeout. It is not a passed factual check. The owner can accept all disclosed concerns with approve, cancel, or redo. Other safety, source-identity, pixel, duplicate and integrity checks remain in place. Clean reviews retain the one-hour timer. All issue pages must be delivered before any review opens. No new content judgment follows approval.
+
+The report explains every command with its actual review ID. `redo ID all` replaces the whole carousel. `redo ID images 2,4,7` replaces those images as one staged batch, preserving text and other slides; `redo ID images all` preserves text and replaces all nine images. Duplicate numbers, ranges, unknown numbers and mixed decisions change nothing. Partial generation failure does not install any replacement. The new preview repeats the complete issue report.
+
 ## The one entry point
 
 ```bash

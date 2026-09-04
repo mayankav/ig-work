@@ -788,7 +788,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         # claim the deck invented; a deck that is merely not good enough is
         # HELD, and a person decides what happens to it. That is the whole
         # difference between a gate and a prosecutor.
-        if outcome == "block":
+        if outcome == "block" and not (owner_art.enabled() and content_review.owner_decidable(outcome, objections)):
             # Amber. Nothing shipped and the content genuinely was wrong, so it
             # is not green — but no vendor failed and nothing needs repairing,
             # so it is not red either. The next moment is a different deck.
