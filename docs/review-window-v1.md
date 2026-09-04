@@ -16,7 +16,8 @@ Implementation:
 - [x] Python and Worker tests and deployment.
 - [x] Six source-supported claims cover all eight content topics; old unsupported claims remain excluded.
 - [x] First live preview accepted by Telegram (message 68, run 33895172712).
-- [ ] Owner reply tests and Instagram publication remain unconfirmed. The preview contains unsupported claims and must not publish.
+- [x] Live approval dispatch and cancellation confirmed. The first, unsupported preview was cancelled.
+- [ ] Successful Instagram publication and redo remain unconfirmed.
 
 No existing experiment records, slot history or publication receipts may be reset. Existing force-held decks are not silently enrolled in timeout publication. A confirmed or uncertain Instagram upload must be reconciled before redo/cancel changes its deck.
 
@@ -78,3 +79,9 @@ V1 makes at most three draft attempts. Remaining style problems are saved as rev
 Every notification includes a resource report or an explicit unavailable reading. A preview has a companion resource message. Gemini shows recorded requests by model and its Pacific-day reset, without inventing an unreported ceiling. Groq shows the vendor's last request/token balances and their observation/refill timestamps. Cloudflare shows the shared recorded usage and UTC reset. Instagram's publishing-limit endpoint is queried when credentials are available; the returned limit is used without a fixed assumed ceiling. Telegram does not report a daily remaining allowance. Failures of resource reporting do not block a post.
 
 Validation covers style-note fallback, fixed captions, no quality recheck in the real publisher entry point, unknown quotas, dated snapshots and rolling refill times. Live verification is still required after deployment.
+
+## Resource report verified at 22:52 IST
+
+Release `b3e2527` is on main; Worker version `ef3d00cf-8401-40fa-81b6-da232977ece0` is deployed. All 68 local Python suites and all Worker suites passed. Recovery run `33899912272` passed its code checks and is building; its publication result is not yet confirmed.
+
+A real Telegram `list` reply received a resource report. It showed Cloudflare's recorded 9,928.68 units used and 71.32 remaining, with reset on 5 September at 05:30 IST. Gemini counts and its 12:30 IST reset were shown. Groq's older request/token readings retained their actual observation and refill dates. Missing Instagram readings and unreported Telegram daily limits were labelled unknown. This verifies delivery of the report, not live account balances or Instagram publication.
