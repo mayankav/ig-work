@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "slot_id": "2026-09-03_2000",
+  "attempts": [
+    {
+      "request_id": "gh-33824384609",
+      "run_id": "33824384609",
+      "created_at": "2026-09-04T01:05:20Z",
+      "result": {
+        "stage": "tests",
+        "outcome": "error",
+        "fault_code": "gates_failed",
+        "reason": "Failed tests: test_insights_window.py, test_posting_slots.py",
+        "retryable": false,
+        "published": false
+      }
+    },
+    {
+      "request_id": "gh-33827677228",
+      "run_id": "33827677228",
+      "created_at": "2026-09-04T01:57:01Z",
+      "result": {
+        "stage": "generation",
+        "outcome": "stopped",
+        "fault_code": "quality_refused",
+        "reason": "Only 0 library images have current checks; nine are needed before a run. No generation request was sent.",
+        "retryable": false,
+        "published": false,
+        "slug": "",
+        "held": false
+      },
+      "revision": "8b62ca66ae4185ecf3b4950ffbfd71ea37f8b2cf",
+      "code_revision": "0e1081cf518c6c9d6ef9ed7a6cb78def3f7305271ea47294ffbf8b33fb653b34"
+    }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "purpose": "Initial screen only; cannot qualify models or approve artwork",
+  "started_at": "2026-09-04T02:39:17.769826+00:00",
+  "system": "Inspect the supplied cartoon image. Describe only what is visible.\nDo not infer a limb count from what an animal should have. Trace each visible\nleg from its hoof toward the body. Distinguish legs from arms, tail, furniture,\nand marks. Describe each character separately. Hidden limbs, closed eyes,\nprofiles, tilted heads and separate complete characters are not faults by\nthemselves. If a connection or feature is ambiguous, state that uncertainty.\nInspect eyes for blank open eyes, missing pupils, stray marks and mismatched\neyes. Also report disconnected parts, extra heads or eyes, merged bodies,\nvisible lettering and off-palette marks. Return observations and faults, never\npermission to publish. Return JSON matching the requested fields.",
+  "user": "Count the visible arms and legs for each donkey. Describe each limb's\nend location and connection toward the body. Separately describe shapes that\ncould be confused with limbs. Inspect the face and the rest of the artwork for\nthe listed faults. Do not assume normal anatomy.",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "figures",
+      "other_shapes",
+      "uncertainty",
+      "faults"
+    ],
+    "properties": {
+      "figures": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "location",
+            "arms",
+            "legs",
+            "arm_descriptions",
+            "leg_descriptions"
+          ],
+          "properties": {
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "legs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "arm_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "leg_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "other_shapes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "uncertainty": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "faults": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "fault"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "extra_limb",
+                "disconnected",
+                "extra_head",
+                "extra_eye",
+                "merged_body",
+                "blank_eye",
+                "stray_eye_mark",
+                "mismatched_eyes",
+                "text",
+                "off_palette"
+              ]
+            },
+            "fault": {
+              "type": "string",
+              "minLength": 4
+            }
+          }
+        }
+      }
+    }
+  },
+  "temperature": 0.2,
+  "max_output_tokens": 8192,
+  "models": [
+    "gemini-robotics-er-2-preview",
+    "gemini-2.5-pro"
+  ],
+  "cases": [
+    "extra_leg",
+    "blank_profile_eye",
+    "malformed_eyelids",
+    "kneeling",
+    "far_apart",
+    "on_back"
+  ],
+  "source_hashes": {
+    "scripts/probe_free_image_models.py": "663c02eb54050c729cdd04949e336c0bcd01600b2e12765580339217affaf8a3",
+    ".agents/skills/suresilly-carousel/scripts/image_single_review.py": "1f77db9eccd4b9bf119bca5d950ba1462cd3652e26031c5ef7d8cf37244a8029",
+    ".agents/skills/suresilly-carousel/scripts/llm.py": "66509678bb16bd52f5ddde10c18a67195363ff3529f6e44a9f1d2754349bb87f",
+    ".agents/skills/suresilly-carousel/scripts/image_qualification.py": "aee40e5c3b3c80aeb848117d33865b05de75c9cc140dca9570d87ef9ca8f8dcb"
+  },
+  "http_requests": 3,
+  "results": [
+    {
+      "model": "gemini-robotics-er-2-preview",
+      "status": "incomplete",
+      "observations": [
+        {
+          "case": "extra_leg",
+          "source_sha256": "b491d8759c23c4bf46f3988c82c00ec0a873b24890a1c0575840d34da3267cf9",
+          "image_sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602",
+          "response": {
+            "candidates": [
+              {
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\n  \"figures\": [\n    {\n      \"location\": \"center\",\n      \"arms\": 2,\n      \"legs\": 3,\n      \"arm_descriptions\": [\n        \"The donkey's right arm extends to the left, ending in a black hoof.\",\n        \"The donkey's left arm is bent across the belly, ending in a black hoof.\"\n      ],\n      \"leg_descriptions\": [\n        \"The donkey's right leg extends downwards, ending in a black hoof.\",\n        \"The donkey's left leg extends downwards, ending in a black hoof.\",\n        \"An extra leg is bent backwards to the right, ending in a black hoof.\"\n      ]\n    }\n  ],\n  \"other_shapes\": [\n    \"A dark grey chair is positioned behind the donkey.\",\n    \"A green tail with a black tuft extends to the right.\"\n  ],\n  \"uncertainty\": [],\n  \"faults\": [\n    {\n      \"code\": \"extra_limb\",\n      \"fault\": \"The donkey has three legs in addition to two arms.\"\n    },\n    {\n      \"code\": \"off_palette\",\n      \"fault\": \"There are purple stray marks on the tail tip and between the legs.\"\n    }\n  ]\n}",
+                      "thoughtSignature": "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"
+                    }
+                  ],
+                  "role": "model"
+                },
+                "finishReason": "STOP",
+                "index": 0
+              }
+            ],
+            "usageMetadata": {
+              "promptTokenCount": 1288,
+              "candidatesTokenCount": 286,
+              "totalTokenCount": 2514,
+              "promptTokensDetails": [
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 208
+                },
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 1080
+                }
+              ],
+              "thoughtsTokenCount": 940,
+              "serviceTier": "standard"
+            },
+            "modelVersion": "gemini-robotics-er-2-preview",
+            "responseId": "Vi-aasL2Ctmwg8UPgO-r2Ao"
+          },
+          "answer": {
+            "figures": [
+              {
+                "location": "center",
+                "arms": 2,
+                "legs": 3,
+                "arm_descriptions": [
+                  "The donkey's right arm extends to the left, ending in a black hoof.",
+                  "The donkey's left arm is bent across the belly, ending in a black hoof."
+                ],
+                "leg_descriptions": [
+                  "The donkey's right leg extends downwards, ending in a black hoof.",
+                  "The donkey's left leg extends downwards, ending in a black hoof.",
+                  "An extra leg is bent backwards to the right, ending in a black hoof."
+                ]
+              }
+            ],
+            "other_shapes": [
+              "A dark grey chair is positioned behind the donkey.",
+              "A green tail with a black tuft extends to the right."
+            ],
+            "uncertainty": [],
+            "faults": [
+              {
+                "code": "extra_limb",
+                "fault": "The donkey has three legs in addition to two arms."
+              },
+              {
+                "code": "off_palette",
+                "fault": "There are purple stray marks on the tail tip and between the legs."
+              }
+            ]
+          },
+          "codes": [
+            "extra_limb",
+            "off_palette"
+          ],
+          "passed": true
+        },
+        {
+          "case": "blank_profile_eye",
+          "source_sha256": "975a03ca30d2f22bb752b28706a84e6e5d3b2da194d099c5968c0344bf98c055",
+          "image_sha256": "f731f105aedf9a11e5a8905ae3eb58214d0ddd0c760876858f865ed62f1d299a",
+          "response": {
+            "candidates": [
+              {
+                "content": {
+                  "parts": [
+                    {
+                      "text": "{\n  \"figures\": [\n    {\n      \"location\": \"center-left\",\n      \"arms\": 2,\n      \"legs\": 2,\n      \"arm_descriptions\": [\n        \"The left arm is green, extending from the shoulder to a black hoof resting on the desk.\",\n        \"The right arm is mostly hidden, with only a yellow hoof visible resting on the book.\"\n      ],\n      \"leg_descriptions\": [\n        \"The left leg is green, extending from the lower body to a black hoof on the ground.\",\n        \"The right leg is green, extending from the lower body to a black hoof on the ground.\"\n      ]\n    }\n  ],\n  \"other_shapes\": [\n    \"A green tail with a black tuft extends from the lower back.\",\n    \"A brown desk with a book on it.\"\n  ],\n  \"uncertainty\": [\n    \"The right arm's hoof is yellow, which is inconsistent with the other black hooves.\"\n  ],\n  \"faults\": [\n    {\n      \"code\": \"blank_eye\",\n      \"fault\": \"The large left eye of the donkey is completely white and lacks a pupil.\"\n    },\n    {\n      \"code\": \"off_palette\",\n      \"fault\": \"The hoof of the right arm is yellow, whereas all other hooves are black.\"\n    }\n  ]\n}",
+                      "thoughtSignature": "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"
+                    }
+                  ],
+                  "role": "model"
+                },
+                "finishReason": "STOP",
+                "index": 0
+              }
+            ],
+            "usageMetadata": {
+              "promptTokenCount": 1288,
+              "candidatesTokenCount": 311,
+              "totalTokenCount": 2687,
+              "promptTokensDetails": [
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 1080
+                },
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 208
+                }
+              ],
+              "thoughtsTokenCount": 1088,
+              "serviceTier": "standard"
+            },
+            "modelVersion": "gemini-robotics-er-2-preview",
+            "responseId": "fi-aaqD7BbznqfkP5-GNoQg"
+          },
+          "answer": {
+            "figures": [
+              {
+                "location": "center-left",
+                "arms": 2,
+                "legs": 2,
+                "arm_descriptions": [
+                  "The left arm is green, extending from the shoulder to a black hoof resting on the desk.",
+                  "The right arm is mostly hidden, with only a yellow hoof visible resting on the book."
+                ],
+                "leg_descriptions": [
+                  "The left leg is green, extending from the lower body to a black hoof on the ground.",
+                  "The right leg is green, extending from the lower body to a black hoof on the ground."
+                ]
+              }
+            ],
+            "other_shapes": [
+              "A green tail with a black tuft extends from the lower back.",
+              "A brown desk with a book on it."
+            ],
+            "uncertainty": [
+              "The right arm's hoof is yellow, which is inconsistent with the other black hooves."
+            ],
+            "faults": [
+              {
+                "code": "blank_eye",
+                "fault": "The large left eye of the donkey is completely white and lacks a pupil."
+              },
+              {
+                "code": "off_palette",
+                "fault": "The hoof of the right arm is yellow, whereas all other hooves are black."
+              }
+            ]
+          },
+          "error": {
+            "type": "ValueError",
+            "reason": "single-image reviewer is uncertain"
+          }
+        }
+      ]
+    },
+    {
+      "model": "gemini-2.5-pro",
+      "status": "incomplete",
+      "observations": [
+        {
+          "case": "extra_leg",
+          "source_sha256": "b491d8759c23c4bf46f3988c82c00ec0a873b24890a1c0575840d34da3267cf9",
+          "image_sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602",
+          "error": {
+            "type": "ModelRefused",
+            "reason": "HTTP 404: {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"This model models/gemini-2.5-pro is no longer available to new users. Please update your code to use models/gemini-3.1-pro-preview for the latest features and improvements. We recommend you to use the Interactions API.\",\n    \"status\": \"NOT_FOUND\"\n  }\n}\n"
+          }
+        }
+      ]
+    }
+  ]
+}

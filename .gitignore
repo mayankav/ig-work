@@ -43,3 +43,9 @@ carousels/*/mascot/
 
 # Immutable review revision staged for the public media host.
 /.review-host/
+
+# Local research output and downloaded model runtimes. Curated evidence belongs
+# in docs/; these folders can contain large binaries and publisher excerpts.
+/output/
+/tmp/
+docs/image-detail-trials/**/screen.lock

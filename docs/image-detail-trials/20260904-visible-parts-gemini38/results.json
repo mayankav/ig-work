@@ -1,0 +1,158 @@
+{
+  "purpose": "Initial screen only; cannot qualify models or approve artwork",
+  "started_at": "2026-09-04T11:11:36.226645+00:00",
+  "system": "Inspect the supplied cartoon image. Analyse fully visible and\npartially visible body parts, using only their visible shapes and connections.\nDo not infer, count or analyse any part that is not visible. Do not invent a\nhidden connection or complete a hidden limb. Occlusion alone is not a fault or\nuncertainty: do not list an unseen part as something that needs checking.\nCount each visible or partially visible limb once per character, not each\nseparate exposed fragment. Stop tracing where it disappears behind an object.\nDistinguish arms and legs from tails, furniture and marks. Describe each\ncharacter separately. A count alone is not evidence of a defect. Do not compare\ncounts with an expected number. Profiles, closed eyes, tilted heads and separate\ncomplete characters are not faults by themselves.\nReport uncertainty only about an ambiguous VISIBLE shape or visible connection,\nwith its location and the ambiguity; do not report generic confidence doubts.\nInspect visible and partially visible eyes for blank open eyes, missing pupils,\nstray marks and mismatched eyes. Also inspect visible parts for disconnected\nparts, extra limbs, heads or eyes, merged bodies, lettering and off-palette marks.\nEach fault must name its location and describe visible evidence supporting it.\nReturn observations and faults, never permission to publish. Return JSON matching\nthe requested fields.",
+  "user": "For each donkey, describe and count only fully visible and partially\nvisible arms and legs. Describe the visible portion and visible connections of\neach limb; state where the visible portion ends without guessing what is hidden.\nDescribe shapes that could be confused with limbs. Inspect the visible face and\nother visible artwork for the listed faults. Do not assess unseen parts.",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "figures",
+      "other_shapes",
+      "uncertainty",
+      "faults"
+    ],
+    "properties": {
+      "figures": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "location",
+            "arms",
+            "legs",
+            "arm_descriptions",
+            "leg_descriptions"
+          ],
+          "properties": {
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "legs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "arm_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "leg_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "other_shapes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "uncertainty": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "faults": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "fault",
+            "location",
+            "visible_evidence"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "extra_limb",
+                "disconnected",
+                "extra_head",
+                "extra_eye",
+                "merged_body",
+                "blank_eye",
+                "stray_eye_mark",
+                "mismatched_eyes",
+                "text",
+                "off_palette"
+              ]
+            },
+            "fault": {
+              "type": "string",
+              "minLength": 4
+            },
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "visible_evidence": {
+              "type": "string",
+              "minLength": 4
+            }
+          }
+        }
+      }
+    }
+  },
+  "temperature": 0.2,
+  "max_output_tokens": 8192,
+  "models": [
+    "gemini-3.8-flash"
+  ],
+  "cases": [
+    "extra_leg",
+    "blank_profile_eye",
+    "malformed_eyelids",
+    "kneeling",
+    "far_apart",
+    "on_back"
+  ],
+  "source_hashes": {
+    "scripts/probe_free_image_models.py": "f721842347f855e0ab24797a52a19935d4831d4640c8a639a5ecd957fc29fc13",
+    ".agents/skills/suresilly-carousel/scripts/image_single_review.py": "1ea9835b034f3190489ae101a16ebc16c8de0a91590cc2d3d0b7c0c4ec3ed1c4",
+    ".agents/skills/suresilly-carousel/scripts/llm.py": "66509678bb16bd52f5ddde10c18a67195363ff3529f6e44a9f1d2754349bb87f",
+    ".agents/skills/suresilly-carousel/scripts/image_qualification.py": "aee40e5c3b3c80aeb848117d33865b05de75c9cc140dca9570d87ef9ca8f8dcb"
+  },
+  "http_requests": 1,
+  "results": [
+    {
+      "model": "gemini-3.8-flash",
+      "status": "incomplete",
+      "observations": [
+        {
+          "case": "extra_leg",
+          "source_sha256": "b491d8759c23c4bf46f3988c82c00ec0a873b24890a1c0575840d34da3267cf9",
+          "image_sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602",
+          "error": {
+            "type": "RateLimited",
+            "reason": "HTTP 503",
+            "quota": "",
+            "retry_after_seconds": 25
+          }
+        }
+      ]
+    }
+  ]
+}

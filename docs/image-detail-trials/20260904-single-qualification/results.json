@@ -1,0 +1,172 @@
+{
+  "version": "single-full-body-1",
+  "purpose": "offline single-image trial only",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash",
+  "contract": "d68047cd76ca684d118f526c7e785e286c028bff057014b795259775c15cba10",
+  "started_at": "2026-09-04T02:33:05.243057+00:00",
+  "system": "Inspect the supplied cartoon image. Describe only what is visible.\nDo not infer a limb count from what an animal should have. Trace each visible\nleg from its hoof toward the body. Distinguish legs from arms, tail, furniture,\nand marks. Describe each character separately. Hidden limbs, closed eyes,\nprofiles, tilted heads and separate complete characters are not faults by\nthemselves. If a connection or feature is ambiguous, state that uncertainty.\nInspect eyes for blank open eyes, missing pupils, stray marks and mismatched\neyes. Also report disconnected parts, extra heads or eyes, merged bodies,\nvisible lettering and off-palette marks. Return observations and faults, never\npermission to publish. Return JSON matching the requested fields.",
+  "user": "Count the visible arms and legs for each donkey. Describe each limb's\nend location and connection toward the body. Separately describe shapes that\ncould be confused with limbs. Inspect the face and the rest of the artwork for\nthe listed faults. Do not assume normal anatomy.",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "figures",
+      "other_shapes",
+      "uncertainty",
+      "faults"
+    ],
+    "properties": {
+      "figures": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "location",
+            "arms",
+            "legs",
+            "arm_descriptions",
+            "leg_descriptions"
+          ],
+          "properties": {
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "arms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "legs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "arm_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "leg_descriptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      },
+      "other_shapes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "uncertainty": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "faults": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "fault"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "extra_limb",
+                "disconnected",
+                "extra_head",
+                "extra_eye",
+                "merged_body",
+                "blank_eye",
+                "stray_eye_mark",
+                "mismatched_eyes",
+                "text",
+                "off_palette"
+              ]
+            },
+            "fault": {
+              "type": "string",
+              "minLength": 4
+            }
+          }
+        }
+      }
+    }
+  },
+  "http_requests": 1,
+  "observations": [
+    {
+      "repeat": 0,
+      "case": "kneeling",
+      "candidate": {
+        "source_sha256": "08157917897235728cb2a3bd66c39d1101f2285394aeac154cc95d59c208c788",
+        "image_sha256": "4aa36ee66181bb6772c3efd6bc936480fd457943ef9b9c32f157349e0fbf6ebe",
+        "answer": {
+          "figures": [
+            {
+              "location": "center",
+              "arms": 2,
+              "legs": 2,
+              "arm_descriptions": [
+                "The left arm (viewer's left) is green, extending from the shoulder down to a black hoof resting near the lap.",
+                "The right arm (viewer's right) is green, extending from the shoulder down to a black hoof resting near the lap."
+              ],
+              "leg_descriptions": [
+                "The left leg (viewer's left) is bent forward at the knee, appearing as a rounded green shape at the bottom left without a visible hoof.",
+                "The right leg (viewer's right) is bent underneath, ending in a black hoof pointing downwards and backwards at the bottom right."
+              ]
+            }
+          ],
+          "other_shapes": [
+            "A green tail with a black tuft at the end extends from the lower back to the right.",
+            "Two long green ears stand upright on top of the head.",
+            "A black curly mane runs along the back of the head and neck."
+          ],
+          "uncertainty": [
+            "The front limbs are positioned like arms in a sitting posture, but could also be interpreted as front legs.",
+            "The left leg's hoof is not visible, ending only in a rounded green fold."
+          ],
+          "faults": []
+        },
+        "actual_model": "gemini/gemini-3.5-flash"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "type": "ValueError",
+      "reason": "single-image reviewer is uncertain"
+    }
+  ],
+  "status": "incomplete",
+  "result": {
+    "qualified": false,
+    "faults": [
+      "trial stopped with an error",
+      "three complete trials required",
+      "'control'"
+    ],
+    "clean_rejects": [
+      0,
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "purpose": "Diagnostic only. Does not qualify models or permit posting.",
+  "at": "2026-09-04T02:21:29.255476+00:00",
+  "system": "Inspect the supplied cartoon image. Describe only what is visible. Do not infer a limb count from what an animal should have. Trace each visible leg from its hoof toward the body. Distinguish legs from arms, tail, furniture, and marks. If a connection is hidden or ambiguous, state that uncertainty. Return JSON.",
+  "user": "How many visible legs does this donkey have? For each leg, describe the hoof location and its connection toward the body. Separately describe any shapes that could be confused with legs. Do not assume a normal anatomy.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "visible_legs": {
+        "type": "integer"
+      },
+      "leg_descriptions": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "other_shapes": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "uncertainty": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "visible_legs",
+      "leg_descriptions",
+      "other_shapes",
+      "uncertainty"
+    ],
+    "additionalProperties": false
+  },
+  "http_requests": 4,
+  "results": [
+    {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "view": "body",
+      "sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602",
+      "answer": {
+        "visible_legs": 3,
+        "leg_descriptions": [
+          "The leftmost lower leg extends downwards from the lower torso, ending in a black hoof resting flat on the ground.",
+          "The middle lower leg extends downwards from the lower torso, positioned right next to the leftmost leg, ending in a black hoof resting flat on the ground.",
+          "The rightmost lower leg is bent backwards at the knee, extending towards the rear and ending in a black hoof pointing upwards and backwards."
+        ],
+        "other_shapes": [
+          "An upper left limb (arm) extending horizontally to the left, ending in a black hoof resting on the chair seat.",
+          "An upper right limb (arm) bent across the circular cream-colored belly patch, ending in a black hoof.",
+          "A thin green tail with a black tuft at the end, extending from the lower rear of the body.",
+          "Four dark grey vertical legs belonging to the chair on which the donkey is leaning."
+        ],
+        "uncertainty": "The connection of the bent rightmost leg to the main body is slightly obscured by the angle of the torso, but its origin from the lower rear hip area is clear."
+      },
+      "actual_model": "gemini/gemini-3.5-flash"
+    },
+    {
+      "provider": "gemini",
+      "model": "gemini-3.5-flash",
+      "view": "lower",
+      "sha256": "a76aaf1d510b0056da3a60c5f4f2a089c4402f08e6331d3cf7efcb9c6edbfb6c",
+      "error_type": "RateLimited",
+      "error": "HTTP 503"
+    },
+    {
+      "provider": "groq",
+      "model": "qwen/qwen3.8-27b",
+      "view": "body",
+      "sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602",
+      "answer": {
+        "visible_legs": 2,
+        "leg_descriptions": [
+          "Front leg: a black hoof sits at the bottom center of the image; from that hoof a straight green limb extends upward and merges into the lower front of the torso.",
+          "Hind leg: a black hoof is positioned to the right of the front leg (mid-lower area); from that hoof a green limb angles up and to the left, connecting into the rear of the body."
+        ],
+        "other_shapes": [
+          "Left arm: a green limb ending in a black hand resting on the left edge of the chair seat.",
+          "Right arm: a green limb crossing the belly, ending in a black hand over the cream-colored belly patch.",
+          "Tail: a thin curved green line on the right ending in a small black tuft.",
+          "Chair legs: four gray vertical posts (two on the left, two on the right) supporting the seat.",
+          "Chair seat and backrest: dark gray horizontal and vertical panels behind the donkey."
+        ],
+        "uncertainty": "The donkey is seated, so any additional legs (a second front leg or second hind leg) are not visible and may be hidden behind the body or the chair; I cannot confirm them. The upper connection of the bent hind leg is partly obscured by the torso, and the front leg's top joins the body in a region that blends with the belly."
+      },
+      "actual_model": "groq/qwen/qwen3.8-27b"
+    },
+    {
+      "provider": "groq",
+      "model": "qwen/qwen3.8-27b",
+      "view": "lower",
+      "sha256": "a76aaf1d510b0056da3a60c5f4f2a089c4402f08e6331d3cf7efcb9c6edbfb6c",
+      "error_type": "RateLimited",
+      "error": "HTTP 429"
+    }
+  ]
+}

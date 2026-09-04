@@ -1,0 +1,272 @@
+{
+  "purpose": "Offline initial screen only; cannot approve artwork",
+  "contract": "f73757086bdb19a616b2135b6c66df7bffcb2c96edc17ef7c4420e32d4fd6d1d",
+  "specification": {
+    "model": "gemini-3.8-flash",
+    "system": "Inspect the supplied cartoon image. Analyse fully visible and\npartially visible body parts, using only their visible shapes and connections.\nDo not infer, count or analyse any part that is not visible. Do not invent a\nhidden connection or complete a hidden limb. Occlusion alone is not a fault or\nuncertainty: do not list an unseen part as something that needs checking.\nCount each visible or partially visible limb once per character, not each\nseparate exposed fragment. Stop tracing where it disappears behind an object.\nDistinguish arms and legs from tails, furniture and marks. Describe each\ncharacter separately. A count alone is not evidence of a defect. Do not compare\ncounts with an expected number. Profiles, closed eyes, tilted heads and separate\ncomplete characters are not faults by themselves.\nReport uncertainty only about an ambiguous VISIBLE shape or visible connection,\nwith its location and the ambiguity; do not report generic confidence doubts.\nInspect visible and partially visible eyes for blank open eyes, missing pupils,\nstray marks and mismatched eyes. Also inspect visible parts for disconnected\nparts, extra limbs, heads or eyes, merged bodies, lettering and off-palette marks.\nEach fault must name its location and describe visible evidence supporting it.\nReturn observations and faults, never permission to publish. Return JSON matching\nthe requested fields.",
+    "user": "For each donkey, describe and count only fully visible and partially\nvisible arms and legs. Describe the visible portion and visible connections of\neach limb; state where the visible portion ends without guessing what is hidden.\nDescribe shapes that could be confused with limbs. Inspect the visible face and\nother visible artwork for the listed faults. Do not assess unseen parts.",
+    "schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "figures",
+        "other_shapes",
+        "uncertainty",
+        "faults"
+      ],
+      "properties": {
+        "figures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "location",
+              "arms",
+              "legs",
+              "arm_descriptions",
+              "leg_descriptions"
+            ],
+            "properties": {
+              "location": {
+                "type": "string",
+                "minLength": 1
+              },
+              "arms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "legs": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "arm_descriptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "leg_descriptions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "other_shapes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "uncertainty": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "faults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "fault",
+              "location",
+              "visible_evidence"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "extra_limb",
+                  "disconnected",
+                  "extra_head",
+                  "extra_eye",
+                  "merged_body",
+                  "blank_eye",
+                  "stray_eye_mark",
+                  "mismatched_eyes",
+                  "text",
+                  "off_palette"
+                ]
+              },
+              "fault": {
+                "type": "string",
+                "minLength": 4
+              },
+              "location": {
+                "type": "string",
+                "minLength": 1
+              },
+              "visible_evidence": {
+                "type": "string",
+                "minLength": 4
+              }
+            }
+          }
+        }
+      }
+    },
+    "temperature": 0.2,
+    "max_output_tokens": 8192,
+    "limits": {
+      "per_case": 3,
+      "total": 18,
+      "spacing": 40,
+      "lifetime": 86400
+    },
+    "sources": {
+      "scripts/resumable_image_screen.py": "9a790d104f10b37c01affce2b0107509100313b748d2284f02a79a63308df3b9",
+      ".agents/skills/suresilly-carousel/scripts/image_single_review.py": "1ea9835b034f3190489ae101a16ebc16c8de0a91590cc2d3d0b7c0c4ec3ed1c4",
+      ".agents/skills/suresilly-carousel/scripts/image_qualification.py": "aee40e5c3b3c80aeb848117d33865b05de75c9cc140dca9570d87ef9ca8f8dcb",
+      ".agents/skills/suresilly-carousel/scripts/llm.py": "66509678bb16bd52f5ddde10c18a67195363ff3529f6e44a9f1d2754349bb87f"
+    },
+    "cases": [
+      {
+        "id": "extra_leg",
+        "codes": [
+          "extra_limb"
+        ],
+        "sha256": "b491d8759c23c4bf46f3988c82c00ec0a873b24890a1c0575840d34da3267cf9",
+        "submitted_sha256": "a969439a799935ce32046273ce02e2804d0cf1a56bc5e29a0255bb06cf6c5602"
+      },
+      {
+        "id": "blank_profile_eye",
+        "codes": [
+          "blank_eye"
+        ],
+        "sha256": "975a03ca30d2f22bb752b28706a84e6e5d3b2da194d099c5968c0344bf98c055",
+        "submitted_sha256": "f731f105aedf9a11e5a8905ae3eb58214d0ddd0c760876858f865ed62f1d299a"
+      },
+      {
+        "id": "malformed_eyelids",
+        "codes": [
+          "stray_eye_mark",
+          "mismatched_eyes",
+          "blank_eye"
+        ],
+        "sha256": "60d7b7a1970f5466cd7a907097c5cf09eaa8d7da41e9ede42b375ce3a3224fb1",
+        "submitted_sha256": "c9c3d200655614465078b35a3cff33f16997bc8e6dac1c953df91121deba657d"
+      },
+      {
+        "id": "kneeling",
+        "codes": [],
+        "sha256": "08157917897235728cb2a3bd66c39d1101f2285394aeac154cc95d59c208c788",
+        "submitted_sha256": "4aa36ee66181bb6772c3efd6bc936480fd457943ef9b9c32f157349e0fbf6ebe"
+      },
+      {
+        "id": "far_apart",
+        "codes": [],
+        "sha256": "c5d4e88235ab87a71e3a41f7d56e53f13c9dab6f25fbe095394fb4493067e473",
+        "submitted_sha256": "93a5c6db4c5fde4620b0314f7fef6ba44660254218ec552b1cca97ad09cdd726"
+      },
+      {
+        "id": "on_back",
+        "codes": [],
+        "sha256": "72285484ab5f3127adceb7ade513158d0cf5de40305ddd6615a2957fdf006e24",
+        "submitted_sha256": "c1f161af1a47a3b0f93a02ac5953fe23ad150d3a87ae731d2540e28d74dd309d"
+      }
+    ]
+  },
+  "started_at": 1788523335.1555798,
+  "next_request_at": 1788523635.1732621,
+  "status": "unavailable",
+  "cases": [
+    {
+      "id": "extra_leg",
+      "status": "pending",
+      "attempts": [
+        {
+          "state": "received",
+          "started_at": 1788523335.175749,
+          "elapsed_seconds": 29.379838943481445,
+          "response": {
+            "http_status": 503,
+            "body": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+            "error": {
+              "category": "service_unavailable",
+              "http_status": 503,
+              "provider_status": "UNAVAILABLE",
+              "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+              "quota_ids": [],
+              "retry_after_seconds": 0,
+              "retryable": true
+            }
+          }
+        },
+        {
+          "state": "received",
+          "started_at": 1788523409.584123,
+          "elapsed_seconds": 9.401905059814453,
+          "response": {
+            "http_status": 503,
+            "body": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+            "error": {
+              "category": "service_unavailable",
+              "http_status": 503,
+              "provider_status": "UNAVAILABLE",
+              "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+              "quota_ids": [],
+              "retry_after_seconds": 0,
+              "retryable": true
+            }
+          }
+        },
+        {
+          "state": "received",
+          "started_at": 1788523484.0159621,
+          "elapsed_seconds": 26.154900074005127,
+          "response": {
+            "http_status": 503,
+            "body": "{\n  \"error\": {\n    \"code\": 503,\n    \"message\": \"This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.\",\n    \"status\": \"UNAVAILABLE\"\n  }\n}\n",
+            "error": {
+              "category": "service_unavailable",
+              "http_status": 503,
+              "provider_status": "UNAVAILABLE",
+              "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+              "quota_ids": [],
+              "retry_after_seconds": 0,
+              "retryable": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "blank_profile_eye",
+      "status": "pending",
+      "attempts": []
+    },
+    {
+      "id": "malformed_eyelids",
+      "status": "pending",
+      "attempts": []
+    },
+    {
+      "id": "kneeling",
+      "status": "pending",
+      "attempts": []
+    },
+    {
+      "id": "far_apart",
+      "status": "pending",
+      "attempts": []
+    },
+    {
+      "id": "on_back",
+      "status": "pending",
+      "attempts": []
+    }
+  ]
+}
