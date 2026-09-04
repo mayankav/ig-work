@@ -24,6 +24,8 @@ import io
 import json
 import re
 import sys
+import tempfile
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -82,7 +84,7 @@ BODY = "Familjen"
 
 THEMES = {
     # saturated grounds — the BLEED mode lives here
-    "terracotta": dict(ground="#D0522A", field="#B03F1B", ink="#FFF7EE",
+    "terracotta": dict(ground="#B8441F", field="#923313", ink="#FFF7EE",
                        soft="rgba(255,247,238,.80)", accent="#FFD9A0",
                        cardink="#3A1A0E", card="#FFF7EE", grid="rgba(255,247,238,.10)",
                        badge_ink="#B8441F"),
@@ -95,7 +97,7 @@ THEMES = {
                        cardink="#23201C", card="#F2EFE8", grid="rgba(242,239,232,.07)",
                        badge_ink="#1E1E1E"),
     "ochre":      dict(ground="#C6892B", field="#A56C17", ink="#221703",
-                       soft="rgba(34,23,3,.72)", accent="#FFF7EE",
+                       soft="rgba(34,23,3,.85)", accent="#593407",
                        cardink="#221703", card="#FFF7EE", grid="rgba(34,23,3,.10)",
                        badge_ink="#AE7420"),
     "indigo":     dict(ground="#3B5C7E", field="#2A4460", ink="#F1F4F7",
@@ -676,7 +678,7 @@ body{{background:{t['ground']};color:{t['ink']};position:relative;overflow:hidde
 .grid{{position:absolute;inset:0;z-index:2;pointer-events:none;
   background-image:repeating-linear-gradient(0deg,{t['grid']} 0 2px,transparent 2px 58px),
                    repeating-linear-gradient(90deg,{t['grid']} 0 2px,transparent 2px 58px)}}
-.grain{{position:absolute;inset:0;z-index:60;pointer-events:none;opacity:.5;
+.grain{{position:absolute;inset:0;z-index:60;pointer-events:none;opacity:.08;
   background-image:url({{GRAIN}});background-size:128px 128px;mix-blend-mode:overlay}}
 
 .canvas{{position:absolute;left:{MARGIN}px;right:{MARGIN}px;top:{MARGIN}px;bottom:{FOOTER_H+12}px;
@@ -688,14 +690,6 @@ body{{background:{t['ground']};color:{t['ink']};position:relative;overflow:hidde
    looks broken rather than composed. */
 .canvas.solo{{justify-content:center}}
 .canvas.center{{text-align:center;align-items:center}}
-.canvas.sparse{{gap:32px}}
-.canvas.sparse h1{{font-size:128px;line-height:0.92}}
-.canvas.sparse h2{{font-size:96px;line-height:0.96}}
-.canvas.sparse .lead{{font-size:52px;line-height:1.25}}
-.canvas.sparse .body-text{{font-size:48px;line-height:1.35}}
-.canvas.sparse .script .line{{font-size:52px;line-height:1.28}}
-.canvas.sparse .quote{{font-size:62px;line-height:1.22}}
-.canvas.sparse .bullets li{{font-size:48px;line-height:1.28}}
 
 h1{{font-family:'{DISPLAY}',system-ui,sans-serif;font-weight:400;
   font-size:{T['h1'][0]}px;line-height:{T['h1'][1]};letter-spacing:{T['h1'][2]};
@@ -780,7 +774,7 @@ h1 + h2{{font-family:'{BODY}',system-ui,sans-serif;font-weight:500;
 .mythgrid{{display:grid;grid-template-columns:1fr 1fr;gap:26px;max-width:900px;margin-top:8px}}
 .mythbox{{background:{t['card']};color:{t['cardink']};padding:28px;border-radius:30px}}
 .mythbox .tag{{font-size:{T['label'][0]}px;letter-spacing:{T['label'][2]};
-  text-transform:uppercase;font-weight:800;margin-bottom:16px;color:{t['accent']}}}
+  text-transform:uppercase;font-weight:800;margin-bottom:16px;color:{t['cardink']}}}
 .mythbox .line{{font-size:36px;line-height:1.24;font-weight:550}}
 
 .pill{{display:inline-flex;align-self:flex-start;margin-top:28px;
@@ -817,9 +811,9 @@ h1 + h2{{font-family:'{BODY}',system-ui,sans-serif;font-weight:500;
   display:flex;align-items:center;justify-content:space-between;
   border-top:2px solid {t['grid']};padding-top:20px}}
 .handle{{font-size:{T['footer'][0]}px;letter-spacing:{T['footer'][2]};
-  text-transform:uppercase;color:{t['soft']};font-weight:700}}
+  text-transform:uppercase;color:{t['ink']};font-weight:700}}
 .num{{font-size:{T['footer'][0]}px;letter-spacing:{T['footer'][2]};
-  color:{t['soft']};font-weight:700}}
+  color:{t['ink']};font-weight:700}}
 """.replace("{GRAIN}", grain_tile())
 
 
@@ -1008,8 +1002,17 @@ def slide_html(s: dict, idx: int, total: int, mascot: Path | None,
 
 FONT_GUARD = """async () => {
   const need = [['400 104px ArchivoBlk','ArchivoBlk'], ['450 38px Familjen','Familjen']];
-  await Promise.all(need.map(([spec]) => document.fonts.load(spec).catch(() => {})));
-  return need.filter(([spec]) => !document.fonts.check(spec)).map(([,n]) => n);
+  const missing = await Promise.all(need.map(async ([spec, name]) => {
+    try {
+      const loaded = await document.fonts.load(spec);
+      // check() alone returns true when the family has no declaration: the
+      // fallback can satisfy it. Require the actual requested FontFace.
+      const found = loaded.some(face => face.status === 'loaded' &&
+        face.family.replace(/['\"]/g, '') === name);
+      return found && document.fonts.check(spec) ? null : name;
+    } catch (_) { return name; }
+  }));
+  return missing.filter(Boolean);
 }"""
 
 # Type never shrinks. Instead the figure GROWS into whatever the copy leaves —
@@ -1028,14 +1031,6 @@ FIT_FIGURE = """(cfg) => {
       ? Math.max(...kids.map(k => k.getBoundingClientRect().bottom))
       : copy.getBoundingClientRect().bottom;
     out.overflow = Math.max(0, Math.round(copyBottom - cfg.copyMaxY));
-    // Sparse text — bump size so it doesn't look lost at the top while mascot is huge below
-    if ((copyBottom - cfg.top) < 380 && kids.length <= 3) {
-      copy.classList.add('sparse');
-      const kids2 = [...copy.children].filter(k => k.id !== 'fig');
-      copyBottom = kids2.length
-        ? Math.max(...kids2.map(k => k.getBoundingClientRect().bottom))
-        : copy.getBoundingClientRect().bottom;
-    }
   }
 
   // The colour field must never run through type. Positioned by slide index it
@@ -1136,7 +1131,57 @@ FIT_FIGURE = """(cfg) => {
 }"""
 def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
            verbose: bool = True) -> list[Path]:
+    """Publish the complete set only after all nine surfaces pass."""
+    import render_guard
+    import art_eligibility
+    out_dir.parent.mkdir(parents=True, exist_ok=True)
+    failure_marker = out_dir.parent / "render-incomplete"
+    failure_marker.write_text("A new render has not passed all final checks.\n")
+    if len(parse_markdown(md_path)) != 9:
+        raise ValueError("A complete deck must have exactly nine slides")
+    out_dir.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".render-", dir=out_dir.parent) as scratch:
+        stage = Path(scratch) / "slides"
+        frozen, art_proofs = {}, {}
+        for number, path in mascots.items():
+            raw = path.read_bytes()
+            art_proofs[str(number)] = art_eligibility.proof(raw)
+            frozen[number] = Path(scratch) / f"mascot-{number}.png"
+            frozen[number].write_bytes(raw)
+        paths = _render(md_path, frozen, stage, verbose)
+        for value in art_proofs.values():
+            art_eligibility.check_proof(value)
+        for path in paths:
+            with Image.open(path) as im:
+                if im.size != (W, H) or im.format != "PNG":
+                    raise ValueError("Wrong final image dimensions or format")
+        report = {"check_version": render_guard.VERSION,
+                  "render_contract": render_guard.contract(),
+                  "render_runtime": render_guard.runtime(),
+                  "complete": len(paths) == 9, "has_mascots": len(mascots) == 9,
+                  "artwork": art_proofs,
+                  "markdown_sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
+                  "slides": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
+        (stage / "checks.json").write_text(json.dumps(report, indent=2) + "\n")
+        # Preserve an old export until replacement succeeds. Failed new builds
+        # never leave a mix of old and new slides in the publishing directory.
+        backup = Path(scratch) / "previous"
+        if out_dir.exists():
+            out_dir.rename(backup)
+        try:
+            stage.rename(out_dir)
+        except BaseException:
+            if backup.exists():
+                backup.rename(out_dir)
+            raise
+        failure_marker.unlink()
+        return [out_dir / p.name for p in paths]
+
+
+def _render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
+            verbose: bool = True) -> list[Path]:
     from playwright.sync_api import sync_playwright
+    import render_guard
 
     slides = parse_markdown(md_path)
     if not slides:
@@ -1149,12 +1194,27 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
     textonly: list[int] = []
     with sync_playwright() as p:
         browser = p.chromium.launch()
+        try:
+            render_guard.check_browser(browser.version)
+        except BaseException:
+            browser.close()
+            raise
         page = browser.new_page(viewport={"width": W, "height": H},
                                 device_scale_factor=1)
         for i, s in enumerate(slides, 1):
             html = slide_html(s, i, len(slides), mascots.get(i), i - 1, palette)
             page.set_content(html, wait_until="load")
             page.evaluate("document.fonts.ready")
+            failed_images = page.evaluate("""async () => {
+              const failed = await Promise.all([...document.images].map(async (image, index) => {
+                try { await image.decode(); return null; }
+                catch (_) { return index + 1; }
+              }));
+              return failed.filter(value => value !== null);
+            }""")
+            if failed_images:
+                browser.close()
+                raise ValueError(f"Slide {i}: image(s) failed to load: {failed_images}")
             missing = page.evaluate(FONT_GUARD)
             if missing:
                 browser.close()
@@ -1177,6 +1237,12 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
             if fit["overflow"] > 0:
                 long_slides.append((i, s.get("title", ""), fit["overflow"]))
             page.wait_for_timeout(60)
+            faults = render_guard.check(page, require_mascot=bool(mascots), expected=s)
+            if fit["overflow"] > 0:
+                faults.append(f"copy exceeds its text zone by {fit['overflow']}px")
+            if faults:
+                browser.close()
+                raise ValueError(f"Slide {i} failed final checks: " + "; ".join(faults))
             safe = re.sub(r"[^a-z0-9]+", "_", s.get("title", f"slide{i}").lower()).strip("_")
             dest = out_dir / f"{i:02d}_{safe}.png"
             page.screenshot(path=str(dest))

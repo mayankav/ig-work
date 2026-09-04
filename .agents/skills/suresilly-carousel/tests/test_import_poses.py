@@ -175,14 +175,14 @@ def test_an_off_palette_body_is_rejected():
     assert any(b.startswith("palette:") for b in blocking), blocking
 
 
-def test_a_blank_eye_is_reported_but_does_not_block():
+def test_a_blank_eye_blocks_import():
     """Advisory here, blocking on the generation path. The gate refuses three
     real library poses — guarded, chasing, lab_coat — which is an accepted cost
     when the remedy is a free re-roll and the wrong trade for artwork a person
     chose and handed over."""
     blocking, advisory, _ = gated(silly(eyes="left"))
-    assert any(a.startswith("pupils:") for a in advisory), advisory
-    assert not any(b.startswith("pupils:") for b in blocking), blocking
+    assert not advisory
+    assert any(b.startswith("pupils:") for b in blocking), blocking
 
 
 def test_closed_eyes_raise_nothing_at_all():
@@ -203,10 +203,8 @@ def test_every_failure_is_reported_not_just_the_first():
 
 # ──────────────────── 3 · what blocks and what only reports ──────────────────
 
-def test_palette_may_be_overruled_and_the_override_is_recorded(tmp_path, monkeypatch):
-    """The brand colour is the brand owner's to change, so a deliberate palette
-    shift is a decision rather than a defect. It is recorded either way, so a
-    pose that entered by exception can be told from one that passed."""
+def test_palette_override_cannot_bypass_shared_eligibility(tmp_path, monkeypatch):
+    """A preview exception cannot admit an unchecked image into the library."""
     lib = tmp_path / "library"
     lib.mkdir()
     manifest = tmp_path / "poses.json"
@@ -217,8 +215,8 @@ def test_palette_may_be_overruled_and_the_override_is_recorded(tmp_path, monkeyp
     src.mkdir()
     cv2.imwrite(str(src / "offcolour.png"), silly(body=(40, 170, 40)))
     ip.main_argv([str(src), "--allow", "palette"])
-    entry = json.loads(manifest.read_text())["poses"]["offcolour"]
-    assert entry["override"] == ["palette"]
+    assert json.loads(manifest.read_text())["poses"] == {}
+    assert not (lib / "offcolour.png").exists()
 
 
 def test_text_may_not_be_overruled_by_the_cli(tmp_path):
@@ -228,13 +226,13 @@ def test_text_may_not_be_overruled_by_the_cli(tmp_path):
     assert "refused" in str(e.value)
 
 
-def test_only_pupils_is_advisory():
+def test_no_image_gate_is_advisory():
     """If another gate is ever added to ADVISORY, this is the test that should
     make somebody argue for it out loud."""
-    assert ip.ADVISORY == {"pupils"}
+    assert ip.ADVISORY == set()
 
 
-def test_an_advisory_failure_still_lets_the_pose_be_written(tmp_path, monkeypatch):
+def test_an_eye_failure_never_writes_the_pose(tmp_path, monkeypatch):
     lib = tmp_path / "library"
     lib.mkdir()
     manifest = tmp_path / "poses.json"
@@ -245,7 +243,7 @@ def test_an_advisory_failure_still_lets_the_pose_be_written(tmp_path, monkeypatc
     src.mkdir()
     cv2.imwrite(str(src / "squinting.png"), silly(eyes="left"))
     ip.main_argv([str(src)])
-    assert (lib / "squinting.png").is_file()
+    assert not (lib / "squinting.png").exists()
 
 
 def test_a_blocking_failure_does_not(tmp_path, monkeypatch):
@@ -317,9 +315,13 @@ def test_framing_defaults_to_full_body(tmp_path, monkeypatch):
     monkeypatch.setattr(ip, "MANIFEST", manifest)
     src = tmp_path / "in"
     src.mkdir()
-    cv2.imwrite(str(src / "sulking.png"), silly())
+    from art_review_fixture import offline_reviewer, check_fixture
+    offline_reviewer(monkeypatch, tmp_path)
+    path = src / "sulking.png"
+    path.write_bytes((ROOT / "mascot/library/deadpan.png").read_bytes())
+    check_fixture([path])
 
-    ip.main_argv([str(src)])
+    ip.main_argv([str(src), "--exact"])
     assert json.loads(manifest.read_text())["poses"]["sulking"]["framing"] == "full"
 
 
@@ -445,7 +447,11 @@ def test_every_real_pose_clears_the_whole_import_gate_stack():
         blocking = [b for b in blocking if not b.startswith("text:")]
         if blocking:
             rejected.append((p.stem, blocking[0][:60]))
-    assert rejected == [], f"{len(rejected)} real poses rejected: {rejected[:6]}"
+    # Eyes now block imports too. Keep the measured false-refusal cost visible;
+    # no runtime exception admits these four poses past the check.
+    assert {name for name, _ in rejected} <= {"guarded", "chasing", "lab_coat", "sulking"}
+    assert all(reason.startswith("pupils:") for _, reason in rejected)
+    assert len(rejected) / len(list(_library_poses())) <= .05
 
 
 # ──────────────────── 8 · the residue gate and near-black artwork ────────────

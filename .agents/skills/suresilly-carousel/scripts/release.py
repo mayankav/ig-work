@@ -26,7 +26,10 @@ import argparse
 import json
 import subprocess
 import sys
+import publication_record
 from pathlib import Path
+
+import run_control
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 PENDING = REPO_ROOT / "state" / "pending"
@@ -63,6 +66,10 @@ def find(slug: str) -> dict | None:
 
 def publish(record: dict) -> int:
     """Post a held deck, then stop holding it."""
+    reason = run_control.pause_reason(REPO_ROOT / "state/HALT")
+    if reason:
+        print(reason, file=sys.stderr)
+        return 1
     deck = REPO_ROOT / record["deck"]
     if not deck.is_file():
         print(f"the deck is gone from disk: {record['deck']}", file=sys.stderr)
@@ -74,7 +81,14 @@ def publish(record: dict) -> int:
         cwd=REPO_ROOT, capture_output=True, text=True)
     if done.returncode != 0:
         tail = (done.stdout + done.stderr).strip().splitlines()[-4:]
-        print("Instagram refused the post: " + " | ".join(tail), file=sys.stderr)
+        print("Publication did not finish cleanly: " + " | ".join(tail), file=sys.stderr)
+        return 1
+    # A successful subprocess can be a dry run. Only Instagram's saved receipt
+    # lets us remove held state and tell the owner that a deck was posted.
+    try:
+        publication_record.read(deck.parent / "published.json", record["slug"])
+    except (OSError, ValueError, TypeError):
+        print("Publication is not confirmed. The deck stays held. Do not retry blindly.", file=sys.stderr)
         return 1
     (PENDING / f"{record['slug']}.json").unlink(missing_ok=True)
     print(f"posted {record['slug']} (held at {record['score']}/100)")

@@ -34,7 +34,7 @@ at 11pm with the caption "babe read slide 4."
 
 - **Primary:** Adults 25–38, relationship-aware, psychologically curious
 - **Psychographic:** People who follow both Tim Ferriss AND Esther Perel
-- **Gender:** Skews 60/40 female/male but content is gender-neutral
+- **Gender:** Content is gender-neutral; no measured audience split is claimed.
 - **Behavioral signal:** They've been to therapy at least once, or listen to
   psychology podcasts, or have googled "anxious attachment style"
 - **Platform behavior:** Heavy savers, frequent DM-sharers, moderate commenters
@@ -57,28 +57,14 @@ this slide to their best friend in a group chat at midnight?"* If not, rewrite.
 
 ---
 
-## Part 2 · Niche Research (Embedded)
+## Part 2 · Content direction
 
-### 2.1 Niche Ranking Context
+### 2.1 What we aim to make
 
-@suresilly operates in the **#1 ranked niche**: Applied Relational Psychology &
-Attachment. From our research:
-
-| Dimension | Score (out of 10) |
-|---|---|
-| Virality | 9.5 |
-| Shareability | **9.8** (highest in the dataset) |
-| Save Rate | 8.0 |
-| Audience Size (TAM) | ~2B globally |
-| Monetization Potential | 6.0 |
-| Evergreen Score | 9.5 |
-| Competition (inverted) | 6.5 |
-| **Overall Score** | **8.64** |
-
-**Key insight:** Relationship carousels average 4–6x the shares of finance
-carousels of equal quality. Attachment theory keyword searches are up 340%
-since 2020. The #1 growth lever is **DM-shares** — relationship content spreads
-laterally through existing real relationships, not just through the algorithm.
+Useful relational content that a reader can save or send to someone.
+The old niche rankings, market sizes and engagement multipliers were not
+supported by verified measurements. They must not guide generation or be
+printed as facts. Measure real post results separately from generation.
 
 ### 2.2 Competitive Landscape
 
@@ -100,18 +86,17 @@ shows from one account, so two posts close together compete with each other.
 
 The three pillars below are the *kinds* of deck, not a weekly timetable. Nothing
 assigns a pillar to a weekday — `run.py` picks the moment, and the pattern comes
-from rotation against the last few decks (see "Rotate the pattern" in
-`content-playbook.md`). A deck records which pillar it landed on in its
+from code-owned variation (see `content-playbook.md`). A deck records which pillar it landed on in its
 `**Content Pillar:**` line.
 
-1. **Diagnosis Post**: Names a pattern the reader recognizes but couldn't
-   articulate. *"5 signs you're the 'therapist friend' and it's burning you out."*
+1. **Recognition Post**: Shows a familiar action and gives a supported explanation.
+   It does not diagnose the reader or require an invented label.
 2. **Script / Template Post**: Gives the reader exact words to use.
    *"Instead of 'it's fine', say 'I need a minute to figure out what I'm
    actually feeling.' Here are 6 more."*
-3. **Philosophy / Reframe Post**: A counter-intuitive observation that
-   reframes how the reader sees a common situation. *"You don't have commitment
-   issues. You have trust issues. The difference matters."*
+3. **Reframe Post**: A supported explanation that gives the reader another
+   way to understand a familiar interaction. It must not assign a hidden
+   condition, motive or personal history to the reader.
 
 > No Reels. No weekday timetable. The engine has never produced a video.
 

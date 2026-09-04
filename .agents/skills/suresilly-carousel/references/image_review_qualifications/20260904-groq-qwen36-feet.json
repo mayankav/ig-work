@@ -1,0 +1,36 @@
+{
+  "provider": "groq",
+  "model": "qwen/qwen3.6-27b",
+  "contract": "f0c2af41afc72b6bd5c0d8172adb0cab255666df5688cd6461be2fc67791a12e",
+  "started_at": "2026-09-03T21:41:37.983622+00:00",
+  "observations": [
+    {
+      "repeat": 0,
+      "cases": [
+        "kneeling",
+        "waving",
+        "deadpan"
+      ],
+      "sheet_sha256": "15c0ea2cc961552d45cfa540acae2bcc7d9bf06a6813db23112a0ed5aa345428",
+      "actual_model": "groq/qwen/qwen3.6-27b",
+      "answer": {
+        "inspected": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "uncertain": [],
+        "faults": []
+      }
+    }
+  ],
+  "errors": [
+    {
+      "request": 1,
+      "type": "ValueError",
+      "reason": "image reviewer missed the known extra leg",
+      "answer": null
+    }
+  ]
+}

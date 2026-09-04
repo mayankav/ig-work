@@ -7,9 +7,9 @@ description: >
   on every slide. Use when asked to create, write, draft or render a @suresilly carousel,
   Instagram carousel, psychology carousel or slide deck for the page, or to work on the
   pipeline that publishes two every day.
-version: "3.0.0"
-author: "@suresilly"
-user-invocable: true
+metadata:
+  version: "3.0.0"
+  author: "@suresilly"
 ---
 
 # @suresilly Carousel Creator
@@ -65,9 +65,7 @@ itself; run it by hand only to re-render a deck you have edited.
 |---|---|
 | *(none)* | **Default. Uses the pose library. Free, instant, no key.** |
 | `--no-mascot` | Fast copy and layout iteration. |
-| `--generate` | Obsolete paid path. Needs billing; fails otherwise. |
-| `--model pro` | only meaningful alongside `--generate` — uses Gemini Pro. |
-| `--model empero` | alongside `--generate` — uses Empero community models (`glm-5.3-flash` or `qwen3.8-flash`) via `https://free.empero.org/v1`. Free tier with fair usage limits. API key `free` is accepted by default. |
+| `--generate` / `--model` | Removed. Both stop before any request or write. Use `--fresh` for the checked free path. |
 | `--fresh` | Generate a pose per slide from that slide's own brief, via `fresh_poses.py`. Free, never load-bearing — every failure hands the slide back its library pose. `run.py` passes this on every run; on `build.py` it is opt-in. See invariant 2. |
 | `--fresh-budget N` | Cap what `--fresh` may spend, in neurons. Only meaningful with `--fresh`. |
 | `--random-palette` | Ignore the round-robin and roll a theme. |
@@ -77,12 +75,44 @@ itself; run it by hand only to re-render a deck you have edited.
 
 | Path | When | Cost |
 |---|---|---|
-| **Draw fresh** | Default on `run.py`. One pose per slide from that slide's own brief. Needs a vendor that can look at a picture: with none reachable, nothing is drawn at all. | ~126 neurons each, free tier |
+| **Draw fresh** | Default on `run.py`. One pose per slide from that slide's own brief. Requires a qualified image reviewer before drawing; a key alone is not enough. | Free allowance, bounded by the run's ledger |
 | **Library** | The fallback. Every failure lands here, and `--no-fresh` picks it outright. | nothing, no key, no network |
 | `poses_flux.py` | Offline tool to grow the library in bulk. | free |
-| `--generate` | Obsolete. Gemini image generation has no free tier. | fails without billing |
+| `--generate` / `--model` | Removed from the builder. No code path reaches the obsolete mascot module. | no request |
 
-A drawn pose passes four gates before it reaches a slide — no text, on palette, has pupils, and `cutout.qa()` — and is then shown to a model **once per deck**, as one numbered 3×3 sheet, which may only veto: any panel it faults falls back to its library pose, and the file is deleted rather than offered to the library. Nothing anywhere counts limbs deterministically, because two-donkey poses make that impossible (invariant 28). The veto **fails closed**: no vendor, a timeout or an unreadable reply throws away every drawn pose, so a bad afternoon at a vendor costs library art and never a deck.
+A drawn pose is checked before it reaches a slide, then inspected in groups of
+at most three poses. Each inspection includes full-body and enlarged detail views
+plus a known defective control. There are at most three review requests per deck.
+The model may only veto; missing coverage, uncertainty, a missed control or an
+unreadable reply rejects the group. The exact model must first pass the fixed
+qualification set. No qualified model means no fresh generation.
+
+The library candidate is the exact reviewed PNG, not the raw frame. Import uses
+`--exact`: all pixel gates still run, but cropping, matting, mirroring, colour
+changes and overrides are forbidden. Candidate hashes must match before import.
+In `run.py`, novelty is checked before fresh generation; new art is imported only
+after the complete render passes.
+
+`art_eligibility.py` is mandatory for fresh art, imports, library selection and
+generation references. It stores exact group images, the inspection sheet hash,
+the model response and check version. A saved flag cannot establish eligibility:
+the sheet, coverage, control and vetoes are replayed. Changed image bytes, check
+code or model qualification require a new usable check. The renderer freezes the
+checked image bytes and retains the evidence references with all nine slides.
+Publishing checks that evidence again, including for held decks.
+
+Offline library audit (maximum nine PNGs and three model requests per invocation):
+
+```bash
+.agents/skills/suresilly-carousel/.venv/bin/python \
+  .agents/skills/suresilly-carousel/scripts/art_eligibility.py path/to/final.png
+```
+
+This requires an already qualified free model; it does not qualify a model or
+promote an image. For transformed imports, use `import_poses.py --preview DIR`
+first, audit the staged PNGs, then import those files with `--exact`. Evidence
+lives in `mascot/checks/` and is committed with the run. The existing library
+still needs this audit. See `docs/reliable-posts-status.md` before enabling posting.
 
 The library holds about 190 poses, 32 of them two-donkey scenes, matched to a slide by the words in its brief and never repeated inside a deck. **Do not quote a count from this file** — every run imports new poses, up to 18 a day. Count them:
 
@@ -94,7 +124,11 @@ python3 -c "import json;print(len(json.load(open('mascot/poses.json'))['poses'])
 
 Hand-drawn 6-up sheets still work: `mascot/GENERATION_PROMPTS.md`, then `scripts/import_poses.py`.
 
-Vendors are called over plain REST, in order: Gemini → Groq → Cloudflare. No MCP. **Two must be configured**, because the critic may not be the model that wrote the deck. `llm.look()` is the same walk for a picture: Gemini's buckets are already multimodal, Groq and Cloudflare each need their own vision model id — and both of those ids are ⚠ **unverified**, so run `scripts/probe_vision.py` before trusting one.
+Text vendors are called over plain REST, in order: Gemini → Groq → Cloudflare.
+No MCP. **Two must be configured**, because the critic may not be the vendor that
+wrote the deck. Production image review uses `image_review.py` and an exact model
+with current qualification evidence. `probe_vision.py` is an offline diagnostic;
+accepting an image request does not qualify a model to review production art.
 
 ---
 

@@ -1,0 +1,29 @@
+{
+  "status": "not_usable_by_engine",
+  "book": "The Mindful Self-Compassion Workbook",
+  "authors": ["Kristin Neff", "Christopher Germer"],
+  "publisher_year": 2018,
+  "isbn": "9781462526789",
+  "publisher_page": "https://www.guilford.com/books/The-Mindful-Self-Compassion-Workbook/Neff-Germer/9781462526789",
+  "public_excerpt": "https://www.guilford.com/add/neff_germer_chapter1.pdf?t=1",
+  "catalogue_edition": "https://openlibrary.org/books/OL30596326M/Mindful_Self-Compassion_Workbook",
+  "catalogue_work": "/works/OL22540794W",
+  "catalogue_classification": "BF575.S37N443 2018",
+  "catalogue_page_year": 2016,
+  "observations": [
+    "The publisher page identifies the title, both authors, ISBN and 2018 publication date.",
+    "Web retrieval returned chapter text, including the book identity and copyright date.",
+    "The Open Library page for the matching ISBN lists 2016, while its classification contains 2018. This mismatch has not been resolved for an exact edition record.",
+    "The engine environment could resolve Open Library but its catalogue API connection was refused.",
+    "The publisher URL without the query returned HTTP 200 HTML, not a PDF. Its own page redirects to the t=1 URL.",
+    "Following that explicitly supplied PDF URL with a normal Python HTTP request returned HTTP 403. No alternate identity, credentials or access-control workaround was attempted."
+  ],
+  "not_completed": [
+    "Direct PDF ingestion",
+    "Exact edition verification in the engine",
+    "Independent review of a proposed claim",
+    "Insertion into the active citation pool"
+  ],
+  "model_requests": 0,
+  "claims_activated": 0
+}

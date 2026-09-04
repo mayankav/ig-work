@@ -59,6 +59,9 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import llm  # noqa: E402
+import image_review  # noqa: E402
+import art_checks  # noqa: E402
+import art_eligibility  # noqa: E402
 from cutout import (  # noqa: E402
     QAFailure, assert_has_pupils, auto_chroma_matte, detect_key_colour, qa,
 )
@@ -76,53 +79,8 @@ VISION_TILE = 512              # pixels per panel; nine of them make a 1536px sh
 GRID_QUALITY = 82              # JPEG quality — about 200KB for the whole sheet
 GRID_BG = (128, 128, 128)      # flat mid grey: not the mascot green, not a bubble white
 
-VISION_SCHEMA = {
-    "type": "object",
-    "required": ["faults"],
-    "properties": {
-        "faults": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": ["panel", "fault"],
-                "properties": {
-                    # Ranged, because a schema that accepts panel 47 turns a
-                    # confused reply into a silent no-op instead of a complaint.
-                    "panel": {"type": "integer", "minimum": 1, "maximum": 9},
-                    "fault": {"type": "string", "minLength": 4, "maxLength": 120},
-                },
-            },
-        },
-    },
-}
-
-# Written to be a VETO and nothing else — invariant 11: a model may write and may
-# veto, it may never approve. There is no field here for "this one is fine",
-# because the deterministic gates above have already decided that. The only
-# thing this reply can do is take a pose away.
-#
-# The fault list is mechanical on purpose. "Does this look right" is a taste
-# question and taste is what the rules own; counting limbs is a perception
-# question, which is the one thing a model can do here that no gate can.
-VISION_SYSTEM = """\
-You are checking drawings of a cartoon donkey for anatomy that is impossible.
-
-Report a panel ONLY when you can point at one of these:
-  - one animal with more than four legs
-  - one figure with more than two arms, or more than two hands
-  - a limb, hoof or hand that connects to nothing
-  - a second head, or more than two eyes on one face
-  - two bodies melted into each other
-
-These are NOT faults, and reporting them is wrong:
-  - two or three SEPARATE complete donkeys in one panel — often asked for
-  - a limb hidden behind a prop, a wall or the animal's own body
-  - a tail, ears, a held object, a shadow
-  - anything about colour, style, framing, or how well it is drawn
-
-If you are not sure, leave it out. Return {"faults": []} when nothing is wrong.
-"""
-
+VISION_SCHEMA = image_review.SCHEMA
+VISION_SYSTEM = image_review.SYSTEM
 
 def contact_grid(tiles: dict[int, "cv2.typing.MatLike"], tile: int = VISION_TILE) -> bytes:
     """The generated poses as one numbered JPEG sheet.
@@ -179,50 +137,8 @@ def contact_grid(tiles: dict[int, "cv2.typing.MatLike"], tile: int = VISION_TILE
 
 
 def anatomy_faults(tiles: dict[int, "cv2.typing.MatLike"], log=print) -> dict[int, str]:
-    """Which generated poses have anatomy no donkey has. Fails CLOSED.
-
-    A limb count cannot be written as a gate, and this was measured rather than
-    assumed: profiling silhouette runs across the leg band of all 194 library
-    poses, 25 of them have a median count of three or more, because hugging,
-    high_five, far_apart2, laughing_together, shoulder_hold, mirroring and
-    pursue_withdraw are TWO-donkey poses where four legs is correct, and
-    gardener, hero_landing and clinging hold props. No threshold separates a
-    malformed donkey from two correct ones, and a fault nothing can answer is a
-    stopped engine rather than a strict gate — invariant 21.
-
-    So this is the one place a model is allowed to look at the artwork, and it
-    is allowed to do exactly one thing with it: take a pose away.
-
-    Every failure — no vendor, a refusal, a timeout, a reply that will not
-    parse — vetoes EVERY tile. That is the uncomfortable direction on purpose.
-    The alternative is publishing unchecked art whenever a vendor has a bad
-    afternoon, which is the exact failure this was built for, and the cost of
-    being wrong is nine library poses and a deck that still goes out.
-    """
-    if not tiles:
-        return {}
-    numbers = sorted(tiles)
-    try:
-        grid = contact_grid(tiles)
-        answer, vendor = llm.look(
-            VISION_SYSTEM,
-            f"The sheet holds {len(numbers)} numbered panels: "
-            + ", ".join(str(n) for n in numbers)
-            + ". Check each one and list the faults you can point at.",
-            VISION_SCHEMA, grid)
-    except Exception as exc:                                  # noqa: BLE001
-        log(f"  anatomy check unavailable ({type(exc).__name__}), "
-            f"keeping the library poses")
-        return {n: f"anatomy unchecked: {type(exc).__name__}" for n in numbers}
-
-    faults: dict[int, str] = {}
-    for item in answer.get("faults") or []:
-        panel = item.get("panel")
-        if panel in tiles:
-            faults[panel] = str(item.get("fault", "anatomy"))[:100]
-    log(f"  anatomy checked by {vendor}: {len(faults)} of {len(numbers)} vetoed")
-    return faults
-
+    """Review at most nine images through the shared bounded veto path."""
+    return image_review.review(tiles, log=log)
 
 def pose_name(brief: str) -> str:
     """A library name for a generated pose: a few words of the brief, plus a
@@ -248,10 +164,9 @@ def _matte(raw_bgr) -> "cv2.typing.MatLike":
     a scene has several pieces and a wide silhouette, and poses_flux.check() is
     tuned for one standing figure.
 
-    This matte is for THIS DECK only. The same frame also goes to the library,
-    and it goes there raw, through import_poses.py, so that the library's own
-    gates and the library's own matte decide. Two writers into mascot/library/
-    is how two subtly different libraries happen, so there is still exactly one.
+    This matte is both the review image and the library candidate. Import checks
+    it again but must not matte, crop or re-encode it. One checked file, one writer
+    into the library.
     """
     rgba = auto_chroma_matte(raw_bgr)
     rgba = tight_crop(drop_neighbour_bleed(rgba))
@@ -270,15 +185,34 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
     generation never removes a pose, it only replaces one.
     """
     stats = {"generated": 0, "fell_back": 0, "seconds": 0.0, "neurons": 0.0,
-             "reasons": [], "kept": [], "vetoed": []}
+             "reasons": [], "kept": [], "kept_hashes": {}, "vetoed": []}
     out = dict(fallback)
 
     # Asked BEFORE a single neuron is spent. The anatomy check is a veto, so
     # with no vendor to run it every generated pose would be thrown away — and
     # thrown away after roughly 1,130 neurons had drawn it. Nine library poses
     # are the same deck for nothing.
-    if not llm.vision_ready():
-        stats["reasons"].append("no vendor can check anatomy, so nothing was drawn")
+    if not image_review.ready():
+        stats["reasons"].append("no qualified image reviewer; no fresh art drawn")
+        stats["fell_back"] = len(fallback)
+        return out, stats
+
+    # Hold back the full review cost while drawing. Checks occur after the
+    # generation loop; those requests reserve their own cost before HTTP.
+    review_headroom = 0
+    try:
+        provider, model = image_review.model_for_review()
+        import review_budget
+        review_requests = math.ceil(len(fallback) / image_review.GROUP_SIZE)
+        budget_fault = review_budget.fault(provider, model, review_requests)
+        if budget_fault:
+            raise ValueError(budget_fault)
+        if provider == "cloudflare":
+            import cloudflare_budget
+            review_headroom = review_requests * cloudflare_budget.reservation(
+                model, cloudflare_budget.VISION_OUTPUT)
+    except Exception as exc:
+        stats["reasons"].append(f"image review budget unavailable: {exc}")
         stats["fell_back"] = len(fallback)
         return out, stats
 
@@ -297,7 +231,7 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
         # rather than nine times inside the loop. The real set is chosen per
         # slide, because the brief decides half of it.
         flux.pick_references()
-        ledger = flux.Ledger(budget=budget) if budget else flux.Ledger()
+        ledger = flux.Ledger(budget=budget) if budget is not None else flux.Ledger()
     except Exception as exc:                                  # noqa: BLE001
         stats["reasons"].append(f"no generator credentials: {exc}")
         stats["fell_back"] = len(fallback)
@@ -325,6 +259,8 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
             # back mid-jump, both times against four upright references.
             refs = flux.pick_references(brief=brief)
             reserved = flux.estimate_neurons(1024, 1024, len(refs))
+            if review_headroom:
+                ledger.check_account(reserved + review_headroom)
             ledger.check(reserved)
             ledger.spend(reserved, note=f"deck-slide-{number}")
             blob, billed = flux.generate(
@@ -372,23 +308,22 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
             ok, buf = cv2.imencode(".png", rgba)
             if not ok:
                 raise QAFailure("could not encode the matted pose")
+            faults = art_checks.pixel_faults_bytes(buf.tobytes())
+            if faults:
+                raise QAFailure("saved image checks: " + "; ".join(faults))
             dest.write_bytes(buf.tobytes())
 
-            # Keep the RAW magenta frame for the library, never the matte. The
-            # library is grown by import_poses.py and by nothing else, and it
-            # wants the frame before matting so its own gates and its own matte
-            # decide. The brief travels with it as a sidecar so the pose enters
-            # the library tagged with the BODY it was drawn from, which is the
-            # vocabulary selection has never had.
+            # Keep the exact encoded matte reviewed and used on the slide.
+            # Matting the raw frame again would create a different, unchecked
+            # library image. The raw frame's text check already ran above.
             if keep_dir is not None:
                 keep_dir.mkdir(parents=True, exist_ok=True)
                 name = pose_name(brief)
-                ok_raw, raw_buf = cv2.imencode(".png", arr)
-                if ok_raw:
-                    (keep_dir / f"{name}.png").write_bytes(raw_buf.tobytes())
-                    (keep_dir / f"{name}.brief.txt").write_text(brief, encoding="utf-8")
-                    stats["kept"].append(name)
-                    kept_name = name
+                (keep_dir / f"{name}.png").write_bytes(buf.tobytes())
+                (keep_dir / f"{name}.brief.txt").write_text(brief, encoding="utf-8")
+                stats["kept"].append(name)
+                stats["kept_hashes"][name] = hashlib.sha256(buf.tobytes()).hexdigest()
+                kept_name = name
             out[number] = dest
             made[number] = {"rgba": rgba, "dest": dest, "kept": kept_name}
             stats["generated"] += 1
@@ -407,8 +342,8 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
     # above this line is deterministic and everything below it is a model, which
     # is the order that matters: the gates decide what is admissible and the
     # model may only take more away.
-    for number, fault in anatomy_faults({n: m["rgba"] for n, m in made.items()},
-                                        log=log).items():
+    for number, fault in art_eligibility.check_paths(
+            {n: m["dest"] for n, m in made.items()}, log=log).items():
         entry = made[number]
         # Undone completely, not just unlinked from the deck. A vetoed pose left
         # in out_dir is a file the next thing to read that folder will find, and
@@ -421,6 +356,7 @@ def generate_for_deck(slides: list[dict], fallback: dict[int, Path], out_dir: Pa
                 (keep_dir / f"{entry['kept']}.brief.txt").unlink(missing_ok=True)
             if entry["kept"] in stats["kept"]:
                 stats["kept"].remove(entry["kept"])
+            stats["kept_hashes"].pop(entry["kept"], None)
         out[number] = fallback[number]
         stats["generated"] -= 1
         stats["fell_back"] += 1

@@ -22,10 +22,10 @@
     "text_neurons": 949.67
   },
   "2026-09-03": {
-    "calls": 9,
+    "calls": 18,
     "last": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
-    "neurons": 1129.32,
-    "text_calls": 7,
-    "text_neurons": 570.38
+    "neurons": 2258.64,
+    "text_calls": 10,
+    "text_neurons": 796.55
   }
 }

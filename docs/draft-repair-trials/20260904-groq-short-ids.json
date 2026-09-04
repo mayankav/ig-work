@@ -1,0 +1,76 @@
+{
+  "at": "2026-09-03T23:38:28.265358+00:00",
+  "status": "checked",
+  "scope": "edit format and merge only; not a full-deck release test",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "draft": {
+    "script": {
+      "new": "You ask the bike shop when the bike will be ready."
+    },
+    "caption": "The bike is at the shop. Keep the pickup time clear."
+  },
+  "faults": [
+    "the Say line starts \"You...\", so it narrates the reader instead of giving them words: 'You ask the bike shop when the bike will be ready.'"
+  ],
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "edits"
+    ],
+    "properties": {
+      "edits": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 12,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "value",
+            "fault"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "enum": [
+                "/script/new",
+                "/caption"
+              ]
+            },
+            "value": {
+              "type": "string"
+            },
+            "fault": {
+              "type": "string",
+              "enum": [
+                "fault-1"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "http_requests": 1,
+  "repair_code_sha256": "536d9dd8370221752c42999c5bc7e3ec8c9294853bc14f3f7839bb6cc1c67a01",
+  "raw_reply": "{\"edits\":[{\"fault\":\"fault-1\",\"path\":\"/script/new\",\"value\":\"When will my bike be ready?\"}]}",
+  "reply": {
+    "edits": [
+      {
+        "fault": "fault-1",
+        "path": "/script/new",
+        "value": "When will my bike be ready?"
+      }
+    ]
+  },
+  "repaired": {
+    "script": {
+      "new": "When will my bike be ready?"
+    },
+    "caption": "The bike is at the shop. Keep the pickup time clear."
+  },
+  "remaining_faults": []
+}

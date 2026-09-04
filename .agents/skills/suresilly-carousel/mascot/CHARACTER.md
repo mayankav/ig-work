@@ -46,7 +46,8 @@ single heavy eyebrow - this deadpan brow is a defining feature.
 His mane is dense black (#141414) corkscrew curls: a full rounded tuft on top of the head and
 a wide strip of the same curls running down the back of the neck.
 Two tall pointed ears, green with a slightly darker green inner.
-Small solid black hooves on all four limbs, and a thin green tail with a black tuft at the tip.
+Exactly two arms and two legs per character, with small solid black hooves.
+A thin green tail with a black tuft at the tip is not a leg.
 ```
 
 ### The second donkey

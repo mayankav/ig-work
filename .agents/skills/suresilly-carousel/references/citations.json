@@ -114,8 +114,7 @@
       "claims": [
         "The Nagoskis found the body needs a clear sign that the hard part is over.",
         "The Nagoskis found that the problem ending and your body settling are two separate things.",
-        "Emotional exhaustion stems from completing stress cycles without adequate recovery time.",
-        "Emily Nagoski explains that burnout happens when the stress cycle is not completed, leading to a feeling of being stuck."
+        "Emotional exhaustion stems from completing stress cycles without adequate recovery time."
       ],
       "verified": {
         "catalogue": "openlibrary",
@@ -251,18 +250,20 @@
       "id": "brown-2012",
       "line": "— Brené Brown, *Daring Greatly* (2012)",
       "pillars": [
-        "numbing"
+        "numbing",
+        "self_worth"
       ],
       "claims": [
-        "We choose emotional numbing as a way to avoid the vulnerability of our daily lives."
+        "We choose emotional numbing as a way to avoid the vulnerability of our daily lives.",
+        "People internalize the relentless belief of being never enough when evaluating daily performance."
       ],
       "phrase": "emotional numbing",
       "verified": {
         "catalogue": "openlibrary",
-        "scanned_hits": 3765,
+        "scanned_hits": 167415,
         "proposed_by": "gemini",
         "checked_by": "cloudflare",
-        "at": "2026-08-30T20:23:08Z"
+        "at": "2026-09-03T14:09:07Z"
       }
     },
     {

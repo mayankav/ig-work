@@ -33,7 +33,7 @@ const ENV = {
 };
 
 /** Push one Telegram update through the real handler and report every URL hit. */
-async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh" } = {}) {
+async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh", ghStatus = 204 } = {}) {
   const seen = [];
   const realFetch = globalThis.fetch;
   const realLog = console.log;
@@ -42,7 +42,7 @@ async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh" } = {
     // 204 is what a successful workflow_dispatch answers, and ghDispatch branches
     // on it. `null` body, not "": node's Response constructor refuses a body on a
     // 204 outright, which is a truer stub than a 200 would be.
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: String(url).includes("api.github.com") ? ghStatus : 204 });
   };
   console.log = () => {};                       // the Worker narrates; not our output
   try {
@@ -52,7 +52,8 @@ async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh" } = {
         "X-Telegram-Bot-Api-Secret-Token": secret,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: { chat: { id: chatId }, text } }),
+      body: JSON.stringify({ update_id: 123, message: { chat: { id: chatId }, text,
+        date: Date.parse("2026-09-04T02:35:00Z") / 1000 } }),
     });
     const response = await worker.fetch(request, ENV);
     return { status: response.status, seen };
@@ -129,6 +130,12 @@ async function run() {
       failures.push("ROUTE retry dispatched auto-post without mode=publish, so the " +
                     "retried run would build and not post");
     }
+    if (hits[0].body?.inputs?.retry !== "true" || hits[0].body?.inputs?.request_id !== "tg-123") {
+      failures.push("ROUTE retry lost its intent or stable delivery id");
+    }
+    if (hits[0].body?.inputs?.slot_id !== "2026-09-04_0800") {
+      failures.push("ROUTE retry lost the slot at the time the owner sent the message");
+    }
   }
   if (!r.seen.some((c) => c.url.includes("api.telegram.org"))) {
     failures.push("ROUTE retry sent no acknowledgment, so the reply meets silence " +
@@ -142,6 +149,9 @@ async function run() {
   }
   if (held[0]?.body?.inputs?.decision !== "publish") {
     failures.push("ROUTE publish lost its decision on the way to review.yml");
+  }
+  if (held[0]?.body?.inputs?.request_id !== "tg-123") {
+    failures.push("ROUTE publish lost its stable delivery id");
   }
 
   // rerun must reach review.yml as a drop, not auto-post as a retry. Same
@@ -167,7 +177,17 @@ async function run() {
     }
   }
 
-  const total = words.length + 3 + 5 + 2 + 1 + 4;
+  for (const text of ["retry", "publish", "force"]) {
+    const failed = await reply(text, {ghStatus: 503});
+    if (failed.status !== 502 || failed.seen.some(c => c.body?.text?.includes("on it"))) {
+      failures.push(`DISPATCH ${text} hid GitHub failure or falsely acknowledged success`);
+    }
+    if (!failed.seen.some(c => c.body?.text?.includes("could not start"))) {
+      failures.push(`DISPATCH ${text} gave no failure notice`);
+    }
+  }
+
+  const total = words.length + 3 + 7 + 3 + 1 + 4 + 6;
   if (failures.length) {
     console.log(`parse-reply: ${failures.length}/${total} failed`);
     for (const line of failures) console.log(`  ${line}`);

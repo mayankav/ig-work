@@ -21,7 +21,9 @@ be a cycle — and neither of them should own a number the other depends on.
 from __future__ import annotations
 
 import json
+import math
 import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -103,6 +105,8 @@ class Ledger:
         # believes it has already spent the afternoon.
         self.path = Path(path) if path is not None else LEDGER_PATH
         self.budget = float(budget)
+        if not math.isfinite(self.budget) or self.budget < 0:
+            raise BudgetExceeded("The daily budget must be a finite, non-negative number")
         if self.budget > FREE_DAILY_NEURONS:
             raise BudgetExceeded(
                 f"budget {self.budget:.0f} exceeds the free daily allowance of "
@@ -111,18 +115,33 @@ class Ledger:
     def _read(self) -> dict:
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
+        except FileNotFoundError:
+            if self.path.is_symlink():
+                raise BudgetExceeded("The usage ledger link is broken. Spending is stopped.")
             return {}
-        return data if isinstance(data, dict) else {}
+        except (OSError, json.JSONDecodeError) as exc:
+            raise BudgetExceeded("The usage ledger cannot be read. Spending is stopped; preserve and repair the file.") from exc
+        if not isinstance(data, dict):
+            raise BudgetExceeded("The usage ledger is invalid. Spending is stopped.")
+        for day in data.values():
+            if not isinstance(day, dict):
+                raise BudgetExceeded("The usage ledger has an invalid day. Spending is stopped.")
+            for key in ("neurons", "text_neurons", "calls", "text_calls"):
+                value = day.get(key, 0)
+                if (type(value) not in (int, float) or not math.isfinite(value) or value < 0):
+                    raise BudgetExceeded(f"The usage ledger has invalid {key}. Spending is stopped.")
+        return data
 
     def spent(self) -> float:
         day = self._read().get(_today())
         return float(day.get("neurons", 0.0)) if isinstance(day, dict) else 0.0
 
     def remaining(self) -> float:
-        return max(0.0, self.budget - self.spent())
+        return max(0.0, min(self.budget - self.spent(), self.account_left()))
 
     def check(self, cost: float) -> None:
+        if not math.isfinite(cost) or cost < 0:
+            raise BudgetExceeded("The requested cost must be finite and non-negative")
         if cost > self.remaining():
             raise BudgetExceeded(
                 f"this call is booked at {cost:.0f} neurons and only "
@@ -133,13 +152,23 @@ class Ledger:
     def spend_text(self, cost: float, note: str = "") -> None:
         """Record what the text vendor took out of the SAME allowance.
 
-        No check() and no refusal. Writing is the thing this repo exists to do
-        and a deck that cannot be written is a day with no post, so text is
-        never turned away to protect a picture budget. It is only recorded, so
-        that the picture side can see the true remaining total and so a person
-        can see whether writing is close to the edge.
+        This bookkeeping method also records usage already incurred. Network
+        callers must use reserve_text(), which checks the shared limit first.
         """
         self._write(0.0, 0, note=note, text_neurons=cost, text_calls=1)
+
+    def check_account(self, cost: float) -> None:
+        if not math.isfinite(cost) or cost < 0 or cost > self.account_left():
+            raise BudgetExceeded("The shared free allowance cannot cover this request and its reserved checks")
+
+    def reserve_text(self, cost: float, note: str = "") -> None:
+        """Persist a conservative charge before requesting text or image review."""
+        self.check_account(cost)
+        self.spend_text(cost, note)
+
+    def reconcile_text(self, reserved: float, actual: float | None, note: str = "") -> None:
+        if actual is not None and math.isfinite(actual) and actual > reserved:
+            self._write(0, 0, note=note, text_neurons=actual - reserved)
 
     def text_spent(self) -> float:
         day = self._read().get(_today())
@@ -154,6 +183,9 @@ class Ledger:
 
     def _write(self, neurons_delta: float, calls_delta: int, note: str = "",
                text_neurons: float = 0.0, text_calls: int = 0) -> None:
+        for value in (neurons_delta, calls_delta, text_neurons, text_calls):
+            if not math.isfinite(value) or value < 0:
+                raise BudgetExceeded("Usage records cannot be negative or non-finite")
         data = self._read()
         day = data.get(_today())
         day = day if isinstance(day, dict) else {"neurons": 0.0, "calls": 0}
@@ -171,7 +203,15 @@ class Ledger:
         for stale in sorted(data)[:-14]:
             data.pop(stale, None)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+        fd, scratch = tempfile.mkstemp(prefix=".usage-", dir=self.path.parent)
+        try:
+            with os.fdopen(fd, "w") as stream:
+                stream.write(json.dumps(data, indent=2, sort_keys=True) + "\n")
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(scratch, self.path)
+        finally:
+            Path(scratch).unlink(missing_ok=True)
 
     def spend(self, cost: float, note: str = "") -> None:
         self._write(cost, 1, note)

@@ -100,7 +100,7 @@ SHIPPED_BROKEN = """### Slide 1 · Hook
 # no gate had refused. Importing it is the point — one list, and the copy the
 # test checks is the copy the pipeline enforces.
 PAPER_WORDS = readability.JARGON
-CLAIM_WORD_CAP = 18
+from bibliography import CLAIM_WORD_CAP
 
 
 TYPOS = """### Slide 5 · Value Step 2
@@ -144,6 +144,10 @@ def run() -> int:
     # to it survived. Every test passed; the fault only appears on the path
     # where a plan cannot be fixed, which is the path CI takes on a bad night.
     import llm as _llm
+    from support_fixture import with_support
+    real_options = writer.citations_for
+    # Isolate the writer/vendor failure boundary from the source-pool audit.
+    writer.citations_for = lambda *a, **k: [with_support(writer.load_citations()["espie-2006"])]
     for name, fn in (("plan_deck", lambda: writer.plan_deck("a moment", "sleep")),
                      ("write_deck", lambda: writer.write_deck(
                          "a moment", "sleep", title="t", pattern="p", pillar="P"))):
@@ -158,6 +162,7 @@ def run() -> int:
             failures.append(f"REFUSAL {name} raised {type(other).__name__}: {other}")
         finally:
             _llm.ask = real
+    writer.citations_for = real_options
 
     # Slide 3 is the one card a reader has to understand on the first read. It
     # is code that puts these words there, so nothing downstream can fix them.
@@ -195,23 +200,27 @@ def run() -> int:
     if not decks:
         failures.append("DECKS the on-disk deck sweep found no carousel.md at all, so every "
                         "check that reads the published decks proved nothing")
-    # One deck on disk genuinely has the fault: 20260830_kitchen-at-11pm printed
+    # Known decks on disk genuinely have the fault: 20260830_kitchen-at-11pm printed
     # `"Say out loud: The ceramic bowl is done. Walker found that leaving is
     # learned where it worked."` as a regulated response, which is the sentence
     # SHIPPED_BROKEN above was cut from and the reason this gate exists. So the
     # sweep asserts both directions on real published data: that deck must trip
-    # it, and no other may.
-    KNOWN_QUOTES_A_RESEARCHER = "20260830_kitchen-at-11pm_800736"
+    # it. The supplied September 3 defect repeats this under the new Say label;
+    # an old-label-only check missed it. Neither is a clean reference example.
+    KNOWN_QUOTES_A_RESEARCHER = {
+        "20260830_kitchen-at-11pm_800736",
+        "20260903_desk-cleared-my_7c11e0",
+    }
     for deck in decks:
         text = deck.read_text(encoding="utf-8")
         if "Slide 5" not in text:
             continue
         spoken = [f for f in writer.check_repeats(text) if "out loud" in f]
-        if spoken and deck.parent.name != KNOWN_QUOTES_A_RESEARCHER:
+        if spoken and deck.parent.name not in KNOWN_QUOTES_A_RESEARCHER:
             failures.append(f"REPEAT {deck.parent.name} blocked for crediting a "
                             f"source: {spoken[0]}")
-        if not spoken and deck.parent.name == KNOWN_QUOTES_A_RESEARCHER:
-            failures.append(f"REPEAT {KNOWN_QUOTES_A_RESEARCHER} puts a researcher inside "
+        if not spoken and deck.parent.name in KNOWN_QUOTES_A_RESEARCHER:
+            failures.append(f"REPEAT {deck.parent.name} puts a researcher inside "
                             f"a spoken script and no longer trips the gate that caught it")
 
     # ── the angles ──
@@ -244,8 +253,8 @@ def run() -> int:
          "must contain the scene token 'body'"),
         # The name is the thing a reader repeats and sends on, so it has to be
         # on the only slide most people see.
-        ("a pattern name that never reaches slide 1",
-         broken(pattern_name="the quiet tax"), "missing from slide 1"),
+        ("an optional pattern name not explained on slide 4",
+         broken(pattern_name="the quiet tax"), "slide 4 does not name"),
         ("a pattern name that is a sentence, not a handle",
          broken(pattern_name="you cannot sit down until it is clear"), "two or three"),
         # The pillar is the shelf, not the thing. A deck written by the weakest
@@ -360,7 +369,7 @@ def run() -> int:
     # the count says how far short the subtitle fell and survives paraphrase.
     if not any("new words" in f for f in faults):
         failures.append(f"HOOK a subtitle repeating the headline was accepted: {faults}")
-    if not any("again" in f for f in faults):
+    if not any("cover prints pattern name" in f for f in faults):
         failures.append(f"HOOK a subtitle repeating the name was accepted: {faults}")
     # This headline fails on two counts, and the second one only became visible
     # once plain words were measured: "Execution" is four syllables on the cover.

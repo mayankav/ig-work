@@ -19,6 +19,14 @@ on:
         description: "Which deck. The last six characters are enough. Leave empty to list."
         required: false
         type: string
+      request_id:
+        description: "Stable Telegram delivery id; leave blank for a manual decision"
+        required: false
+        type: string
+
+concurrency:
+  group: suresilly-state
+  cancel-in-progress: false
 
 jobs:
   decide:
@@ -26,21 +34,39 @@ jobs:
     permissions:
       contents: write
     env:
+      SS_HALT: ${{ vars.SS_HALT }}
       IG_USER_ID: ${{ secrets.IG_USER_ID }}
       IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # release.py is stdlib-only, but publishing a held deck shells out to
-      # post_to_ig.py, which needs requests. Install it always so `publish` never
-      # dies on an import after the owner has already said yes.
+      # Reserve before resolving a blank slug: a repeated 'publish' must not
+      # publish the next held deck after the first has been removed.
+      - name: Reserve this decision once
+        id: slot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export RUN_CREATED_AT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)
+          python scripts/posting_slots.py reserve
+
+      # Held publishing replays source, image and final-render evidence. A fresh
+      # runner needs the same pinned dependencies as the automatic build.
       - name: Install
-        run: pip install --quiet requests
+        if: steps.slot.outputs.accepted == 'true'
+        run: python -m pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
+
+      - name: Check publication checks can load
+        if: steps.slot.outputs.accepted == 'true' && inputs.decision == 'publish'
+        run: python scripts/check_publish_runtime.py
 
       # One step now, for every decision. telegram_review.py --reply runs the
       # action through the SAME act() the webhook path uses and sends the answer
@@ -52,12 +78,19 @@ jobs:
       # verbatim; --reply maps it again through VERBS as a safety net, so this can
       # never do something the reply did not name.
       - name: Act on the reply, and say what happened
+        if: steps.slot.outputs.accepted == 'true'
+        env:
+          DECISION: ${{ inputs.decision }}
+          SLUG: ${{ inputs.slug }}
         run: |
           python .agents/skills/suresilly-carousel/scripts/telegram_review.py \
-            --reply "${{ inputs.decision }}" "${{ inputs.slug }}"
+            --reply "$DECISION" "$SLUG"
 
       - name: Record the decision
-        if: always() && inputs.decision != 'list'
+        if: always() && steps.slot.outputs.accepted == 'true' && inputs.decision != 'list'
+        env:
+          DECISION: ${{ inputs.decision }}
+          SLUG: ${{ inputs.slug }}
         run: |
           git config user.name  "suresilly-bot"
           git config user.email "bot@suresilly.local"
@@ -65,6 +98,15 @@ jobs:
           # folder when release.py posts a held deck, and that media id is the
           # only way insights.py can ever measure it. state/ alone loses it.
           git add state/ carousels/
-          git diff --staged --quiet || git commit -m "review: ${{ inputs.decision }} ${{ inputs.slug }} [skip ci]"
-          git pull --rebase --quiet || true
+          git diff --staged --quiet || git commit -m "review: $DECISION $SLUG [skip ci]"
+          git pull --rebase --quiet
           git push
+
+      - name: Report a failed reservation
+        if: failure() && steps.slot.outcome == 'failure'
+        env:
+          REASON: ${{ steps.slot.outputs.reason }}
+        run: |
+          python -m pip install --quiet requests
+          python scripts/notify.py --subject "[SILLY-ERROR] Reply could not start" \
+            --body "${REASON:-The reply could not be reserved. Nothing was posted.} Do not retry until the saved state is checked."

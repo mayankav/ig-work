@@ -1,0 +1,15 @@
+{
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "contract": "f0c2af41afc72b6bd5c0d8172adb0cab255666df5688cd6461be2fc67791a12e",
+  "started_at": "2026-09-03T21:40:58.925153+00:00",
+  "observations": [],
+  "errors": [
+    {
+      "request": 1,
+      "type": "RateLimited",
+      "reason": "HTTP 429",
+      "answer": null
+    }
+  ]
+}

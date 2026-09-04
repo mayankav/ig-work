@@ -1,0 +1,36 @@
+{
+  "provider": "gemini",
+  "model": "gemini-2.5-flash",
+  "contract": "429a6e0b5df291ab7f8e955301af8439683cdb2aa94e4c3f59051ca4c52859e0",
+  "started_at": "2026-09-03T21:39:44.404409+00:00",
+  "observations": [
+    {
+      "repeat": 0,
+      "cases": [
+        "kneeling",
+        "waving",
+        "deadpan"
+      ],
+      "sheet_sha256": "c8d7b85dc0f25a3dc60901741e2e2561a30350a01b78f0d69214c6d9c6409f07",
+      "actual_model": "gemini/gemini-2.5-flash",
+      "answer": {
+        "inspected": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "uncertain": [],
+        "faults": []
+      }
+    }
+  ],
+  "errors": [
+    {
+      "request": 1,
+      "type": "ValueError",
+      "reason": "image reviewer missed the known extra leg",
+      "answer": null
+    }
+  ]
+}

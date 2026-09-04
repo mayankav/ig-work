@@ -706,7 +706,8 @@ def _body_refused(status: str, note: str, history: list[int], retry: bool,
         # on the one message that most needs reading.
         out += [esc(part) for part in _wrap(note or "The run did not finish.")]
         out += ["", bold(f"{MARK['self']} CAN I FIX IT MYSELF?")]
-        out += _wrap("Maybe. A vendor being unreachable is often a short outage.")
+        out += _wrap("A new try may help after a short outage." if retry else
+                     "No. This fault needs a fix before a new try.")
         out += [""]
         return out
 
@@ -726,7 +727,7 @@ def _body_refused(status: str, note: str, history: list[int], retry: bool,
             out += [""]
     out += [bold(f"{MARK['self']} CAN I FIX IT MYSELF?")]
     shape, why = outcomes.trajectory(trail)
-    out += ["No." if shape == "stuck" else "Not this time."]
+    out += ["Not this time." if retry else "No. A new try is not advised."]
     if trail:
         out += [f"   {outcomes.arrow(trail)}"]
     out += [f"   {esc(part)}" for part in _wrap(why, 40)]

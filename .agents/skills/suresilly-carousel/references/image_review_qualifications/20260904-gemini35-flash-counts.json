@@ -1,0 +1,58 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.5-flash",
+  "contract": "bb725ff07a59e42545ed258104bdfec9dd0c655c7e1e38f14a112f2ea5937c3f",
+  "started_at": "2026-09-03T21:43:50.316708+00:00",
+  "observations": [
+    {
+      "repeat": 0,
+      "cases": [
+        "kneeling",
+        "waving",
+        "deadpan"
+      ],
+      "sheet_sha256": "15c0ea2cc961552d45cfa540acae2bcc7d9bf06a6813db23112a0ed5aa345428",
+      "actual_model": "gemini/gemini-3.5-flash",
+      "answer": {
+        "inspected": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "uncertain": [],
+        "figures": [
+          {
+            "panel": 1,
+            "arms": 2,
+            "legs": 2
+          },
+          {
+            "panel": 2,
+            "arms": 2,
+            "legs": 2
+          },
+          {
+            "panel": 3,
+            "arms": 2,
+            "legs": 2
+          },
+          {
+            "panel": 4,
+            "arms": 2,
+            "legs": 2
+          }
+        ],
+        "faults": []
+      }
+    }
+  ],
+  "errors": [
+    {
+      "request": 1,
+      "type": "ValueError",
+      "reason": "image reviewer missed the known extra leg",
+      "answer": null
+    }
+  ]
+}

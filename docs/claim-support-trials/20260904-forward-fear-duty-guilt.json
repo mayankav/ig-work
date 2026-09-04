@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-03T23:20:05.332751+00:00",
+  "candidate": {
+    "author": "Susan Forward",
+    "title": "Emotional Blackmail",
+    "year": 1997,
+    "phrase": "emotional blackmail",
+    "claim": "Forward describes fear, duty, and guilt as tools people use to push others into giving in."
+  },
+  "active_pool_changed": false,
+  "status": "refused",
+  "reason": "no usable passage from the named book was available: the source request failed (HTTP 403)"
+}

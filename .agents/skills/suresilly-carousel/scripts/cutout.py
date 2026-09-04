@@ -522,6 +522,28 @@ GREEN_HUE_RANGE = (35, 95)      # OpenCV H is 0-179, so this is 70-190 deg
 CREAM_MIN_V, CREAM_MAX_S = 180, 120
 EYE_MAX_SAT = 45          # an eye white is white; the cream muzzle is 73-94
 
+# How much of the collar just outside a white blob must be opaque artwork before
+# that blob is judged as an eye, and how far down the frame an eye may sit.
+#
+# An eye is sunk into a head. A held prop is not: it has background on most
+# sides. That is the whole idea, and it is what lets a LONE eye be judged at all
+# — see _assert_lone_eye_sees, which is the check these two numbers serve.
+#
+# Measured on all 201 library poses. A held blank card scores 0.22 and 0.22
+# (`blank_card`, `blank_card_m`); the blank eye that shipped on 2026-09-03 scores
+# 0.87. Sweeping the threshold, the cost is a flat 2 refusals everywhere from
+# 0.25 to 0.75 and rises outside it: at 0.20 the card enters and two good poses
+# are refused, and at 0.80 the real eye of `pondering` is excluded so its own
+# blank neighbour becomes the largest and it is refused. 0.50 is the middle of
+# that plateau, which is the furthest any single number can sit from both
+# failures.
+#
+# The band is 0.45 rather than _eye_candidates' 0.62 because the second thing in
+# frame on the 2026-09-03 slide was the paper in a box on a table at 0.59, and it
+# does carry a dark mark. Nothing that low is a face.
+EYE_EMBED = 0.50
+EYE_BAND = 0.45
+
 
 def correct_palette(bgr: np.ndarray) -> np.ndarray:
     """Pull the body green and the cream back onto the brand palette.
@@ -586,6 +608,9 @@ def _eye_candidates(rgba: np.ndarray) -> list[tuple[int, int, int, int, int]]:
     return sorted(out, key=lambda b: -b[4])
 
 
+PUPIL_MAX_AXIS_RATIO = 16.0
+
+
 def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
     """Centre of the dark core inside one eye white, or None if there isn't one."""
     x, y, w, h, _ = box
@@ -598,6 +623,13 @@ def _pupil_centre(grey: np.ndarray, box: tuple[int, int, int, int, int]):
     if dark.sum() < max(6, int(0.05 * inner.size)):
         return None
     ys, xs = np.nonzero(dark)
+    # A thin lid is not a pupil. Covariance is rotation-independent, unlike
+    # width/height. The supplied malformed eyes measure 20.6 and 7.5; rejecting
+    # the bare lid exposes the mismatched pair. Replayed on the library, this
+    # also refuses four difficult clean poses (< 5%), never approves a pose.
+    axes = np.linalg.eigvalsh(np.cov(np.array([xs, ys])))
+    if axes[-1] / max(.01, axes[0]) > PUPIL_MAX_AXIS_RATIO:
+        return None
     return (x + inset_x + float(xs.mean()), y + inset_y + float(ys.mean()))
 
 
@@ -668,6 +700,75 @@ def _assert_not_lopsided(grey: np.ndarray, boxes: list, what: str) -> None:
                 f"Re-roll with another seed.")
 
 
+def _ring_opacity(rgba: np.ndarray, box: tuple[int, int, int, int, int]) -> float:
+    """How much of the collar just outside this blob is opaque artwork?
+
+    An eye is sunk into a head, so its collar is all figure. A held card, a
+    window or a plate has background on most sides. See EYE_EMBED.
+    """
+    x, y, w, h, _ = box
+    pad = max(3, int(0.18 * max(w, h)))
+    height, width = rgba.shape[:2]
+    y0, y1 = max(0, y - pad), min(height, y + h + pad)
+    x0, x1 = max(0, x - pad), min(width, x + w + pad)
+    collar = np.ones((y1 - y0, x1 - x0), bool)
+    collar[y - y0:y + h - y0, x - x0:x + w - x0] = False
+    alpha = rgba[y0:y1, x0:x1, 3][collar]
+    return float((alpha > 200).mean()) if alpha.size else 0.0
+
+
+def _assert_lone_eye_sees(rgba: np.ndarray, grey: np.ndarray,
+                          boxes: list, what: str) -> None:
+    """Draft four. The shape the fault arrived in on 2026-09-03.
+
+    Drafts two and three both judge a PAIR, and say so on purpose: a closed-eye
+    pose, a wink and a profile legitimately show no pair, so "no pair found"
+    returns clean. That reasoning is sound and it is also the hole. A donkey
+    drawn in three-quarter view shows ONE eye. When that one eye came back as a
+    blank white oval, there was no pair, so there was nothing to judge, so the
+    gate reported passed — and the frame went onto slide 4 of
+    20260903_desk-cleared-my_7c11e0 AND into the pose library as
+    `turning_head_away_from_56e9`, where invariant 2's fallback can reach it
+    forever with no model call at all.
+
+    This is the second time this exact defect has shipped. On 2026-09-01 it was
+    a gate that was never called (see fresh_poses.py, which fixed that by
+    calling it). Today it was the same gate, called, reporting passed, because
+    the earlier frame had two eye whites and this one has one. A gate must be
+    able to see the shape the fault arrives in.
+
+    So a lone eye is judged, and the thing that makes it safe to judge is
+    EYE_EMBED: of the candidates that sit high in the frame AND are sunk into
+    the artwork on nearly every side, the largest must carry a pupil. That is
+    the train-window case answered from the other end — draft two could not
+    tell an eye from a pale prop, so it demanded a pair; this asks whether the
+    blob is INSIDE a head, which a prop held in a hoof is not.
+
+    Measured on all 201 library poses: 2 refusals, and neither is new. `guarded`
+    was already refused by draft two — narrowed lids, a good pose, a known and
+    accepted cost recorded in import_poses.py. `turning_head_away_from_56e9` is
+    today's broken frame, so it is a catch and not a cost. Every other pose,
+    including both blank-card poses whose prop is larger than the eyes and
+    carries nothing, is untouched.
+    """
+    eyes = [b for b in boxes
+            if (b[1] + b[3] / 2) / rgba.shape[0] <= EYE_BAND
+            and _ring_opacity(rgba, b) >= EYE_EMBED]
+    if not eyes:
+        return
+    if len(eyes) > 1 and all(_pupil_centre(grey, eye) is None for eye in eyes):
+        # Two blank pale objects are ambiguous, not proof of a face. The pair
+        # checks below and mandatory visual review still apply.
+        return
+    biggest = max(eyes, key=lambda b: b[4])
+    if _pupil_centre(grey, biggest) is not None:
+        return
+    raise QAFailure(
+        f"pupils: {what} has one eye white {biggest[2]}x{biggest[3]} sunk into "
+        f"the head and it is blank — no pupil at all. A single eye still has to "
+        f"see. Re-roll with another seed.")
+
+
 def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
     """Refuse a pose whose eyes came back blank, mismatched or crooked.
 
@@ -696,16 +797,28 @@ def assert_has_pupils(rgba: np.ndarray, what: str) -> None:
     left: "no matched pair" was treated as "nothing to judge", so an eye drawn
     the wrong SIZE disabled the very check that would have caught it.
 
-    When no pair of any kind is found the gate still passes. That is deliberate
-    and it is the limit of what this can honestly claim: a closed-eye pose, a
-    wink and a profile all legitimately show no pair, and refusing them would
-    refuse good art to catch bad art. The gate's promise is narrow and complete
-    — IF two eye whites are visible side by side, THEN both are correct.
+    Draft four is _assert_lone_eye_sees, and it closes the other half of that
+    same hole. "No pair" was still treated as "nothing to judge" when there is
+    genuinely only ONE eye, which is what a three-quarter view draws, and a
+    lone blank eye shipped through it twice. A lone eye is now judged when it is
+    sunk into the head — see EYE_EMBED.
+
+    A pose with no eye white at all still passes, and that is the limit of what
+    this can honestly claim: a closed-eye pose shows nothing to judge, and
+    refusing it would refuse good art to catch bad art. The gate's promise is
+    narrow and complete — IF an eye white is visible, THEN it carries a pupil,
+    and IF two are visible side by side, THEN they are a matched, level pair.
     """
     if rgba.shape[2] < 4:
         return
     grey = cv2.cvtColor(rgba[..., :3], cv2.COLOR_BGR2GRAY)
     boxes = _eye_candidates(rgba)
+
+    # Before the pair search, not inside it. A lone eye is judged on its own
+    # terms and the pair rules cannot see it at all — that is draft four's whole
+    # subject, and running it here means no arrangement of blobs can route
+    # around it.
+    _assert_lone_eye_sees(rgba, grey, boxes, what)
 
     pair = None
     for i, a in enumerate(boxes):

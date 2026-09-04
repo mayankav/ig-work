@@ -17,6 +17,19 @@ on:
         # publish, and the publish steps below test for that exact word, so a
         # forced deck cannot go out until a separate `publish <id>` reply.
         options: ["build", "publish", "force"]
+      slot_id:
+        description: "Posting slot supplied by the clock; leave blank for a manual run"
+        required: false
+        type: string
+      request_id:
+        description: "Stable delivery id; leave blank for a manual run"
+        required: false
+        type: string
+      retry:
+        description: "Retry only a saved failure which can recover"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -24,7 +37,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: auto-post
+  group: suresilly-state
   cancel-in-progress: false
 
 jobs:
@@ -34,7 +47,11 @@ jobs:
     if: vars.SS_HALT != '1'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    outputs:
+      accepted: ${{ steps.slot.outputs.accepted }}
+      deck_built: ${{ steps.build.outputs.slug != '' }}
     env:
+      SS_HALT: ${{ vars.SS_HALT }}
       # A scheduled run publishes. A manual run builds unless you say otherwise,
       # because the usual reason to press the button is to look at something.
       MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
@@ -66,12 +83,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      - name: Reserve this work before spending quota
+        id: slot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export RUN_CREATED_AT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)
+          python scripts/posting_slots.py reserve
+
       - name: Install
+        id: install
+        if: steps.slot.outputs.accepted == 'true'
         run: |
           pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
           python -m playwright install chromium --with-deps
@@ -79,6 +107,8 @@ jobs:
       # Every gate runs before anything is generated. A broken gate must never
       # be discovered by a published post.
       - name: Check the gates still work
+        id: gates
+        if: steps.slot.outputs.accepted == 'true'
         run: |
           # Every suite in the directory, not a hand-kept list. The list had
           # drifted: six suites existed that CI never ran, including the ones
@@ -101,15 +131,8 @@ jobs:
           # import, and a developer running them locally got silence and a zero
           # exit. Two scheduled runs on 2026-08-31 failed here and posted
           # nothing.
-          failed=0
-          for t in .agents/skills/suresilly-carousel/tests/test_*.py; do
-            if grep -q '^import pytest\|^from pytest' "$t"; then
-              python -m pytest "$t" -q || failed=1
-            else
-              python "$t" || failed=1
-            fi
-          done
-          exit $failed
+          python scripts/check_content_data.py
+          python scripts/check_suites.py
 
       # The Worker is JavaScript and lives outside the engine, so the loop above
       # cannot see it — but it decides what a Telegram reply does, and "rerun"
@@ -117,7 +140,11 @@ jobs:
       # discard a held deck on a request for another attempt. Node is already on
       # the runner and the check has no dependencies, so this costs a second.
       - name: Check the Telegram verbs
-        run: node ops/dispatch-worker/test/parse-reply.test.mjs
+        id: verbs
+        if: steps.slot.outputs.accepted == 'true'
+        run: |
+          node ops/dispatch-worker/test/parse-reply.test.mjs
+          node ops/dispatch-worker/test/posting-slot.test.mjs
 
       # A test may never write committed state. state/ carries what has been
       # used and what a vendor last said it had left; a suite that manufactures
@@ -125,6 +152,8 @@ jobs:
       # behind for the next real run to believe. Cheap to check, and it fails
       # the build rather than being discovered weeks later in a diff.
       - name: No test may write committed state
+        id: test_state
+        if: steps.slot.outputs.accepted == 'true'
         run: |
           dirty=$(git status --porcelain state/)
           if [ -n "$dirty" ]; then
@@ -137,6 +166,7 @@ jobs:
 
       - name: Build the deck
         id: build
+        if: steps.slot.outputs.accepted == 'true'
         run: |
           # --force only when the run was dispatched with mode=force, which only
           # a `force` reply or the manual button can set. A scheduled run cannot
@@ -157,6 +187,7 @@ jobs:
       # publish that nothing has ever fetched. The host is the path Instagram
       # reads from; the archive is the repo.
       - name: Publish the slides
+        id: host
         if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -167,6 +198,7 @@ jobs:
           cname: media.suresilly.com
 
       - name: Wait for the slides to be reachable
+        id: reachable
         if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         run: |
           URL="https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides/01_slide_1_hook.png"
@@ -180,6 +212,7 @@ jobs:
           exit 1
 
       - name: Post to Instagram
+        id: post
         if: steps.build.outputs.slug != '' && env.MODE == 'publish'
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
@@ -206,14 +239,16 @@ jobs:
       # has stopped, and prune_slides.py refuses rather than reporting a tidy
       # nothing when it cannot tell what it is looking at.
       - name: Fetch the published branch
-        if: ${{ !cancelled() && steps.build.outputs.slug != '' && env.MODE == 'publish' }}
+        id: fetch_host
+        if: ${{ !cancelled() && steps.post.outcome == 'success' }}
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
       - name: Take down the slides that are past the window
-        if: ${{ !cancelled() && steps.build.outputs.slug != '' && env.MODE == 'publish' }}
+        id: prune
+        if: ${{ !cancelled() && steps.post.outcome == 'success' }}
         run: |
           # --protect is also a check that the publish landed: the script aborts
           # if the deck this run put up is not on the host.
@@ -256,8 +291,14 @@ jobs:
       # deck is judged by (invariant 8). `git add carousels` skips the ignored
       # files without complaining.
       - name: Record what happened
-        if: always()
+        id: record
+        if: always() && steps.slot.outputs.accepted == 'true'
         run: |
+          content_status=0
+          python scripts/check_content_data.py --quarantine || content_status=$?
+          if [ "$content_status" != 0 ]; then
+            echo "reason=Invalid saved claims were quarantined. Usage records were kept." >> "$GITHUB_OUTPUT"
+          fi
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
           # The one deck whose slides must stay in git: a held deck is posted
@@ -287,17 +328,62 @@ jobs:
           # A history file that does not exist yet is legitimate and skipped. An
           # add that genuinely fails is not, and must not be swallowed.
           for path in state carousels \
+                      .agents/skills/suresilly-carousel/mascot/poses.json \
+                      .agents/skills/suresilly-carousel/mascot/library \
+                      .agents/skills/suresilly-carousel/mascot/checks \
                       .agents/skills/suresilly-carousel/mascot/usage_history.json \
                       .agents/skills/suresilly-carousel/palette_history.json \
                       .agents/skills/suresilly-carousel/citation_history.json \
                       .agents/skills/suresilly-carousel/references/citations.json \
                       .agents/skills/suresilly-carousel/concept_history.json; do
             [ -e "$path" ] || continue
+            if [ "$path" = ".agents/skills/suresilly-carousel/references/citations.json" ]; then
+              python scripts/check_content_data.py || continue
+            fi
             git add "$path"
           done
-          git commit -m "auto: ${{ steps.build.outputs.slug || 'no deck' }} [skip ci]" || echo "nothing to record"
-          git pull --rebase --quiet || true
-          git push || echo "push failed, next run will retry"
+          if ! git diff --staged --quiet; then
+            git commit -m "auto: record run $GITHUB_RUN_ID [skip ci]"
+          fi
+          git pull --rebase --quiet
+          git push
+          exit "$content_status"
+
+      - name: Save the result of this attempt
+        id: save_attempt
+        if: always() && steps.slot.outputs.accepted == 'true' && steps.record.outcome == 'success'
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+          SLOT_ID: ${{ steps.slot.outputs.slot_id }}
+          SLUG: ${{ steps.build.outputs.slug }}
+          VERDICT: ${{ steps.build.outputs.verdict }}
+          REASON: ${{ steps.build.outputs.reason }}
+          CAN_RETRY: ${{ steps.build.outputs.retry }}
+        run: |
+          python scripts/run_result.py
+          python scripts/posting_slots.py finish --result "$RUNNER_TEMP/suresilly-result.json"
+
+      - name: Resolve the actual result
+        id: result
+        if: always()
+        env:
+          STEPS_JSON: ${{ toJSON(steps) }}
+          SLUG: ${{ steps.build.outputs.slug }}
+          VERDICT: ${{ steps.build.outputs.verdict }}
+          REASON: ${{ steps.build.outputs.reason }}
+          CAN_RETRY: ${{ steps.build.outputs.retry }}
+        run: python scripts/run_result.py
+
+      - name: Preserve the result and test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-evidence-${{ github.run_id }}
+          include-hidden-files: true
+          path: |
+            ${{ runner.temp }}/suresilly-result.json
+            ${{ runner.temp }}/suresilly-tests-*
+            .agents/skills/suresilly-carousel/mascot/checks/
 
       # Two channels on purpose. Telegram is the alert that reaches a phone;
       # email is the archive that is still searchable in a year. A channel that
@@ -317,10 +403,10 @@ jobs:
           # of model-written text lands inside the shell as code — a reason
           # holding a backtick or a $( would run. As an env var it is a string.
           SLUG: ${{ steps.build.outputs.slug }}
-          VERDICT: ${{ steps.build.outputs.verdict }}
-          REASON: ${{ steps.build.outputs.reason }}
-          CAN_RETRY: ${{ steps.build.outputs.retry }}
-          OUTCOME: ${{ steps.build.outcome }}
+          VERDICT: ${{ steps.result.outputs.outcome }}
+          REASON: ${{ steps.result.outputs.reason }}
+          CAN_RETRY: ${{ steps.result.outputs.retryable }}
+          OUTCOME: ${{ steps.result.outputs.outcome }}
         run: |
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           # The body is a dashboard, not a sentence. scripts/dashboard.py reads
@@ -339,13 +425,19 @@ jobs:
             # before `verdict` existed and the step read the slug alone.
             echo "### ⏸ held \`$SLUG\` — waiting for a reply" >> "$GITHUB_STEP_SUMMARY"
             exit 0
-          elif [ -n "$SLUG" ]; then
+          elif [ "$OUTCOME" = "duplicate" ]; then
+            echo "### No repeated work: $REASON" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          elif [ "$OUTCOME" = "built" ]; then
+            echo "### Built only: $SLUG. Not posted." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          elif [ "$OUTCOME" = "ok" ]; then
             SUBJECT="[SILLY-OK] $SLUG"
             BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
             HTML=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL" --format html)
             ATTACH="carousels/$SLUG/contact_sheet.png"
             echo "### ✅ posted \`$SLUG\`" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "$OUTCOME" = "success" ]; then
+          elif [ "$OUTCOME" = "stopped" ]; then
             # AMBER. The build ran and exited 0 with no deck, which only happens
             # when a gate said no. The warning annotation is as close to an amber
             # dot as Actions gets: the run stays green, and the summary says why.
@@ -379,12 +471,17 @@ jobs:
             # to the generic sentence when the build died before it could speak.
             SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d)"
             NOTE="${REASON:-The build did not finish ($OUTCOME). A gate suite failed before the build ran, or the run died before it could say why.}"
-            BODY=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE")
-            HTML=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" --format html)
+            RETRY_FLAG="--no-retry"
+            if [ "$CAN_RETRY" = "true" ]; then RETRY_FLAG=""; fi
+            BODY=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG)
+            HTML=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG --format html)
             ATTACH=""
             echo "### ❌ broken (build $OUTCOME) — see the log" >> "$GITHUB_STEP_SUMMARY"
             echo "$NOTE" >> "$GITHUB_STEP_SUMMARY"
           fi
+          # Slot refusal happens before the main dependency install. The alert
+          # still needs its small HTTP client; duplicate events exit above.
+          python -c 'import requests' || python -m pip install --quiet requests
           if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
             python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML" --attach "$ATTACH"
           else
@@ -403,7 +500,7 @@ jobs:
   # `--source concept` returns nothing at all.
   topup:
     needs: post
-    if: always() && vars.SS_HALT != '1'
+    if: always() && vars.SS_HALT != '1' && needs.post.result == 'success' && needs.post.outputs.accepted == 'true' && needs.post.outputs.deck_built == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -447,18 +544,35 @@ jobs:
         if: steps.due.outputs.due == 'yes'
         run: |
           echo "${{ steps.due.outputs.note }}"
-          # Adding nothing is an ordinary outcome — the gates are strict — so a
-          # non-zero exit here is not a failure of the run.
+          # An empty result exits normally. A crash must remain a failed step.
           python .agents/skills/suresilly-carousel/scripts/discovery.py \
-            --refresh --scan 250 --limit 25 || echo "nothing new survived the gates"
+            --refresh --scan 250 --limit 25
 
       - name: Record what was proved
-        if: steps.due.outputs.due == 'yes'
+        if: always() && steps.due.outputs.due == 'yes'
         run: |
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
-          git add .agents/skills/suresilly-carousel/references/concepts.json \
-                  .agents/skills/suresilly-carousel/concept_demand.json || true
-          git commit -m "auto: topped up the concept vocabulary [skip ci]" || echo "nothing to record"
-          git pull --rebase --quiet || true
-          git push || echo "push failed, next top-up will retry"
+          for path in .agents/skills/suresilly-carousel/references/concepts.json \
+                      .agents/skills/suresilly-carousel/concept_demand.json \
+                      state/vendor_quotas.json state/flux_neurons.json; do
+            [ -e "$path" ] || continue
+            git add "$path"
+          done
+          if ! git diff --staged --quiet; then
+            git commit -m "auto: topped up the concept vocabulary [skip ci]"
+          fi
+          git pull --rebase --quiet
+          git push
+
+      - name: Keep unsaved top-up records
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topup-records-${{ github.run_id }}
+          include-hidden-files: true
+          path: |
+            .agents/skills/suresilly-carousel/references/concepts.json
+            .agents/skills/suresilly-carousel/concept_demand.json
+            state/vendor_quotas.json
+            state/flux_neurons.json

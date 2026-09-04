@@ -1,0 +1,14 @@
+{
+  "provider": "groq",
+  "model": "qwen/qwen3.6-27b",
+  "contract": "a082869f769d4117c86697dcffb0c3042d3c4d9385f3911ae4047637dcf836d4",
+  "started_at": "2026-09-03T21:38:13.940843+00:00",
+  "observations": [],
+  "errors": [
+    {
+      "request": 1,
+      "type": "SchemaMismatch",
+      "reason": "response.inspected[0]: expected a number, got str; response.inspected[1]: expected a number, got str; response.inspected[2]: expected a number, got str; response.inspected[3]: expected a number, got str"
+    }
+  ]
+}

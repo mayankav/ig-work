@@ -59,6 +59,26 @@ function parseReply(text) {
 // allowed other named exports (that is how Durable Objects are declared).
 export { parseReply, VERBS };
 
+// Use the trigger's intended time, never the time a delayed handler starts.
+// This is the same IST date-and-slot contract as scripts/posting_slots.py.
+export function postingSlot(scheduledTime, cron) {
+  const hour = { "30 2 * * *": "08", "30 14 * * *": "20" }[cron];
+  if (!hour || !Number.isFinite(scheduledTime)) throw new Error("Invalid posting trigger");
+  const local = new Date(scheduledTime + 330 * 60 * 1000);
+  if (Number.isNaN(local.getTime()) || local.getUTCHours() !== Number(hour) ||
+      local.getUTCMinutes() !== 0) throw new Error("Trigger time does not match its slot");
+  return `${local.toISOString().slice(0, 10)}_${hour}00`;
+}
+
+export function replySlot(messageTime) {
+  if (!Number.isSafeInteger(messageTime) || messageTime < 0) throw new Error("Invalid reply time");
+  const local = new Date(messageTime * 1000 + 330 * 60 * 1000);
+  const hour = local.getUTCHours() >= 20 || local.getUTCHours() < 8 ? 20 : 8;
+  if (local.getUTCHours() < 8) local.setUTCDate(local.getUTCDate() - 1);
+  local.setUTCHours(hour, 0, 0, 0);
+  return postingSlot(local.getTime() - 330 * 60 * 1000, hour === 8 ? "30 2 * * *" : "30 14 * * *");
+}
+
 async function ghDispatch(env, workflow, inputs, label) {
   const res = await fetch(
     `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${workflow}/dispatches`,
@@ -103,17 +123,20 @@ async function ack(env, text) {
   }
 }
 
-function dispatch(env, cron, mode = "publish") {
+function dispatch(env, cron, mode = "publish", extra = {}) {
   // The auto-post clock. Cron passes no mode, so it publishes; the manual button
   // passes mode explicitly and defaults to a safe build.
-  return ghDispatch(env, WORKFLOW, { mode }, `cron=${cron ?? "manual"} mode=${mode}`);
+  return ghDispatch(env, WORKFLOW, { mode, ...extra }, `cron=${cron ?? "manual"} mode=${mode}`);
 }
 
 export default {
   // Cloudflare's clock. event.cron is the expression that fired, kept for the
   // log so the two daily slots are distinguishable.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dispatch(env, event.cron));
+    const slot = postingSlot(event.scheduledTime, event.cron);
+    ctx.waitUntil(dispatch(env, event.cron, "publish", { slot_id: slot }).then((result) => {
+      if (result.status !== 204) throw new Error(`Scheduled dispatch failed (${result.status})`);
+    }));
   },
 
   // Two doors, and only two.
@@ -195,6 +218,13 @@ export default {
       console.log("telegram: not a command, ignored");
       return new Response("ok", { status: 200 });
     }
+    // Telegram retries the same update_id. Carry it through to the durable
+    // reservation instead of treating each delivery as a new human request.
+    if (!Number.isSafeInteger(update.update_id) || update.update_id < 0) {
+      console.log("telegram: command has no valid delivery id, ignored");
+      return new Response("ok", { status: 200 });
+    }
+    const requestId = `tg-${update.update_id}`;
 
     // retry and force are the two verbs that are not decisions about a HELD
     // deck, so neither goes to review.yml. A run that stopped on a gate produced
@@ -209,9 +239,20 @@ export default {
     // reply publish to the picture.
     if (command.decision === "retry" || command.decision === "force") {
       const forced = command.decision === "force";
-      await ack(env, forced ? "⏳ on it — building it anyway…" : "⏳ on it — retrying…");
-      const r = await dispatch(env, null, forced ? "force" : "publish");
+      let slot;
+      if (!forced) {
+        try { slot = replySlot(message.date); }
+        catch { return new Response("ignored: missing reply time", {status: 200}); }
+      }
+      const r = await dispatch(env, null, forced ? "force" : "publish",
+        { retry: forced ? "false" : "true", request_id: requestId,
+          ...(forced ? {} : {slot_id: slot}) });
       console.log(`telegram: dispatched auto-post ${command.decision} status=${r.status}`);
+      if (r.status !== 204) {
+        await ack(env, "The request could not start on GitHub. Nothing was confirmed. Telegram will try delivery again.");
+        return new Response("dispatch failed", {status: 502});
+      }
+      await ack(env, forced ? "⏳ on it — building it anyway…" : "⏳ on it — retrying…");
       return new Response("ok", { status: 200 });
     }
 
@@ -219,15 +260,15 @@ export default {
     // not silence. The real answer ("Posted …", "Dropped …", the held list) comes
     // from review.yml afterwards and replaces this in your reading of the chat.
     const what = command.slug ? `${command.decision} ${command.slug}` : command.decision;
-    await ack(env, `⏳ on it — ${what}…`);
-
     const r = await ghDispatch(env, REVIEW_WORKFLOW,
-      { decision: command.decision, slug: command.slug },
+      { decision: command.decision, slug: command.slug, request_id: requestId },
       `telegram ${command.decision} ${command.slug || "(none)"}`);
-    // Either way Telegram gets a 200: the command was accepted for dispatch. The
-    // friendly reply ("Posted …", "Dropped …") comes from review.yml once the
-    // runner has actually done it, on the same Telegram chat.
     console.log(`telegram: dispatched review ${command.decision} ${command.slug || "(none)"} status=${r.status}`);
+    if (r.status !== 204) {
+      await ack(env, "The request could not start on GitHub. Nothing was confirmed. Telegram will try delivery again.");
+      return new Response("dispatch failed", {status: 502});
+    }
+    await ack(env, `⏳ on it — ${what}…`);
     return new Response("ok", { status: 200 });
   },
 };

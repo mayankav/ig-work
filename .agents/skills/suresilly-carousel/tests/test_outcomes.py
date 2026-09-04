@@ -132,6 +132,8 @@ def run() -> int:
     # being down. The model here always answers, and always answers badly.
     keep_ask = llm.ask
     keep_discover = writer.bibliography.discover
+    keep_options = writer.citations_for
+    from support_fixture import with_support
     # A real plan, well-formed and schema-valid, with the pattern name changed so
     # it no longer appears on slides 1 and 4. An ordinary gate failure of the
     # kind the live model produces several times a week — not malformed JSON,
@@ -142,7 +144,8 @@ def run() -> int:
         # No new book survives the shelf gates. That is the ordinary case — the
         # gates are strict — and it keeps this test off the network entirely.
         writer.bibliography.discover = lambda *a, **k: (None, [])
-        llm.ask = lambda *a, **k: (copymod.deepcopy(stubborn), "stub")
+        writer.citations_for = lambda *a, **k: [with_support(writer.load_citations()["espie-2006"])]
+        llm.ask = lambda *a, **k: (copymod.deepcopy(stubborn), "gemini")
         try:
             writer.plan_deck(MOMENT, "sleep")
             failures.append("SITE plan_deck accepted a plan that fails every gate")
@@ -170,6 +173,7 @@ def run() -> int:
     finally:
         llm.ask = keep_ask
         writer.bibliography.discover = keep_discover
+        writer.citations_for = keep_options
 
     total = 5 + 3 + 5 + 2
     if failures:

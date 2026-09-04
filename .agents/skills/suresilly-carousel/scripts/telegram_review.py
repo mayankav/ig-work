@@ -177,6 +177,11 @@ def act(verb: str, slug: str) -> str:
             return "Nothing is held."
         return "<b>Held</b>\n" + "\n".join(row(r) for r in waiting)
 
+    if verb == "publish":
+        import run_control
+        if run_control.pause_reason(release.REPO_ROOT / "state/HALT"):
+            return "<b>Paused</b>. Nothing was posted. Held decks stay held. Reply <code>list</code> to see them."
+
     if not slug:
         waiting = release.held()
         if not waiting:

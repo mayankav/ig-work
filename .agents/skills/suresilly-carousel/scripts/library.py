@@ -78,7 +78,9 @@ def framing_of(pose: str) -> str:
 def available() -> set[str]:
     if not LIBRARY_DIR.is_dir():
         return set()
-    return {f.stem for f in LIBRARY_DIR.glob("*.png") if not f.stem.startswith("_")}
+    import art_eligibility
+    return {f.stem for f in LIBRARY_DIR.glob("*.png")
+            if not f.stem.startswith("_") and not art_eligibility.faults(f)}
 
 
 def load_usage() -> dict[str, list[str]]:

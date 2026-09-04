@@ -130,11 +130,10 @@ def git(*args: str) -> tuple[int, str]:
 def check_halt() -> None:
     """The kill switch. A file in the repo, or an environment variable set on
     the workflow, so it can be thrown from a phone or from a laptop."""
-    if os.environ.get("SS_HALT", "").strip() in ("1", "true", "yes"):
-        raise Stop("posting is halted by SS_HALT")
-    if HALT_FILE.is_file():
-        reason = HALT_FILE.read_text(encoding="utf-8").strip() or "no reason given"
-        raise Stop(f"posting is halted by state/HALT: {reason}")
+    import run_control
+    reason = run_control.pause_reason(HALT_FILE)
+    if reason:
+        raise Stop(reason)
 
 
 def check_state_is_current(strict: bool) -> str:
@@ -486,11 +485,16 @@ def write_deck(markdown: str, slug: str) -> Path:
     # Written by scripts/post_to_ig.py at the moment Instagram accepts a deck.
     # Named as a literal rather than imported: those scripts are jobs around the
     # engine and the engine never imports one.
+    pending = folder / "publication_pending.json"
+    if pending.exists() or pending.is_symlink():
+        raise Stop(f"carousels/{slug}/ has an unresolved publication attempt. "
+                   "This run will not overwrite its copy or images. Check Instagram first.")
     posted = folder / "published.json"
-    if posted.is_file():
+    if posted.exists() or posted.is_symlink():
         try:
             record = json.loads(posted.read_text(encoding="utf-8"))
-            went_out = f"as media {record.get('media_id')} on {record.get('published_at')}"
+            went_out = (f"as media {record.get('media_id')} on {record.get('published_at')}"
+                        if isinstance(record, dict) else "already")
         except (json.JSONDecodeError, OSError):
             went_out = "already"
         raise Stop(
@@ -535,6 +539,20 @@ def render_slides(path: Path, fresh: bool = True) -> None:
         raise Stop("the renderer refused this deck: " + " | ".join(tail))
 
 
+def check_novelty_then_render(path: Path, slug: str, moment, slide_text,
+                             fresh: bool) -> dict:
+    """Reject repeated copy before image quota or new library promotion."""
+    slides = render.parse_markdown(path)
+    fingerprint = novelty.fingerprint(slug, slides, sorted(anchor_words(moment)), slide_text)
+    repeats = novelty.check(fingerprint)
+    if repeats:
+        raise Refused("this deck is too close to one we published: " + "; ".join(repeats[:3]))
+    say("novelty", "clear of the last 30 decks and every scene match")
+    render_slides(path, fresh=fresh)
+    say("rendered", "slides and contact sheet")
+    return fingerprint
+
+
 def publish(path: Path, slug: str) -> None:
     """Hand the deck to Instagram.
 
@@ -550,7 +568,8 @@ def publish(path: Path, slug: str) -> None:
         raise Stop("Instagram refused the post: " + " | ".join(tail))
 
 
-def record_faults(run_id: str, reason: str, history: list[int], mode: str) -> None:
+def record_faults(run_id: str, reason: str, history: list[int], mode: str,
+                  signatures=None) -> None:
     """One line in the gate-fault ledger. Never raises.
 
     Called only when a gate refused. It writes and it stops — nothing reads this
@@ -566,6 +585,8 @@ def record_faults(run_id: str, reason: str, history: list[int], mode: str) -> No
     try:
         GATE_FAULTS.parent.mkdir(parents=True, exist_ok=True)
         shape, _ = outcomes.trajectory(history)
+        if signatures:
+            shape = "stuck" if outcomes.unchanged_faults(signatures) else "changing"
         line = json.dumps({
             "at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "run": run_id,
@@ -576,6 +597,7 @@ def record_faults(run_id: str, reason: str, history: list[int], mode: str) -> No
                        re.sub(r"\[faults per attempt:[^\]]*\]", "", reason).split(";")
                        if part.strip()],
             "history": list(history),
+            "signatures": list(signatures or []),
             "shape": shape,
         }, ensure_ascii=False)
         with open(GATE_FAULTS, "a", encoding="utf-8") as handle:
@@ -642,6 +664,12 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             say("state check", "skipped, this run writes nothing")
         else:
             say("state check", check_state_is_current(strict=(mode == "publish")))
+            import library
+            checked_art = len(library.available())
+            if checked_art < 9:
+                raise Refused(f"Only {checked_art} library images have current checks; "
+                              "nine are needed before a run. No generation request was sent.",
+                              retry=False)
 
         result = draw_concept() if source == "concept" else draw()
         candidates = result["candidates"]
@@ -771,29 +799,9 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         path = write_deck(markdown, slug)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
-        render_slides(path, fresh=fresh)
-        say("rendered", "slides and contact sheet")
+        fingerprint = check_novelty_then_render(path, slug, moment, slide_text, fresh)
 
-        # Recorded at render, not at publish. A deck that was built and never
-        # posted still counts as used, or a manual build could be repeated later.
-        slides = render.parse_markdown(path)
-        # anchor_words(), not moment.anchors. The anchors are {kind: [words]},
-        # so passing the dict passed "place" and "clock" — the same mistake this
-        # file already fixed once for the writer, made a second time here. Every
-        # deck then filed itself under the same three labels, which quietly cost
-        # the gate its ability to reach back past the recent window to an older
-        # deck set in the same kitchen.
-        fingerprint = novelty.fingerprint(slug, slides, sorted(anchor_words(moment)), slide_text)
-
-        # The novelty gate runs here, after the deck exists and before it is
-        # recorded. Unique moments are enforced upstream, so what this catches is
-        # the other failure: the writer saying the same thing twice about two
-        # different evenings.
-        repeats = novelty.check(fingerprint)
-        if repeats:
-            raise Refused("this deck is too close to one we published: " + "; ".join(repeats[:3]))
-        say("novelty", "clear of the last 30 decks and every scene match")
-
+        # Record only after render succeeds. Built-but-unposted decks remain used.
         novelty.record(fingerprint)
         bibliography.remember(slug, plan["citation_id"])
         if source == "concept":
@@ -851,7 +859,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             print("  reply `retry` in Telegram to try again now with a fresh moment.")
         # The reason, out to the workflow. It was always printed and never read:
         # auto-post.yml wrote its own sentence and the real one died with the log.
-        record_faults(run_id, str(reason), reason.history, mode)
+        record_faults(run_id, str(reason), reason.history, mode, reason.signatures)
         emit(reason=str(reason), verdict="refused",
              faults=",".join(str(n) for n in reason.history),
              retry="true" if reason.retry else "false")

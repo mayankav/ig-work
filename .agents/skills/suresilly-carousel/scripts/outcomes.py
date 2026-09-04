@@ -54,13 +54,15 @@ class Refused(Exception):
     """
 
     def __init__(self, reason: str, retry: bool = True,
-                 history: list[int] | None = None) -> None:
+                 history: list[int] | None = None,
+                 signatures: list[tuple[str, ...]] | None = None) -> None:
         super().__init__(reason)
         self.retry = retry
         # The fault count per attempt. Carried because it is the one number that
         # tells a stuck gate from an unlucky draft, and until now it existed only
         # inside the reason string, where nothing could read it.
         self.history = list(history or [])
+        self.signatures = list(signatures or [])
 
 
 # ───────────────────────── reading the fault trail ─────────────────────────
@@ -76,6 +78,16 @@ class Refused(Exception):
 # retry from a run that was about to finish. Four never fires on a seven-attempt
 # loop until the sixth, which is too late to be worth saying.
 STUCK_AFTER = 3
+
+
+def fault_signature(faults: list[str]) -> tuple[str, ...]:
+    """Order and whitespace do not make the same unresolved fault new."""
+    return tuple(sorted({" ".join(f.split()).casefold() for f in faults}))
+
+
+def unchanged_faults(signatures: list[tuple[str, ...]]) -> bool:
+    tail = signatures[-STUCK_AFTER:]
+    return len(tail) == STUCK_AFTER and bool(tail[0]) and len(set(tail)) == 1
 
 
 def trajectory(history: list[int]) -> tuple[str, str]:
@@ -97,8 +109,7 @@ def trajectory(history: list[int]) -> tuple[str, str]:
     tail = counts[-STUCK_AFTER:]
     if len(tail) >= STUCK_AFTER and len(set(tail)) == 1:
         return "stuck", (f"The count stopped falling at {tail[0]}. "
-                         f"One check cannot be passed, so a new idea will stop "
-                         f"in the same place.")
+                         "Equal counts do not show if the faults are the same.")
     return "converging", ("The count was still falling. It ran out of tries "
                           "rather than running out of ideas.")
 

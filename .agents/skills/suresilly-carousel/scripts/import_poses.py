@@ -49,12 +49,12 @@ Two deliberate choices about who decides:
     has already been added to the library, which was the only way to see one
     before.
 
-  · The pupil gate REPORTS here and blocks on the generation path. It refuses
-    three real library poses — guarded, chasing, lab_coat — which was an
-    accepted cost while it only saw generated frames, where the remedy is
-    another seed and a seed is free. Artwork a person chose and handed over is
-    not free to re-roll, and the picture is right there to look at. Text and
-    palette still block; they are invariants, not judgement calls.
+  · The pupil gate blocks imports too. A person choosing a file does not make
+    its eye faults safe for automatic use.
+
+  · --exact preserves the bytes of an already-checked RGBA PNG. It still runs
+    every pixel gate, but cannot crop, matte, mirror, recolour or override a
+    failure. This is how a generated deck offers its checked file to the library.
 
 --correct-palette is off by default. The generation path corrects colour
 automatically because it knows the model drifts; here the artwork came from a
@@ -72,6 +72,8 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import art_checks
+import art_eligibility
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from imaging import (  # noqa: E402
@@ -189,24 +191,9 @@ def _flatten_for_text(cell: np.ndarray, rgba: np.ndarray, kind: str) -> np.ndarr
     return (rgba[:, :, :3].astype(np.float32) * a + key * (1 - a)).astype(np.uint8)
 
 
-# The pupil gate is ADVISORY here and blocking on the generation path, and the
-# difference is a cost asymmetry, not a difference of opinion about the gate.
-#
-# assert_has_pupils refuses three real library poses — `guarded`, whose lids are
-# narrowed, `chasing` and `lab_coat`. They are good poses. That was an accepted
-# cost while the gate only ever saw freshly generated frames, because there the
-# remedy is another seed and a seed is free. Its own test in test_poses_flux.py
-# says so in as many words, and names those three.
-#
-# On this path the artwork came from a person who chose it. Re-rolling is not
-# free, the picture is right there to look at, and a gate with a known 1.7%
-# false-refusal rate on the body of work should not be the thing that stops it.
-# So it reports and does not block: the sheet shows the pose, the note says
-# what the gate thinks, and the person decides.
-#
-# Nothing is loosened by this. The gate is unchanged and still blocks on the
-# generation path, where the premise it was calibrated under still holds.
-ADVISORY = {"pupils"}
+# Automated imports must not turn an eye failure into a warning. Four difficult
+# clean poses are conservatively refused; no unattended exception admits them.
+ADVISORY = set()  # Imports have the same blocking eye rule as fresh artwork.
 
 # Gates a person may overrule with --allow. `text` is not among them: invariant
 # 3 admits no exceptions and no amount of looking at a picture makes a caption
@@ -402,11 +389,15 @@ def build_parser() -> argparse.ArgumentParser:
                     help="matte, gate and write a judging sheet to DIR. Writes NOTHING "
                          "to the library and nothing to the manifest.")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--exact", action="store_true",
+                    help="import an RGBA PNG without changing any bytes; all gates still block")
     return ap
 
 
 def main_argv(argv: list[str] | None = None) -> None:
     a = build_parser().parse_args(argv)
+    if a.exact and (a.grid or a.mirror or a.correct_palette or a.allow):
+        sys.exit("ERROR: --exact cannot crop, mirror, recolour, or override a gate.")
     allow = {t.strip() for t in a.allow.split(",") if t.strip()}
     refused = allow - OVERRIDABLE
     if refused:
@@ -441,9 +432,15 @@ def main_argv(argv: list[str] | None = None) -> None:
     written, failed, idx = [], [], 0
     entries: list[dict] = []
     for f in files:
-        img = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)
+        exact_bytes = f.read_bytes() if a.exact else None
+        img = (cv2.imdecode(np.frombuffer(exact_bytes, np.uint8), cv2.IMREAD_UNCHANGED)
+               if a.exact else cv2.imread(str(f), cv2.IMREAD_UNCHANGED))
         if img is None:
             failed.append(f"{f.name}: unreadable")
+            continue
+        if a.exact and (not exact_bytes.startswith(b"\x89PNG\r\n\x1a\n")
+                        or img.ndim != 3 or img.shape[2] != 4):
+            failed.append(f"{f.name}: exact import requires an RGBA PNG")
             continue
         for cell in cells(img, a.grid):
             name = (names[idx] if names and idx < len(names)
@@ -454,14 +451,27 @@ def main_argv(argv: list[str] | None = None) -> None:
                 # what is written are the same picture — the same ordering the
                 # generation path uses for the same reason.
                 cell = correct_palette(cell)
-            rgba, kind = to_rgba(cell)
+            rgba, kind = (cell, "alpha") if a.exact else to_rgba(cell)
             # A pair scene's second donkey is legitimately small and often sits
             # near a side edge — exactly what drop_neighbour_bleed is designed
             # to delete. Skip it for --pair imports so it doesn't eat the
             # partner donkey; single-figure cells still get the bleed cleanup.
-            rgba = tight_crop(rgba if a.pair else drop_neighbour_bleed(rgba))
+            if not a.exact:
+                rgba = tight_crop(rgba if a.pair else drop_neighbour_bleed(rgba))
 
             blocking, advisory, overridden = run_gates(cell, rgba, kind, name, allow)
+            if a.exact:
+                blocking.extend(art_checks.pixel_faults_bytes(exact_bytes))
+            # Import cannot grant body eligibility. Check the exact bytes that
+            # will be saved, including transformed and mirrored imports.
+            ok, encoded = cv2.imencode(".png", rgba)
+            saved_bytes = exact_bytes if a.exact else (encoded.tobytes() if ok else b"")
+            if preview_dir is None:
+                blocking.extend(art_eligibility.faults_bytes(saved_bytes))
+                if a.mirror:
+                    mirror_ok, mirror_encoded = cv2.imencode(".png", cv2.flip(rgba, 1))
+                    blocking.extend(art_eligibility.faults_bytes(
+                        mirror_encoded.tobytes() if mirror_ok else b""))
             dupes = near_duplicates(rgba, LIBRARY)
             notes = list(advisory) + [f"[OVERRULED] {o}" for o in overridden]
             found = body_green_delta(rgba)
@@ -472,7 +482,7 @@ def main_argv(argv: list[str] | None = None) -> None:
                 notes.append("near-duplicate of " + ", ".join(
                     f"{n} ({v:.0%} silhouette overlap)" for n, v in dupes))
             entries.append({"name": name, "rgba": rgba, "ok": not blocking,
-                            "verdicts": blocking + notes})
+                            "verdicts": blocking + notes, "encoded": saved_bytes})
 
             if blocking:
                 failed.append(f"{name}: {blocking[0]}")
@@ -488,7 +498,7 @@ def main_argv(argv: list[str] | None = None) -> None:
                 manifest.get("poses", {}).get(name, {}).get("tags", [])
                 + [name.replace("_", " ")] + extra + sidecar_tags(f)))
             if writing:
-                cv2.imwrite(str(LIBRARY / f"{name}.png"), rgba)
+                (LIBRARY / f"{name}.png").write_bytes(saved_bytes)
                 # sorted(set(...)) here, not append: base_tags already carries
                 # these pair markers on a re-import (they merged in from the
                 # prior entry last time), and appending again without dedup
@@ -517,7 +527,7 @@ def main_argv(argv: list[str] | None = None) -> None:
                 mname = f"{name}_m"
                 print(f"  ✓ {mname:20s} mirrored")
                 if writing:
-                    cv2.imwrite(str(LIBRARY / f"{mname}.png"), cv2.flip(rgba, 1))
+                    (LIBRARY / f"{mname}.png").write_bytes(mirror_encoded.tobytes())
                     prior_m = manifest.get("poses", {}).get(mname, {}).get("tags", [])
                     merge_pose(manifest, mname, {
                         "tags": sorted(set(prior_m + mirror_tags(base_tags))),
@@ -530,9 +540,13 @@ def main_argv(argv: list[str] | None = None) -> None:
 
     if preview_dir is not None and entries:
         sheet = judging_sheet(entries, LIBRARY, preview_dir / "judging_sheet.png")
+        for entry in entries:
+            # A preview is staging, never a selectable library. Retain the
+            # exact final bytes so an offline audit can precede --exact import.
+            (preview_dir / (entry["name"] + ".png")).write_bytes(entry["encoded"])
         print(f"\njudging sheet: {sheet}")
-        print("Nothing was written to the library. Look at the sheet, then re-run "
-              "without --preview to import.")
+        print("Nothing was written to the library. Check the staged PNGs with "
+              "art_eligibility.py, then import those exact files with --exact.")
 
     if writing and written:
         MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")

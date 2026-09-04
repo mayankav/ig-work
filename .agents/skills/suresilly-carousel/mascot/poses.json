@@ -3187,6 +3187,124 @@
       "framing": "full",
       "figures": 1,
       "source": "imported"
+    },
+    "facing_blank_wall_head_d817": {
+      "tags": [
+        "blank",
+        "close",
+        "facing",
+        "facing blank wall head d817",
+        "generated",
+        "head",
+        "hooves",
+        "lowered",
+        "planted",
+        "together",
+        "wall"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "shifting_weight_from_front_6ae5": {
+      "tags": [
+        "beside",
+        "chair",
+        "empty",
+        "front",
+        "generated",
+        "hoof",
+        "other",
+        "shifting",
+        "shifting weight from front 6ae5",
+        "weight"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "standing_firmly_facing_bare_af7f": {
+      "tags": [
+        "bare",
+        "corner",
+        "facing",
+        "firmly",
+        "generated",
+        "limbs",
+        "locked",
+        "standing",
+        "standing firmly facing bare af7f"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "standing_motionless_beside_heavy_e7e2": {
+      "tags": [
+        "beside",
+        "desk",
+        "ears",
+        "forward",
+        "generated",
+        "heavy",
+        "motionless",
+        "standing",
+        "standing motionless beside heavy e7e2",
+        "tilted",
+        "wooden"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "standing_quietly_by_closed_cb47": {
+      "tags": [
+        "closed",
+        "door",
+        "eyes",
+        "generated",
+        "half",
+        "quietly",
+        "standing",
+        "standing quietly by closed cb47"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "turning_completely_around_face_5791": {
+      "tags": [
+        "around",
+        "completely",
+        "doorway",
+        "face",
+        "generated",
+        "open",
+        "quiet",
+        "room",
+        "turning",
+        "turning completely around face 5791"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
+    },
+    "turning_head_away_from_56e9": {
+      "tags": [
+        "away",
+        "generated",
+        "head",
+        "ledger",
+        "resting",
+        "shut",
+        "tabletop",
+        "turning",
+        "turning head away from 56e9",
+        "wooden"
+      ],
+      "framing": "full",
+      "figures": 1,
+      "source": "imported"
     }
   },
   "role_default": {

@@ -1,0 +1,70 @@
+{
+  "at": "2026-09-03T23:15:20.123874+00:00",
+  "candidate": {
+    "author": "William James",
+    "title": "The Principles of Psychology",
+    "year": 1890,
+    "phrase": "second nature",
+    "claim": "James says second nature cannot be changed through practice."
+  },
+  "active_pool_changed": false,
+  "status": "refused",
+  "reason": "claim was vetoed or the unsupported control was missed",
+  "rejected_evidence": {
+    "version": "book-passages-control-2",
+    "claim": "James says second nature cannot be changed through practice.",
+    "book": {
+      "author": "William James",
+      "title": "The principles of psychology",
+      "year": 1890,
+      "work_key": "/works/OL1502064W",
+      "scan_ids": [
+        "theprinciplesofp0000unse",
+        "principlesofpsyc01jame",
+        "theprinciplesofp00jameuoft",
+        "principlesofpsyc02jame",
+        "acq8606.0002.001.umich.edu",
+        "principlesofpsyc01jameuoft",
+        "principlespsych12jamegoog",
+        "principlespsych30spengoog",
+        "principlespsych10jamegoog",
+        "principlespsycho00jame"
+      ]
+    },
+    "source": {
+      "work_key": "/works/OL1502064W",
+      "scan_id": "theprinciplesofp0000unse",
+      "passages": [
+        {
+          "text": "How  lax  the  connection  between  the  system  of  visual  and the  system  of  tactile  directions  is  in  man,  appears  from  the facility  with  which  microscopists  learn  to  reverse  the  move¬ ments  of  their  hand  in  manipulating  things  on  the  stage  of the  instrument.  To  move  the  slide  to  the  seen  left  they must  draw  it  to  th efelt  right.  But  in  a  very  few  days  the habit  becomes  a  second  nature.  So  in  tying  our  cravat, shaving  before  a  mirror,  etc.,  the  right  and  left  sides  are inverted,  and  the  directions  of  our  hand  movements  are  the opposite  of  what  they  seem.  Yet  this  never  annoys  us. Only  when  by  accident  we  try  to  tie  the  cravat  of  another person  do  we  learn  that  there  are  two  ways  of  combining sight  and  touch  perceptions.  Let  any  one  try  for  the  first time  to  write  or  draw  while  looking  at  the  image  of  his hand  and  paper  in  a  mirror,  and  he  will  be  utterly  bewil¬ dered.  But  a  very  short  training  will  teach  him  to  undo in  this  respect  the  associations  of  his  previous  lifetime.",
+          "pages": [
+            194
+          ],
+          "url": "https://archive.org/details/theprinciplesofp0000unse/page/n194"
+        }
+      ]
+    },
+    "proposed_by": "manual-audit",
+    "checked_by": "groq",
+    "review": {
+      "inspected": [
+        "claim",
+        "control"
+      ],
+      "uncertain": [],
+      "vetoes": [
+        {
+          "id": "claim",
+          "reason": "The passage states the habit becomes second nature but also that short training can undo it, contradicting the claim that it cannot be changed."
+        },
+        {
+          "id": "control",
+          "reason": "The passage discusses visual‑tactile coordination and does not mention bicycles or cheese, so it does not support the claim."
+        }
+      ],
+      "quotes": []
+    },
+    "at": "2026-09-03T23:15:30.990445+00:00",
+    "sha256": "06584db4fa1a8536a5d7b49bc6d124470cb489b738c0499d8e1e473daea57c56"
+  }
+}

@@ -426,6 +426,10 @@ def pick_references(names: list[str] | None = None, count: int = MAX_REFS,
         # captioned style sheet slipped through the first time.
         flat = _flatten_onto_key(img) if transparent else img[:, :, :3]
         assert_no_text(flat, f"reference {p.name}")
+        import art_eligibility
+        faults = art_eligibility.faults(p)
+        if faults:
+            raise FluxError(f"reference {p.name} failed pixel checks: {'; '.join(faults)}")
         ok, buf = cv2.imencode(".png", flat)
         if not ok:
             raise FluxError(f"could not encode reference: {p}")

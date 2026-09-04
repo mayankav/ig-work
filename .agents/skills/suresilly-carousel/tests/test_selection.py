@@ -17,6 +17,17 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
 import library  # noqa: E402
 
+
+def ranking_candidates():
+    """Fixed ranking corpus, not a declaration of production eligibility.
+
+    test_art_eligibility separately proves that live selection excludes images
+    without a qualified body review. No vendor or saved review is needed here.
+    """
+    import art_checks
+    return {p.stem for p in library.LIBRARY_DIR.glob("*.png")
+            if not p.stem.startswith("_") and not art_checks.pixel_faults(p)}
+
 # (role, brief, headline, body, {poses a person would accept})
 TUNED = [
  ("hook", "deadpan, unimpressed, staring at the viewer",
@@ -128,7 +139,7 @@ HELDOUT = [
 
 
 def run(cases, label, verbose=False):
-    have = library.available()
+    have = ranking_candidates()
     hits = 0
     misses = []
     for role, brief, head, body, ok in cases:
@@ -147,7 +158,7 @@ def test_recency_penalty():
     pose — but a deck rebuilding itself is never penalised for its own past
     choice. Uses a synthetic usage dict, not real carousels/ state, so it
     stays hermetic as decks are added or removed."""
-    have = library.available()
+    have = ranking_candidates()
     brief, head, body, role = "", "flat unimpressed expression", "", "hook"
     usage = {
         "20260101_deck_a": ["deadpan"],
@@ -201,7 +212,7 @@ def test_the_special_bar_is_reachable_on_the_current_score_scale():
     numbers did not move, because the labelled cases mostly do not want a
     costume. This test is the one that would have caught it.
     """
-    have = library.available()
+    have = ranking_candidates()
     special = [p for p in library.SPECIAL if p in have]
     assert special, "no costume poses in the library; this test is meaningless"
     best = max(
@@ -258,7 +269,7 @@ def test_a_never_used_pose_gains_ground_but_cannot_invent_a_match():
     `total <= 0` return, so a pose with no word in common is zero, and zero
     times 1.5 is still zero. Variety is bought only among poses that already
     fit."""
-    have = library.available()
+    have = ranking_candidates()
     usage = {"20260101_a": ["deadpan"], "20260102_b": ["deadpan"]}
     # a pose with nothing in common must stay at zero however cold it is
     cold = [p for p in have if not library._ever_used(p, usage, None)][0]
@@ -281,7 +292,7 @@ def test_the_boost_skips_mirrors_and_pairs():
     idle because only 1 of 63 real slides is about two people, which is a fact
     about what has been written; boosting them rebuilds the defect the is_pair
     scaling exists to prevent."""
-    have = library.available()
+    have = ranking_candidates()
     mirrors = [p for p in have if library.is_mirrored(p)]
     pairs = [p for p in have if library.is_pair(p)]
     assert mirrors and pairs, "library lacks the poses this test is about"

@@ -5,7 +5,7 @@ name: insights
 # This reads how published decks performed. It is not part of publishing and
 # must never be able to affect it: it is not called from run.py, it is not a
 # step in auto-post.yml, and it shares no state with either. If this job goes
-# red for a week, four posts still go out a day and nothing about them changes.
+# red for a week, posting still runs independently.
 #
 # The reverse also holds, and matters more. Nothing here writes anything the
 # pipeline reads. state/insights.jsonl is a ledger for a person — see the
@@ -13,10 +13,9 @@ name: insights
 # decide what ships. A performance number must never reach a gate.
 on:
   schedule:
-    # 06:00 UTC / 11:30 IST. Between the two posting runs (02:30 and 14:30 UTC)
-    # so it never queues behind one, and mid-morning so a red run is seen the
-    # same day.
-    - cron: "0 6 * * *"
+    # Hourly collection targets the 72–73-hour window. Late scheduler runs
+    # retain the actual age and are excluded from same-age comparisons.
+    - cron: "15 * * * *"
   workflow_dispatch:
     inputs:
       min_age_days:
@@ -39,7 +38,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: insights
+  group: suresilly-state
   cancel-in-progress: false
 
 jobs:
@@ -78,6 +77,10 @@ jobs:
               ${{ inputs.dry_run && '--dry-run' || '' }}
           fi
 
+      - name: Show same-age results
+        if: always()
+        run: python scripts/insights_report.py >> "$GITHUB_STEP_SUMMARY"
+
       # always(), because insights.py appends each reading the moment it has it.
       # A run that collected three decks and then hit an error still has three
       # readings worth keeping, and a failed run wrote nothing so this is a
@@ -87,7 +90,18 @@ jobs:
         run: |
           git config user.name "suresilly-bot"
           git config user.email "bot@suresilly.com"
-          git add state/insights.jsonl || true
-          git commit -m "auto: insights [skip ci]" || echo "nothing to record"
-          git pull --rebase --quiet || true
-          git push || echo "push failed, the next run appends the same way"
+          if [ -e state/insights.jsonl ]; then
+            git add state/insights.jsonl
+          fi
+          if ! git diff --staged --quiet; then
+            git commit -m "auto: insights [skip ci]"
+          fi
+          git pull --rebase --quiet
+          git push
+
+      - name: Keep unsaved measurements
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insights-records-${{ github.run_id }}
+          path: state/insights.jsonl

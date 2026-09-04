@@ -27,6 +27,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import fresh_poses  # noqa: E402
+import image_review
+
+_REVIEW_PANELS = {}
 
 
 SLIDES = [
@@ -36,7 +39,7 @@ SLIDES = [
 
 
 @pytest.fixture(autouse=True)
-def offline_vision(monkeypatch):
+def offline_vision(monkeypatch, tmp_path):
     """No vendor, and no test that quietly needs one.
 
     Only the two functions that reach the network are replaced, so
@@ -48,9 +51,26 @@ def offline_vision(monkeypatch):
     take a different path on a runner with no .env — and the path it would take
     is "draw nothing", which is silent and green.
     """
-    monkeypatch.setattr(fresh_poses.llm, "vision_ready", lambda: True)
-    monkeypatch.setattr(fresh_poses.llm, "look",
-                        lambda *a, **k: ({"faults": []}, "stub"))
+    monkeypatch.setattr(image_review, "ready", lambda: True)
+    # Budget policy has its own real-record tests. This suite isolates image
+    # generation/fallback and must not depend on the workstation's quota file.
+    import review_budget
+    monkeypatch.setattr(review_budget, "fault", lambda *a: None)
+    monkeypatch.setattr(image_review, "model_for_review", lambda: ("gemini", fresh_poses.llm.GEMINI_MODELS[0]))
+    import art_eligibility
+    import image_qualification
+    monkeypatch.setattr(art_eligibility, "STORE", tmp_path / "checks")
+    monkeypatch.setattr(image_qualification, "qualified_models",
+                        lambda: [("gemini", fresh_poses.llm.GEMINI_MODELS[0])])
+    original = image_review.inspection_sheet
+
+    def capture(panels):
+        _REVIEW_PANELS.clear()
+        _REVIEW_PANELS.update(panels)
+        return original(panels)
+
+    monkeypatch.setattr(image_review, "inspection_sheet", capture)
+    monkeypatch.setattr(fresh_poses.llm, "look_once", vetoing())
 
 
 def fallback(tmp_path) -> dict[int, pathlib.Path]:
@@ -98,6 +118,24 @@ def run(monkeypatch, tmp_path, module):
     monkeypatch.setitem(sys.modules, "poses_flux", module)
     return fresh_poses.generate_for_deck(
         SLIDES, fallback(tmp_path), tmp_path / "out", log=lambda *a: None)
+
+
+@pytest.mark.parametrize("spare,expected_calls", [(125, 0), (126, 1)])
+def test_generation_keeps_cloudflare_review_allowance(tmp_path, monkeypatch, spare, expected_calls):
+    import neurons
+    import cloudflare_budget
+    monkeypatch.setattr(neurons, "LEDGER_PATH", tmp_path / "usage.json")
+    model = fresh_poses.llm.CLOUDFLARE_VISION_MODEL
+    monkeypatch.setattr(image_review, "model_for_review", lambda: ("cloudflare", model))
+    review_cost = cloudflare_budget.reservation(model, cloudflare_budget.VISION_OUTPUT)
+    neurons.Ledger().spend_text(neurons.FREE_DAILY_NEURONS - review_cost - spare)
+    calls = []
+    def failed_generation(*a, **k):
+        calls.append(1)
+        raise TimeoutError("test outage")
+    run(monkeypatch, tmp_path, fake_flux(Ledger=neurons.Ledger, generate=failed_generation))
+    assert len(calls) == expected_calls
+    assert neurons.Ledger().account_left() >= review_cost
 
 
 # ─────────────────── every failure keeps the deck ────────────────────────────
@@ -274,29 +312,40 @@ def test_a_clean_frame_replaces_the_library_pose(monkeypatch, tmp_path):
 # So a model looks, and the only thing it is allowed to do is take a pose away.
 
 
-def clean_frame() -> bytes:
+def clean_frame(extra_width=0) -> bytes:
     """A magenta-backdrop frame holding one plain green figure."""
     frame = np.full((512, 512, 3), (255, 0, 255), np.uint8)
-    cv2.rectangle(frame, (150, 120), (360, 400), (90, 150, 60), -1)
+    cv2.rectangle(frame, (150, 120), (360 + extra_width, 400), (90, 150, 60), -1)
     ok, buf = cv2.imencode(".png", frame)
     assert ok
     return buf.tobytes()
 
 
 def vetoing(*faults, seen=None):
-    """A stand-in for llm.look that reports the faults a test asks for."""
+    """Test reviewer identifies the actual control pixels, not a fixed label."""
     def look(system, user, schema, image, **k):
         if seen is not None:
             seen.append(image)
-        return {"faults": [{"panel": p, "fault": f} for p, f in faults]}, "stub"
+        reference = cv2.imread(str(image_review.CONTROL_PATH), cv2.IMREAD_UNCHANGED)
+        control = next(n for n, art in _REVIEW_PANELS.items()
+                       if np.array_equal(art, reference))
+        labels = sorted(set(_REVIEW_PANELS) - {control})
+        found = [{"panel": control, "code": "extra_limb", "fault": "extra leg"}]
+        found += [{"panel": labels[p-1] if p <= len(labels) else 99,
+                   "code": "extra_limb", "fault": f} for p, f in faults]
+        return {"inspected": sorted(_REVIEW_PANELS), "uncertain": [],
+                "figures": [{"panel": n, "arms": 2, "legs": 2} for n in _REVIEW_PANELS],
+                "faults": found}, (
+            k["provider"] + "/" + k["model"])
     return look
 
 
 def test_a_faulted_pose_falls_back_to_its_library_pose(monkeypatch, tmp_path):
-    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((1, "six legs")))
+    monkeypatch.setattr(fresh_poses.llm, "look_once", vetoing((1, "six legs")))
     given = fallback(tmp_path)
+    frames = iter([clean_frame(), clean_frame(12)])
     monkeypatch.setitem(sys.modules, "poses_flux",
-                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+                        fake_flux(generate=lambda *a, **k: (next(frames), 1.0)))
     out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
                                                log=lambda *a: None)
     assert out[1] == given[1], "the vetoed slide must go back to the library"
@@ -315,11 +364,12 @@ def test_a_vetoed_pose_is_deleted_from_the_deck_and_from_the_candidates(
     donkey offered to the library — where every deck after this one could
     select it, which turns one bad afternoon into a permanent one.
     """
-    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((1, "an extra arm")))
+    monkeypatch.setattr(fresh_poses.llm, "look_once", vetoing((1, "an extra arm")))
     given = fallback(tmp_path)
     keep = tmp_path / "candidates"
+    frames = iter([clean_frame(), clean_frame(12)])
     monkeypatch.setitem(sys.modules, "poses_flux",
-                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+                        fake_flux(generate=lambda *a, **k: (next(frames), 1.0)))
     out_dir = tmp_path / "o"
     _, stats = fresh_poses.generate_for_deck(SLIDES, given, out_dir,
                                              keep_dir=keep, log=lambda *a: None)
@@ -341,7 +391,7 @@ def test_an_unreachable_checker_vetoes_everything(monkeypatch, tmp_path):
     """
     def down(*a, **k):
         raise RuntimeError("all three vendors refused")
-    monkeypatch.setattr(fresh_poses.llm, "look", down)
+    monkeypatch.setattr(fresh_poses.llm, "look_once", down)
     given = fallback(tmp_path)
     monkeypatch.setitem(sys.modules, "poses_flux",
                         fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
@@ -354,7 +404,7 @@ def test_an_unreachable_checker_vetoes_everything(monkeypatch, tmp_path):
 def test_nothing_is_drawn_when_no_vendor_can_check(monkeypatch, tmp_path):
     """The pre-flight. Generating and then discarding all nine costs about
     1,130 neurons for the deck we would have had anyway."""
-    monkeypatch.setattr(fresh_poses.llm, "vision_ready", lambda: False)
+    monkeypatch.setattr(image_review, "ready", lambda: False)
     calls = []
     monkeypatch.setitem(sys.modules, "poses_flux",
                         fake_flux(generate=lambda *a, **k: calls.append(1) or (clean_frame(), 1.0)))
@@ -372,7 +422,7 @@ def test_the_whole_deck_costs_one_vision_call(monkeypatch, tmp_path):
     would push the writer out of quota to catch a fault that has never stopped
     a deck."""
     seen = []
-    monkeypatch.setattr(fresh_poses.llm, "look", vetoing(seen=seen))
+    monkeypatch.setattr(fresh_poses.llm, "look_once", vetoing(seen=seen))
     monkeypatch.setitem(sys.modules, "poses_flux",
                         fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
     fresh_poses.generate_for_deck(SLIDES, fallback(tmp_path), tmp_path / "o",
@@ -381,16 +431,16 @@ def test_the_whole_deck_costs_one_vision_call(monkeypatch, tmp_path):
     assert seen[0][:2] == b"\xff\xd8", "the sheet must be a JPEG"
 
 
-def test_a_fault_for_a_panel_that_was_never_drawn_is_ignored(monkeypatch, tmp_path):
-    """A confused reply must cost nothing. Panel 9 exists in no two-slide deck."""
-    monkeypatch.setattr(fresh_poses.llm, "look", vetoing((9, "six legs")))
+def test_a_fault_for_a_panel_that_was_never_drawn_rejects_the_group(monkeypatch, tmp_path):
+    """A confused reply cannot establish that any member was inspected."""
+    monkeypatch.setattr(fresh_poses.llm, "look_once", vetoing((9, "six legs")))
     given = fallback(tmp_path)
     monkeypatch.setitem(sys.modules, "poses_flux",
                         fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
     out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
                                                log=lambda *a: None)
-    assert stats["vetoed"] == [] and stats["generated"] == 2
-    assert out[1] != given[1]
+    assert sorted(stats["vetoed"]) == [1, 2] and stats["generated"] == 0
+    assert out == given
 
 
 def test_the_sheet_is_numbered_by_slide_number(monkeypatch, tmp_path):
@@ -408,12 +458,12 @@ def test_the_checker_can_veto_and_can_never_approve():
     """Invariant 11. There is no field in the reply that means 'this one is
     fine' — the deterministic gates already decided that, and a model that can
     approve is a model that can wave through what they refused."""
-    assert set(fresh_poses.VISION_SCHEMA["properties"]) == {"faults"}
-    assert fresh_poses.VISION_SCHEMA["required"] == ["faults"]
+    assert set(fresh_poses.VISION_SCHEMA["properties"]) == {"inspected", "uncertain", "figures", "faults"}
+    assert fresh_poses.VISION_SCHEMA["required"] == ["inspected", "uncertain", "figures", "faults"]
     fault = fresh_poses.VISION_SCHEMA["properties"]["faults"]["items"]
-    assert set(fault["properties"]) == {"panel", "fault"}
+    assert set(fault["properties"]) == {"panel", "code", "fault"}
     # Ranged, so a reply about panel 47 is a complaint rather than a silent no-op.
-    assert fault["properties"]["panel"]["maximum"] == 9
+    assert fault["properties"]["panel"]["maximum"] == 4
 
 
 # ─────────────────── build.py only reaches it when asked ─────────────────────
@@ -476,10 +526,8 @@ def test_the_same_brief_always_lands_on_the_same_library_name():
     assert fresh_poses.pose_name(a).startswith("sitting_edge_bed")
 
 
-def test_a_kept_frame_is_raw_and_carries_its_brief(monkeypatch, tmp_path):
-    """The library wants the frame BEFORE matting, so its own gates and its own
-    matte decide. The brief rides along as a sidecar so the pose enters tagged
-    with the body it was drawn from."""
+def test_a_kept_frame_is_the_exact_reviewed_matte_and_carries_its_brief(monkeypatch, tmp_path):
+    """The library gets the checked slide image, not another cut of the raw frame."""
     frame = np.full((512, 512, 3), (255, 0, 255), np.uint8)
     cv2.rectangle(frame, (150, 120), (360, 400), (90, 150, 60), -1)
     ok, buf = cv2.imencode(".png", frame)
@@ -488,7 +536,7 @@ def test_a_kept_frame_is_raw_and_carries_its_brief(monkeypatch, tmp_path):
     keep = tmp_path / "candidates"
     monkeypatch.setitem(sys.modules, "poses_flux",
                         fake_flux(generate=lambda *a, **k: (buf.tobytes(), 1.0)))
-    _, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "o",
                                              keep_dir=keep, log=lambda *a: None)
     assert len(stats["kept"]) == 2
     for name in stats["kept"]:
@@ -496,8 +544,27 @@ def test_a_kept_frame_is_raw_and_carries_its_brief(monkeypatch, tmp_path):
         brief = keep / f"{name}.brief.txt"
         assert png.is_file() and brief.is_file()
         kept = cv2.imread(str(png), cv2.IMREAD_UNCHANGED)
-        assert kept.shape[2] == 3, "the library gets the raw frame, not a matte"
+        assert kept.shape[2] == 4
+        assert png.read_bytes() in [path.read_bytes() for path in out.values()]
         assert brief.read_text().strip() in [s["mascot"] for s in SLIDES]
+
+
+def test_saved_pixel_refusal_keeps_fallback_and_writes_no_candidate(monkeypatch, tmp_path):
+    given = fallback(tmp_path)
+    calls = []
+    def refuse(raw):
+        calls.append(raw)
+        return ("palette: saved PNG is off brand",)
+    monkeypatch.setattr(fresh_poses.art_checks, "pixel_faults_bytes", refuse)
+    monkeypatch.setitem(sys.modules, "poses_flux",
+                        fake_flux(generate=lambda *a, **k: (clean_frame(), 1.0)))
+    out, stats = fresh_poses.generate_for_deck(SLIDES, given, tmp_path / "out",
+                                             keep_dir=tmp_path / "kept", log=lambda *a: None)
+    assert out == given and stats["generated"] == 0 and stats["kept"] == []
+    assert stats["kept_hashes"] == {} and len(calls) == 2
+    assert all(raw.startswith(b"\x89PNG\r\n\x1a\n") for raw in calls)
+    assert not list((tmp_path / "out").glob("*.png"))
+    assert not (tmp_path / "kept").exists()
 
 
 def test_the_library_is_grown_only_through_the_import_script():

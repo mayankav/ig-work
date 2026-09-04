@@ -102,7 +102,7 @@ AXES = {
         "without-the-cost": "the h2 promises the result and names the effort they do not have to spend on it",
         "smallest-version": "the h2 promises the smallest usable version, the one that fits in a spare minute",
         "one-of-these": "the h2 promises that one of the moves further in is the one that will sting, without saying which",
-        "craft-name": "the h2 hands over a short name for the behaviour, said as though it were a skill worth having",
+        "craft-name": "the h2 promises a small skill the reader can use in this situation",
         "who-this-is": "the h2 names who this is for by something they do, never by something they are",
         "what-it-costs": "the h2 names what it costs to carry on not knowing this, with no deadline attached",
         "refuse-their-reason": "the h2 refuses the explanation the reader has already been handed about themselves",
@@ -145,14 +145,14 @@ ROLES = ("hook", "cost", "source", "name", "script", "action", "sustain", "cheat
 # What a deck built on a proved concept is told about it.
 #
 # The term does NOT become the pattern name, and it must not reach slide 1.
-# Slide 1 is a scene in plain words — "bowl washing", "waiting mode" — and the
+# Slide 1 is a filmable scene in plain words, not a required label, and the
 # brand rule is that clinical vocabulary is translated, never printed raw. The
 # playbook says the same thing in its own words: recognition first, no diagnosis
 # before slide 3.
 #
 # So the reader recognises themselves first and learns the word afterwards,
 # which is also the order that makes the word stick. Slide 4 already exists to
-# explain the name slide 1 gave; this gives it a second, real name to hand over.
+# explain what the finding means; a proved field term may be explained there.
 TERM_BRIEF = """
 THE FIELD'S NAME FOR THIS, which is why this deck exists.
 
@@ -164,9 +164,8 @@ your own words, after the pattern has been explained. "This has a name:
 
 It must NOT appear on slide 1 or slide 2. Those are a scene in plain words, and
 a reader who meets a term before they have recognised themselves stops reading.
-You still coin your own plain handle for slide 1, exactly as always. The deck
-carries two names on purpose: yours, which they repeat, and this one, which
-they look up."""
+Use the real scene on slide 1, not an invented label. No second name is
+required. Do not claim that the field's term diagnoses the reader."""
 
 
 # How many decks a formula stays taken for once it is used. Eight, matching
@@ -255,6 +254,8 @@ def combinations() -> int:
 
 def load_citations() -> dict:
     data = json.loads(CITATIONS_PATH.read_text(encoding="utf-8"))
+    for citation in data["citations"]:
+        bibliography.validate_citation(citation)
     return {c["id"]: c for c in data["citations"]}
 
 
@@ -272,8 +273,7 @@ def citations_for(topic: str, avoid: list[str] | None = None) -> list[dict]:
     """
     skip = set(avoid or ())
     everything = list(load_citations().values())
-    fitting = [c for c in everything if topic in c["pillars"]]
-    pool = fitting or everything
+    pool = [c for c in everything if topic in c["pillars"] and bibliography.supported_indices(c)]
     return [c for c in pool if c["id"] not in skip] or pool
 
 
@@ -293,49 +293,30 @@ The page sounds like a smart friend who reads the textbooks. Never a therapist,
 never a guru, never a brand. Dry, warm, specific. A reader should want to send it
 to one person rather than agree with it in public.
 
-WHAT THE READER FEELS, and it is not relief. Relief is calm, and calm does not
-travel: the emotions that get a post sent are the ones with a jolt in them —
-recognition ("there is a NAME for that?"), being caught out, mild indignation.
-Relief is where the deck ENDS, on slide 9. It is not what the deck is built on.
+START WITH A REAL SCENE. Show a familiar action or tension involving another
+person. Build useful words and a small action first; write the cover last.
+The reader should recognise the moment and have something useful to send.
+Do not claim that a label, emotion or format guarantees shares.
 
-THE NAME IS THE POST. Before the beats, decide what this pattern is CALLED:
-a short noun phrase a reader can repeat, search for, and send to somebody with
-"this is you". Two or three words. "Waiting mode". "The bird test". "Bowl
-washing". Not a sentence, not a feeling, not a diagnosis. SHORT WORDS: nothing
-in it may run to four syllables, because a handle is repeated out loud and the
-ones that spread are two plain words each.
-
-  This is the single biggest thing that decides whether a post travels. A name
-  can be looked up, argued with, and used as an accusation, a confession or a
-  diagnosis of somebody else. A scene cannot: nobody forwards a stranger's
-  evening. The named ideas that spread — waiting mode, the orange peel theory,
-  weaponised incompetence — are all somebody putting a handle on a thing
-  everybody already did.
+PATTERN NAMES ARE OPTIONAL. Set pattern_name to an empty string unless a short
+plain label helps explain the scene. It is not the cover and not a diagnosis.
+An invented label is our shorthand, never a medical fact or a term the source
+proved. If used, explain it on slide 4 as shorthand, not on slides 1 or 2.
 
 THE NINE BEATS, in order, each one earning the next:
-  1 hook     the NAME, then one line saying what it is. Not a staged scene.
+  1 hook     a familiar action or tension in the moment, not a pattern name.
   2 cost     what it costs. This is served on its own to people who did not
              swipe, so it must work with no slide 1 in front of it.
-  3 source   the citation, then ONE sentence connecting it to the name.
+  3 source   the citation, then ONE sentence connecting it to the moment.
              The citation line is written for you and you do not touch it.
 
-             YOUR SENTENCE CONTAINS THE NAME AND SAYS SOMETHING NEW.
-             The name has to be in it. It may NOT be the subject of the
-             sentence. "<name> explains why ..." and "<name> happens because
-             ..." are the name plus filler, and they read as a machine filling
-             in a form. Say what the finding costs the person in the moment,
-             then let the name land.
-               claim    "Ferrand found that a queue with no visible end is
-                         judged twice as long as one with a sign."
-               weak     "Queue blindness explains why the queue feels long."
-               yours    "You are not waiting badly. You are waiting without a
-                         sign. That is queue blindness."
+             Say what the supported finding means for this situation. Do not
+             attach an invented label to the researcher or add a new claim.
              Copying the claim under a second heading is the fastest way to
              look broken, and it is checked.
-  4 name     EXPLAIN the name slide 1 gave. Never coin a second one. A deck
-             that posted led with one name and coined a second one here, so a
-             reader was handed two and carried away neither. One deck, one
-             name; this is where it is unpacked.
+  4 name     explain the meaning for the reader. The field is called name for
+             storage only; no label is required. If pattern_name is present,
+             explain that one shorthand here. Never coin a second label.
   5 script   a condition, then the words. Two fields, two different jobs:
 
                When: The library book has been by the front door nine days.
@@ -401,8 +382,8 @@ RULES
         word. Never open with Why, The reason, What nobody, Most people, or
         Here is: each of those delays the noun, and the first three words are
         the ones that carry it.
-    h2  at most 7 words. No [[accent]] at all. It never repeats the name — the
-        headline already gave it.
+    h2  at most 7 words. No [[accent]] at all. Add a useful promise or reframe,
+        not a pattern name or a repeat of the headline.
 
         THE H2 EITHER ABSOLVES OR PROMISES. Those are the only two jobs, and
         HOW THIS DECK IS BUILT tells you which one this deck's h2 has.
@@ -422,23 +403,11 @@ RULES
     thumb that keeps moving. It is not permission to soften the idea — the idea
     stays as sharp as you can make it, the vocabulary gets easy. Give eight
     hooks and this is the rule that will disqualify most of them.
-    h1 CONTAINS THE NAME, and one thing a camera could point at. Both. The
-    name is what gets sent on; the thing is what makes it a picture rather
-    than a slogan. "Ticket blindness. The envelope stays on the [[shelf]] for
-    weeks" has the name and has the envelope.
-    Write about what always happens, not about one evening that happened.
-    "You" means anybody, in the present. It does not mean one person doing one
-    thing at one hour.
-      Right:  Return drift. The parcel rides in the boot of the [[car]].
-              (11 words. Count them before you return it — every hook in one
-               rejected plan ran to 14 and 15, and the cap is 12.)
-      Right:  Ticket blindness. The envelope stays on the [[shelf]] for weeks.
-              (10 words.)
-      Wrong:  You put the ticket on the shelf last Tuesday and [[forgot]].
-    The wrong one reads as somebody else's Tuesday. The reader has their own
-    room and their own hour, and an invented one competes with the real
-    memory and loses. Say the thing that is always true and let them supply
-    the evening.
+    h1 CONTAINS A FILMABLE ACTION OR TENSION and a thing from the moment.
+    Do not print pattern_name in either cover line. The scene is the way in.
+    A specific hour is allowed when it matters, not required decoration.
+      Shape only: The parcel rides home again in the [[car]].
+    Instructions later must work at the reader's own time and place.
     Do not promise a result, do not sell a trick, do not name a condition.
     No diagnosis word anywhere in a hook: nervous system, attachment,
     regulation, cortisol, polyvagal, somatic, trauma response, fawn response,
@@ -490,9 +459,10 @@ PLAN_SCHEMA = {
                  "hooks", "dm_share_hypothesis"],
     "properties": {
         "scene_token": {"type": "string", "maxLength": 30},
-        # The handle a reader repeats, searches for, and sends to somebody.
+        # Optional shorthand. Empty is valid; it must not replace the scene.
         # Two or three words, a noun phrase, never a sentence.
-        "pattern_name": {"type": "string", "minLength": 3, "maxLength": 28},
+        "pattern_name": {"type": "string", "maxLength": 28,
+                         "description": "Optional plain shorthand for slide 4. Empty string means no label. Never a diagnosis."},
         # Replaced per deck in plan_deck() with an enum of the ids that actually
         # cover this topic. A model cannot then return a citation we do not
         # have — and one did: pinned to Cloudflare it copied the label out of
@@ -684,8 +654,8 @@ def hook_faults(hook: dict, name: str = "") -> list[str]:
             f"h2 adds {len(new_content)} new words to h1, needs {H2_NEW_WORDS}. It has "
             f"one job: absolve the reader or promise them something. Either one "
             f"brings words the headline did not have")
-    if name and name.lower() in h2.lower():
-        faults.append(f"h2 says {name!r} again. The headline already named it")
+    if name and any(name.lower() in line.lower() for line in (h1, h2)):
+        faults.append(f"cover prints pattern name {name!r}. Show the scene; explain optional shorthand on slide 4")
     # Plain words, checked here rather than only on the finished deck. Slide 1 is
     # this hook written on unchanged, so a hook carrying a four-syllable noun is
     # a cover that fails the readability gate after the draft has been paid for.
@@ -712,7 +682,7 @@ def hook_ok(hook: dict, name: str = "") -> bool:
     return not hook_faults(hook, name)
 
 
-def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[str]:
+def validate_plan(plan: dict, moment: str, topic: str, term: str = "", *, require_support: bool = False) -> list[str]:
     """Check the chain before any copy is written.
 
     A bad plan expanded into nine slides is nine bad slides, so this is the
@@ -726,6 +696,10 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
         problems.append("the beats are not numbered 1 to 9 in order")
     if [b["role"] for b in beats] != list(ROLES):
         problems.append("the beats are not in the fixed role order")
+    for number, beat in enumerate(beats, 1):
+        links = beat["depends_on"]
+        if len(set(links)) != len(links) or any(link >= number or link < 1 for link in links):
+            problems.append(f"slide {number} must depend only on distinct earlier slides")
 
     citation = citations.get(plan["citation_id"])
     if not citation:
@@ -734,9 +708,14 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
         problems.append(f"claim {plan['claim_index']} does not exist for {plan['citation_id']}")
     elif topic not in citation["pillars"]:
         problems.append(f"{plan['citation_id']} does not cover {topic}")
+    elif require_support:
+        try:
+            bibliography.require_claim_support(citation, plan["claim_index"])
+        except bibliography.Unverified as why:
+            problems.append(str(why))
 
     name = plan.get("pattern_name", "").strip()
-    if not 1 <= len(name.split()) <= 4:
+    if name and not 1 <= len(name.split()) <= 4:
         problems.append(f"the pattern name is {len(name.split())} words. A handle a reader "
                         f"repeats is two or three: 'waiting mode', 'bowl washing'")
     elif readability.hard_words(name):
@@ -758,21 +737,12 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "") -> list[s
         # A deck pinned to the weaker vendor came back with pattern_name
         # "Boundaries" and slide 4 reading "the name of this pattern is
         # boundaries", which teaches nobody anything and is not sendable.
-        problems.append(f"the pattern name {name!r} is just the subject. Coin a handle for "
-                        f"this particular pattern — 'peace keeping', 'bowl washing', "
-                        f"'waiting mode' — not the shelf it sits on")
-    else:
-        # It has to be on slide 1. A name introduced later is a name nobody
-        # carries away, and slide 1 is the only slide most people see.
-        first = f"{beats[0]['beat']} {' '.join(h['h1'] for h in plan['hooks'])}".lower()
-        if name.lower() not in first:
-            problems.append(f"the pattern name {name!r} is missing from slide 1. Lead with "
-                            f"it: it is the thing a reader repeats and sends on")
-
-        # Slide 4's whole job is to explain the name slide 1 gave. A deck that
-        # posted led with "Execution freeze" and then coined "the traction gap"
-        # four slides later, so a reader was handed two handles and carried
-        # away neither. One deck, one name.
+        problems.append(f"the pattern name {name!r} is just the subject. Leave it empty "
+                        f"or use plain shorthand for this specific scene")
+    elif name:
+        if any(term in name.lower() for term in EARLY_JARGON):
+            problems.append("pattern name uses diagnosis language; use plain shorthand or leave it empty")
+        # An optional label is explained once, not forced onto the cover.
         fourth = beats[3]["beat"] if len(beats) > 3 else ""
         exported = " ".join(beats[3].get("exports", [])) if len(beats) > 3 else ""
         if name.lower() not in f"{fourth} {exported}".lower():
@@ -926,8 +896,10 @@ def best_hook(plan: dict, token: str = "") -> dict:
         has_token = bool(token) and token.lower() in h1.lower()
         return (not has_token, not bool(CONCRETE.search(h1)), len(_words(h1)))
 
-    usable = [h for h in plan["hooks"] if hook_ok(h)]
-    return sorted(usable or plan["hooks"], key=rank)[0]
+    usable = [h for h in plan["hooks"] if hook_ok(h, plan.get("pattern_name", "").strip())]
+    if not usable:
+        raise Refused("No usable scene-first cover remains", retry=False)
+    return sorted(usable, key=rank)[0]
 
 
 def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]:
@@ -938,8 +910,8 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     concept deck has that a feed deck does not, and without it the two produce
     the same deck: the concept picks the subject and is then thrown away.
 
-    Two attempts. A plan that fails its own chain check twice is a signal about
-    the moment, not about the model, and the feed has thousands more moments.
+    One outline and at most three bounded field repairs. Three unchanged fault
+    signatures stop the loop. Clean work and the selected source remain fixed.
     """
     axes = draw_axes(moment, recent_formulas())
 
@@ -960,11 +932,14 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
         print(f"    citation      no new book survived: {refused[0][:88]}")
 
     options = citations_for(topic, avoid)
+    if not options:
+        raise Refused("No source-supported claim is available for this subject. Saved claims need review.", retry=False)
     if found:
-        options = [found] + [c for c in options if c["id"] != found["id"]]
+        options.sort(key=lambda c: c["id"] != found["id"])
     listing = "\n".join(
         f"  {c['id']}\n" + "\n".join(f"      claim {i}: {claim}"
-                                     for i, claim in enumerate(c["claims"]))
+                                     for i, claim in enumerate(c["claims"])
+                                     if i in bibliography.supported_indices(c))
         for c in options
     )
     # The words the coherence gate will actually recognise, taken from the gate
@@ -1006,16 +981,37 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
         "maximum": max(len(c["claims"]) for c in options) - 1}
 
     history: list[int] = []
+    signatures = []
+    import plan_repair
+    import draft_repair
+    original_provider = None
+    def checked_outline(value):
+        return validate_plan(value, moment, topic, term=term, require_support=True)
     for attempt in range(4):
-        plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, plan_schema,
-                                 temperature=1.0 if attempt == 0 else 0.7)
-        problems = validate_plan(plan, moment, topic, term=term)
+        if attempt == 0:
+            plan, provider = llm.ask(PLAN_SYSTEM, attempt_user, plan_schema, temperature=1.0)
+            original_provider = provider
+            problems = checked_outline(plan)
+        else:
+            providers = tuple(p for p in llm.PROVIDERS if p[0] == original_provider)
+            if not providers:
+                raise llm.ModelRefused("The original outline writer is unavailable for field repair.")
+            reply, provider = llm.ask(
+                PLAN_SYSTEM + "\nREPAIR MODE: return field edits only, not a new outline. "
+                "Use plain text for text fields and JSON text for number or array fields. "
+                "The source and claim cannot change. Do not alter clean fields.",
+                attempt_user, plan_repair.schema(best_plan, best_problems),
+                temperature=0.4, providers=providers)
+            plan, problems = plan_repair.apply(best_plan, best_problems, reply, plan_schema, checked_outline)
         if not problems:
             return plan, axes, provider
         history.append(len(problems))
+        signatures.append(outcomes.fault_signature(problems))
         if best_problems is None or len(problems) < len(best_problems):
             best_plan, best_problems = plan, problems
         plan, problems = best_plan, best_problems
+        if outcomes.unchanged_faults(signatures):
+            break
         # The plan goes back with the complaints, and it is the BEST plan, not
         # the last one. Retrying blind asks the same model the same question and
         # gets the same answer; retrying from a worse plan loses ground already
@@ -1025,9 +1021,11 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
             "\n\nTHE BEST PLAN SO FAR, which is nearly right:\n"
             + json.dumps(plan, indent=2)
             + f"\n\nOnly these {len(problems)} things are wrong with it:\n  "
-            + "\n  ".join(dict.fromkeys(problems))
-            + "\n\nReturn that plan again with exactly those fixed and everything else "
-              "left as it is."
+            + json.dumps(draft_repair.fault_map(problems), indent=2)
+            + "\n\nEditable fields and value encoding:\n"
+            + json.dumps(plan_repair.describe(plan), indent=2)
+            + "\nReturn only edits to the listed field IDs using paths such as /field_1. "
+              "No full outline. Leave every other field unchanged."
         )
     # Refused, not llm.ModelRefused. Both used to be the same type, so an
     # unreachable vendor and a plan the gates simply would not pass turned CI
@@ -1042,7 +1040,7 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
         f"[faults per attempt: {', '.join(str(n) for n in history)}]",
-        retry=shape != "stuck", history=history)
+        retry=not outcomes.unchanged_faults(signatures), history=history, signatures=signatures)
 
 
 # ─────────────────────────── the draft ────────────────────────────
@@ -1083,10 +1081,9 @@ the slide they stop on, and it is the commonest way a finished deck is dead.
   flat admission, the same fact seen from the other side. Never a joke, never
   a twist, never a bigger claim.
 
-  SAY THE NAME TWICE IN NINE SLIDES. Slide 1 gives it. One later slide uses
-  it. Everywhere else the deck is about the person, not about the label. A
-  name printed on every slide reads as a machine holding on to the only handle
-  it has, and a reader who has already learned the name is being told nothing.
+  NO LABEL IS REQUIRED. If pattern_name is empty, do not invent one. If it is
+  present, explain it on slide 4 as our shorthand, not a medical fact. Slides
+  1 and 2 show the scene. Do not credit an invented label to the source.
 
   SAY THE FINDING ONCE. Slide 3 puts it in plain words and that is the end of
   it. The researcher's surname appears on the citation line and nowhere else
@@ -1207,7 +1204,7 @@ it used to be and nobody reads it twice.
   Four short paragraphs, 60 to 120 words. The last one that shipped was two
   sentences and 151 characters, which reads like the post was abandoned.
 
-  1  The name, and what it costs. ONE sentence, and it has to work alone,
+  1  The familiar action, and what it costs. ONE sentence, and it has to work alone,
      because Instagram hides everything after about 125 characters.
   2  Two or three sentences saying something the slides did NOT say. Where
      this shows up in an ordinary week, or what it is usually mistaken for.
@@ -1339,9 +1336,8 @@ DRAFT_SCHEMA = {
         # and the instruction was three hundred lines away talking about
         # "slide 3's last line".
         "explains": {"type": "string", "maxLength": 280,
-                     "description": "Slide 3's last line. Contains the pattern name from the "
-                                    "plan, but never as the sentence's subject. Says what the "
-                                    "finding costs the person in this moment. Never restates "
+                     "description": "Slide 3's last line. Says what the supported "
+                                    "finding means for the person in this moment. Never restates "
                                     "the source claim."},
         "name": {"type": "object", "additionalProperties": False, "required": ["h2", "body"],
                  "properties": {"h2": {"type": "string", "maxLength": 60},
@@ -1386,7 +1382,7 @@ DRAFT_SCHEMA = {
         # this niche run captions of a couple of hundred words. So this is a
         # range wide enough for either, and the prompt asks for the shape.
         "caption": {"type": "string", "minLength": 300, "maxLength": 900,
-                    "description": "60 to 120 words in four short paragraphs: the name and "
+                    "description": "60 to 120 words in four short paragraphs: the action and "
                                    "what it costs, then something the slides did not say, "
                                    "then one line letting the reader off, then ask them to "
                                    "save it. Never a summary of the slides."},
@@ -1580,7 +1576,14 @@ def assemble(plan: dict, copy: dict, hook: dict, citation: dict, claim: str,
 
 
 SPOKEN = re.compile(r"(?m)^- \*\*(❌ Old Reaction|✅ Regulated Response|When|Say):\*\* (.+)$")
-ASKS_THE_READER = re.compile(r"[^.!?]*\byou(?:r|rself)?\b[^.!?]*\?")
+# A spoken line can ask another person a question. Matching every question
+# containing 'you' refused "Could you tell me when my bike will be ready?".
+# Only the measured coaching shape is mechanical evidence here; general
+# conversational meaning belongs to the independent critic.
+ASKS_THE_READER = re.compile(
+    r"\bwhat(?:'s| is) (?:the |your )?(?:smallest|next) (?:action|step)\b[^.!?]*\?",
+    re.I,
+)
 
 
 def check_spoken(markdown: str) -> list[str]:
@@ -1601,8 +1604,8 @@ def check_spoken(markdown: str) -> list[str]:
     carries no quotation marks.
 
     SAY is a line somebody says out loud. It may not begin by narrating the
-    reader, and it may not ask them a question, because a question is the page
-    talking and not the reader.
+    reader. A coaching prompt is not speech; a question addressed to the other
+    person is valid speech and must not be refused merely for containing 'you'.
     """
     problems = []
     for label, line in SPOKEN.findall(markdown):
@@ -1657,7 +1660,7 @@ def check_repeats(markdown: str) -> list[str]:
             slide = int(heading.group(1))
             continue
         field = re.match(r"^- \*\*(H1|H2|Body|Source Claim|What This Explains Here|"
-                         r"❌ Old Reaction|✅ Regulated Response|Callout|Primary CTA|"
+                         r"❌ Old Reaction|✅ Regulated Response|When|Say|Callout|Primary CTA|"
                          r"Closing thought)"
                          r":\*\* (.+)$", line)
         if not field:
@@ -1679,7 +1682,7 @@ def check_repeats(markdown: str) -> list[str]:
     author = re.search(r"(?m)^- \*\*Source:\*\* — ([^,]+),", markdown)
     if author:
         surname = author.group(1).strip().split()[-1].lower()
-        spoken = re.findall(r"(?m)^- \*\*(?:❌ Old Reaction|✅ Regulated Response):\*\* (.+)$",
+        spoken = re.findall(r"(?m)^- \*\*(?:Say|❌ Old Reaction|✅ Regulated Response):\*\* (.+)$",
                             markdown)
         if any(surname in line.lower() for line in spoken):
             problems.append(f"a script tells the reader to say {surname.title()}'s name out "
@@ -1824,11 +1827,6 @@ def verify_draft(markdown: str, moment_anchors: set[str] | None = None,
     problems += check_last_slide(markdown)
     problems += check_spoken(markdown)
     problems += check_spelling(markdown)
-    explains = re.search(r"(?m)^- \*\*What This Explains Here:\*\* (.+)$", markdown)
-    if explains and pattern_name and pattern_name.lower() not in explains.group(1).lower():
-        problems.append(f"slide 3's last line does not mention {pattern_name!r}. Its whole "
-                        f"job is to connect the finding to the name, and without the name "
-                        f"it can only repeat the finding")
     problems += check_mascots(re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown))
 
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as handle:
@@ -1914,6 +1912,8 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     """
     plan, axes, _ = plan_deck(moment, topic, term=term)
     citation = load_citations()[plan["citation_id"]]
+    # A second boundary protects against a changed pool and applies to force.
+    bibliography.require_claim_support(citation, plan["claim_index"])
     claim = citation["claims"][plan["claim_index"]]
     hook = best_hook(plan, plan["scene_token"])
 
@@ -1933,13 +1933,6 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # prose above it.
     name = plan.get("pattern_name", "").strip()
     schema = json.loads(json.dumps(DRAFT_SCHEMA))
-    if name:
-        schema["properties"]["explains"]["description"] = (
-            f'Slide 3\'s last line. It MUST contain the words "{name}", and "{name}" MUST '
-            f'NOT be the subject of the sentence: a line beginning "{name} explains why" or '
-            f'"{name} happens because" is the name plus filler and reads as a filled-in '
-            f'form. Say what the finding costs the person in this moment, in your own '
-            f'words, and let the name land inside or at the end. Never restate the claim.')
 
     # Same treatment for the other two rules that stall a draft. Both were
     # stated in the system prompt and both were missed for five attempts
@@ -1968,11 +1961,17 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         cheat_shape=AXES["cheat_shape"][axes["cheat_shape"]],
         formula=AXES["formula"][axes["formula"]],
     )
-    # The whole draft is rewritten on a repair rather than the failing slides
-    # being spliced back in. Splicing saves a few thousand tokens and costs the
-    # guarantee that the deck still reads as one piece; at two posts a day the
-    # tokens are not worth the risk. The plan does not change, so the argument
-    # cannot drift between attempts.
+    # Repairs return field edits, never a replacement deck. Code checks the
+    # assembled result and removes edits that were not needed to fix a fault.
+    import draft_repair
+
+    def assembled(value):
+        return assemble(plan, value, hook, citation, claim, value["mascots"],
+                        title, pattern, pillar,
+                        pick_hashtags(topic, plan.get("pattern_name", "") + moment))
+
+    def checked(value):
+        return verify_draft(assembled(value), moment_anchors, plan.get("pattern_name", ""))
     # Repair from the BEST draft so far, never from the last one.
     #
     # A deck has to satisfy about thirty-five rules at once. A draft that breaks
@@ -1999,20 +1998,34 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # against a hundred a day, and a run that stops at one remaining fault has
     # already paid for the plan, the judge and the composer.
     history: list[int] = []
+    signatures = []
     for attempt in range(7):
-        copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, schema,
-                              temperature=0.6 if attempt == 0 else 0.4)
-        markdown = assemble(plan, copy, hook, citation, claim, copy["mascots"],
-                            title, pattern, pillar,
-                            pick_hashtags(topic, plan.get("pattern_name", "") + moment))
-        problems = verify_draft(markdown, moment_anchors, plan.get("pattern_name", ""))
+        if attempt == 0:
+            copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, schema, temperature=0.6)
+            problems = checked(copy)
+        else:
+            # A mixed-vendor draft would let the independent critic review
+            # some of its own text. Repair with the original writer only.
+            providers = tuple(p for p in llm.PROVIDERS if p[0] == best_wrote)
+            if not providers:
+                raise llm.ModelRefused("The original writer is unavailable for field repair.")
+            reply, wrote = llm.ask(
+                DRAFT_SYSTEM + "\nREPAIR MODE: return only the field edits in the supplied schema, "
+                "not a full draft. Each edit must address a listed fault. Leave clean text alone.",
+                attempt_user, draft_repair.schema(best_copy, best_problems),
+                temperature=0.4, providers=providers)
+            copy, problems = draft_repair.apply(best_copy, best_problems, reply, schema, checked)
+        markdown = assembled(copy)
         if not problems:
             return markdown, plan, axes, wrote, []
         history.append(len(problems))
+        signatures.append(outcomes.fault_signature(problems))
         if best_problems is None or len(problems) < len(best_problems):
             best_copy, best_problems = copy, problems
             best_markdown, best_wrote = markdown, wrote
         copy, problems = best_copy, best_problems
+        if outcomes.unchanged_faults(signatures):
+            break
         # The draft itself goes back with the complaints. It said "your previous
         # draft was rejected" and then did not include the draft, so the model
         # wrote a fresh deck every attempt and arrived with a fresh set of
@@ -2021,10 +2034,11 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
             "\n\nTHE BEST DRAFT SO FAR, which is nearly right:\n"
             + json.dumps(copy, indent=2)
             + f"\n\nOnly these {len(problems)} things are wrong with it:\n  "
-            + "\n  ".join(list(dict.fromkeys(problems))[:12])
-            + "\n\nReturn that draft again with exactly those fixed. Every other line "
-              "stays word for word as it is above. Do not improve anything you were not "
-              "asked about — a line you rewrite unasked is a new fault."
+            + json.dumps(draft_repair.fault_map(problems), indent=2)
+            + "\n\nReturn only edits to existing text fields. Use the exact field path "
+              "and fault from the schema. Every other line stays word for word. "
+              "Do not change the plan, source claim, or cover. Fix up to "
+            + str(draft_repair.MAX_EDITS) + " fields in this reply."
         )
     # Out of attempts. Two ways this ends.
     #
@@ -2058,7 +2072,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
         f"[faults per attempt: {', '.join(str(n) for n in history)}]",
-        retry=shape != "stuck", history=history)
+        retry=not outcomes.unchanged_faults(signatures), history=history, signatures=signatures)
 
 
 # ─────────────────────────── checking the draft ────────────────────────────

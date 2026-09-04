@@ -8,12 +8,10 @@ drawn from a list somebody typed, which is a much better page and a much larger
 blast radius, so the gates that make it safe are worth more tests than the
 lookup itself.
 
-The offline cases always run. The catalogue cases need openlibrary.org, and when
-it cannot be reached they report INCONCLUSIVE and do not fail: a gate that goes
-red because somebody's donated server is busy trains people to ignore red. What
-must never happen is the opposite — an unreachable catalogue must never let a
-candidate through — and that is checked offline, by pointing the module at a
-host that cannot answer.
+The normal suite is offline. Run with --live-catalogue to additionally check
+openlibrary.org. An unavailable server fails that explicit live check; it never
+silently becomes a passing result. Offline tests still verify fail-closed
+behavior with controlled responses.
 """
 import json
 import pathlib
@@ -24,7 +22,20 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts
 import bibliography as bib  # noqa: E402
 
 
-def run() -> int:
+def report(failures, total, live=False):
+    if failures:
+        print(f"bibliography: {len(failures)}/{total} failed")
+        for line in failures:
+            print(f"  {line}")
+        return 1
+    print(f"bibliography: {total}/{total} passed "
+          f"(uncheckable claims, accents, failing closed, line assembly, "
+          f"pool growth, rotation, subject classification, one request, user agent"
+          f"{', live catalogue' if live else '; offline only'})")
+    return 0
+
+
+def run(live_catalogue=False) -> int:
     failures: list[str] = []
     skipped = 0
 
@@ -55,20 +66,11 @@ def run() -> int:
         except bib.Unverified as why:
             failures.append(f"GATE2 an honest claim was refused: {claim[:40]} ({why})")
 
-    # ── the claim has to be built on the phrase we prove ──
-    #
-    # Otherwise gate 3 proves a real term of art and the sentence printed on the
-    # slide is about something else entirely, which is the whole failure this
-    # module exists to stop, arrived at by a longer route.
-    try:
-        bib.verify({"author": "Pete Walker", "title": "Complex PTSD", "year": 2013,
-                    "phrase": "fawn response",
-                    "claim": "Walker found that shame is stored in the body."},
-                   proposed_by="gemini", pillars=["people_pleasing"])
-        failures.append("LINK a claim that never mentions its own phrase was accepted")
-    except bib.Unverified as why:
-        if "does not contain the phrase" not in str(why):
-            failures.append(f"LINK refused for the wrong reason: {why}")
+    # The lookup term is not forced into public copy. Actual passage support
+    # replaces that keyword-only link. The candidate-to-store cases in
+    # test_claim_support.py exercise both paraphrases and rejected claims.
+    if "it MUST contain the phrase" in bib.PROPOSE_SYSTEM:
+        failures.append("LINK the lookup term is still forced into public copy")
 
     # ── accents ──
     #
@@ -90,22 +92,23 @@ def run() -> int:
     # An unreachable catalogue must reject, never wave through. This is the one
     # that would be invisible in production: everything would keep working and
     # nothing would be verified.
-    real_search, real_inside = bib.SEARCH_URL, bib.INSIDE_URL
-    real_retries = bib.RETRIES
-    bib.SEARCH_URL = "https://localhost:1/search.json"
-    bib.INSIDE_URL = "https://localhost:1/inside.json"
-    bib.RETRIES = 0
+    real_lookup = bib._get
+    def unavailable_lookup(*args, **kwargs):
+        raise bib.Unverified("controlled catalogue outage")
+    bib._get = unavailable_lookup
     try:
-        bib.verify_book("Pete Walker", "Complex PTSD", 2013)
-        failures.append("CLOSED an unreachable catalogue still verified a book")
-    except bib.Unverified:
-        pass
-    try:
-        bib.verify_phrase("fawn response")
-        failures.append("CLOSED an unreachable catalogue still verified a phrase")
-    except bib.Unverified:
-        pass
-    bib.SEARCH_URL, bib.INSIDE_URL, bib.RETRIES = real_search, real_inside, real_retries
+        try:
+            bib.verify_book("Pete Walker", "Complex PTSD", 2013)
+            failures.append("CLOSED an unreachable catalogue still verified a book")
+        except bib.Unverified:
+            pass
+        try:
+            bib.verify_phrase("fawn response")
+            failures.append("CLOSED an unreachable catalogue still verified a phrase")
+        except bib.Unverified:
+            pass
+    finally:
+        bib._get = real_lookup
 
     # ── gate 1b: the book is shelved in this field ──
     #
@@ -285,8 +288,9 @@ def run() -> int:
         entry = {"id": "engel-2008", "line": "— Beverly Engel, *The Nice Girl Syndrome* (2008)",
                  "pillars": ["people_pleasing"], "claims": ["A claim about people pleasing."],
                  "phrase": "people pleasing", "verified": {"at": "x"}}
-        bib.store(entry)
-        bib.store({**entry, "pillars": ["self_worth"], "claims": ["A different claim entirely."]})
+        from support_fixture import with_support
+        bib.store(with_support(entry))
+        bib.store(with_support({**entry, "pillars": ["self_worth"], "claims": ["A different claim entirely."]}))
         pool = bib.load_pool()
         if len(pool) != 1:
             failures.append(f"POOL the same book was stored {len(pool)} times")
@@ -303,7 +307,11 @@ def run() -> int:
         if len(bib.recent(window=2)) != 2:
             failures.append("RECENT the window is not honoured")
 
-    # ── the catalogue itself, when it will talk to us ──
+    offline_total = (6 + 2 + 1 + 2 + 2 + 2 + 3 + 2 + 6 + 5 + 3 + 5 + 4 + 1)
+    if not live_catalogue:
+        return report(failures, offline_total)
+
+    # Explicit live check. Not part of routine CI or a posting slot's tests.
     try:
         real = bib.verify_book("Nedra Glover Tawwab", "Set Boundaries, Find Peace", 2019)
         if real["year"] != 2021:
@@ -353,21 +361,9 @@ def run() -> int:
                 pass
     except bib.Unverified as why:
         skipped = 1
-        print(f"  (catalogue unreachable, its cases skipped: {str(why)[:70]})")
+        failures.append(f"LIVE catalogue check could not finish: {str(why)[:140]}")
 
-    total = (6 + 2 + 1 + 2 + 2 + 2 + 3 + 2          # claims, linkage, accents, closed, line…
-             + 6 + 5 + 3 + 5 + 4 + 1                # …the subject classes, and the address
-             + (0 if skipped else 9))
-    if failures:
-        print(f"bibliography: {len(failures)}/{total} failed")
-        for line in failures:
-            print(f"  {line}")
-        return 1
-    print(f"bibliography: {total}/{total} passed "
-          f"(uncheckable claims, phrase linkage, accents, failing closed, line assembly, "
-          f"pool growth, rotation, subject classification, one request, user agent"
-          f"{'' if skipped else ', live catalogue'})")
-    return 0
+    return report(failures, offline_total + (0 if skipped else 9), live=True)
 
 
 def test_bibliography():
@@ -381,4 +377,7 @@ def test_bibliography():
 
 
 if __name__ == "__main__":
-    raise SystemExit(run())
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--live-catalogue", action="store_true")
+    raise SystemExit(run(live_catalogue=parser.parse_args().live_catalogue))

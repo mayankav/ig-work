@@ -68,7 +68,10 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 # and prints what came back. Getting one wrong costs a failed attempt and the
 # next vendor, never a deck: a vision call that finds no vendor is read as a
 # veto, and the nine slides keep their library poses.
-GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+# Verified against the authenticated models endpoint on 2026-09-04. The old
+# Scout id is no longer offered. Availability is not image qualification.
+GROQ_VISION_MODEL = "qwen/qwen3.6-27b"
+GROQ_VISION_MODELS = (GROQ_VISION_MODEL, "qwen/qwen3.8-27b")
 CLOUDFLARE_VISION_MODEL = "@cf/meta/llama-3.2-11b-vision-instruct"
 
 # Gemini models whose DAILY quota is gone. Per-model and per-day, so one being
@@ -462,7 +465,7 @@ def _tally(fn: str, *args) -> None:
 
 
 def call_gemini(system: str, user: str, temperature: float, schema: dict | None = None,
-                image: bytes | None = None) -> str:
+                image: bytes | None = None, *, exact_model: str | None = None) -> str:
     keys = resolve_keys("GEMINI_API_KEY") or resolve_keys("GOOGLE_API_KEY")
     if not keys:
         raise ModelRefused("no Gemini key")
@@ -473,6 +476,10 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
         # text. Nothing below this line knows whether there is an image.
         parts.append({"inline_data": {"mime_type": "image/jpeg",
                                       "data": base64.b64encode(image).decode("ascii")}})
+        if exact_model is not None and exact_model.startswith("gemini-3"):
+            # Inspection sheets contain small eye and hoof details. This is
+            # part of the qualified transport, never an unrecorded fallback.
+            parts[-1]["media_resolution"] = {"level": "MEDIA_RESOLUTION_ULTRA_HIGH"}
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": parts}],
@@ -484,7 +491,12 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
     # One bucket per key per model, because that is how the quota is counted.
     # The best model on the first key is tried first and the order degrades from
     # there, so a run only reaches the smaller models once the good ones are out.
-    buckets = [(n, model) for n in range(len(keys)) for model in GEMINI_MODELS]
+    # Image qualification is tied to one exact model. One review request must
+    # never become a walk across models or keys behind the caller's budget.
+    if exact_model is not None and exact_model not in GEMINI_MODELS:
+        raise ModelRefused("unknown exact Gemini model")
+    buckets = ([(0, exact_model)] if exact_model is not None else
+               [(n, model) for n in range(len(keys)) for model in GEMINI_MODELS])
     live = [b for b in buckets if f"{b[0]}:{b[1]}" not in _SPENT]
     if not live:
         # Every bucket is gone for the day. Asking again costs four seconds of
@@ -513,14 +525,18 @@ def call_gemini(system: str, user: str, temperature: float, schema: dict | None 
                 # Once per bucket, and worded so nobody reads it as the reason a
                 # run failed. It is not an error: the next model, and then the
                 # next vendor, carries on from here.
-                print(f"    note: {label} is out of free quota for today, "
-                      f"moving to the next model")
+                next_step = "stopping this exact-model request" if exact_model else "moving to the next model"
+                print(f"    note: {label} is out of free quota for today, {next_step}")
             trouble.append(f"{label} {limited}")
+            if exact_model is not None:
+                raise
         except ModelRefused as refused:
             # Any refusal moves to the next bucket, not just a rate limit. One
             # model rejecting a schema or disappearing should cost us that model,
             # not the whole call, and the earlier version aborted on both.
             trouble.append(f"{label} {refused}")
+            if exact_model is not None:
+                raise
     else:
         raise RateLimited("; ".join(trouble)[:300], RATE_LIMIT_PAUSE)
 
@@ -579,7 +595,9 @@ def _groq_format(schema: dict | None, strict: bool = True) -> dict:
 
 
 def call_groq(system: str, user: str, temperature: float, schema: dict | None = None,
-              image: bytes | None = None) -> str:
+              image: bytes | None = None, *, exact_model: str | None = None) -> str:
+    if exact_model is not None and (image is None or exact_model not in GROQ_VISION_MODELS):
+        raise ModelRefused("unknown exact Groq image model")
     key = resolve_key("GROQ_API_KEY")
     if not key:
         raise ModelRefused("no Groq key")
@@ -587,7 +605,7 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
     content: str | list = user
     model = GROQ_MODEL
     if image is not None:
-        model = GROQ_VISION_MODEL
+        model = exact_model or GROQ_VISION_MODEL
         content = [
             {"type": "text", "text": user},
             {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,"
@@ -612,6 +630,9 @@ def call_groq(system: str, user: str, temperature: float, schema: dict | None = 
             {"role": "user", "content": content},
         ],
     }
+    if image is not None:
+        payload["max_completion_tokens"] = 4096 if model == "qwen/qwen3.8-27b" else 2048
+        payload["reasoning_effort"] = "medium" if model == "qwen/qwen3.8-27b" else "none"
     # Every Groq response — including the 429 that says the allowance is gone —
     # carries x-ratelimit-remaining-requests, which is the DAILY figure. That is
     # more than Cloudflare gives us: Cloudflare says what one call cost and
@@ -664,6 +685,8 @@ def call_cloudflare(system: str, user: str, temperature: float,
     It also does not train on what it is sent, unlike the Gemini free tier, so
     it is the one to prefer when that matters.
     """
+    import cloudflare_budget
+    import neurons
     account = resolve_key("CLOUDFLARE_ACCOUNT_ID")
     token = resolve_key("CLOUDFLARE_API_TOKEN")
     if not (account and token):
@@ -681,7 +704,7 @@ def call_cloudflare(system: str, user: str, temperature: float,
         # roughly where a 256 token default lands. A deck plan is several times
         # that. This is the difference between a third vendor that exists and a
         # third vendor that can do the work.
-        "max_tokens": 4096,
+        "max_tokens": cloudflare_budget.TEXT_OUTPUT,
     }
     if schema:
         payload["response_format"] = {
@@ -696,27 +719,27 @@ def call_cloudflare(system: str, user: str, temperature: float,
         # reason it is third in the chain and not first.
         model = CLOUDFLARE_VISION_MODEL
         payload = {"image": list(image), "prompt": system + "\n\n" + user,
-                   "temperature": temperature, "max_tokens": 1024}
+                   "temperature": temperature, "max_tokens": cloudflare_budget.VISION_OUTPUT}
 
-    # Text and pictures come out of ONE 10,000-neuron daily allowance, and
-    # until this was recorded only the pictures were. The split everyone quoted
-    # — 6,000 for pictures, the rest for writing — was an assumption nobody
-    # could check: if the writer had quietly eaten half of it, the picture
-    # budget would still have reported itself full.
-    #
-    # Recorded, never refused. Writing is what this repo exists to do, and a
-    # deck that cannot be written is a day with no post, so text is never
-    # turned away to protect a picture budget.
+    # Reserve before HTTP, including failed attempts and vision requests.
+    # No billing header is permission to reset or refund the reservation.
+    try:
+        reserved = cloudflare_budget.reservation(model, payload["max_tokens"])
+        ledger = neurons.Ledger()
+        ledger.reserve_text(reserved, note=model)
+    except (OSError, ValueError, neurons.BudgetExceeded) as exc:
+        raise ModelRefused(f"Cloudflare spending stopped: {exc}") from exc
     headers: dict = {}
     data = _post(CLOUDFLARE_URL.format(account=account, model=model),
                  payload, {"Authorization": f"Bearer {token}"}, capture=headers)
     try:
-        billed = headers.get("cf-ai-neurons")
-        if billed is not None:
-            import neurons
-            neurons.Ledger().spend_text(float(billed), note=model)
-    except Exception:                                          # noqa: BLE001
-        pass        # a ledger that cannot be written must never fail a deck
+        billed = float(headers["cf-ai-neurons"])
+    except (KeyError, TypeError, ValueError):
+        billed = None
+    try:
+        ledger.reconcile_text(reserved, billed, note=model)
+    except (OSError, neurons.BudgetExceeded) as exc:
+        raise ModelRefused("Cloudflare usage could not be saved; stop further requests") from exc
     result = data.get("result") or {}
     text = result.get("response")
     if isinstance(text, dict):
@@ -835,6 +858,30 @@ def look(system: str, user: str, schema: dict, image: bytes,
     """
     bound = tuple((name, functools.partial(call, image=image)) for name, call in providers)
     return ask(system, user, schema, temperature, providers=bound)
+
+
+def look_once(system: str, user: str, schema: dict, image: bytes,
+              *, provider: str, model: str) -> tuple[dict, str]:
+    """One HTTP request to one named image model. No retry or fallback.
+
+    Used for bounded image review and qualification, not the text writer.
+    The caller owns both model eligibility and the total request budget.
+    """
+    if provider == "gemini" and model in GEMINI_MODELS:
+        reply = call_gemini(system, user, 0.2, schema, image, exact_model=model)
+    elif provider == "groq" and model in GROQ_VISION_MODELS:
+        reply = call_groq(system, user, 0.2, schema, image, exact_model=model)
+    elif provider == "cloudflare" and model == CLOUDFLARE_VISION_MODEL:
+        reply = call_cloudflare(system, user, 0.2, schema, image)
+    else:
+        raise ModelRefused("unknown exact image model")
+    answer = extract_json(reply)
+    problems = validate(answer, schema)
+    if problems:
+        error = SchemaMismatch("; ".join(problems[:4]))
+        error.answer = answer  # retain rejected image evidence for qualification
+        raise error
+    return answer, f"{provider}/{model}"
 
 
 def vision_ready() -> bool:

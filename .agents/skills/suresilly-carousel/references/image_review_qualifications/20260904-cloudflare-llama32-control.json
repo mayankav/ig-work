@@ -1,0 +1,15 @@
+{
+  "provider": "cloudflare",
+  "model": "@cf/meta/llama-3.2-11b-vision-instruct",
+  "contract": "33bcbd676c9fb9c4db8752afffa01723e34fbb59d8ec642419f88e75bbcd7ea0",
+  "started_at": "2026-09-03T22:35:09.557367+00:00",
+  "observations": [],
+  "errors": [
+    {
+      "request": 1,
+      "type": "ModelRefused",
+      "reason": "HTTP 403: {\"errors\":[{\"message\":\"AiError: Model Agreement: Prior to using this model, you must submit the prompt 'agree'. By submitting \u2018agree\u2019, you  hereby agree to the llama-3.2-11b-vision-instruct Community License https://github.com/meta-llama/llama-models/blob/main/models/llama3_2/LICENSE and Acceptable Use Policy https://github.com/meta-llama/llama-models/blob/main/models/llama3_2/USE_POLICY.md and yo",
+      "answer": null
+    }
+  ]
+}

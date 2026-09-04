@@ -112,6 +112,8 @@ def _telegram(subject: str, body: str, attach: Path | None,
     base = f"https://api.telegram.org/bot{token}"
 
     def _mode(data: dict) -> dict:
+        if "text" in data:
+            data["link_preview_options"] = '{"is_disabled":true}'
         if parse_mode:
             data["parse_mode"] = parse_mode
         return data

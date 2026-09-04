@@ -28,37 +28,65 @@ import argparse, re, os, sys, json, time
 from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".agents/skills/suresilly-carousel/scripts"))
+from run_control import PostingPaused, require_posting_allowed
+import publication_record
+import reserve_publication
+from instagram_api import GRAPH_FACEBOOK, GRAPH_INSTAGRAM, PUBLISHED_FILENAME, graph_base
+
 try:
     import requests
 except ImportError:
     print("requests not installed — pip install requests")
     sys.exit(1)
 
-GRAPH_FACEBOOK = "https://graph.facebook.com/v20.0"
-GRAPH_INSTAGRAM = "https://graph.instagram.com/v21.0"
-
-def graph_base(token: str) -> str:
-    """Pick the right API host based on token type.
-    IGAAP... tokens come from the new Instagram API → graph.instagram.com
-    EAA...  tokens come from Facebook Login       → graph.facebook.com
-    """
-    if token.startswith("IGAAP"):
-        return GRAPH_INSTAGRAM
-    return GRAPH_FACEBOOK
-
 # The deck folder is the right home for this. auto-post.yml already `git add`s
 # `carousels`, so an id written here is committed by the run that earned it,
 # without the posting workflow having to learn anything new.
-PUBLISHED_FILENAME = "published.json"
+PUBLICATION_PENDING = "publication_pending.json"
+
+
+def check_export(carousel_dir: Path, markdown: Path) -> None:
+    """Independent last check: only the exact checked PNG set can be posted."""
+    import hashlib
+    if (carousel_dir / "render-incomplete").exists():
+        raise ValueError("The last render did not pass. This deck cannot be posted.")
+    slides = carousel_dir / "slides"
+    try:
+        report = json.loads((slides / "checks.json").read_text())
+    except (OSError, ValueError) as exc:
+        raise ValueError("This deck has no final-render check record") from exc
+    import render_guard
+    if not report.get("complete") or not report.get("has_mascots") or not report.get("check_version"):
+        raise ValueError("The export is not a complete, checked mascot deck")
+    if (report.get("check_version") != render_guard.VERSION
+            or report.get("render_contract") != render_guard.contract()):
+        raise ValueError("The render checks, templates or fonts changed. Render this deck again.")
+    import art_eligibility
+    artwork = report.get("artwork")
+    if not isinstance(artwork, dict) or set(artwork) != {str(n) for n in range(1, 10)}:
+        raise ValueError("The deck has no complete artwork check record")
+    for value in artwork.values():
+        art_eligibility.check_proof(value)
+    if report.get("markdown_sha256") != hashlib.sha256(markdown.read_bytes()).hexdigest():
+        raise ValueError("The copy changed after rendering")
+    files = {p.name: p for p in slides.glob("*.png")}
+    if len(files) != 9 or set(files) != set(report.get("slides", {})):
+        raise ValueError("The checked nine-slide set is incomplete or changed")
+    for name, path in files.items():
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != report["slides"][name]:
+            raise ValueError(f"Slide changed after inspection: {name}")
+        if raw[:8] != b"\x89PNG\r\n\x1a\n" or raw[16:24] != (1080).to_bytes(4,"big") + (1350).to_bytes(4,"big"):
+            raise ValueError(f"Invalid PNG size: {name}")
 
 
 def record_publication(carousel_dir: Path, media_id: str) -> None:
     """Write the published media id next to the deck it belongs to.
 
-    Never raises. By the time this runs the post is already live, so failing the
-    job here would blame the wrong step and misreport a deck that did go out.
-    A warning is loud enough — the only consequence is that insights.py has one
-    fewer deck it can ask about.
+    Failure is a state-saving error, not permission to publish again. The
+    pending marker remains until a complete receipt has been read back.
     """
     path = carousel_dir / PUBLISHED_FILENAME
     record = {
@@ -66,11 +94,22 @@ def record_publication(carousel_dir: Path, media_id: str) -> None:
         "deck_slug": carousel_dir.name,
         "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
-    try:
-        path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
-        print(f"Recorded media id {media_id} in {path}")
-    except OSError as exc:
-        print(f"::warning::could not record media id {media_id} in {path}: {exc}", file=sys.stderr)
+    if not publication_record.valid(record, carousel_dir.name):
+        raise ValueError("Instagram returned an invalid publication id.")
+    publication_record.write_new(path, record)
+    publication_record.read(path, carousel_dir.name)
+    print(f"Recorded media id {media_id} in {path}")
+
+
+def publication_outputs(**values):
+    """Keep API confirmation distinct from the success of saving it."""
+    path = os.getenv("GITHUB_OUTPUT")
+    if path:
+        import uuid
+        with open(path, "a", encoding="utf-8") as handle:
+            for key, value in values.items():
+                delimiter = uuid.uuid4().hex
+                handle.write(f"{key}<<{delimiter}\n{value}\n{delimiter}\n")
 
 
 def strip_markup(text: str) -> str:
@@ -126,7 +165,33 @@ def list_images(carousel_dir: Path, base_url: str) -> list[str]:
         print(f"Warning: carousel needs 2-10 images, found {len(urls)}", file=sys.stderr)
     return urls
 
+def check_hosted_images(carousel_dir: Path, urls: list[str]) -> None:
+    """Instagram must receive the exact nine checked files, not merely live URLs."""
+    import hashlib
+    from urllib.parse import urlsplit
+    files = sorted((carousel_dir / "slides").glob("*.png"))
+    if len(files) != 9 or len(urls) != 9:
+        raise ValueError("Hosting check needs exactly nine images")
+    for path, url in zip(files, urls):
+        require_posting_allowed()
+        if urlsplit(url).scheme != "https":
+            raise ValueError("Hosted slides must use HTTPS")
+        expected = path.read_bytes()
+        digest, count = hashlib.sha256(), 0
+        with requests.get(url, stream=True, timeout=(5, 10), allow_redirects=False) as response:
+            if response.status_code != 200:
+                raise ValueError(f"Hosted slide {path.name} returned HTTP {response.status_code}")
+            for chunk in response.iter_content(chunk_size=65536):
+                count += len(chunk)
+                if count > len(expected):
+                    raise ValueError(f"Hosted slide differs from the checked file: {path.name}")
+                digest.update(chunk)
+        if count != len(expected) or digest.hexdigest() != hashlib.sha256(expected).hexdigest():
+            raise ValueError(f"Hosted slide differs from the checked file: {path.name}")
+
+
 def create_image_container(ig_user_id: str, token: str, image_url: str) -> str:
+    require_posting_allowed()
     base = graph_base(token)
     r = requests.post(f"{base}/{ig_user_id}/media", data={
         "image_url": image_url,
@@ -139,6 +204,7 @@ def create_image_container(ig_user_id: str, token: str, image_url: str) -> str:
     return r.json()["id"]
 
 def create_carousel(ig_user_id: str, token: str, children: list[str], caption: str) -> str:
+    require_posting_allowed()
     base = graph_base(token)
     r = requests.post(f"{base}/{ig_user_id}/media", data={
         "media_type": "CAROUSEL",
@@ -155,6 +221,7 @@ def publish(ig_user_id: str, token: str, creation_id: str) -> str:
     # Poll for finish — carousel needs ~5-10s
     base = graph_base(token)
     for _ in range(12):
+        require_posting_allowed()
         r = requests.post(f"{base}/{ig_user_id}/media_publish", data={
             "creation_id": creation_id,
             "access_token": token,
@@ -188,6 +255,10 @@ def main():
         print(f"Inferred base_url: {base_url}")
 
     carousel_dir = md_path.parent
+    for name in (PUBLISHED_FILENAME, PUBLICATION_PENDING):
+        marker = carousel_dir / name
+        if marker.exists() or marker.is_symlink():
+            sys.exit("This deck has a completed or unresolved publication record. Refusing a duplicate post.")
     caption = parse_caption(md_path)
     print(f"Caption length {len(caption)} chars, {len(caption.split())} words")
 
@@ -196,14 +267,29 @@ def main():
         print(f"Caption preview:\n{caption[:300]}...")
         return
 
+    require_posting_allowed()
+
+    # Held decks can predate source checks. A manual publish cannot turn a
+    # book-level flag into evidence for the exact sentence about to be sent.
+    import bibliography
+    bibliography.require_deck_support(md_path.read_text(encoding="utf-8"))
+
     ig_user_id = os.getenv("IG_USER_ID", "")
     token = os.getenv("IG_ACCESS_TOKEN", "")
     if not ig_user_id or not token:
-        print("IG_USER_ID or IG_ACCESS_TOKEN not set — dry run", file=sys.stderr)
-        print(f"Would post {len(list_images(carousel_dir, base_url))} images")
-        return
+        sys.exit("IG_USER_ID or IG_ACCESS_TOKEN not set. Nothing was posted.")
+
+    check_export(carousel_dir, md_path)
 
     urls = list_images(carousel_dir, base_url)
+    if len(urls) != 9:
+        sys.exit(f"A post needs exactly nine images; found {len(urls)}.")
+    try:
+        check_hosted_images(carousel_dir, urls)
+    except (OSError, ValueError, requests.RequestException) as exc:
+        reason = f"Hosted slides failed the final check: {exc}. Nothing was posted."
+        publication_outputs(stage="hosting", reason=reason)
+        sys.exit(reason)
     print(f"Creating {len(urls)} image containers...")
     children = []
     for url in urls:
@@ -217,10 +303,27 @@ def main():
     print(f"Carousel container: {carousel_id}")
 
     print("Publishing...")
+    try:
+        pending = reserve_publication.reserve(Path(__file__).resolve().parents[1], carousel_dir, carousel_id)
+    except (OSError, ValueError, reserve_publication.subprocess.CalledProcessError) as exc:
+        reason = f"The publication intent could not be saved remotely: {type(exc).__name__}. Nothing was published."
+        publication_outputs(stage="state saving", reason=reason)
+        sys.exit(reason)
     media_id = publish(ig_user_id, token, carousel_id)
-    print(f"Published: https://www.instagram.com/p/{media_id}/")
-    if media_id:
+    if not media_id:
+        sys.exit("Instagram returned no post id. Publication is not confirmed. Do not retry blindly.")
+    print(f"Instagram confirmed media id: {media_id}")
+    publication_outputs(confirmed_media_id=media_id, confirmed_deck_slug=carousel_dir.name)
+    try:
         record_publication(carousel_dir, media_id)
+        pending.unlink()
+    except (OSError, ValueError) as exc:
+        reason = f"Instagram returned media {media_id}, but saving its record failed: {exc}. Do not post again."
+        publication_outputs(stage="state saving", reason=reason)
+        sys.exit(reason)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except PostingPaused as exc:
+        sys.exit(str(exc))

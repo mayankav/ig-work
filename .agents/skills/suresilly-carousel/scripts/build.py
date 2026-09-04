@@ -21,7 +21,7 @@ Flags:
 from __future__ import annotations
 
 import argparse
-import re
+import hashlib
 import subprocess
 import sys
 from pathlib import Path
@@ -61,14 +61,31 @@ def role_key(role: str, slide: dict | None = None) -> str:
     return "value"
 
 
+def promote_checked_candidates(candidates: list[tuple[Path, str]]) -> None:
+    """Import frozen checked PNGs only after every candidate hash matches."""
+    import tempfile
+    import shutil
+    import import_poses
+    with tempfile.TemporaryDirectory(prefix="suresilly-import-") as temporary:
+        for candidate, expected_hash in candidates:
+            raw = candidate.read_bytes()
+            if hashlib.sha256(raw).hexdigest() != expected_hash:
+                raise ValueError(f"Checked artwork changed before import: {candidate.name}")
+            (Path(temporary) / candidate.name).write_bytes(raw)
+            brief = candidate.with_suffix(".brief.txt")
+            if brief.is_file():
+                shutil.copy2(brief, Path(temporary) / brief.name)
+        import_poses.main_argv([temporary, "--tags", "generated", "--exact"])
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("script", nargs="?")
     ap.add_argument("--no-mascot", action="store_true")
     ap.add_argument("--generate", action="store_true",
-                    help="OBSOLETE paid path — generate poses instead of using the "
-                         "library. Needs a billed Gemini project; fails otherwise.")
-    ap.add_argument("--model", choices=["pro", "flash", "empero"], default="flash")
+                    help="removed unsafe path; use --fresh for checked free generation")
+    ap.add_argument("--model", choices=["pro", "flash", "empero"], default=None,
+                    help="removed with --generate; cannot choose an unchecked image model")
     ap.add_argument("--random-palette", action="store_true",
                     help="Pick a random bleed/paper pair (avoids immediate repeat), "
                          "instead of LRU round-robin. Use in CI for every-run variety.")
@@ -80,6 +97,10 @@ def main() -> None:
                     help="neuron ceiling for this deck's generation (see poses_flux)")
     ap.add_argument("--bootstrap", action="store_true")
     a = ap.parse_args()
+
+    if a.generate or a.model is not None:
+        ap.error("--generate and --model were removed. Use --fresh for checked free art, "
+                 "or omit it to use the library. No request was sent.")
 
     if a.bootstrap:
         bootstrap()
@@ -101,12 +122,14 @@ def main() -> None:
     mascots: dict[int, Path] = {}
     mdir = md.parent / "mascot"
     chosen: dict[int, str] = {}
+    candidates: list[tuple[Path, str]] = []
 
-    if not a.generate and not a.no_mascot:
+    if not a.no_mascot:
         import library
         have = library.available()
         if not have:
-            sys.exit("ERROR: pose library is empty. Import sheets with\n                 scripts/import_poses.py — see mascot/GENERATION_PROMPTS.md")
+            sys.exit("ERROR: no library artwork has current pixel, body and eye checks. "
+                     "Complete the image audit before building. No image request was sent.")
         # Assign the whole deck at once — see library.assign_deck.
         specs = []
         for s in slides:
@@ -156,45 +179,19 @@ def main() -> None:
             # Wrapped, because growing the library is a bonus and a deck that
             # already rendered must not fail over it.
             if stats["kept"]:
-                try:
-                    import import_poses
-                    print(f"\nOffering {len(stats['kept'])} generated pose(s) to the library…")
-                    import_poses.main_argv([str(keep), "--tags", "generated"])
-                except SystemExit as exc:
-                    print(f"  library import refused: {exc}")
-                except Exception as exc:                       # noqa: BLE001
-                    print(f"  library import failed: {type(exc).__name__}: {exc}")
+                candidates = [(keep / f"{name}.png", stats["kept_hashes"][name])
+                              for name in stats["kept"]]
 
-
-    elif a.generate:
-        print("WARNING: --generate is the obsolete paid path. Gemini image "
-              "generation\n         has no free tier, so this fails unless "
-              "billing is enabled.\n         Drop the flag to use the pose library.\n"
-              "         Use --model empero to try Empero community models instead.")
-        import mascot as mascot_mod
-        defaults = mascot_mod.default_briefs()
-        api_key = mascot_mod.resolve_api_key()
-        model = mascot_mod.MODEL_PRO if a.model == "pro" else \
-                mascot_mod.MODEL_FLASH if a.model == "flash" else \
-                mascot_mod.MODEL_EMPERO_FLASH if a.model == "empero" else mascot_mod.MODEL_FLASH
-        mdir.mkdir(parents=True, exist_ok=True)
-        print(f"Generating {len(slides)} mascot poses with {model}…")
-        for i, s in enumerate(slides, 1):
-            rk = role_key(s.get("role", ""))
-            brief = s.get("mascot", "").strip()
-            # legacy S1.2-style pose codes carry no posture information
-            if not brief or re.fullmatch(r"S\d\.\d.*", brief, re.I):
-                brief = defaults.get(rk, defaults["value"])
-            dest = mdir / f"{i:02d}_{rk}.png"
-            print(f"  [{i}/{len(slides)}] {rk}: {brief[:64]}…")
-            mascot_mod.render_pose(brief, dest, model=model, seed=1000 + i * 37,
-                                   api_key=api_key)
-            mascots[i] = dest
 
     out = render.render(md, mascots, md.parent / "slides")
     sheet = render.contact_sheet(out, md.parent / "contact_sheet.png")
     print(f"\n{len(out)} slides -> {md.parent / 'slides'}")
     print(f"contact sheet -> {sheet}")
+
+    # Promotion is after the complete render, and includes only this attempt's
+    # surviving candidates. Old files in _library_candidates are not eligible.
+    if candidates:
+        promote_checked_candidates(candidates)
 
     if chosen:
         library.record_usage(md.parent.name, chosen)

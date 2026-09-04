@@ -1,0 +1,21 @@
+{
+  "at": "2026-09-04T00:55:59.152296+00:00",
+  "candidate": {
+    "author": "William James",
+    "title": "The Principles of Psychology",
+    "year": 1890,
+    "phrase": "first possible opportunity",
+    "claim": "James advises acting on a new plan at the first chance."
+  },
+  "active_pool_changed": false,
+  "status": "refused",
+  "reason": "the source request failed (URLError)",
+  "follow_up_diagnostic": {
+    "endpoint": "https://openlibrary.org/search.json",
+    "result": "ConnectionRefusedError [Errno 61] Connection refused",
+    "model_review_reached": false,
+    "active_claim_added": false,
+    "web_cross_check": "https://www.gutenberg.org/files/57628/old/57628-h/57628-h.htm",
+    "limit": "Web availability does not establish access from the production Python checker. Do not activate this claim from the search result."
+  }
+}

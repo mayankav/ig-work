@@ -7,7 +7,8 @@
     "20260901_door-unlocked-the_572b21",
     "20260901_door-washed-the_cd4b3a",
     "20260902_6pm-picked-up_068b42",
-    "20260903_6pm-carried-the_ca942f"
+    "20260903_6pm-carried-the_ca942f",
+    "20260903_desk-cleared-my_7c11e0"
   ],
   "anchors": {
     "action": [
@@ -61,7 +62,8 @@
     ],
     "6pm": [
       "20260902_6pm-picked-up_068b42",
-      "20260903_6pm-carried-the_ca942f"
+      "20260903_6pm-carried-the_ca942f",
+      "20260903_desk-cleared-my_7c11e0"
     ],
     "doorway": [
       "20260902_6pm-picked-up_068b42"
@@ -71,6 +73,9 @@
     ],
     "waited": [
       "20260903_6pm-carried-the_ca942f"
+    ],
+    "desk": [
+      "20260903_desk-cleared-my_7c11e0"
     ]
   }
 }

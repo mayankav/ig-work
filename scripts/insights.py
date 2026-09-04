@@ -69,6 +69,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from datetime import datetime, timezone
@@ -79,11 +80,10 @@ try:
 except ImportError:  # pragma: no cover - the workflow installs it
     requests = None
 
-# Host selection is post_to_ig's rule and stays post_to_ig's rule. Duplicating
-# it here would let the two drift, and the host is what decides which permission
-# name the owner has to add — so a drift would print the wrong instructions.
+# Share only API identifiers, never import the publisher and its image engine.
+# The reporting workflow installs requests alone and must remain independent.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import post_to_ig  # noqa: E402
+import instagram_api  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CAROUSELS_DIR = REPO_ROOT / "carousels"
@@ -124,14 +124,12 @@ CORE_METRICS = ("reach", "saved", "shares", "total_interactions")
 
 # How long a deck ages before we ask.
 #
-# Instagram keeps serving a carousel for days: the bulk of reach lands in the
-# first 48 hours, but saves and shares keep arriving after that, and a number
-# taken at 24 hours mostly measures how fast the feed moved, not how the deck
-# did. Three days is past the bulk of it while the numbers are still moving
-# slowly enough that the reading is stable, and it is short enough that a deck
-# is still recognisable to the person reading the ledger. It is one number in
-# one place precisely so it can be argued with and changed.
+# Three days is a reporting policy, not a claim that engagement has finished.
+# Lifetime counters are sampled in one hourly window; a missed window cannot
+# be reconstructed later. Keep late observations but label them honestly.
 MIN_AGE_DAYS = 3.0
+TARGET_AGE_HOURS = 72
+WINDOW_HOURS = 1
 
 # A ceiling on calls per run. The backlog on a first run is every deck ever
 # published; there is no hurry, and the next run takes the next batch.
@@ -171,6 +169,25 @@ def _parse_stamp(text: str) -> datetime | None:
     return parsed.astimezone(timezone.utc)
 
 
+def measurement_age(published_at: datetime, collected_at: datetime) -> dict:
+    hours = (collected_at - published_at).total_seconds() / 3600
+    return {"age_hours": hours, "target_age_hours": TARGET_AGE_HOURS,
+            "window_hours": WINDOW_HOURS,
+            "comparable": TARGET_AGE_HOURS <= hours < TARGET_AGE_HOURS + WINDOW_HOURS}
+
+
+def number(value) -> bool:
+    return (isinstance(value, (int, float)) and not isinstance(value, bool)
+            and math.isfinite(value) and value >= 0)
+
+
+def rates(metrics: dict) -> dict:
+    reach = metrics.get("reach")
+    return {f"{name}_per_reach": (metrics[name] / reach
+            if number(reach) and reach > 0 and number(metrics.get(name)) else None)
+            for name in ("saved", "shares")}
+
+
 # ─────────────────────────── what has been published ────────────────────────────
 
 def published_decks(carousels_dir: Path | None = None) -> list[dict]:
@@ -184,11 +201,13 @@ def published_decks(carousels_dir: Path | None = None) -> list[dict]:
     if not root.is_dir():
         return []
     out = []
-    for path in sorted(root.glob("*/" + post_to_ig.PUBLISHED_FILENAME)):
+    for path in sorted(root.glob("*/" + instagram_api.PUBLISHED_FILENAME)):
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
             print(f"::warning::unreadable {path}: {exc}", file=sys.stderr)
+            continue
+        if not isinstance(record, dict):
             continue
         media_id = str(record.get("media_id") or "").strip()
         published_at = _parse_stamp(str(record.get("published_at") or ""))
@@ -214,7 +233,9 @@ def _read_jsonl(path: Path) -> list[dict]:
         line = line.strip()
         if line:
             try:
-                out.append(json.loads(line))
+                record = json.loads(line)
+                if isinstance(record, dict):
+                    out.append(record)
             except ValueError:
                 print(f"::warning::skipping an unparseable line in {path}", file=sys.stderr)
     return out
@@ -262,6 +283,9 @@ def due(
         deck = dict(deck)
         deck["age_days"] = round(age, 2)
         out.append(deck)
+    # Timely readings first. Old backlog must not consume the current window.
+    out.sort(key=lambda d: (not measurement_age(d["published_at"], when)["comparable"],
+                            d["published_at"]))
     return out[:limit]
 
 
@@ -303,7 +327,7 @@ def parse_metrics(payload: dict) -> dict:
             value = values[0].get("value")
         if value is None and isinstance(row.get("total_value"), dict):
             value = row["total_value"].get("value")
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if number(value):
             out[str(name)] = value
     return out
 
@@ -320,7 +344,7 @@ def fetch(media_id: str, token: str) -> tuple[dict, list[str], str]:
     """
     if requests is None:
         raise InsightsError("requests is not installed")
-    base = post_to_ig.graph_base(token)
+    base = instagram_api.graph_base(token)
     attempts = [
         ("full", METRICS, {}),
         ("full+total_value", METRICS, {"metric_type": "total_value"}),
@@ -363,7 +387,7 @@ def scope_help(token: str) -> str:
     Printed on a permission failure rather than buried in a README, because the
     run that fails is the moment somebody is looking.
     """
-    instagram_login = post_to_ig.graph_base(token) == post_to_ig.GRAPH_INSTAGRAM
+    instagram_login = instagram_api.graph_base(token) == instagram_api.GRAPH_INSTAGRAM
     if instagram_login:
         host, scope = "graph.instagram.com", "instagram_business_manage_insights"
         steps = [
@@ -462,13 +486,16 @@ def collect(
             failed += 1
             continue
         missing = [m for m in requested if m not in metrics]
+        collected_at = now or _now()
         record = {
             "media_id": deck["media_id"],
             "deck_slug": deck["deck_slug"],
             "published_at": _stamp(deck["published_at"]),
-            "collected_at": _stamp(now or _now()),
-            "age_days": deck["age_days"],
-            "host": post_to_ig.graph_base(token),
+            "collected_at": _stamp(collected_at),
+            "age_days": (collected_at - deck["published_at"]).total_seconds() / 86400,
+            **measurement_age(deck["published_at"], collected_at),
+            "rates": rates(metrics),
+            "host": instagram_api.graph_base(token),
             "variant": variant,
             "metrics": metrics,
             "missing": missing,
@@ -481,7 +508,7 @@ def collect(
         print(f"  {deck['deck_slug']}: {summary}" + (f"  (missing: {', '.join(missing)})" if missing else ""))
 
     print(f"wrote {written} record(s) to {path}, {failed} deck(s) had no trustworthy reading")
-    return 1 if written == 0 else 0
+    return 1 if failed or written == 0 else 0
 
 
 def check_token(token: str) -> int:
@@ -508,8 +535,8 @@ def check_token(token: str) -> int:
         print("::error::IG_ACCESS_TOKEN is not set")
         return 1
 
-    base = post_to_ig.graph_base(token)
-    kind = ("Instagram login" if base == post_to_ig.GRAPH_INSTAGRAM
+    base = instagram_api.graph_base(token)
+    kind = ("Instagram login" if base == instagram_api.GRAPH_INSTAGRAM
             else "Facebook login")
     print(f"host {base}  ({kind} token)")
 

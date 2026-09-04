@@ -24,11 +24,12 @@ discarded and the next one is tried. There is no shortage of books.
                              and shelved in a psychology-adjacent subject
   2  the claim is falsifiable no percentages, no counts, no "studies show"
   3  the term is real         Open Library full-text search over scanned books
-  4  nobody can refute it     a model that did NOT propose it tries to
+  4  source passages         fetched from scans attached to the named book;
+                             an independent model may veto, with a control
   5  code writes the line     from the verified fields, never from model prose
 
-Gates 1 and 3 are free, keyless and need no account. Gate 4 costs one model
-call. Everything here fails CLOSED: an unreachable API rejects the candidate
+Catalogue and public passage requests need no key. Gate 4 costs one model
+call and retains evidence per claim. Everything here fails CLOSED: an unreachable API rejects the candidate
 rather than waving it through, because "we could not check" and "we checked"
 must never produce the same outcome.
 """
@@ -72,6 +73,7 @@ TIMEOUT = 20
 # and let the caller fall back to a book already proved.
 RETRIES = 1
 RETRY_PAUSE = 3.0
+CLAIM_WORD_CAP = 18
 
 
 class Unverified(Exception):
@@ -90,10 +92,16 @@ def _get(url: str, params: dict) -> dict:
         try:
             with urllib.request.urlopen(request, timeout=TIMEOUT) as handle:
                 return json.loads(handle.read().decode("utf-8"))
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError,
+        except urllib.error.HTTPError as problem:
+            last = problem
+            # Retry temporary service failures, not denied or missing material.
+            if problem.code != 429 and not 500 <= problem.code < 600:
+                break
+        except (urllib.error.URLError, TimeoutError,
                 json.JSONDecodeError, OSError) as problem:
             last = problem
-    raise Unverified(f"the catalogue could not be reached ({type(last).__name__})")
+    detail = f"HTTP {last.code}" if isinstance(last, urllib.error.HTTPError) else type(last).__name__
+    raise Unverified(f"the source request failed ({detail})")
 
 
 # ─────────────────────────── gate 1 ────────────────────────────
@@ -256,7 +264,7 @@ def check_discipline(doc: dict) -> None:
                      "A real book on the wrong shelf is still the wrong book")
 
 
-def verify_book(author: str, title: str, year: int) -> dict:
+def verify_book(author: str, title: str, year: int, *, require_scan: bool = False) -> dict:
     """Gate 1. The book exists, by that author, at roughly that date.
 
     Returns the CATALOGUE's spelling of all three, not the model's. A model that
@@ -277,7 +285,7 @@ def verify_book(author: str, title: str, year: int) -> dict:
     # round trip, two more field names.
     found = _get(SEARCH_URL, {
         "q": f"{_norm(title)} {_norm(author)}", "limit": 8,
-        "fields": "title,author_name,first_publish_year,ddc,lcc",
+        "fields": "key,ia,title,author_name,first_publish_year,ddc,lcc",
     })
     docs = found.get("docs") or []
     if not docs:
@@ -285,6 +293,7 @@ def verify_book(author: str, title: str, year: int) -> dict:
 
     want_title, want_author = _norm(title), _surname(author)
     wrong_shelf: list[str] = []
+    without_scan = False
     for doc in docs:
         got_title = _norm(doc.get("title") or "")
         names = doc.get("author_name") or []
@@ -301,11 +310,21 @@ def verify_book(author: str, title: str, year: int) -> dict:
                 wrong_shelf.append(str(off_field))
                 continue
             published = doc.get("first_publish_year")
+            scans = doc.get("ia", [])
+            work = doc.get("key", "")
+            if require_scan and (not isinstance(scans, list) or not scans
+                    or not isinstance(work, str) or not re.fullmatch(r"/works/OL\d+W", work)):
+                without_scan = True
+                continue
             return {
                 "author": names[0] if names else author,
                 "title": doc.get("title") or title,
                 "year": int(published) if published else int(year),
+                "work_key": work,
+                "scan_ids": scans,
             }
+    if without_scan:
+        raise Unverified(f"no catalogue-linked scan was found for {title!r} by {author}")
     if wrong_shelf:
         raise Unverified(wrong_shelf[0])
     shown = f"{docs[0].get('title')!r} by {(docs[0].get('author_name') or ['?'])[0]}"
@@ -338,6 +357,11 @@ def check_claim_is_falsifiable(claim: str) -> None:
     second is not a stronger version of the first, it is a different and worse
     kind of sentence, and it is the only kind that has ever got us in trouble.
     """
+    if not isinstance(claim, str) or not claim.strip():
+        raise Unverified("the claim is empty or is not text")
+    count = len(claim.split())
+    if count > CLAIM_WORD_CAP:
+        raise Unverified(f"the claim has {count} words; the limit is {CLAIM_WORD_CAP}")
     for pattern in FABRICATION_TELLS:
         hit = re.search(pattern, claim, re.I)
         if hit:
@@ -442,29 +466,12 @@ REFUTE_SCHEMA = {
 
 
 def check_not_refuted(book: dict, phrase: str, claim: str, proposed_by: str) -> str:
-    """Gate 4. A model that did not propose this tries to knock it down.
-
-    The vendor separation is the whole point and it is the same rule the critic
-    runs on: a model recognises its own output and defends it. Asking the
-    proposer to check its own citation is asking it to agree with itself.
-    """
-    import critic  # local import: critic imports llm, and llm must load first
-    import llm
-
-    providers = critic.available_providers(proposed_by)
-    if not providers:
-        raise Unverified(f"no second opinion available that did not propose this "
-                         f"({proposed_by} proposed it)")
+    """Compatibility helper; memory-only review is no longer a valid path."""
+    import claim_support
     try:
-        answer, who = llm.ask(
-            REFUTE_SYSTEM,
-            REFUTE_USER.format(phrase=phrase, claim=claim, **book),
-            REFUTE_SCHEMA, temperature=0.0, providers=providers)
-    except llm.ModelRefused as refused:
-        raise Unverified(f"no second opinion could be reached ({refused})") from refused
-    if answer["refuted"]:
-        raise Unverified(f"{who} refuted it: {answer['why']}")
-    return who
+        return claim_support.verify(book, phrase, claim, proposed_by, _get)["checked_by"]
+    except claim_support.Unsupported as why:
+        raise Unverified(str(why)) from why
 
 
 # ─────────────────────────── gate 5 ────────────────────────────
@@ -527,21 +534,27 @@ def verify(candidate: dict, proposed_by: str, pillars: list[str]) -> dict:
     phrase = candidate["phrase"].strip()
 
     check_claim_is_falsifiable(claim)
-    # The claim has to be built ON the phrase, or gate 3 proves a term of art
-    # that has nothing to do with the sentence we are about to print.
-    if _norm(phrase) not in _norm(claim):
-        raise Unverified(f"the claim does not contain the phrase {phrase!r}, so proving "
-                         "the phrase proves nothing about the claim")
+    # The phrase locates source text; it need not be printed as jargon in the
+    # claim. Passage-based review below checks the actual sentence, not merely
+    # the presence of the lookup term. A matching term alone is never evidence.
 
-    book = verify_book(candidate["author"], candidate["title"], candidate["year"])
+    book = verify_book(candidate["author"], candidate["title"], candidate["year"], require_scan=True)
     hits = verify_phrase(phrase)
-    checked_by = check_not_refuted(book, phrase, claim, proposed_by)
+    import claim_support
+    try:
+        support = claim_support.verify(book, phrase, claim, proposed_by, _get)
+    except claim_support.Unsupported as why:
+        refused = Unverified(str(why))
+        refused.evidence = why.evidence
+        raise refused from why
+    checked_by = support["checked_by"]
 
     return {
         "id": citation_id(book),
         "line": citation_line(book),
         "pillars": list(pillars),
         "claims": [claim],
+        "claim_support": {claim_support.claim_key(claim): support},
         "phrase": phrase,
         "verified": {
             "catalogue": "openlibrary",
@@ -567,15 +580,17 @@ published. Do not suggest journal articles.
 For each book give a PHRASE — the term of art the idea is known by, one to five
 words, as it is actually printed in the literature ("fawn response", "emotional
 flashback", "codependency", "overfunctioning"). It must be distinctive: a term
-this field would recognise, never an ordinary word like "shame" or "boundaries". Then give a CLAIM: one sentence, under
-sixteen words, saying what that book found, and it MUST contain the phrase.
+this field would recognise, never an ordinary word like "shame" or "boundaries". Then give a CLAIM: one sentence,
+{claim_word_cap} words or fewer, saying what the book supports in plain words.
+The phrase is for source lookup. It need not appear in the public claim.
+Do not turn a description or argument into a claim that an experiment proved it.
 
 Never a statistic. No percentages, no counts, no "studies show". Say what the
 book found. Every suggestion is checked against a library catalogue and against
 the scanned text of the book, and a second model will try to refute it, so a
 book you are unsure about costs you the slot for nothing.
 
-Return JSON only."""
+Return JSON only.""".replace("{claim_word_cap}", str(CLAIM_WORD_CAP))
 
 PROPOSE_USER = """Subject: {topic}
 The moment the deck is about: {moment}
@@ -666,11 +681,8 @@ def discover(topic: str, moment: str, avoid: list[str]) -> tuple[dict | None, li
 
 # ─────────────────────────── the pool ────────────────────────────
 #
-# citations.json is no longer a list somebody wrote. It is the record of what
-# has already been proved: every book in it passed all five gates on some
-# earlier day, so nothing has to be proved twice and the daily run has something
-# to fall back on when Open Library is down or every suggestion is rejected.
-# It grows on its own and it never needs editing by hand.
+# New claims retain passage-based evidence. Legacy entries predate that check
+# and must be audited before release; their book-level flags are not proof.
 
 CITATIONS_PATH = SKILL_DIR / "references" / "citations.json"
 HISTORY_PATH = SKILL_DIR / "citation_history.json"
@@ -689,7 +701,73 @@ def _read(path: Path, fallback):
 
 
 def load_pool() -> list[dict]:
-    return _read(CITATIONS_PATH, {"citations": []}).get("citations", [])
+    pool = _read(CITATIONS_PATH, {"citations": []}).get("citations", [])
+    for citation in pool:
+        validate_citation(citation)
+    return pool
+
+
+def require_claim_support(citation: dict, index: int) -> None:
+    import claim_support
+    try:
+        if type(index) is not int or index < 0:
+            raise Unverified("invalid claim index")
+        claim = citation["claims"][index]
+        claim_support.validate(citation.get("claim_support", {}).get(claim_support.claim_key(claim)),
+                               claim, citation.get("line", ""))
+    except (KeyError, IndexError, TypeError, claim_support.Unsupported) as why:
+        raise Unverified(f"claim {index} has no usable source support: {why}") from why
+
+
+def supported_indices(citation: dict) -> list[int]:
+    indices = []
+    for index in range(len(citation.get("claims", []))):
+        try:
+            require_claim_support(citation, index)
+        except Unverified:
+            continue
+        indices.append(index)
+    return indices
+
+
+def require_deck_support(markdown: str) -> None:
+    """Recheck the printed claim before publication, including old held decks."""
+    sources = re.findall(r"(?m)^- \*\*Source:\*\* (.+)$", markdown)
+    claims = re.findall(r"(?m)^- \*\*Source Claim:\*\* (.+)$", markdown)
+    if len(sources) != 1 or len(claims) != 1:
+        raise Unverified("the deck must contain one source and one supported claim")
+    claim = claims[0].replace("[[", "").replace("]]", "").strip()
+    for citation in load_pool():
+        if citation.get("line") == sources[0].strip() and claim in citation["claims"]:
+            require_claim_support(citation, citation["claims"].index(claim))
+            return
+    raise Unverified("the printed claim has no matching source record")
+
+
+def validate_citation(citation: dict) -> None:
+    """The same boundary applies to insertions, updates and saved data."""
+    if not isinstance(citation, dict) or not citation.get("id"):
+        raise Unverified("the citation has no id")
+    claims = citation.get("claims")
+    if not isinstance(claims, list) or not claims:
+        raise Unverified(f"{citation['id']}: no claims")
+    for claim in claims:
+        check_claim_is_falsifiable(claim)
+    # Legacy claims have no passage records yet. They require a separate audit;
+    # do not invent evidence during loading. Any supplied evidence must replay.
+    import claim_support
+    evidence = citation.get("claim_support", {})
+    if not isinstance(evidence, dict):
+        raise Unverified("malformed claim support")
+    if set(evidence) - {claim_support.claim_key(claim) for claim in claims}:
+        raise Unverified("claim support contains a record for a missing claim")
+    for claim in claims:
+        key = claim_support.claim_key(claim)
+        if key in evidence:
+            try:
+                claim_support.validate(evidence[key], claim, citation.get("line", ""))
+            except claim_support.Unsupported as why:
+                raise Unverified(str(why)) from why
 
 
 def store(citation: dict) -> None:
@@ -700,6 +778,16 @@ def store(citation: dict) -> None:
     how one book comes to serve several pillars, which is what makes the pool
     stop being a lookup table and start being a library.
     """
+    validate_citation(citation)
+    import claim_support
+    # Every incoming claim needs its own evidence, including updates to a book
+    # already in the pool. One book-level flag cannot prove a second sentence.
+    for claim in citation["claims"]:
+        try:
+            claim_support.validate(citation.get("claim_support", {}).get(claim_support.claim_key(claim)),
+                                   claim, citation.get("line", ""))
+        except claim_support.Unsupported as why:
+            raise Unverified(str(why)) from why
     data = _read(CITATIONS_PATH, {"citations": []})
     pool = data.setdefault("citations", [])
     for existing in pool:
@@ -712,11 +800,17 @@ def store(citation: dict) -> None:
             if pillar not in existing["pillars"]:
                 existing["pillars"].append(pillar)
         existing["verified"] = citation["verified"]
+        existing.setdefault("claim_support", {}).update(citation["claim_support"])
         break
     else:
         pool.append(citation)
-    CITATIONS_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
-                              encoding="utf-8")
+    for entry in pool:
+        validate_citation(entry)
+    # A failed check never changes the pool. Replace only a complete JSON file.
+    temporary = CITATIONS_PATH.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+                         encoding="utf-8")
+    temporary.replace(CITATIONS_PATH)
 
 
 def remember(slug: str, citation_id: str) -> None:
