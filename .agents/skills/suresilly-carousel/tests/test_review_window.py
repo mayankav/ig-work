@@ -112,3 +112,12 @@ def test_failed_preview_is_not_reported_as_waiting(stage):
     assert value['outcome']=='error'
     assert value['fault_code']==stage+'_failed'
     assert value['held'] is False
+
+
+def test_child_failure_preserves_the_actual_reason(monkeypatch):
+    import subprocess
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import review_window_job as job
+    monkeypatch.setattr(job.subprocess,'run',lambda *args,**kwargs:subprocess.CompletedProcess(args,1,'Posting is paused by SS_HALT. Nothing will be posted.\n',''))
+    with pytest.raises(ValueError,match='Posting is paused by SS_HALT'):
+        job.run_child(['python','publisher.py'])

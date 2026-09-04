@@ -162,6 +162,18 @@ def deliver_result(deck, media_id):
             time.sleep(5)
 
 
+def run_child(args, **kwargs):
+    result = subprocess.run(args, text=True, capture_output=True, **kwargs)
+    if result.stdout: print(result.stdout, end='', flush=True)
+    if result.stderr: print(result.stderr, end='', file=sys.stderr, flush=True)
+    if result.returncode:
+        lines = [line.strip() for line in (result.stdout + '\n' + result.stderr).splitlines() if line.strip()]
+        pause = next((line for line in lines if 'Posting is paused' in line), None)
+        reason = pause or (lines[-1] if lines else 'The child job stopped without a reason')
+        raise ValueError(reason[:600])
+    return result
+
+
 def act(token, action_id, deck):
     prior = window.api(token, 'status')
     if prior.get('state') == 'published' and prior.get('action', {}).get('id') == action_id:
@@ -176,7 +188,7 @@ def act(token, action_id, deck):
             base = f'https://media.suresilly.com/slides/{deck.name}/reviews/{token}/slides'
             args = [sys.executable, str(ROOT / 'scripts/post_to_ig.py'), '--carousel', str(deck / 'carousel.md'), '--base-url', base]
             if any((deck / name).exists() for name in ('published.json', 'publication_pending.json')): args.append('--recover')
-            subprocess.run(args, cwd=ROOT, check=True)
+            run_child(args, cwd=ROOT)
             receipt = publication_record.read(deck / 'published.json', deck.name)
             window.api(token, 'complete', {'action_id': action_id, 'state': 'published', 'media_id': receipt['media_id']})
             deliver_result(deck, receipt['media_id'])
@@ -195,7 +207,7 @@ def act(token, action_id, deck):
             env['OWNER_REDO_EXCLUDE_HASHES'] = ','.join(value['sha256'] for value in previous['artwork'].values())
             with tempfile.NamedTemporaryFile() as outputs:
                 env['GITHUB_OUTPUT'] = outputs.name
-                subprocess.run([sys.executable, str(ENGINE / 'run.py'), '--no-post', '--source', 'concept'], cwd=ROOT, env=env, check=True)
+                run_child([sys.executable, str(ENGINE / 'run.py'), '--no-post', '--source', 'concept'], cwd=ROOT, env=env)
                 values = dict(line.split('=', 1) for line in Path(outputs.name).read_text().splitlines() if '=' in line)
             if not values.get('review_token') or not values.get('slug'): raise ValueError('The new carousel did not pass its checks')
             revised = ROOT / 'carousels' / values['slug']
