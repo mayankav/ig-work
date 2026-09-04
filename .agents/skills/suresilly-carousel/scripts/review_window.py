@@ -56,7 +56,7 @@ def api(token, operation, body=None):
     if parsed.scheme != 'https' or not parsed.hostname or parsed.query or parsed.fragment or not key:
         raise ValueError('Review service is not configured')
     request = urllib.request.Request(f'{base}/review/{token}/{operation}',
-        data=json.dumps(body or {}).encode(), headers={'Content-Type': 'application/json', 'X-Review-Key': key})
+        data=json.dumps(body or {}).encode(), headers={'Content-Type': 'application/json', 'User-Agent': 'suresilly-review-window/1.0', 'X-Review-Key': key})
     with urllib.request.urlopen(request, timeout=30) as response:
         result = json.load(response)
     if not isinstance(result, dict) or result.get('error'): raise ValueError('Review service refused the action')
