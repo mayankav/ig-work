@@ -2,3 +2,4 @@
 {"at": "2026-09-04T02:01:51Z", "run": "33827677228", "faults": ["Only 0 library images have current checks", "nine are needed before a run. No generation request was sent."], "history": [], "signatures": [], "shape": "one-shot"}
 {"at": "2026-09-04T02:34:40Z", "run": "33829769572", "faults": ["Only 0 library images have current checks", "nine are needed before a run. No generation request was sent."], "history": [], "signatures": [], "shape": "one-shot"}
 {"at": "2026-09-04T14:34:52Z", "run": "33884109241", "faults": ["Only 0 library images have current checks", "nine are needed before a run. No generation request was sent."], "history": [], "signatures": [], "shape": "one-shot"}
+{"at": "2026-09-04T15:49:46Z", "run": "33891116582", "faults": ["No source-supported claim is available for this subject. Saved claims need review."], "history": [], "signatures": [], "shape": "one-shot"}
