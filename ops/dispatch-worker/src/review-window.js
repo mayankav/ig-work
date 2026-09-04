@@ -110,7 +110,9 @@ export class ReviewWindow {
         body: JSON.stringify({ref: 'main', inputs: {token: record.token, action_id: record.action.id}})});
       if (response.status !== 204) throw new Error('Dispatch not accepted');
       record.action.dispatched = true;
+      record.action.retry_at = Date.now() + 10 * 60 * 1000;
       await this.ctx.storage.put('review', record);
+      await this.ctx.storage.setAlarm(record.action.retry_at);
       return {state: record.state, accepted: true};
     } catch {
       if (record.action.attempts < 3) await this.ctx.storage.setAlarm(Date.now() + 60000);
@@ -135,7 +137,16 @@ export class ReviewWindow {
         record.history.push({at: Date.now(), decision: 'timeout_publish'});
         await this.ctx.storage.put('review', record);
       }
-      if (['queued', 'cancelled'].includes(record.state) && record.action && !record.action.dispatched && record.action.attempts < 3) await this.dispatch(record);
+      if (['queued', 'cancelled'].includes(record.state) && record.action && !record.claimed) {
+        if (record.action.dispatched && Date.now() < record.action.retry_at) {
+          await this.ctx.storage.setAlarm(record.action.retry_at); return;
+        }
+        if (record.action.attempts < 3) await this.dispatch(record);
+        else {
+          if (record.state !== 'cancelled') record.state = 'dispatch_failed';
+          await this.ctx.storage.put('review', record); await this.ctx.storage.deleteAlarm();
+        }
+      }
     });
   }
 }

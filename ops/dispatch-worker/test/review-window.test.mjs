@@ -40,7 +40,7 @@ assert.equal(parseWindowReply('approve 4',preview.caption),null);
 }
 {
  const {obj,storage}=await setup();now+=REVIEW_HOUR;await obj.alarm();const old=await call(obj,'status');
- await call(obj,'decide',decision(3,'redo_slide',4));assert.equal(storage.alarm,null);
+ await call(obj,'decide',decision(3,'redo_slide',4));assert.equal(storage.alarm,now+10*60*1000);
  assert.equal((await call(obj,'claim',{manifest,action_id:old.action.id})).status,409);
  const r=await call(obj,'status');assert.equal(r.action.slide,4);
  const calls=dispatches;assert.equal((await call(obj,'decide',decision(3,'redo_slide',4))).duplicate,true);assert.equal(dispatches,calls);
@@ -50,7 +50,7 @@ assert.equal(parseWindowReply('approve 4',preview.caption),null);
 }
 {
  const {obj,storage}=await setup();await call(obj,'decide',decision(5,'drop'));now+=REVIEW_HOUR;
- const calls=dispatches;await obj.alarm();assert.equal(dispatches,calls);assert.equal(storage.alarm,null);
+ const calls=dispatches;await obj.alarm();assert.equal(dispatches,calls+1);assert.equal((await call(obj,'status')).state,'cancelled');
  assert.equal((await call(obj,'decide',decision(6))).status,409);
 }
 {
@@ -68,5 +68,11 @@ assert.equal(parseWindowReply('approve 4',preview.caption),null);
  await call(obj,'claim',{manifest,action_id:r.action.id});now+=40*60*1000;await obj.alarm();
  assert.equal((await call(obj,'status')).state,'held');assert.equal(storage.alarm,null);
  assert.equal((await call(obj,'complete',{action_id:r.action.id,state:'published',media_id:'12'})).status,409);
+}
+{
+ const {obj}=await setup();await call(obj,'decide',decision(9));const first=await call(obj,'status');
+ now+=10*60*1000;const calls=dispatches;await obj.alarm();const second=await call(obj,'status');
+ assert.equal(dispatches,calls+1);assert.equal(second.action.id,first.action.id);
+ assert.equal((await call(obj,'claim',{manifest,action_id:first.action.id})).state,'working');
 }
 console.log('review-window: all transition, receipt, timeout and stale-action checks passed');
