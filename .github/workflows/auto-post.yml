@@ -198,8 +198,8 @@ jobs:
           # 'publish', so there are two independent reasons it cannot post.
           if [ -n "$RESUME_SLUG" ]; then
             if [ -f "carousels/$RESUME_SLUG/review_window.json" ]; then
-              echo "::error::This deck has a Telegram review ID. Use its review commands to continue."
-              exit 1
+              python scripts/review_window_job.py resume --deck "carousels/$RESUME_SLUG"
+              exit 0
             fi
             echo "slug=$RESUME_SLUG" >> "$GITHUB_OUTPUT"
             echo "deck=carousels/$RESUME_SLUG/carousel.md" >> "$GITHUB_OUTPUT"

@@ -115,7 +115,7 @@ def reserve(path: Path, slot: str, request: str, run_id: str, created_at: str,
             if (final.get("stage") in {"setup", "tests", "generation"} and final.get("published") is False
                     and not final.get("slug") and old_code and code_revision and old_code != code_revision):
                 pass
-            elif (final.get("outcome") == "error" and final.get("slug") and final.get("stage") in {"setup", "tests", "hosting", "posting", "state saving"}):
+            elif (final.get("outcome") == "error" and final.get("slug") and final.get("stage") in {"setup", "tests", "hosting", "posting", "state saving", "review preparation", "Telegram delivery"}):
                 resume_slug = safe_id(final["slug"])
                 resume_run = safe_id(prior.get("resume_run") or prior["run_id"])
             else:

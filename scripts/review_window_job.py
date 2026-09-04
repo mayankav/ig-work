@@ -60,6 +60,13 @@ def stage(deck):
     return record
 
 
+def resume(deck):
+    record = window.read(deck)
+    for name in ('published.json', 'publication_pending.json'):
+        if (deck / name).exists(): raise ValueError('Resolve the Instagram publication using its review action')
+    output(slug=record['slug'], deck=str(deck / 'carousel.md'), review_token=record['token'], verdict='held')
+
+
 def register(deck):
     record = window.read(deck)
     base = f'https://media.suresilly.com/slides/{record["slug"]}/reviews/{record["token"]}'
@@ -233,7 +240,7 @@ def prune(deck):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('describe', 'act', 'stage', 'register', 'finish-redo', 'fail', 'prune'))
+    parser.add_argument('operation', choices=('describe', 'act', 'stage', 'register', 'finish-redo', 'fail', 'prune', 'resume'))
     parser.add_argument('--token', default=os.environ.get('REVIEW_TOKEN', ''))
     parser.add_argument('--action-id', default=os.environ.get('REVIEW_ACTION_ID', ''))
     parser.add_argument('--deck', type=Path)
@@ -241,6 +248,7 @@ def main():
     if args.operation == 'describe': describe(args.token, args.action_id)
     elif args.operation == 'act': act(args.token, args.action_id, args.deck)
     elif args.operation == 'stage': stage(args.deck)
+    elif args.operation == 'resume': resume(args.deck)
     elif args.operation == 'register': register(args.deck)
     elif args.operation == 'prune': prune(args.deck)
     else: finish(args.token, args.action_id, failed=args.operation == 'fail')

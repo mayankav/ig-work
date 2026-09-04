@@ -19,7 +19,7 @@ def result(steps: dict, *, mode: str, slug: str, verdict: str, reason: str,
     def record(stage, outcome, code, why, can_retry=False):
         return dict(stage=stage, outcome=outcome, fault_code=code,
                     reason=why, retryable=can_retry,
-                    published=confirmed, slug=slug, held=verdict == "held")
+                    published=confirmed, slug=slug, held=verdict == "held" and outcome == "held")
     stages = [("slot", "work reservation"), ("install", "setup"), ("gates", "tests"), ("verbs", "tests"),
               ("test_state", "tests"), ("restore", "hosting"), ("build", "generation"),
               ("archive", "state saving"), ("owner_preview", "review preparation"),

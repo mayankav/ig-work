@@ -111,3 +111,4 @@ def test_failed_preview_is_not_reported_as_waiting(stage):
         mode='publish',slug='deck',verdict='held',reason='',retry=False,published=None)
     assert value['outcome']=='error'
     assert value['fault_code']==stage+'_failed'
+    assert value['held'] is False
