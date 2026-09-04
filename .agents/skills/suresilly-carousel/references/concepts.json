@@ -28,6 +28,19 @@
       }
     },
     {
+      "id": "circadian-rhythm",
+      "term": "circadian rhythm",
+      "article": "Circadian rhythm",
+      "demand": 21307,
+      "scanned_hits": 30516,
+      "summary": "A circadian rhythm (), or circadian cycle, is a natural oscillation that repeats roughly every 24 hours. Circadian rhythms can refer to any process that originates within an organism (i.e., endogenous) and responds to the environment (is entrained by the environment). Circadian rhythms are regulated by a circadian clock whose primary function is to rhythmically co-ordinate biological processes so they occur at the correct time to maximize the fitness of an individual. Circadian rhythms have been widely observed in animals, plants, fungi and cyanobacteria and there is evidence that they evolved",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:39:05Z"
+      }
+    },
+    {
       "id": "classical-conditioning",
       "term": "classical conditioning",
       "article": "Classical conditioning",
@@ -67,6 +80,19 @@
       }
     },
     {
+      "id": "female-hysteria",
+      "term": "female hysteria",
+      "article": "Female hysteria",
+      "demand": 14787,
+      "scanned_hits": 3016,
+      "summary": "Female hysteria was once a common medical diagnosis for women. It was described as exhibiting a wide array of symptoms, including anxiety, shortness of breath, fainting, nervousness, exaggerated and impulsive sexual desire, insomnia, fluid retention, heaviness in the abdomen, irritability, loss of appetite for food or sex, sexually impulsive behavior, and a \"tendency to cause trouble for others\". It is no longer recognized by medical authorities as a medical disorder. Its diagnosis and treatment were routine for hundreds of years in Western Europe. In extreme cases, the woman may have been for",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:39:24Z"
+      }
+    },
+    {
       "id": "akrasia",
       "term": "akrasia",
       "article": "Akrasia",
@@ -77,6 +103,19 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:25:05Z"
+      }
+    },
+    {
+      "id": "at-eternity-s-gate",
+      "term": "at eternity's gate",
+      "article": "At Eternity's Gate",
+      "demand": 10627,
+      "scanned_hits": 179,
+      "summary": "Sorrowing Old Man (At Eternity's Gate) is an oil painting by Vincent van Gogh that he made in May 1890 in Saint-Rémy de Provence based on an early lithograph. The painting was completed in early May at a time when he was convalescing from a severe relapse in his health some two months before his death, which is generally accepted as a suicide. In the 1970 catalogue raisonné, it was given the title Worn Out: At Eternity's Gate.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:39:37Z"
       }
     },
     {
@@ -119,6 +158,19 @@
       }
     },
     {
+      "id": "reactive-attachment-disorder",
+      "term": "reactive attachment disorder",
+      "article": "Reactive attachment disorder",
+      "demand": 8283,
+      "scanned_hits": 3065,
+      "summary": "Reactive attachment disorder (RAD) is an attachment disorder characterized by markedly disturbed and developmentally inappropriate ways of relating socially in most contexts. RAD primarily affects children, although these issues do occasionally persist into adulthood. It can take the form of a persistent failure to initiate or respond to most social interactions in a developmentally appropriate way—known as the \"inhibited form\". In the DSM-5, the \"disinhibited form\" is considered a separate diagnosis named \"disinhibited social engagement disorder\". RAD arises from a failure to form normal atta",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:40:04Z"
+      }
+    },
+    {
       "id": "sexual-frustration",
       "term": "sexual frustration",
       "article": "Sexual frustration",
@@ -129,6 +181,19 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:26:02Z"
+      }
+    },
+    {
+      "id": "comfort-food",
+      "term": "comfort food",
+      "article": "Comfort food",
+      "demand": 7643,
+      "scanned_hits": 46803,
+      "summary": "Comfort food is food that provides the eater a nostalgic or sentimental value and may be characterized by its satisfying heartiness and association with childhood or home cooking. The nostalgia may be specific to an individual or it may apply to a specific culture.",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:40:35Z"
       }
     },
     {
@@ -197,6 +262,19 @@
       }
     },
     {
+      "id": "activities-of-daily-living",
+      "term": "activities of daily living",
+      "article": "Activities of daily living",
+      "demand": 4170,
+      "scanned_hits": 47186,
+      "summary": "Activities of daily living (ADLs) is a term used in healthcare to refer to an individual's daily self-care activities. Health professionals often use a person's ability or inability to perform ADLs as a measure of their functional status. The concept of ADLs was originally proposed in the 1950s by Sidney Katz and his team at the Benjamin Rose Hospital in Cleveland, Ohio. Since then, numerous researchers have expanded on the concept of ADLs. For instance, many indexes that assess ADLs incorporate measures of mobility. In 1969, Lawton and Brody developed the concept of instrumental activities of",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:41:21Z"
+      }
+    },
+    {
       "id": "emotional-blackmail",
       "term": "emotional blackmail",
       "article": "Emotional blackmail",
@@ -233,6 +311,19 @@
         "terms_from": "wikipedia",
         "phrase_checked_against": "openlibrary",
         "at": "2026-08-30T22:28:00Z"
+      }
+    },
+    {
+      "id": "avoidance-coping",
+      "term": "avoidance coping",
+      "article": "Avoidance coping",
+      "demand": 3120,
+      "scanned_hits": 2046,
+      "summary": "In psychology, avoidance coping is a coping mechanism and form of experiential avoidance. It is characterized by a person's efforts, conscious or unconscious, to avoid dealing with a stressor in order to protect oneself from the difficulties the stressor presents. Avoidance coping can lead to substance abuse, social withdrawal, and other forms of escapism. High levels of avoidance behaviors may lead to a diagnosis of avoidant personality disorder, though not everyone who displays such behaviors meets the definition of having this disorder. Avoidance coping is also a symptom of post-traumatic s",
+      "verified": {
+        "terms_from": "wikipedia",
+        "phrase_checked_against": "openlibrary",
+        "at": "2026-09-04T16:41:52Z"
       }
     },
     {
