@@ -23,7 +23,16 @@
       "request_id": "gh-33891116582",
       "run_id": "33891116582",
       "created_at": "2026-09-04T15:43:27Z",
-      "result": null,
+      "result": {
+        "stage": "generation",
+        "outcome": "stopped",
+        "fault_code": "quality_refused",
+        "reason": "No source-supported claim is available for this subject. Saved claims need review.",
+        "retryable": false,
+        "published": false,
+        "slug": "",
+        "held": false
+      },
       "revision": "0fb5627153da804cd882b15a7e52adb0bb885775",
       "code_revision": "ade9ae51e5209f2f56906680b19c6e0a5f60d293c76622c58e023bb9132a8e8a"
     }
