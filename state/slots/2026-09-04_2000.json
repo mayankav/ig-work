@@ -40,7 +40,16 @@
       "request_id": "gh-33895172712",
       "run_id": "33895172712",
       "created_at": "2026-09-04T16:26:44Z",
-      "result": null,
+      "result": {
+        "stage": "review",
+        "outcome": "held",
+        "fault_code": "review_required",
+        "reason": "The deck needs review.",
+        "retryable": false,
+        "published": false,
+        "slug": "20260904_kitchen-poured_39090b",
+        "held": true
+      },
       "revision": "70afc0a6085141a3adee941cabc5796d29494258",
       "code_revision": "7e494a75030ab77e4e7e622457a5431d35614345f7c320eb30a19cdbfcb0a1e0"
     }
