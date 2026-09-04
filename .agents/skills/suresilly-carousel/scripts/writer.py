@@ -970,6 +970,11 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
 
     # Repair from the BEST plan so far, the same as the draft loop. Starting
     # each attempt from whatever came back last lets a fixed fault come back.
+    user += ("\nSOURCE LIMIT: The supplied claims are the full factual boundary. "
+             "Do not invent a cause, brain effect or benefit for a suggested action. "
+             "Offer actions as things to try, with no promised result. "
+             "A shared word does not prove a mechanism. Keep scripts to words "
+             "the reader can actually say, without directions inside the quotation.")
     attempt_user = user
     best_plan: dict | None = None
     best_problems: list[str] | None = None
@@ -1989,6 +1994,11 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     #
     # Keeping the best and always repairing from it makes the fault count go
     # down or stay flat. It cannot go up.
+    user += ("\nSOURCE LIMIT: The supplied claims are the full factual boundary. "
+             "Do not invent a cause, brain effect or benefit for a suggested action. "
+             "Offer actions as things to try, with no promised result. "
+             "A shared word does not prove a mechanism. Keep scripts to words "
+             "the reader can actually say, without directions inside the quotation.")
     attempt_user = user
     best_copy: dict | None = None
     best_problems: list[str] | None = None

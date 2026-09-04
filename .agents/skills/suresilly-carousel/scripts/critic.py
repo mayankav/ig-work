@@ -126,8 +126,14 @@ every deck simplifies. Simplifying is the job, not a defect.
               source and that claim were checked against an allowlist before the
               deck was written. Do not object to it. If your only objection is
               that slide 3 simplifies a real finding, you have no objection.
-  H3 is NOT:  a deck describing a common pattern in everyday words without
-              citing anything. That is the register, not a false claim.
+  H3 is:      a cause, brain effect or promised benefit beyond the supplied
+              evidence, even when written in ordinary words. Check every slide
+              and the caption, not just the printed source claim. A verified
+              sentence on slide 3 does not verify the rest of the deck.
+  H3 is NOT:  a description of this person's scene or an optional action with
+              no claimed effect. Do not demand evidence for trying a small action.
+              Do demand it for saying that action reduces fatigue, changes the
+              brain, resolves a cause or reliably produces an outcome.
   H3 is NOT:  a number that describes the scene. "ten minutes through the door",
               "read it four times", "woke at 2:17am" are details of one person's
               evening. A statistic is a claim about people in general. If the

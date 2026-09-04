@@ -14,7 +14,9 @@ Implementation:
 - [x] Build/host/preview integration and immutable revision artifacts.
 - [x] Review actuator for approve, cancel, full redo and slide redo.
 - [x] Python and Worker tests and deployment.
-- [ ] First live preview and publication: blocked by missing claim source evidence.
+- [x] Six source-supported claims cover all eight content topics; old unsupported claims remain excluded.
+- [x] First live preview accepted by Telegram (message 68, run 33895172712).
+- [ ] Owner reply tests and Instagram publication remain unconfirmed. The preview contains unsupported claims and must not publish.
 
 No existing experiment records, slot history or publication receipts may be reset. Existing force-held decks are not silently enrolled in timeout publication. A confirmed or uncertain Instagram upload must be reconciled before redo/cancel changes its deck.
 
@@ -44,4 +46,13 @@ An unresolved Instagram upload uses the existing publication reconciliation path
 - Live recovery: https://github.com/mayankav/ig-work/actions/runs/33891116582 . All CI tests passed. The builder found usable artwork, composed and safety-checked a burnout moment, then stopped because no source-supported claim was available. No deck, preview timer or Instagram post was created. The failure notification was accepted by Telegram.
 - Citation inventory: 53 saved claims, zero current `claim_support` records. A direct source check for Christina Maslach's *The Truth About Burnout* (1997), Open Library work `/works/OL2528268W`, found its catalogue-linked scan, but the excerpt request returned HTTP 403. The access restriction was not bypassed.
 
-Next content task: obtain usable source passages and independently verify claims before trying another build. Do not repeatedly rerun this unchanged content failure or remove the evidence requirement.
+Source recovery: six new claims have exact public publisher passages and independent control-tested reviews. All 66 local Python suites passed. See `docs/source-audit/README.md`. Recovery run: https://github.com/mayankav/ig-work/actions/runs/33895172712 . Live outcomes must still be recorded; passing code tests does not prove publication.
+
+
+## Whole-deck source correction
+
+The first live V1 preview exposed a content error: the deck claimed that minor tasks drain energy and naming a completed task reduces that drain. The verified Nagoski passage supports neither claim. The reviewer had not received the passage and its instructions exempted some uncited everyday claims.
+
+The reviewer now receives the exact source evidence and checks factual effects throughout the carousel and caption. The same live deck was rejected by Groq in a real recheck; the response is in `docs/source-audit/live-deck-recheck.json`. Writer instructions now forbid invented causes and promised effects. A saved whole-deck review is bound to the markdown, source record and current review code. V1 publication requires that record. Old previews without it stay blocked; changing artwork alone cannot fix unsupported text.
+
+Telegram accepted the preview and a later correction explaining the content hold. Browser reply testing needs the owner's Telegram sign-in. The shared Cloudflare ledger reached 9,928.68 of 10,000 daily free neurons, leaving less than one 114.84-neuron image request. No paid use was enabled. Slide regeneration needs the next allowance. Code tests are separate from these pending live checks.

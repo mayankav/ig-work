@@ -19,6 +19,7 @@ def files(deck):
     slides = sorted((deck / 'slides').glob('*.png'))
     if len(slides) != 9: raise ValueError('Review needs exactly nine slides')
     paths += slides
+    if (deck / 'content_review.json').exists(): paths.append(deck / 'content_review.json')
     if any(p.is_symlink() or not p.is_file() for p in paths): raise ValueError('Incomplete or linked preview files')
     return {str(p.relative_to(deck)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 

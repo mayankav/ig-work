@@ -1,0 +1,24 @@
+{
+  "run": 33895172712,
+  "result": [
+    "block",
+    74,
+    "H3_FALSE_PSYCH on slide 2: Makes an unsupported causal claim that a simple task drains energy without evidence.",
+    [
+      {
+        "category": "H3_FALSE_PSYCH",
+        "slide": 2,
+        "quote": "At 7:30pm, even pouring water can feel heavy. It drains energy you don't notice you're spending.",
+        "severity": 4,
+        "why": "Makes an unsupported causal claim that a simple task drains energy without evidence."
+      },
+      {
+        "category": "H5_ABSOLUTE_PROMISE",
+        "slide": 8,
+        "quote": "You can stop carrying the weight of small tasks.",
+        "severity": 3,
+        "why": "Promises a definitive result (eliminating weight of tasks) without evidence."
+      }
+    ]
+  ]
+}

@@ -277,6 +277,8 @@ def main():
     if owner_art.enabled() or owner_window:
         import review_window
         review_window.require_publication(carousel_dir, base_url)
+        import content_review
+        content_review.validate(carousel_dir)
 
     # Held decks can predate source checks. A manual publish cannot turn a
     # book-level flag into evidence for the exact sentence about to be sent.

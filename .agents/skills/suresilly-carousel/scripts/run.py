@@ -780,7 +780,9 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         # The critic must not be the vendor that wrote this. Passing the real
         # writer rather than assuming one is what keeps that true when a
         # fallback did the writing.
-        outcome, score, reason, objections = critic.review(markdown, moment.text, wrote_by)
+        import content_review
+        review_context = content_review.context(markdown, moment.text)
+        outcome, score, reason, objections = critic.review(markdown, review_context, wrote_by)
         # Three outcomes, not two. The reviewer stops a deck only for harm or a
         # claim the deck invented; a deck that is merely not good enough is
         # HELD, and a person decides what happens to it. That is the whole
@@ -800,6 +802,8 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         when = time.strftime("%Y%m%d", time.gmtime())
         slug = deck_slug(moment, plan["scene_token"], when)
         path = write_deck(markdown, slug)
+        if owner_art.enabled():
+            content_review.save(path.parent, wrote_by, outcome, score, reason, objections)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
         fingerprint = check_novelty_then_render(path, slug, moment, slide_text, fresh)
