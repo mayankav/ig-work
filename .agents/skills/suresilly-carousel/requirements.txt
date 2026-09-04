@@ -41,3 +41,7 @@ requests==2.34.2
 # import succeeded, no __main__ ran, the suite printed nothing and exited 0 —
 # 151 tests reporting a pass while checking nothing at all.
 pytest==9.1.1
+
+# Workflow contract tests parse YAML. CI runs them before building a deck;
+# a local installation alone hid this missing dependency in run 33824384609.
+PyYAML==6.0.3
