@@ -168,6 +168,12 @@ def verify(book, phrase, claim, proposed_by, get):
     import critic
     import llm
     source = passages_for(book, phrase, get)
+    return verify_source(book, source, claim, proposed_by)
+
+
+def verify_source(book, source, claim, proposed_by):
+    import critic
+    import llm
     providers = critic.available_providers(proposed_by)
     if not providers:
         raise Unsupported("no independent source reviewer is available")
@@ -180,7 +186,7 @@ def verify(book, phrase, claim, proposed_by, get):
         raise Unsupported("the source reviewer could not be reached") from exc
     if who == proposed_by or who not in {name for name, _ in providers}:
         raise Unsupported("source review was not independent")
-    record = {"version": VERSION, "claim": claim, "book": book, "source": source,
+    record = {"version": ("publisher-excerpt-control-1" if source.get("kind") == "publisher_excerpt" else VERSION), "claim": claim, "book": book, "source": source,
               "proposed_by": proposed_by, "checked_by": who, "review": reply,
               "at": datetime.now(timezone.utc).isoformat()}
     record["sha256"] = digest(record)
@@ -194,7 +200,7 @@ def verify(book, phrase, claim, proposed_by, get):
 def validate(record, claim, line):
     """Replay saved structural evidence; never treat a success flag as proof."""
     import bibliography
-    if not isinstance(record, dict) or record.get("version") != VERSION or record.get("claim") != claim:
+    if not isinstance(record, dict) or record.get("version") not in (VERSION, "publisher-excerpt-control-1") or record.get("claim") != claim:
         raise Unsupported("claim has no current passage-based support")
     expected = record.get("sha256")
     if expected != digest({k: v for k, v in record.items() if k != "sha256"}):
@@ -205,18 +211,25 @@ def validate(record, claim, line):
     try:
         if bibliography.citation_line(book) != line:
             raise Unsupported("claim support belongs to another citation")
-        if source["work_key"] != book["work_key"] or source["scan_id"] not in book["scan_ids"]:
-            raise Unsupported("claim support belongs to another scan")
-        if not 1 <= len(source["passages"]) <= MAX_PASSAGES:
-            raise Unsupported("invalid saved passage count")
-        for passage in source["passages"]:
-            text, pages = passage["text"], passage["pages"]
-            if not isinstance(text, str) or not text.strip() or len(text) > MAX_PASSAGE_CHARS:
-                raise Unsupported("invalid saved source text")
-            if not isinstance(pages, list) or not pages or any(type(p) is not int or p < 0 for p in pages):
-                raise Unsupported("invalid saved source pages")
-            if passage["url"] != f"https://archive.org/details/{source['scan_id']}/page/n{min(pages)}":
-                raise Unsupported("saved source link does not match the passage")
+        if record['version'] == 'publisher-excerpt-control-1':
+            import publisher_sources
+            try:
+                publisher_sources.validate(source, book)
+            except (ValueError, KeyError, TypeError) as exc:
+                raise Unsupported(str(exc)) from exc
+        else:
+            if source["work_key"] != book["work_key"] or source["scan_id"] not in book["scan_ids"]:
+                raise Unsupported("claim support belongs to another scan")
+            if not 1 <= len(source["passages"]) <= MAX_PASSAGES:
+                raise Unsupported("invalid saved passage count")
+            for passage in source["passages"]:
+                text, pages = passage["text"], passage["pages"]
+                if not isinstance(text, str) or not text.strip() or len(text) > MAX_PASSAGE_CHARS:
+                    raise Unsupported("invalid saved source text")
+                if not isinstance(pages, list) or not pages or any(type(p) is not int or p < 0 for p in pages):
+                    raise Unsupported("invalid saved source pages")
+                if passage["url"] != f"https://archive.org/details/{source['scan_id']}/page/n{min(pages)}":
+                    raise Unsupported("saved source link does not match the passage")
         try:
             when = datetime.fromisoformat(record["at"])
         except ValueError as exc:

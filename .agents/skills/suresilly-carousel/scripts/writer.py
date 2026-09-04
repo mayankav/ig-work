@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -922,7 +923,13 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     # survives — which is ordinary, the gates are strict — the deck is written
     # from a book proved on an earlier day.
     avoid = bibliography.recent()
-    found, refused = bibliography.discover(topic, moment, avoid)
+    # V1 uses verified source material first. Source discovery is useful only
+    # when this subject has no supported claim; it must not spend quota before
+    # every otherwise-ready carousel.
+    if os.environ.get("SS_REVIEW_WINDOW_V1") == "1" and citations_for(topic, avoid):
+        found, refused = None, []
+    else:
+        found, refused = bibliography.discover(topic, moment, avoid)
     if found:
         bibliography.store(found)
         print(f"    citation      {found['line']} "

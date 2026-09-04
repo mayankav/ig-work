@@ -1,0 +1,311 @@
+{
+  "claims": 59,
+  "supported": 6,
+  "covered_topics": [
+    "anxiety",
+    "boundaries",
+    "burnout",
+    "executive_dysfunction",
+    "numbing",
+    "people_pleasing",
+    "self_worth",
+    "sleep"
+  ],
+  "rows": [
+    {
+      "citation_id": "barkley-2010",
+      "claim": "Barkley found that when time feels vague, you wait instead of starting.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "barkley-2010",
+      "claim": "Barkley found that wanting to start and being able to start are two different things.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "hallowell-1994",
+      "claim": "Hallowell found that keeping every option open leaves you hovering over all of them.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "hallowell-1994",
+      "claim": "Hallowell found that attention follows what interests you, not what matters most.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "cowan-2005",
+      "claim": "Cowan found the mind holds about four things at once. A longer list drops one.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "cowan-2005",
+      "claim": "Cowan found that adding a fifth thing pushes out the first, and you do not notice.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "leroy-2009",
+      "claim": "Leroy found that an unfinished job keeps taking a piece of your attention.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "leroy-2009",
+      "claim": "Leroy found that switching jobs costs you more than the time the switch takes.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "walker-2017",
+      "claim": "Walker found that brief wakings are normal. The trouble starts when you worry about them.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "walker-2017",
+      "claim": "Walker found that bright light in the evening pushes your sleep signal later.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "espie-2006",
+      "claim": "Espie found that checking the clock turns a normal waking into a maths problem.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "espie-2006",
+      "claim": "Espie found that trying harder to sleep makes sleep less likely.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "ledoux-2015",
+      "claim": "LeDoux found the body reacts to a message before you have read it.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "ledoux-2015",
+      "claim": "LeDoux found the mind practises for danger. That helps with a lion, not an email.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nolen-hoeksema-2003",
+      "claim": "Nolen-Hoeksema found that going over it feels like solving it, and never is.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nolen-hoeksema-2003",
+      "claim": "Nolen-Hoeksema found that going over a moment again lowers your mood instead of settling it.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "brewer-2017",
+      "claim": "Brewer found that a habit sticks when it makes you feel better, even briefly.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "brewer-2017",
+      "claim": "Brewer found that seeing what a habit gives you loosens it. Deciding to stop does not.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nagoski-2019",
+      "claim": "The Nagoskis found the body needs a clear sign that the hard part is over.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nagoski-2019",
+      "claim": "The Nagoskis found that the problem ending and your body settling are two separate things.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nagoski-2019",
+      "claim": "Emotional exhaustion stems from completing stress cycles without adequate recovery time.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "maslach-1997",
+      "claim": "Maslach found that if you measure yourself by output, stopping feels like slipping.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "maslach-1997",
+      "claim": "Maslach found that burnout comes from the job not fitting the person, not from weakness.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "tawwab-2021",
+      "claim": "Tawwab found that every reason you give is one more thing to argue with.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "tawwab-2021",
+      "claim": "Tawwab found that a limit tells someone about you. It is not a demand on them.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "lerner-1985",
+      "claim": "Lerner found that if no needs a reason, a one word answer becomes a court case.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "lerner-1985",
+      "claim": "Lerner found that changing your part makes people push back. That is not proof you were wrong.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "lerner-1985",
+      "claim": "People who suffer from overfunctioning often sacrifice their own needs to manage the lives of others.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "lerner-1985",
+      "claim": "Women trapped in overfunctioning often take responsibility for fixing their partner's emotional tasks.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "walker-2013",
+      "claim": "Walker found that some people learn to keep everyone happy first, before anything else.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "walker-2013",
+      "claim": "Walker found that keeping the peace becomes automatic, and starts before you decide to.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "walker-2013",
+      "claim": "People-pleasing behaviors often stem from an unconscious fawn response to avoid potential interpersonal conflict.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "neff-2011",
+      "claim": "Neff found that being kind to yourself helps you keep going. Being hard on yourself stops you.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "neff-2011",
+      "claim": "Neff found it helps more to know other people struggle too than to blame yourself.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "neff-2011",
+      "claim": "A self-compassion break helps individuals respond to suffering with kindness, not harsh self-judgment.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "clear-2018",
+      "claim": "Clear found that every small action is a vote for the person you are becoming.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "clear-2018",
+      "claim": "Clear found that shrinking the first step works better than growing the goal.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "gollwitzer-1999",
+      "claim": "Gollwitzer found that saying when and where you will act roughly doubles the odds.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "gollwitzer-1999",
+      "claim": "Gollwitzer found that an if then plan makes the moment decide for you.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "porges-2011",
+      "claim": "Porges found that people used to unpredictable moods read a flat tone as a warning.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "porges-2011",
+      "claim": "Porges found the body decides a room is safe before you have thought about it.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "brown-2012",
+      "claim": "We choose emotional numbing as a way to avoid the vulnerability of our daily lives.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "brown-2012",
+      "claim": "People internalize the relentless belief of being never enough when evaluating daily performance.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "beattie-1986",
+      "claim": "People struggling with codependency often prioritize others' needs while neglecting their own authentic desires.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "beattie-1986",
+      "claim": "Overcoming codependent patterns is essential for preventing exhaustion from over-giving and self-neglect.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "beattie-1986",
+      "claim": "The book describes caretaking behavior as an attempt to control others' lives and feelings.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "beattie-1986",
+      "claim": "Codependency describes losing self in another's problems, often leading to poor personal boundaries.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "kolk-2014",
+      "claim": "Some people meet fear by keeping other people happy, instead of fighting or leaving.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "maslach-1982",
+      "claim": "Chronic work stress leads directly to emotional exhaustion and depersonalization toward clients.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "maslach-1982",
+      "claim": "Chronic work stress leads directly to emotional exhaustion and detachment from clients.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "maslach-1982",
+      "claim": "Chronic work stress often triggers severe depersonalization toward clients and colleagues.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "forward-1996",
+      "claim": "Fear, obligation, and guilt drive people into emotional blackmail when trying to please others.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "mate-2003",
+      "claim": "Chronic compulsive caretaking stems from suppressing authentic needs to maintain attachment.",
+      "status": "excluded: no current source evidence"
+    },
+    {
+      "citation_id": "nagoski-2019-publisher",
+      "claim": "Nagoski describes feeling drained after caring too much for too long.",
+      "status": "supported"
+    },
+    {
+      "citation_id": "brown-daring-publisher",
+      "claim": "Brown links being open with others to love and a sense of belonging.",
+      "status": "supported"
+    },
+    {
+      "citation_id": "tawwab-boundaries-publisher",
+      "claim": "Tawwab says people cannot guess your boundaries from body language or what you leave unsaid.",
+      "status": "supported"
+    },
+    {
+      "citation_id": "winter-sleep-publisher",
+      "claim": "Winter puts a steady wake time first when setting a sleep routine.",
+      "status": "supported"
+    },
+    {
+      "citation_id": "hallowell-attention-publisher",
+      "claim": "Hallowell describes a man whose focus kept breaking as small things drew him away from his task.",
+      "status": "supported"
+    },
+    {
+      "citation_id": "ledoux-anxious-publisher",
+      "claim": "LeDoux says the brain's threat responses and feelings of fear work together, but are not the same.",
+      "status": "supported"
+    }
+  ]
+}

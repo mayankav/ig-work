@@ -1,0 +1,98 @@
+{
+  "sources": {
+    "nagoski-burnout-excerpt": {
+      "book": {
+        "author": "Emily Nagoski",
+        "title": "Burnout",
+        "year": 2019,
+        "work_key": "/works/OL20163365W",
+        "scan_ids": [
+          "burnoutsolveyour0000nago",
+          "burnoutsecrettou0000emil"
+        ]
+      },
+      "isbn": "9781984818324",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9781984818324",
+      "passages": [
+        "emotional exhaustion— the fatigue that comes from caring too much, for too long;"
+      ]
+    },
+    "tawwab-boundaries": {
+      "book": {
+        "author": "Nedra Glover Tawwab",
+        "title": "Set Boundaries, Find Peace",
+        "year": 2021,
+        "work_key": "/works/OL24144951W",
+        "scan_ids": []
+      },
+      "isbn": "9780593192092",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780593192092",
+      "passages": [
+        "People cannot accurately assume your boundaries based on your body language or unspoken expectations."
+      ]
+    },
+    "brown-daring": {
+      "book": {
+        "author": "Brené Brown",
+        "title": "Daring Greatly",
+        "year": 2012,
+        "work_key": "/works/OL16664399W",
+        "scan_ids": [
+          "daringgreatlyhow0000brow"
+        ]
+      },
+      "isbn": "9781101594995",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9781101594995",
+      "passages": [
+        "Vulnerability is the birthplace of love, belonging, joy, courage, empathy, and creativity."
+      ]
+    },
+    "winter-sleep": {
+      "book": {
+        "author": "W. Chris Winter",
+        "title": "The sleep solution",
+        "year": 2017,
+        "work_key": "/works/OL20053059W",
+        "scan_ids": []
+      },
+      "isbn": "9780399583629",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780399583629",
+      "passages": [
+        "Establishing a consistent wake time is the most important first step in setting your schedule and solving your sleep issues."
+      ]
+    },
+    "hallowell-attention": {
+      "book": {
+        "author": "Edward M. Hallowell",
+        "title": "Driven to distraction",
+        "year": 1994,
+        "work_key": "/works/OL81324W",
+        "scan_ids": [
+          "driventodistrac000hall",
+          "driventodistract0000hall_h7a8"
+        ]
+      },
+      "isbn": "9780307743152",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780307743152",
+      "passages": [
+        "One minor distraction after another would knock Jim off-line as he tried to clutch onto the task at hand."
+      ]
+    },
+    "ledoux-anxious": {
+      "book": {
+        "author": "Joseph E. LeDoux",
+        "title": "Anxious",
+        "year": 2015,
+        "work_key": "/works/OL20006661W",
+        "scan_ids": [
+          "anxioususingbrai0000ledo"
+        ]
+      },
+      "isbn": "9780143109044",
+      "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780143109044",
+      "passages": [
+        "Certainly the circuits that control defense responses and give rise to feelings of fear interact, but this does not mean that they are the same."
+      ]
+    }
+  }
+}

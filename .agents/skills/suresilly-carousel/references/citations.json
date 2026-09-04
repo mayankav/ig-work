@@ -362,6 +362,421 @@
         "checked_by": "cloudflare",
         "at": "2026-09-03T00:38:25Z"
       }
+    },
+    {
+      "id": "nagoski-2019-publisher",
+      "line": "— Emily Nagoski, *Burnout* (2019)",
+      "pillars": [
+        "burnout"
+      ],
+      "claims": [
+        "Nagoski describes feeling drained after caring too much for too long."
+      ],
+      "claim_support": {
+        "e8224a5002b667ac7514eb2f9d407fcb27ba28ef07c294c4bd6f5d781c0ead40": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "Nagoski describes feeling drained after caring too much for too long.",
+          "book": {
+            "author": "Emily Nagoski",
+            "title": "Burnout",
+            "year": 2019,
+            "work_key": "/works/OL20163365W",
+            "scan_ids": [
+              "burnoutsolveyour0000nago",
+              "burnoutsecrettou0000emil"
+            ]
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "nagoski-burnout-excerpt",
+            "work_key": "/works/OL20163365W",
+            "document_sha256": "90e022f55161ba517040218c805fd44a667f3acc6bb908ed61fe8e1cd311d54d",
+            "registry_sha256": "9d1d4942a5a5dc7a7bc60164a4f40cb9e80b1e9ee0f7312e0a249aa593926789",
+            "passages": [
+              {
+                "text": "emotional exhaustion— the fatigue that comes from caring too much, for too long;",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9781984818324",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage discusses emotional exhaustion, not bicycles or cheese."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "emotional exhaustion— the fatigue that comes from caring too much, for too long;"
+              }
+            ]
+          },
+          "at": "2026-09-04T16:13:18.799048+00:00",
+          "sha256": "80b12de84ac6e1ecd6e6814797eb9d139e3c9130c9953938152923edaaf73382"
+        }
+      },
+      "phrase": "emotional exhaustion",
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:13:18.799048+00:00",
+        "source_kind": "publisher_excerpt"
+      }
+    },
+    {
+      "id": "brown-daring-publisher",
+      "line": "— Brené Brown, *Daring Greatly* (2012)",
+      "pillars": [
+        "self_worth",
+        "numbing"
+      ],
+      "claims": [
+        "Brown links being open with others to love and a sense of belonging."
+      ],
+      "claim_support": {
+        "3322d312f0b5e9084e11d700b6eebb5e51f6bbc03c103b4f593ab0bc175d3d07": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "Brown links being open with others to love and a sense of belonging.",
+          "book": {
+            "author": "Brené Brown",
+            "title": "Daring Greatly",
+            "year": 2012,
+            "work_key": "/works/OL16664399W",
+            "scan_ids": [
+              "daringgreatlyhow0000brow"
+            ]
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "brown-daring",
+            "work_key": "/works/OL16664399W",
+            "document_sha256": "44fec758569b83bb8d904485eb74c9b612ebd888e0902fbe28cd355f3d6928b2",
+            "registry_sha256": "2b7f573ad73df85ab011c521141277c3a41df615d4238c32c53f453bd4eab647",
+            "passages": [
+              {
+                "text": "Vulnerability is the birthplace of love, belonging, joy, courage, empathy, and creativity.",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9781101594995",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage does not mention bicycles or cheese, so the claim is unsupported."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "Vulnerability is the birthplace of love, belonging, joy, courage, empathy, and creativity."
+              }
+            ]
+          },
+          "at": "2026-09-04T16:17:42.803146+00:00",
+          "sha256": "0b2043b70ea6c3cf971316c2f06b9dcdfaba22aadb5c3aad18a66496ed0b98ad"
+        }
+      },
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:17:42.803146+00:00",
+        "source_kind": "publisher_excerpt"
+      }
+    },
+    {
+      "id": "tawwab-boundaries-publisher",
+      "line": "— Nedra Glover Tawwab, *Set Boundaries, Find Peace* (2021)",
+      "pillars": [
+        "boundaries",
+        "people_pleasing"
+      ],
+      "claims": [
+        "Tawwab says people cannot guess your boundaries from body language or what you leave unsaid."
+      ],
+      "claim_support": {
+        "00cb456238b27837699eff0f2ee44b6810c0b6ec8419ff57b768d2ad4a1bbb43": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "Tawwab says people cannot guess your boundaries from body language or what you leave unsaid.",
+          "book": {
+            "author": "Nedra Glover Tawwab",
+            "title": "Set Boundaries, Find Peace",
+            "year": 2021,
+            "work_key": "/works/OL24144951W",
+            "scan_ids": []
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "tawwab-boundaries",
+            "work_key": "/works/OL24144951W",
+            "document_sha256": "b6bb4d0a3834440ef03374078c921861c9e9ca450aaa0782ed4fa4a18bba8e0c",
+            "registry_sha256": "31ebbd14a3709bd71aca1ebe27b3dbbe3366149557669c3ade24e05edea7b985",
+            "passages": [
+              {
+                "text": "People cannot accurately assume your boundaries based on your body language or unspoken expectations.",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780593192092",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage does not mention bicycles or cheese, so the claim is unsupported."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "People cannot accurately assume your boundaries based on your body language or unspoken expectations."
+              }
+            ]
+          },
+          "at": "2026-09-04T16:19:13.025955+00:00",
+          "sha256": "7669b7f468eb31ce0318269e63ed92b2904a1796e251e699cfca22a0307c6d76"
+        }
+      },
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:19:13.025955+00:00",
+        "source_kind": "publisher_excerpt"
+      }
+    },
+    {
+      "id": "winter-sleep-publisher",
+      "line": "— W. Chris Winter, *The Sleep Solution* (2017)",
+      "pillars": [
+        "sleep"
+      ],
+      "claims": [
+        "Winter puts a steady wake time first when setting a sleep routine."
+      ],
+      "claim_support": {
+        "013e942df0aefc2e3c93137b22b96d6d28d0533106c39df3d290471041407643": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "Winter puts a steady wake time first when setting a sleep routine.",
+          "book": {
+            "author": "W. Chris Winter",
+            "title": "The sleep solution",
+            "year": 2017,
+            "work_key": "/works/OL20053059W",
+            "scan_ids": []
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "winter-sleep",
+            "work_key": "/works/OL20053059W",
+            "document_sha256": "85c4aaad7fbbf9ebf0513a5b06694cc18f90b4591816e3b3b6cb504eeddfd039",
+            "registry_sha256": "4e4a1c21591fcfd9d216ecfe4fb09484448c061352dc0da140490dd55c997531",
+            "passages": [
+              {
+                "text": "Establishing a consistent wake time is the most important first step in setting your schedule and solving your sleep issues.",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780399583629",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage does not mention bicycles or cheese, so it cannot support that claim."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "Establishing a consistent wake time is the most important first step in setting your schedule and solving your sleep issues."
+              }
+            ]
+          },
+          "at": "2026-09-04T16:20:43.502833+00:00",
+          "sha256": "37ac136e498b528990b169273285b84923c49eced9257712bffdd6871e3d0091"
+        }
+      },
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:20:43.502833+00:00",
+        "source_kind": "publisher_excerpt"
+      }
+    },
+    {
+      "id": "hallowell-attention-publisher",
+      "line": "— Edward M. Hallowell, *Driven to Distraction* (1994)",
+      "pillars": [
+        "executive_dysfunction"
+      ],
+      "claims": [
+        "Hallowell describes a man whose focus kept breaking as small things drew him away from his task."
+      ],
+      "claim_support": {
+        "098f7076875dc6703a2c4fd87ffd8bcacf39a532a3b2967272ff8d669acc6fa5": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "Hallowell describes a man whose focus kept breaking as small things drew him away from his task.",
+          "book": {
+            "author": "Edward M. Hallowell",
+            "title": "Driven to distraction",
+            "year": 1994,
+            "work_key": "/works/OL81324W",
+            "scan_ids": [
+              "driventodistrac000hall",
+              "driventodistract0000hall_h7a8"
+            ]
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "hallowell-attention",
+            "work_key": "/works/OL81324W",
+            "document_sha256": "a93fef81fa9e54344f9cb0d5b253d42cfd5e7eb572d8c0ac715243abe518eca9",
+            "registry_sha256": "9b4829971b68dec9b2bb0e57e76060a53eb78708c35e767a75332300cb753e82",
+            "passages": [
+              {
+                "text": "One minor distraction after another would knock Jim off-line as he tried to clutch onto the task at hand.",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780307743152",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage does not mention bicycles or cheese, so it cannot support the claim."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "One minor distraction after another would knock Jim off-line as he tried to clutch onto the task at hand."
+              }
+            ]
+          },
+          "at": "2026-09-04T16:20:47.998562+00:00",
+          "sha256": "5cc4f5733b15e6d39d99e32e06056d09a8eafa4b49e173c303d86f3a9508254a"
+        }
+      },
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:20:47.998562+00:00",
+        "source_kind": "publisher_excerpt"
+      }
+    },
+    {
+      "id": "ledoux-anxious-publisher",
+      "line": "— Joseph E. LeDoux, *Anxious* (2015)",
+      "pillars": [
+        "anxiety"
+      ],
+      "claims": [
+        "LeDoux says the brain's threat responses and feelings of fear work together, but are not the same."
+      ],
+      "claim_support": {
+        "937bbd1068f6d99bdbb68b58e9a7615b41224bc8d9300b3aa082894821502717": {
+          "version": "publisher-excerpt-control-1",
+          "claim": "LeDoux says the brain's threat responses and feelings of fear work together, but are not the same.",
+          "book": {
+            "author": "Joseph E. LeDoux",
+            "title": "Anxious",
+            "year": 2015,
+            "work_key": "/works/OL20006661W",
+            "scan_ids": [
+              "anxioususingbrai0000ledo"
+            ]
+          },
+          "source": {
+            "kind": "publisher_excerpt",
+            "source_id": "ledoux-anxious",
+            "work_key": "/works/OL20006661W",
+            "document_sha256": "264d6f55c6377ea4dd218188809d7847178289e9a130eab93dfafc65001c9c36",
+            "registry_sha256": "90836fbe471f756f7f3ad11edd81f6d334ce231e82abb5d94c1659439344cd92",
+            "passages": [
+              {
+                "text": "Certainly the circuits that control defense responses and give rise to feelings of fear interact, but this does not mean that they are the same.",
+                "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780143109044",
+                "locator": "Publisher excerpt"
+              }
+            ]
+          },
+          "proposed_by": "codex",
+          "checked_by": "groq",
+          "review": {
+            "inspected": [
+              "claim",
+              "control"
+            ],
+            "uncertain": [],
+            "vetoes": [
+              {
+                "id": "control",
+                "reason": "The passage discusses fear circuits, not bicycles or cheese, so the claim is unsupported."
+              }
+            ],
+            "quotes": [
+              {
+                "passage": 0,
+                "text": "Certainly the circuits that control defense responses and give rise to feelings of fear interact, but this does not mean that they are the same."
+              }
+            ]
+          },
+          "at": "2026-09-04T16:20:52.162343+00:00",
+          "sha256": "5b76369964d328f69b76144612e5ec0f68fe01351a6f224821a979571943e6b4"
+        }
+      },
+      "verified": {
+        "catalogue": "openlibrary",
+        "proposed_by": "codex",
+        "checked_by": "groq",
+        "at": "2026-09-04T16:20:52.162343+00:00",
+        "source_kind": "publisher_excerpt"
+      }
     }
   ]
 }

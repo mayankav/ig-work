@@ -1,0 +1,59 @@
+[
+  {
+    "id": "tawwab-boundaries",
+    "result": "blocked",
+    "reason": "the source reviewer rejected the claim: The passage does not contain a warning and adds 'warns' and 'limits' not explicitly stated.",
+    "evidence": {
+      "version": "publisher-excerpt-control-1",
+      "claim": "Tawwab warns that people cannot guess your limits from body language or things left unsaid.",
+      "book": {
+        "author": "Nedra Glover Tawwab",
+        "title": "Set Boundaries, Find Peace",
+        "year": 2021,
+        "work_key": "/works/OL24144951W",
+        "scan_ids": []
+      },
+      "source": {
+        "kind": "publisher_excerpt",
+        "source_id": "tawwab-boundaries",
+        "work_key": "/works/OL24144951W",
+        "document_sha256": "b6bb4d0a3834440ef03374078c921861c9e9ca450aaa0782ed4fa4a18bba8e0c",
+        "registry_sha256": "31ebbd14a3709bd71aca1ebe27b3dbbe3366149557669c3ade24e05edea7b985",
+        "passages": [
+          {
+            "text": "People cannot accurately assume your boundaries based on your body language or unspoken expectations.",
+            "url": "https://penguinrandomhousehighereducation.com/book/?isbn=9780593192092",
+            "locator": "Publisher excerpt"
+          }
+        ]
+      },
+      "proposed_by": "codex",
+      "checked_by": "groq",
+      "review": {
+        "inspected": [
+          "claim",
+          "control"
+        ],
+        "uncertain": [],
+        "vetoes": [
+          {
+            "id": "claim",
+            "reason": "The passage does not contain a warning and adds 'warns' and 'limits' not explicitly stated."
+          },
+          {
+            "id": "control",
+            "reason": "The passage discusses boundaries, not bicycles or cheese, so it cannot support that claim."
+          }
+        ],
+        "quotes": []
+      },
+      "at": "2026-09-04T16:17:38.822028+00:00",
+      "sha256": "c8ff1b6bed504aed2feba979c28a489b626cb5c8cb1dcce210aa7ca6b9f5e919"
+    }
+  },
+  {
+    "id": "brown-daring",
+    "result": "supported",
+    "reviewer": "groq"
+  }
+]
