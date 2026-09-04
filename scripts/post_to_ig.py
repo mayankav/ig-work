@@ -112,44 +112,7 @@ def publication_outputs(**values):
                 handle.write(f"{key}<<{delimiter}\n{value}\n{delimiter}\n")
 
 
-def strip_markup(text: str) -> str:
-    """carousel.md is a source file. Instagram is a text box.
-
-    The deck's markup means something to the renderer — [[accent]] is the word
-    the slide colours, **bold** and *italic* are type. Instagram renders none of
-    it and prints the characters, so on 2026-09-01 a post went out reading
-    "the [[cost]] of carrying the [[street]] across the [[threshold]]".
-
-    Stripped HERE and not only at the writer, because this is where the caption
-    stops being ours. A held deck is posted days later by release.py from a
-    fresh checkout of a file written by an older engine, carousel.md is
-    hand-editable and gets hand-edited, and neither of those paths goes back
-    through the writer. The last thing that touches the text before Instagram
-    does is the right place to guarantee what Instagram gets.
-
-    Deliberately its own regex rather than an import of render.plain(): the
-    engine does not import this file and this file does not import the engine.
-    """
-    text = re.sub(r"\[\[|\]\]", "", text)
-    return re.sub(r"\*{1,2}(.+?)\*{1,2}", r"\1", text)
-
-
-def parse_caption(md_path: Path) -> str:
-    txt = md_path.read_text(encoding="utf-8")
-    m = re.search(r"(?is)^##+\s*Caption\s*(.*?)(?=^##+|\Z)", txt, re.M)
-    caption = m.group(1).strip() if m else ""
-    # Strip markdown headers, keep plain text + hashtags
-    # Also append hashtags section if present
-    h = re.search(r"(?is)^##+\s*Hashtags\s*(.*?)(?=^##+|\Z)", txt, re.M)
-    if h:
-        caption = caption.rstrip() + "\n\n" + h.group(1).strip()
-    # Fallback: if no Caption block, use first paragraph
-    if not caption:
-        caption = txt[:500]
-    # One strip, on the way out, so no branch above can skip it — the fallback
-    # takes raw markdown off the top of the file and is the likeliest of all of
-    # them to carry markup.
-    return strip_markup(caption.strip())[:2200]  # IG limit
+from caption_text import strip_markup, parse_caption
 
 def list_images(carousel_dir: Path, base_url: str) -> list[str]:
     slides = sorted((carousel_dir / "slides").glob("*.png"))
@@ -262,7 +225,9 @@ def main():
             sys.exit("Publication record is a link. Nothing was posted.")
         if marker.exists() and not args.recover:
             sys.exit("This deck has a completed or unresolved publication record. Refusing a duplicate post.")
-    caption = parse_caption(md_path)
+    owner_window = (carousel_dir / "review_window.json").exists()
+    caption = ((carousel_dir / 'caption.txt').read_text() if owner_window and
+               (carousel_dir / 'caption.txt').exists() else parse_caption(md_path))
     print(f"Caption length {len(caption)} chars, {len(caption.split())} words")
 
     if args.dry_run or os.getenv("DRY_RUN", "false").lower() == "true":
@@ -277,13 +242,12 @@ def main():
     if owner_art.enabled() or owner_window:
         import review_window
         review_window.require_publication(carousel_dir, base_url)
-        import content_review
-        content_review.validate(carousel_dir)
 
     # Held decks can predate source checks. A manual publish cannot turn a
     # book-level flag into evidence for the exact sentence about to be sent.
     import bibliography
-    bibliography.require_deck_support(md_path.read_text(encoding="utf-8"))
+    if not owner_window:
+        bibliography.require_deck_support(md_path.read_text(encoding="utf-8"))
 
     ig_user_id = os.getenv("IG_USER_ID", "")
     token = os.getenv("IG_ACCESS_TOKEN", "")
@@ -304,7 +268,8 @@ def main():
         print("This deck already has a confirmed post. Nothing was sent.")
         return
 
-    check_export(carousel_dir, md_path)
+    if not owner_window:
+        check_export(carousel_dir, md_path)
 
     if args.recover and (carousel_dir / PUBLICATION_PENDING).exists():
         import reconcile_publication

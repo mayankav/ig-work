@@ -107,7 +107,8 @@ def sample(spec):
 
 
 @pytest.mark.parametrize("stubborn", [False, True])
-def test_actual_writer_loop_merges_edits_and_stops_unchanged(monkeypatch, stubborn):
+@pytest.mark.parametrize("owner_review", [False, True])
+def test_actual_writer_loop_merges_edits_and_stops_unchanged(monkeypatch, stubborn, owner_review):
     draft = sample(writer.DRAFT_SCHEMA)
     draft["script"]["new"] = "bad speech marker"
     plan = good_plan()
@@ -131,7 +132,12 @@ def test_actual_writer_loop_merges_edits_and_stops_unchanged(monkeypatch, stubbo
                           edit("/cost/body", "Unasked rewrite")]}, "gemini"
 
     monkeypatch.setattr(llm, "ask", ask)
-    if stubborn:
+    if stubborn and owner_review:
+        monkeypatch.setattr(writer, 'hard_faults', lambda md: [])
+        markdown, _, _, wrote, faults = writer.write_deck(MOMENT, "sleep", "title", "pattern", "pillar", review_draft=True)
+        assert len(calls) == 3 and faults == ['fix spoken line']
+        assert 'bad speech marker' in writer.no_accent(markdown)
+    elif stubborn:
         with pytest.raises(writer.Refused) as caught:
             writer.write_deck(MOMENT, "sleep", "title", "pattern", "pillar")
         assert len(calls) == 3 and caught.value.retry is False
@@ -140,3 +146,10 @@ def test_actual_writer_loop_merges_edits_and_stops_unchanged(monkeypatch, stubbo
         assert len(calls) == 2 and wrote == "gemini" and faults == []
         assert "I can talk" in markdown and "Unasked rewrite" not in markdown
         assert citation["line"] in markdown and citation["claims"][0] in markdown
+
+
+def test_grammar_match_is_not_evidence_of_copied_content():
+    text='### Slide 9 · CTA\n- **Closing thought:** You do not have to finish it today.\n'
+    assert writer.check_leak(text, {'do not have to'}) == []
+    copied='### Slide 9 · CTA\n- **Closing thought:** A bicycle needs new tires.\n'
+    assert writer.check_leak(copied, {'bicycle needs new tires'})

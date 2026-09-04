@@ -33,3 +33,8 @@ def test_rejected_review_cannot_be_saved(deck):
 def test_passage_reaches_reviewer(deck):
     assert 'exact passage' in review.context('A checked deck','A scene')
     assert review.validate(deck)['outcome']=='publish'
+
+
+def test_style_notes_do_not_block_preview(deck):
+    review.save(deck,'gemini','review',70,'Tone could improve',[],style_notes=['Repeated heading'])
+    assert review.validate(deck)['style_notes']==['Repeated heading']

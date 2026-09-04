@@ -37,6 +37,14 @@ Read these only when you need them — do not pull them all in up front.
 
 The owner authorized this policy on 4 September 2026. When `SS_REVIEW_WINDOW_V1=1`, strict content and pixel checks remain. Artwork uses explicit owner-review evidence instead of model qualification. Every carousel must be delivered to Telegram before its one-hour publication timer starts. Approve publishes; disapprove cancels only that deck; full redo builds an unrelated concept; slide redo draws a new contextual image from scratch. Every redo starts a new review loop. Publication requires an exact, live Durable Object claim. See `docs/review-window-v1.md` at repository root for commands and recovery. Existing forced drafts are never automatically enrolled.
 
+## Final approval policy (owner update, 4 September 2026)
+
+V1 finishes factual, source, artwork and render checks before sending a preview. It makes at most three draft attempts; remaining style faults are review notes, not an automatic refusal. Harm, unsupported facts, meaningful prompt copying and lettering requests still block before preview. A phrase made only of grammar words does not establish copied content.
+
+The preview freezes its caption, nine PNGs and evidence. Approval publishes those exact files; publication never repeats quality judgments or invalidates the decision because check code changed. File changes, an explicit operational pause, an unavailable service or an unresolved duplicate remain technical stops. Redo starts a new preview. Silence retains the one-hour policy.
+
+Telegram messages include resource data, units, observation times and reset/refill dates. Unknown limits stay unknown. Resource reporting cannot veto approval.
+
 ## The one entry point
 
 ```bash

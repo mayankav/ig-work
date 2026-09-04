@@ -121,3 +121,53 @@ def test_child_failure_preserves_the_actual_reason(monkeypatch):
     monkeypatch.setattr(job.subprocess,'run',lambda *args,**kwargs:subprocess.CompletedProcess(args,1,'Posting is paused by SS_HALT. Nothing will be posted.\n',''))
     with pytest.raises(ValueError,match='Posting is paused by SS_HALT'):
         job.run_child(['python','publisher.py'])
+
+
+def test_caption_is_frozen_and_changes_break_approval(deck):
+    before=window.read(deck)
+    assert 'caption.txt' in before['files']
+    (deck/'caption.txt').write_text('different caption')
+    with pytest.raises(ValueError,match='changed'):window.read(deck)
+
+
+def test_preflight_rejects_before_hosting_or_telegram(deck,monkeypatch):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import review_window_job as job
+    import content_review
+    monkeypatch.setattr(content_review,'validate',Mock(side_effect=ValueError('bad content')))
+    with pytest.raises(ValueError,match='bad content'):job.stage(deck)
+
+
+def test_approved_files_do_not_recheck_new_content_rules(deck,monkeypatch):
+    import content_review
+    record=window.read(deck)
+    monkeypatch.setattr(content_review,'validate',Mock(side_effect=AssertionError('must not rejudge')))
+    monkeypatch.setenv('REVIEW_ACTION_ID','action')
+    monkeypatch.setattr(window,'api',lambda *a:{'manifest':record['manifest'],'state':'working','claimed':True,'action':{'id':'action','decision':'publish'}})
+    assert window.require_publication(deck,f'https://media.suresilly.com/slides/deck/reviews/{record["token"]}/slides')['claimed']
+
+
+def test_publisher_uses_approved_caption_without_new_quality_decisions(deck,monkeypatch):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import post_to_ig as post
+    import content_review,bibliography
+    monkeypatch.setattr(window,'require_publication',lambda *a:{'claimed':True})
+    forbidden=Mock(side_effect=AssertionError('Quality must not be judged after approval'))
+    monkeypatch.setattr(post,'check_export',forbidden)
+    monkeypatch.setattr(content_review,'validate',forbidden)
+    monkeypatch.setattr(bibliography,'require_deck_support',forbidden)
+    monkeypatch.setattr(post,'require_posting_allowed',lambda:None)
+    monkeypatch.setattr(post,'check_hosted_images',lambda *a:None)
+    monkeypatch.setattr(post,'create_image_container',lambda *a:'image')
+    create=Mock(return_value='carousel');monkeypatch.setattr(post,'create_carousel',create)
+    monkeypatch.setattr(post,'publish',lambda *a:'1234')
+    monkeypatch.setattr(post.reserve_publication,'reserve',lambda *a:Mock())
+    monkeypatch.setattr(post,'record_publication',lambda *a:None)
+    monkeypatch.setattr(post,'publication_outputs',lambda **k:None)
+    monkeypatch.setattr(post.time,'sleep',lambda *a:None)
+    monkeypatch.setenv('IG_USER_ID','user');monkeypatch.setenv('IG_ACCESS_TOKEN','fake')
+    monkeypatch.delenv('DRY_RUN',raising=False)
+    monkeypatch.setattr(sys,'argv',['post','--carousel',str(deck/'carousel.md'),'--base-url','https://media.suresilly.com/slides/deck/slides'])
+    post.main()
+    assert create.call_args.args[-1] == (deck/'caption.txt').read_text()
+    forbidden.assert_not_called()

@@ -46,16 +46,25 @@ def claim(token, action_id, deck):
     return window.api(token, 'claim', {'action_id': action_id, 'manifest': local['manifest']})
 
 
+def preflight(deck):
+    # All quality decisions finish before the owner sees a preview.
+    import content_review
+    import post_to_ig
+    content_review.validate(deck)
+    post_to_ig.check_export(deck, deck / 'carousel.md')
+    return window.read(deck)
+
+
 def stage(deck):
-    record = window.read(deck)
+    record = preflight(deck)
     folder = ROOT / '.review-host' / record['slug'] / 'reviews' / record['token']
     folder.mkdir(parents=True, exist_ok=True)
     # Only public preview files. No encoded evidence, secrets or source state.
     (folder / 'slides').mkdir(exist_ok=True)
     for path in (deck / 'slides').glob('*.png'): shutil.copy2(path, folder / 'slides' / path.name)
     shutil.copy2(deck / 'contact_sheet.png', folder / 'contact_sheet.png')
-    caption = __import__('post_to_ig').parse_caption(deck / 'carousel.md')
-    (folder / 'caption.txt').write_text(caption)
+    shutil.copy2(deck / 'caption.txt', folder / 'caption.txt')
+    shutil.copy2(deck / 'review_notes.txt', folder / 'review_notes.txt')
     output(slug=record['slug'], review_token=record['token'], host_dir=str(folder), deck=str(deck / 'carousel.md'))
     return record
 
@@ -68,7 +77,7 @@ def resume(deck):
 
 
 def register(deck):
-    record = window.read(deck)
+    record = preflight(deck)
     base = f'https://media.suresilly.com/slides/{record["slug"]}/reviews/{record["token"]}'
     # Verify every hosted image against the actual bytes before inviting review.
     import post_to_ig
@@ -83,11 +92,13 @@ def register(deck):
         except (requests.RequestException, ValueError):
             if attempt == 11: raise
             time.sleep(10)
+    import resource_status
+    resource_status.save_api()
     import dashboard
-    caption = dashboard.review_window_message(record['token'], base + '/caption.txt')
+    caption = dashboard.review_window_message(record['token'], base + '/caption.txt') + '\nReview notes: ' + base + '/review_notes.txt'
     receipt = window.api(record['token'], 'register', {
         **{k: record[k] for k in ('token', 'slug', 'manifest')}, 'run_id': os.environ['GITHUB_RUN_ID'],
-        'sheet_url': base + '/contact_sheet.png', 'caption': caption})
+        'sheet_url': base + '/contact_sheet.png', 'caption': caption, 'resources': __import__('resource_status').report()})
     if receipt.get('state') != 'waiting' or not receipt.get('message_id'): raise ValueError('Telegram review window did not open')
     (deck / 'review_delivery.json').write_text(json.dumps(receipt, indent=2) + '\n')
     save_history(record['token'])
@@ -134,6 +145,8 @@ def redo_slide(deck, number):
 
 
 def notify(text):
+    import resource_status
+    resource_status.save_api()
     import notify as notifier
     ok, note = notifier._telegram('', text, None)
     if not ok: raise ValueError('Telegram did not confirm delivery: ' + note)

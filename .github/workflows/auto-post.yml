@@ -57,6 +57,7 @@ jobs:
       accepted: ${{ steps.slot.outputs.accepted }}
       deck_built: ${{ steps.build.outputs.slug != '' && steps.slot.outputs.resume_slug == '' }}
     env:
+      PYTHONUNBUFFERED: '1'
       SS_HALT: ${{ vars.SS_HALT }}
       SS_REVIEW_WINDOW_V1: ${{ vars.SS_REVIEW_WINDOW_V1 }}
       REVIEW_WINDOW_URL: ${{ vars.REVIEW_WINDOW_URL }}
@@ -157,6 +158,7 @@ jobs:
           node ops/dispatch-worker/test/parse-reply.test.mjs
           node ops/dispatch-worker/test/posting-slot.test.mjs
           node ops/dispatch-worker/test/review-window.test.mjs
+          node ops/dispatch-worker/test/resource-status.test.mjs
 
       # A test may never write committed state. state/ carries what has been
       # used and what a vendor last said it had left; a suite that manufactures
@@ -602,6 +604,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      PYTHONUNBUFFERED: '1'
       SS_HALT: ${{ vars.SS_HALT }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}

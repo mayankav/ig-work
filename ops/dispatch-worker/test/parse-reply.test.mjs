@@ -63,7 +63,7 @@ async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh", ghSt
   }
 }
 
-const dispatches = (seen) => seen.filter((c) => c.url.includes("api.github.com"));
+const dispatches = (seen) => seen.filter((c) => c.url.includes("api.github.com") && c.url.includes("/dispatches"));
 
 async function run() {
   const failures = [];

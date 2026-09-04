@@ -756,6 +756,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         claimed = moment
         say("claimed", moment.id)
 
+        import owner_art
         markdown, plan, axes, wrote_by, overridden = writer.write_deck(
             moment.text, topic, title=moment.text[:40].rstrip(" .,"),
             pattern="Hidden Mechanism", pillar=topic.replace("_", " ").title(),
@@ -770,7 +771,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             # draft loop — and check_leak and check_mascots still refuse inside
             # it. Everything it does relax comes back here in `overridden` and is
             # printed to the owner before they are asked to publish.
-            allow_faults=force,
+            allow_faults=force, review_draft=owner_art.enabled(),
         )
         say("written", f"by {wrote_by}, {', '.join(axes.values())}")
         if overridden:
@@ -793,8 +794,6 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             # so it is not red either. The next moment is a different deck.
             raise Refused(f"the reviewer stopped this deck: {reason}")
         import owner_art
-        if owner_art.enabled() and (outcome != "publish" or overridden):
-            raise Refused("V1 content checks did not pass: " + reason)
         say("review", f"score {score}/100, {len(objections)} note(s), "
                       f"{'ready' if outcome == 'publish' else 'holding for you'}")
         check_critic_canary(memory.used_count(), wrote_by)
@@ -803,7 +802,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         slug = deck_slug(moment, plan["scene_token"], when)
         path = write_deck(markdown, slug)
         if owner_art.enabled():
-            content_review.save(path.parent, wrote_by, outcome, score, reason, objections)
+            content_review.save(path.parent, wrote_by, outcome, score, reason, objections, style_notes=overridden)
         say("deck", str(path.relative_to(REPO_ROOT)))
 
         fingerprint = check_novelty_then_render(path, slug, moment, slide_text, fresh)

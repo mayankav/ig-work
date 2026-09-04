@@ -115,6 +115,12 @@ def _telegram(subject: str, body: str, attach: Path | None,
         text = f"{subject}\n\n{body}".strip()
     if not subject:
         text = body.strip()
+    try:
+        import resource_status
+        resources = resource_status.report()
+    except Exception:
+        resources = 'Resources: data unavailable; remaining allowances and reset times unknown.'
+    text += '\n\n' + (html.escape(resources) if parse_mode == 'HTML' else resources)
     base = f"https://api.telegram.org/bot{token}"
 
     def _mode(data: dict) -> dict:

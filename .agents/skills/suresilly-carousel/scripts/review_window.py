@@ -19,7 +19,8 @@ def files(deck):
     slides = sorted((deck / 'slides').glob('*.png'))
     if len(slides) != 9: raise ValueError('Review needs exactly nine slides')
     paths += slides
-    if (deck / 'content_review.json').exists(): paths.append(deck / 'content_review.json')
+    for name in ('content_review.json', 'caption.txt', 'review_notes.txt'):
+        if (deck / name).exists(): paths.append(deck / name)
     if any(p.is_symlink() or not p.is_file() for p in paths): raise ValueError('Incomplete or linked preview files')
     return {str(p.relative_to(deck)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
@@ -33,6 +34,13 @@ def prepare(deck, parent=None):
     deck = Path(deck)
     for name in ('published.json', 'publication_pending.json'):
         if (deck / name).exists(): raise ValueError('Check the existing Instagram publication before changing this deck')
+    from caption_text import parse_caption
+    (deck / 'caption.txt').write_text(parse_caption(deck / 'carousel.md'))
+    notes = []
+    if (deck / 'content_review.json').exists():
+        checked = json.loads((deck / 'content_review.json').read_text())
+        notes = checked.get('style_notes', []) + [item['why'] for item in checked.get('objections', [])]
+    (deck / 'review_notes.txt').write_text('\n'.join('- ' + str(note) for note in notes) if notes else 'No style notes.')
     record = {'policy': owner_art.POLICY, 'token': secrets.token_hex(8), 'slug': deck.name,
               'files': files(deck), 'parent': parent}
     record['manifest'] = digest(record['files'])

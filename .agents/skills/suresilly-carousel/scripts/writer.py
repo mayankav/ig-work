@@ -1892,7 +1892,7 @@ def hard_faults(markdown: str) -> list[str]:
 def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
                moment_anchors: set[str] | None = None,
                term: str = "",
-               allow_faults: bool = False) -> tuple[str, dict, dict, str, list[str]]:
+               allow_faults: bool = False, review_draft: bool = False) -> tuple[str, dict, dict, str, list[str]]:
     """Plan, draft, assemble. Returns (markdown, plan, axes, who wrote it, faults).
 
     The last element is the list of copy-craft faults the deck still carries. It
@@ -2016,7 +2016,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # already paid for the plan, the judge and the composer.
     history: list[int] = []
     signatures = []
-    for attempt in range(7):
+    for attempt in range(3 if review_draft else 7):
         if attempt == 0:
             copy, wrote = llm.ask(DRAFT_SYSTEM, attempt_user, schema, temperature=0.6)
             problems = checked(copy)
@@ -2065,7 +2065,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     # comes back empty: a draft that copied the prompt or asked for lettering in
     # the artwork is refused with or without the flag, because neither of those
     # is a matter of taste a person is better placed to judge.
-    if allow_faults and best_markdown is not None:
+    if (allow_faults or review_draft) and best_markdown is not None:
         blocking = hard_faults(best_markdown)
         if not blocking:
             return (best_markdown, plan, axes, best_wrote,
@@ -2184,6 +2184,9 @@ LEAK_N = 4
 # An exemption that matches no prompt n-gram is a hole with nothing behind it,
 # so five speculative ones were deleted rather than left in place.
 LEAK_ALLOWED = ("send this to", "this to the", "to the friend")
+# A run made only of grammar words cannot identify a copied idea or example.
+# "do not have to" caused three identical failed repairs in run 33896861923.
+LEAK_GRAMMAR_WORDS = frozenset("a an the i you we they he she it do does did not no have has had to of in on at for and or but is are was were be been am can could will would should may might this that these those your our their its my his her".split())
 
 
 def _ngrams(text: str, size: int) -> set[str]:
@@ -2237,7 +2240,7 @@ def check_leak(markdown: str, shown: set[str] | None = None) -> list[str]:
     for where, text in copy_lines(markdown):
         line = re.sub(r"\[\[|\]\]", "", text)
         for gram in sorted(_ngrams(line, LEAK_N) & shown):
-            if any(ok in gram for ok in LEAK_ALLOWED):
+            if any(ok in gram for ok in LEAK_ALLOWED) or set(gram.split()) <= LEAK_GRAMMAR_WORDS:
                 continue
             problems.append(
                 f"{where} copies {gram!r} straight out of this prompt. That is an example "

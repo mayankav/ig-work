@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {formatResources} from '../src/resource-status.js';
+const now=Date.parse('2026-09-04T17:00:00Z');
+let text=formatResources({}, {},now);
+assert.match(text,/remaining unknown/);
+assert.match(text,/05 Sept? 2026,? 05:30 IST/);
+assert.match(text,/05 Sept? 2026,? 12:30 IST/);
+text=formatResources({groq:{model:'model',observed_at:'2026-09-04T16:00:00Z',requests:{limit:1000,remaining:900,reset_seconds:8640}}},{'2026-09-04':{neurons:200,text_neurons:9700}},now);
+assert.match(text,/9900.00\/10,000/);
+assert.match(text,/900\/1000 left at that reading/);
+assert.match(text,/23:54 IST/);
+console.log('resource-status: unknown values, shared budget, dates and rolling refill passed');

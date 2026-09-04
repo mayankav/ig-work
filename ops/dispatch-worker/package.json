@@ -8,7 +8,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
     "tail": "wrangler tail",
-    "test": "node test/parse-reply.test.mjs && node test/posting-slot.test.mjs && node test/review-window.test.mjs"
+    "test": "node test/parse-reply.test.mjs && node test/posting-slot.test.mjs && node test/review-window.test.mjs && node test/resource-status.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4"

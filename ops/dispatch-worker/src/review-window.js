@@ -1,3 +1,4 @@
+import {resources} from './resource-status.js';
 // V1 owner review: one Durable Object per immutable preview token.
 // The alarm and owner replies share the same serialized decision record.
 export const REVIEW_HOUR = 60 * 60 * 1000;
@@ -53,6 +54,15 @@ export class ReviewWindow {
         record.state = 'delivery_failed'; await this.ctx.storage.put('review', record);
         return json({error: 'Telegram did not confirm the preview. No automatic posting.'}, 502);
       }
+      // Resource delivery is informational: it cannot reopen or veto approval.
+      try {
+        const summary = typeof input.resources === 'string' && input.resources.length <= 3000 ? input.resources : await resources(this.env);
+        const response = await fetch(`https://api.telegram.org/bot${this.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: {'Content-Type':'application/json'}, signal: AbortSignal.timeout(10000),
+          body: JSON.stringify({chat_id:this.env.TELEGRAM_CHAT_ID,text:`Review ID: ${record.token}\n\n${summary}`})});
+        const quotaReceipt = await response.json();
+        record.resources_accepted = response.ok && quotaReceipt.ok === true;
+      } catch { record.resources_accepted = false; }
       record.message_id = receipt.result.message_id;
       record.delivered_at = Date.now(); record.deadline = record.delivered_at + REVIEW_HOUR;
       record.state = 'waiting';

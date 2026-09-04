@@ -67,3 +67,14 @@ Telegram accepted the preview and a later correction explaining the content hold
 - Replacement run 33896861923 stopped during writing, before rendering or review delivery. Its three revisions had 8, 8, 8 faults. The saved result names repeated headings and prompt copying. The full rejected edit responses were not retained, so the exact cause of no progress is not proved. No identical retry was started.
 - Still unconfirmed: successful full redo, successful slide-image redo, automatic publication after a real hour, Instagram post ID/permalink and Telegram delivery of that permalink. No completion claim is made.
 - Next work: retain draft/repair responses on failure and inspect the rejected edits without starting another full posting run. Resume image testing after the free allowance resets; do not enable paid services or weaken checks.
+
+
+## Owner policy update: approval is final
+
+The owner clarified that approval must be the last content decision. All factual/source, pixel and final-render checks now run before hosting and sending a preview. The publication path checks the frozen manifest, hosted bytes and live decision; it does not re-run source, style, image or render judgments. Caption text is frozen with the nine images. New check code or source records cannot veto unchanged approved content.
+
+V1 makes at most three draft attempts. Remaining style problems are saved as review notes alongside the preview; the owner can approve, cancel or redo. The existing factual/harm critic still runs before preview. Grammar-only prompt matches such as “do not have to” no longer count as copied content; informative copied phrases still fail. Other modes retain their prior behavior.
+
+Every notification includes a resource report or an explicit unavailable reading. A preview has a companion resource message. Gemini shows recorded requests by model and its Pacific-day reset, without inventing an unreported ceiling. Groq shows the vendor's last request/token balances and their observation/refill timestamps. Cloudflare shows the shared recorded usage and UTC reset. Instagram's publishing-limit endpoint is queried when credentials are available; the returned limit is used without a fixed assumed ceiling. Telegram does not report a daily remaining allowance. Failures of resource reporting do not block a post.
+
+Validation covers style-note fallback, fixed captions, no quality recheck in the real publisher entry point, unknown quotas, dated snapshots and rolling refill times. Live verification is still required after deployment.

@@ -1,3 +1,4 @@
+import {resources} from './resource-status.js';
 import { ReviewWindow, parseWindowReply } from "./review-window.js";
 export { ReviewWindow };
 // Off-GitHub timer for the @suresilly auto-post workflow.
@@ -118,7 +119,7 @@ async function ack(env, text) {
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text }),
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: text + '\n\n' + await resources(env) }),
     });
   } catch (e) {
     console.log(`ack failed (ignored): ${e}`);
