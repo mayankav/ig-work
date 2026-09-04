@@ -27,5 +27,12 @@
     "neurons": 2258.64,
     "text_calls": 10,
     "text_neurons": 796.55
+  },
+  "2026-09-04": {
+    "calls": 0,
+    "last": "offline comparison @cf/google/gemma-4-26b-a4b-it",
+    "neurons": 0.0,
+    "text_calls": 3,
+    "text_neurons": 6741.0
   }
 }
