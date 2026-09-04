@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "slot_id": "manual-tg-602066204",
+  "attempts": [
+    {
+      "request_id": "tg-602066204",
+      "run_id": "33900236638",
+      "created_at": "2026-09-04T17:22:35Z",
+      "result": null,
+      "revision": "7eeec139c28e38eae4e39da9451223da29487c6f",
+      "code_revision": "b87b9bacd0bd8789e130e4fb46a54856179ebf263cdb751fd0161270221c8c51"
+    }
+  ]
+}
