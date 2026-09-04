@@ -109,17 +109,17 @@ def reserve(path: Path, slot: str, request: str, run_id: str, created_at: str,
         final = prior.get("result")
         link = f"https://github.com/{os.getenv('GITHUB_REPOSITORY', 'mayankav/ig-work')}/actions/runs/{prior['run_id']}"
         if recover:
-            if not isinstance(final, dict) or final.get("outcome") != "error" or final.get("held") is True:
+            if not isinstance(final, dict) or final.get("outcome") not in {"error", "stopped"} or final.get("held") is True:
                 return None, f"Recovery needs a saved failed attempt. Check {link}. Nothing new was started.", "recovery_refused"
             old_code = prior.get("code_revision") or previous_code
-            if (final.get("stage") in {"setup", "tests"} and final.get("published") is False
+            if (final.get("stage") in {"setup", "tests", "generation"} and final.get("published") is False
                     and not final.get("slug") and old_code and code_revision and old_code != code_revision):
                 pass
-            elif (final.get("slug") and final.get("stage") in {"setup", "tests", "hosting", "posting", "state saving"}):
+            elif (final.get("outcome") == "error" and final.get("slug") and final.get("stage") in {"setup", "tests", "hosting", "posting", "state saving"}):
                 resume_slug = safe_id(final["slug"])
                 resume_run = safe_id(prior.get("resume_run") or prior["run_id"])
             else:
-                return None, f"Recovery cannot start. Fix the code after a test failure, or check the saved deck. Previous run: {link}. Nothing new was started.", "recovery_refused"
+                return None, f"Recovery cannot start. Fix the code after a stopped build or test failure, or check the saved deck. Previous run: {link}. Nothing new was started.", "recovery_refused"
         elif not retry:
             detail = ("The previous attempt has no saved result. Check it before recovery."
                       if not isinstance(final, dict) else

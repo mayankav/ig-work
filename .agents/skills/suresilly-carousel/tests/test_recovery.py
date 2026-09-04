@@ -314,3 +314,17 @@ def test_blocked_message_does_not_offer_force():
 ])
 def test_clock_delivery_and_person_requests_have_different_alerts(event, request_id, repeated, attempt, want):
     assert slots.should_alert(event, request_id, repeated, attempt) is want
+
+
+def test_stopped_build_can_recover_only_after_code_change(tmp_path):
+    path=tmp_path/f'{SLOT}.json'
+    old=failed(path)
+    old['attempts'][0]['result']=final(stage='generation',outcome='stopped',retryable=False,slug='',held=False)
+    save(path,old)
+    assert slots.reserve(path,SLOT,'new','101',CREATED,False,recover=True,code_revision='old-code')[0] is None
+    value,_,decision=recover(path)
+    assert decision=='accepted'
+    assert value['attempts'][0]==old['attempts'][0]
+    for fields in ({'published':True},{'slug':'existing-deck'},{'held':True}):
+        altered=json.loads(json.dumps(old));altered['attempts'][0]['result'].update(fields);save(path,altered)
+        assert recover(path)[0] is None
