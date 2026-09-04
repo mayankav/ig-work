@@ -790,6 +790,9 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             # is not green — but no vendor failed and nothing needs repairing,
             # so it is not red either. The next moment is a different deck.
             raise Refused(f"the reviewer stopped this deck: {reason}")
+        import owner_art
+        if owner_art.enabled() and (outcome != "publish" or overridden):
+            raise Refused("V1 content checks did not pass: " + reason)
         say("review", f"score {score}/100, {len(objections)} note(s), "
                       f"{'ready' if outcome == 'publish' else 'holding for you'}")
         check_critic_canary(memory.used_count(), wrote_by)
@@ -813,6 +816,12 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         # pushes the slides to the public host and only then posts, because
         # Instagram fetches the images itself and cannot see a local file.
         emit_slug(slug, path)
+        if owner_art.enabled():
+            import review_window
+            preview = review_window.prepare(path.parent)
+            emit(verdict="held", review_token=preview["token"])
+            say("review", "Ready for the one-hour Telegram review window")
+            return 0
 
         # A forced deck is HELD, always, whatever the critic thought of it. The
         # owner asked for a gate to be stood down; they did not ask for the result

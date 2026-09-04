@@ -153,7 +153,10 @@ def main() -> None:
                 print(f"  [{i}] {role_key(s.get('role',''), s):9s} -> {pose}")
         print(f"Using {len(mascots)} library poses ({len(set(chosen.values()))} distinct)")
 
-        if a.fresh:
+        import owner_art
+        if a.fresh and owner_art.enabled():
+            mascots = owner_art.generate_deck(slides, mascots, mdir, budget=a.fresh_budget)
+        if a.fresh and not owner_art.enabled():
             # Imported HERE, not at module scope. build.py must keep working on a
             # machine with no key and no network, so the generator is reached only
             # when it is asked for, and every way it can fail returns the library

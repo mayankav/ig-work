@@ -22,7 +22,8 @@ def result(steps: dict, *, mode: str, slug: str, verdict: str, reason: str,
                     published=confirmed, slug=slug, held=verdict == "held")
     stages = [("slot", "work reservation"), ("install", "setup"), ("gates", "tests"), ("verbs", "tests"),
               ("test_state", "tests"), ("restore", "hosting"), ("build", "generation"),
-              ("archive", "state saving"),
+              ("archive", "state saving"), ("owner_preview", "review preparation"),
+              ("owner_archive", "state saving"), ("owner_host", "hosting"), ("owner_delivery", "Telegram delivery"),
               ("host", "hosting"), ("reachable", "hosting"),
               ("post", "posting"), ("fetch_host", "hosting"),
               ("prune", "hosting"), ("record", "state saving"), ("save_attempt", "state saving")]

@@ -33,6 +33,10 @@ Read these only when you need them — do not pull them all in up front.
 
 ---
 
+## Owner review window (V1)
+
+The owner authorized this policy on 4 September 2026. When `SS_REVIEW_WINDOW_V1=1`, strict content and pixel checks remain. Artwork uses explicit owner-review evidence instead of model qualification. Every carousel must be delivered to Telegram before its one-hour publication timer starts. Approve publishes; disapprove cancels only that deck; full redo builds an unrelated concept; slide redo draws a new contextual image from scratch. Every redo starts a new review loop. Publication requires an exact, live Durable Object claim. See `docs/review-window-v1.md` at repository root for commands and recovery. Existing forced drafts are never automatically enrolled.
+
 ## The one entry point
 
 ```bash

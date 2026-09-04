@@ -1,0 +1,127 @@
+name: Act on a carousel review
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        required: true
+        type: string
+      action_id:
+        required: true
+        type: string
+concurrency:
+  group: suresilly-state
+  cancel-in-progress: false
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
+    env:
+      SS_REVIEW_WINDOW_V1: '1'
+      SS_HALT: ${{ vars.SS_HALT }}
+      REVIEW_WINDOW_URL: ${{ vars.REVIEW_WINDOW_URL }}
+      REVIEW_WINDOW_SECRET: ${{ secrets.REVIEW_WINDOW_SECRET }}
+      REVIEW_TOKEN: ${{ inputs.token }}
+      REVIEW_ACTION_ID: ${{ inputs.action_id }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install the checked runtime
+        run: |
+          python -m pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Resolve the current action
+        id: review
+        run: python scripts/review_window_job.py describe
+      - name: Restore the exact preview
+        if: steps.review.outputs.accepted == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.review.outputs.run_id }}
+          name: review-deck
+          path: carousels/${{ steps.review.outputs.slug }}
+      - name: Act on this preview once
+        id: act
+        if: steps.review.outputs.accepted == 'true'
+        env:
+          DECK: carousels/${{ steps.review.outputs.slug }}
+        run: python scripts/review_window_job.py act --deck "$DECK"
+      - name: Save the replacement preview
+        if: steps.act.outputs.result == 'replacement_ready'
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-deck
+          path: carousels/${{ steps.act.outputs.slug }}/
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+      - name: Host the new revision
+        if: steps.act.outputs.result == 'replacement_ready'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.act.outputs.host_dir }}
+          destination_dir: slides/${{ steps.act.outputs.slug }}/reviews/${{ steps.act.outputs.review_token }}
+          keep_files: true
+          cname: media.suresilly.com
+      - name: Send the new preview and open its hour
+        if: steps.act.outputs.result == 'replacement_ready'
+        env:
+          DECK: carousels/${{ steps.act.outputs.slug }}
+        run: python scripts/review_window_job.py register --deck "$DECK"
+      - name: Close the replaced preview
+        if: steps.act.outputs.result == 'replacement_ready'
+        run: python scripts/review_window_job.py finish-redo
+      - name: Hold an unfinished replacement
+        if: failure() && steps.review.outputs.accepted == 'true'
+        run: python scripts/review_window_job.py fail
+      - name: Fetch the media archive after publication
+        if: steps.act.outputs.result == 'published'
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - name: Retain current and pending media
+        if: steps.act.outputs.result == 'published'
+        env:
+          DECK: carousels/${{ steps.review.outputs.slug }}
+        run: |
+          python scripts/review_window_job.py prune --deck "$DECK"
+          git -C gh-pages config user.name suresilly-bot
+          git -C gh-pages config user.email bot@suresilly.local
+          git -C gh-pages add -A
+          git -C gh-pages diff --staged --quiet || git -C gh-pages commit -m "prune: retain current and pending media"
+          git -C gh-pages push
+      - name: Save state and publication receipts
+        if: always() && steps.review.outputs.accepted == 'true'
+        run: |
+          git config user.name suresilly-bot
+          git config user.email bot@suresilly.local
+          git add state/ carousels/ .agents/skills/suresilly-carousel/palette_history.json .agents/skills/suresilly-carousel/mascot/usage_history.json
+          git diff --staged --quiet || git commit -m "review: save decision and receipts [skip ci]"
+          git pull --rebase --quiet
+          git push
+      - name: Report an unfinished action
+        if: failure()
+        run: |
+          python scripts/notify.py --subject "Carousel review action did not finish" \
+            --body "The review action did not finish. Check the run before another request. A redo has no active posting timer until its new preview is delivered. A confirmed Instagram post will not be sent twice."

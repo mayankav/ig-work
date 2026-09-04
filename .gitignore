@@ -40,3 +40,6 @@ carousels/*/mascot/
 # The gh-pages working copy the retention step clones into. It is the published
 # branch, checked out beside the repo, and it is never part of main.
 /gh-pages/
+
+# Immutable review revision staged for the public media host.
+/.review-host/

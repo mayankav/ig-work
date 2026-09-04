@@ -1130,7 +1130,7 @@ FIT_FIGURE = """(cfg) => {
   return out;
 }"""
 def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
-           verbose: bool = True) -> list[Path]:
+           verbose: bool = True, palette_override=None) -> list[Path]:
     """Publish the complete set only after all nine surfaces pass."""
     import render_guard
     import art_eligibility
@@ -1148,7 +1148,8 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
             art_proofs[str(number)] = art_eligibility.proof(raw)
             frozen[number] = Path(scratch) / f"mascot-{number}.png"
             frozen[number].write_bytes(raw)
-        paths = _render(md_path, frozen, stage, verbose)
+        paths = (_render(md_path, frozen, stage, verbose, palette_override=palette_override)
+                 if palette_override is not None else _render(md_path, frozen, stage, verbose))
         for value in art_proofs.values():
             art_eligibility.check_proof(value)
         for path in paths:
@@ -1160,6 +1161,7 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
                   "render_runtime": render_guard.runtime(),
                   "complete": len(paths) == 9, "has_mascots": len(mascots) == 9,
                   "artwork": art_proofs,
+                  "palette": list(palette_override or deck_palette(md_path)),
                   "markdown_sha256": hashlib.sha256(md_path.read_bytes()).hexdigest(),
                   "slides": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
         (stage / "checks.json").write_text(json.dumps(report, indent=2) + "\n")
@@ -1179,7 +1181,7 @@ def render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
 
 
 def _render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
-            verbose: bool = True) -> list[Path]:
+            verbose: bool = True, palette_override=None) -> list[Path]:
     from playwright.sync_api import sync_playwright
     import render_guard
 
@@ -1187,7 +1189,9 @@ def _render(md_path: Path, mascots: dict[int, Path], out_dir: Path,
     if not slides:
         sys.exit(f"ERROR: no slides parsed from {md_path}")
     out_dir.mkdir(parents=True, exist_ok=True)
-    palette = deck_palette(md_path)
+    palette = tuple(palette_override) if palette_override is not None else deck_palette(md_path)
+    if len(palette) != 2 or palette[0] not in BLEED_THEMES or palette[1] not in PAPER_THEMES:
+        raise ValueError("Invalid frozen palette")
 
     written: list[Path] = []
     long_slides: list[tuple[int, str, int]] = []

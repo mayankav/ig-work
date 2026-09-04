@@ -20,6 +20,7 @@ import cv2
 import numpy as np
 
 import art_checks
+import owner_art
 import image_qualification
 import image_review
 import llm
@@ -96,6 +97,8 @@ def faults_bytes(raw: bytes) -> tuple[str, ...]:
     pixel = art_checks.pixel_faults_bytes(raw)
     if pixel:
         return pixel
+    if owner_art.enabled():
+        return ()
     try:
         index = json.loads((STORE / "index" / (digest(raw) + ".json")).read_bytes())
         receipt = index["receipt"]
@@ -118,6 +121,8 @@ def faults(path: Path) -> tuple[str, ...]:
 
 
 def proof(raw: bytes) -> dict:
+    if owner_art.enabled():
+        return owner_art.proof(raw)
     problems = faults_bytes(raw)
     if problems:
         raise ValueError("; ".join(problems))
@@ -127,6 +132,9 @@ def proof(raw: bytes) -> dict:
 
 def check_proof(value: dict) -> None:
     """Validate the exact image proof retained with a rendered deck."""
+    if value.get("policy") == owner_art.POLICY:
+        owner_art.check(value)
+        return
     try:
         for name in ("sha256", "receipt"):
             if (not isinstance(value[name], str) or len(value[name]) != 64
@@ -148,6 +156,8 @@ def check_proof(value: dict) -> None:
 
 def evidence_paths(value: dict) -> list[Path]:
     check_proof(value)
+    if value.get("policy") == owner_art.POLICY:
+        return []
     return [STORE / "reviews" / (value["receipt"] + ".json"),
             STORE / "index" / (value["sha256"] + ".json")]
 

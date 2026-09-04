@@ -79,8 +79,12 @@ def available() -> set[str]:
     if not LIBRARY_DIR.is_dir():
         return set()
     import art_eligibility
+    import owner_art
+    import os
+    blocked = set(os.environ.get("OWNER_REDO_EXCLUDE_HASHES", "").split(",")) if owner_art.enabled() else set()
     return {f.stem for f in LIBRARY_DIR.glob("*.png")
-            if not f.stem.startswith("_") and not art_eligibility.faults(f)}
+            if not f.stem.startswith("_") and not art_eligibility.faults(f)
+            and art_eligibility.digest(f.read_bytes()) not in blocked}
 
 
 def load_usage() -> dict[str, list[str]]:

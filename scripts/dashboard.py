@@ -811,3 +811,16 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def review_window_message(token: str, caption_url: str) -> str:
+    """The V1 review caption: action list and the effect of silence in one place."""
+    return (f"Review ID: {token}\n\n"
+            "Your carousel is ready. You have one hour after delivery to reply.\n\n"
+            f"approve {token} — post now\n"
+            f"disapprove {token} — cancel this carousel\n"
+            f"redo {token} — new concept and new carousel\n"
+            f"redo {token} 4 — new image for slide 4\n\n"
+            "No reply: post on Instagram after one hour and send its link here.\n"
+            "A redo pauses posting. Its new preview starts a new hour.\n\n"
+            f"Caption: {caption_url}")

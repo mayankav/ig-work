@@ -271,6 +271,12 @@ def main():
         return
 
     require_posting_allowed()
+    # V1 pixel-only artwork cannot use the legacy direct-publication path.
+    import owner_art
+    owner_window = (carousel_dir / "review_window.json").exists()
+    if owner_art.enabled() or owner_window:
+        import review_window
+        review_window.require_publication(carousel_dir, base_url)
 
     # Held decks can predate source checks. A manual publish cannot turn a
     # book-level flag into evidence for the exact sentence about to be sent.
@@ -282,7 +288,7 @@ def main():
     if not ig_user_id or not token:
         sys.exit("IG_USER_ID or IG_ACCESS_TOKEN not set. Nothing was posted.")
 
-    if args.recover:
+    if args.recover and not owner_window:
         import reconcile_publication
         reconcile_publication.require_owner(Path(__file__).resolve().parents[1], carousel_dir.name,
                                              os.getenv("SLOT_ID", ""), os.getenv("GITHUB_RUN_ID", ""))

@@ -58,6 +58,9 @@ jobs:
       deck_built: ${{ steps.build.outputs.slug != '' && steps.slot.outputs.resume_slug == '' }}
     env:
       SS_HALT: ${{ vars.SS_HALT }}
+      SS_REVIEW_WINDOW_V1: ${{ vars.SS_REVIEW_WINDOW_V1 }}
+      REVIEW_WINDOW_URL: ${{ vars.REVIEW_WINDOW_URL }}
+      REVIEW_WINDOW_SECRET: ${{ secrets.REVIEW_WINDOW_SECRET }}
       # A scheduled run publishes. A manual run builds unless you say otherwise,
       # because the usual reason to press the button is to look at something.
       MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
@@ -114,6 +117,8 @@ jobs:
       # be discovered by a published post.
       - name: Check the gates still work
         id: gates
+        env:
+          SS_REVIEW_WINDOW_V1: '0'
         if: steps.slot.outputs.accepted == 'true'
         run: |
           # Every suite in the directory, not a hand-kept list. The list had
@@ -151,6 +156,7 @@ jobs:
         run: |
           node ops/dispatch-worker/test/parse-reply.test.mjs
           node ops/dispatch-worker/test/posting-slot.test.mjs
+          node ops/dispatch-worker/test/review-window.test.mjs
 
       # A test may never write committed state. state/ carries what has been
       # used and what a vendor last said it had left; a suite that manufactures
@@ -191,6 +197,10 @@ jobs:
           # run.py itself and every publish step below is gated on MODE ==
           # 'publish', so there are two independent reasons it cannot post.
           if [ -n "$RESUME_SLUG" ]; then
+            if [ -f "carousels/$RESUME_SLUG/review_window.json" ]; then
+              echo "::error::This deck has a Telegram review ID. Use its review commands to continue."
+              exit 1
+            fi
             echo "slug=$RESUME_SLUG" >> "$GITHUB_OUTPUT"
             echo "deck=carousels/$RESUME_SLUG/carousel.md" >> "$GITHUB_OUTPUT"
             exit 0
@@ -210,6 +220,42 @@ jobs:
           retention-days: 14
           path: carousels/${{ steps.build.outputs.slug }}/
 
+      - name: Prepare the owner review preview
+        id: owner_preview
+        if: steps.build.outputs.review_token != '' && env.MODE == 'publish'
+        env:
+          DECK: carousels/${{ steps.build.outputs.slug }}
+        run: python scripts/review_window_job.py stage --deck "$DECK"
+
+      - name: Save the owner review artifact
+        id: owner_archive
+        if: steps.owner_preview.outputs.review_token != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-deck
+          include-hidden-files: true
+          retention-days: 14
+          if-no-files-found: error
+          path: carousels/${{ steps.build.outputs.slug }}/
+
+      - name: Host the owner review revision
+        id: owner_host
+        if: steps.owner_preview.outputs.review_token != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ steps.owner_preview.outputs.host_dir }}
+          destination_dir: slides/${{ steps.build.outputs.slug }}/reviews/${{ steps.owner_preview.outputs.review_token }}
+          keep_files: true
+          cname: media.suresilly.com
+
+      - name: Send the preview and open its hour
+        id: owner_delivery
+        if: steps.owner_preview.outputs.review_token != ''
+        env:
+          DECK: carousels/${{ steps.build.outputs.slug }}
+        run: python scripts/review_window_job.py register --deck "$DECK"
+
       # Instagram fetches the images itself, so they have to be public before
       # the post exists. This is why building and posting are separate steps
       # rather than one --publish run.
@@ -221,7 +267,7 @@ jobs:
       # reads from; the archive is the repo.
       - name: Publish the slides
         id: host
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.review_token == ''
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -232,7 +278,7 @@ jobs:
 
       - name: Wait for the slides to be reachable
         id: reachable
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.review_token == ''
         run: |
           URL="https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides/01_slide_1_hook.png"
           for i in $(seq 1 12); do

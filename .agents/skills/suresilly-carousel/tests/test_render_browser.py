@@ -135,3 +135,19 @@ def test_file_changes_after_check_are_rejected(tmp_path, monkeypatch):
     (slides / "0.png").write_bytes(b"changed")
     with pytest.raises(ValueError, match="changed after inspection"):
         check_export(tmp_path, md)
+
+
+def test_tight_heading_lines_do_not_confuse_font_boxes_with_ink(page):
+    spec={'role':'hook','h1':'Worth Wait. The mistake at [[6pm]], then waiting.', 'h2':'Own your own steady peace.'}
+    settle(page,spec)
+    assert not [f for f in render_guard.check(page,require_mascot=False) if 'text overlap' in f]
+
+
+def test_actual_text_overlap_still_fails(page):
+    settle(page,{'role':'hook','h1':'A short line.','h2':'A second line.'})
+    page.evaluate("""() => {
+      const a=document.querySelector('h1'), b=document.querySelector('h2');
+      const ar=a.getBoundingClientRect(), br=b.getBoundingClientRect();
+      b.style.transform=`translate(${ar.x-br.x}px,${ar.y-br.y}px)`;
+    }""")
+    assert any('text overlap' in f for f in render_guard.check(page,require_mascot=False))

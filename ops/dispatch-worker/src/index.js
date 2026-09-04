@@ -1,3 +1,5 @@
+import { ReviewWindow, parseWindowReply } from "./review-window.js";
+export { ReviewWindow };
 // Off-GitHub timer for the @suresilly auto-post workflow.
 //
 // GitHub Actions `schedule:` triggers are best-effort: under load the event is
@@ -156,6 +158,15 @@ export default {
       return this.telegram(request, env);
     }
 
+    const reviewRoute = /^\/review\/([a-f0-9]{16})\/(register|status|claim|complete)$/.exec(url.pathname);
+    if (request.method === "POST" && reviewRoute) {
+      if (!env.REVIEW_WINDOW_SECRET || request.headers.get("X-Review-Key") !== env.REVIEW_WINDOW_SECRET) return new Response("forbidden", {status: 403});
+      if (!env.REVIEW_WINDOWS) return new Response("Review storage is not configured", {status: 503});
+      const stub = env.REVIEW_WINDOWS.get(env.REVIEW_WINDOWS.idFromName(reviewRoute[1]));
+      const body = await request.json();
+      if (body.token && body.token !== reviewRoute[1]) return new Response("wrong token", {status: 400});
+      return stub.fetch(new Request(`https://review/${reviewRoute[2]}`, {method: "POST", body: JSON.stringify({...body, token: reviewRoute[1]})}));
+    }
     const key = url.searchParams.get("key");
     if (!env.TRIGGER_KEY || key !== env.TRIGGER_KEY) {
       return new Response(
@@ -211,6 +222,23 @@ export default {
       return new Response("ok", { status: 200 });
     }
 
+    const windowCommand = parseWindowReply(message.text, message.reply_to_message?.caption || message.reply_to_message?.text || "");
+    if (windowCommand) {
+      if (!Number.isSafeInteger(update.update_id) || update.update_id < 0 || !env.REVIEW_WINDOWS) return new Response("Review cannot start", {status: 503});
+      const stub = env.REVIEW_WINDOWS.get(env.REVIEW_WINDOWS.idFromName(windowCommand.token));
+      const response = await stub.fetch(new Request("https://review/decide", {method: "POST", body: JSON.stringify({...windowCommand, request_id: `tg-${update.update_id}`})}));
+      const result = await response.json();
+      await ack(env, response.ok ? (result.duplicate ? "This reply was already received." :
+        windowCommand.decision === "drop" ? "Cancelled this carousel. Future posts are unchanged." :
+        windowCommand.decision === "publish" ? "Approval received. Publication is queued." :
+        "Redo received. Automatic posting is paused for this carousel.") : (result.error || "The review action failed."));
+      return new Response("ok", {status: response.status >= 500 ? 502 : 200});
+    }
+    if (env.REVIEW_WINDOWS && (/Review ID:/i.test(message.reply_to_message?.caption || message.reply_to_message?.text || "") ||
+        /^\s*(approve|approval|disapprove|disapproval|cancel|reject|redo)(?:\s+[1-9])?\s*$/i.test(message.text || ""))) {
+      await ack(env, "Reply to the preview message, or include its Review ID. Use approve, disapprove, redo, or redo 4.");
+      return new Response("ok");
+    }
     const command = parseReply(message.text);
     if (!command) {
       // Ordinary chatter, or a word that is not a verb. Nothing to do — and that

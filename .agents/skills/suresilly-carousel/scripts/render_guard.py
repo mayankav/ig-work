@@ -36,8 +36,9 @@ def contract() -> str:
     hashes = [hashlib.sha256(path.read_bytes()).hexdigest() for path in files]
     return hashlib.sha256(json.dumps([VERSION, hashes, runtime()], sort_keys=True).encode()).hexdigest()
 
-MEASURE = """() => {
+MEASURE = r"""() => {
   const faults = [], runs = [];
+  const ink = document.createElement("canvas").getContext("2d");
   for (const img of document.images) {
     if (!img.complete || !img.naturalWidth || !img.naturalHeight)
       faults.push('an image did not load');
@@ -47,21 +48,36 @@ MEASURE = """() => {
     const node = walker.currentNode, el = node.parentElement;
     if (!node.textContent.trim() || !el.closest('.canvas,.footer,.swipe')) continue;
     const style = getComputedStyle(el);
-    const range = document.createRange(); range.selectNodeContents(node);
-    const rects = [...range.getClientRects()];
-    if (!rects.length || style.visibility !== 'visible' || Number(style.opacity) === 0)
-      faults.push('hidden text: ' + node.textContent.trim().slice(0, 40));
-    for (const r of rects) {
-      if (r.width < 1 || r.height < 1) continue;
-      if (r.left < 40 || r.right > 1040 || r.top < 40 || r.bottom > 1310)
-        faults.push('text outside safe bounds: ' + node.textContent.trim().slice(0, 40));
-      runs.push({x:r.x,y:r.y,w:r.width,h:r.height,color:style.color,
-                 size:parseFloat(style.fontSize),weight:parseFloat(style.fontWeight),text:node.textContent.trim()});
+    // DOM text rectangles include the font's empty ascent/descent space.
+    // Tight, readable heading lines overlap those boxes without touching ink.
+    // Measure each visible word using the loaded font's actual glyph bounds.
+    ink.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    ink.letterSpacing = style.letterSpacing === "normal" ? "0px" : style.letterSpacing;
+    for (const match of node.textContent.matchAll(/\S+/g)) {
+      const range = document.createRange();
+      range.setStart(node, match.index); range.setEnd(node, match.index + match[0].length);
+      const rects = [...range.getClientRects()];
+      if (!rects.length || style.visibility !== 'visible' || Number(style.opacity) === 0)
+        faults.push('hidden text: ' + match[0]);
+      const metrics = ink.measureText(match[0]);
+      for (const box of rects) {
+        if (box.width < 1 || box.height < 1) continue;
+        const baseline = box.y + metrics.fontBoundingBoxAscent;
+        const r = {x:box.x-metrics.actualBoundingBoxLeft,
+                   y:baseline-metrics.actualBoundingBoxAscent,
+                   width:metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight,
+                   height:metrics.actualBoundingBoxAscent+metrics.actualBoundingBoxDescent};
+        if (r.x < 40 || r.x+r.width > 1040 || r.y < 40 || r.y+r.height > 1310)
+          faults.push('text outside safe bounds: ' + match[0]);
+        runs.push({x:r.x,y:r.y,w:r.width,h:r.height,layoutX:box.x,layoutW:box.width,color:style.color,
+                   size:parseFloat(style.fontSize),weight:parseFloat(style.fontWeight),text:match[0]});
+      }
     }
   }
   for (let i=0; i<runs.length; i++) for(let j=i+1;j<runs.length;j++) {
     const a=runs[i],b=runs[j];
-    if(Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>2 &&
+    if(Math.min(a.layoutX+a.layoutW,b.layoutX+b.layoutW)-Math.max(a.layoutX,b.layoutX)>2 &&
+       Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)>2 &&
        Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)>2)
       faults.push('text overlap: ' + a.text.slice(0,25) + ' / ' + b.text.slice(0,25));
   }
