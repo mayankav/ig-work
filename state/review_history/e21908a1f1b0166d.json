@@ -5,34 +5,40 @@
   "run_id": "33895172712",
   "sheet_url": "https://media.suresilly.com/slides/20260904_kitchen-poured_39090b/reviews/e21908a1f1b0166d/contact_sheet.png",
   "caption": "Review ID: e21908a1f1b0166d\n\nYour carousel is ready. You have one hour after delivery to reply.\n\napprove e21908a1f1b0166d \u2014 post now\ndisapprove e21908a1f1b0166d \u2014 cancel this carousel\nredo e21908a1f1b0166d \u2014 new concept and new carousel\nredo e21908a1f1b0166d 4 \u2014 new image for slide 4\n\nNo reply: post on Instagram after one hour and send its link here.\nA redo pauses posting. Its new preview starts a new hour.\n\nCaption: https://media.suresilly.com/slides/20260904_kitchen-poured_39090b/reviews/e21908a1f1b0166d/caption.txt",
-  "state": "held",
+  "state": "cancelled",
   "delivery_attempts": 1,
   "history": [
     {
       "at": 1788539929996,
       "decision": "publish",
       "request_id": "tg-602066202"
+    },
+    {
+      "at": 1788540290934,
+      "decision": "drop",
+      "request_id": "tg-602066203"
     }
   ],
   "seen": {
-    "tg-602066202": true
+    "tg-602066202": true,
+    "tg-602066203": true
   },
   "message_id": 68,
   "delivered_at": 1788539796802,
   "deadline": 1788543396802,
   "action": {
-    "id": "rv-e21908a1f1b0166d-tg-602066202",
-    "decision": "publish",
+    "id": "rv-e21908a1f1b0166d-tg-602066203",
+    "decision": "drop",
     "slide": 0,
     "attempts": 1,
     "dispatched": true,
-    "retry_at": 1788540531187
+    "retry_at": 1788540892191
   },
   "claimed": false,
-  "claim_expires": 1788542578480,
+  "claim_expires": 1788542736493,
   "result": {
-    "action_id": "rv-e21908a1f1b0166d-tg-602066202",
-    "state": "held",
+    "action_id": "rv-e21908a1f1b0166d-tg-602066203",
+    "state": "cancelled",
     "token": "e21908a1f1b0166d"
   }
 }
