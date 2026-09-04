@@ -6,7 +6,14 @@
       "request_id": "gh-33824384609",
       "run_id": "33824384609",
       "created_at": "2026-09-04T01:05:20Z",
-      "result": null
+      "result": {
+        "stage": "tests",
+        "outcome": "error",
+        "fault_code": "gates_failed",
+        "reason": "Failed tests: test_insights_window.py, test_posting_slots.py",
+        "retryable": false,
+        "published": false
+      }
     }
   ]
 }
