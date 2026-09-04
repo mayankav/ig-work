@@ -8,7 +8,8 @@
     "20260901_door-washed-the_cd4b3a",
     "20260902_6pm-picked-up_068b42",
     "20260903_6pm-carried-the_ca942f",
-    "20260903_desk-cleared-my_7c11e0"
+    "20260903_desk-cleared-my_7c11e0",
+    "20260904_kitchen-poured_39090b"
   ],
   "anchors": {
     "action": [
@@ -76,6 +77,15 @@
     ],
     "desk": [
       "20260903_desk-cleared-my_7c11e0"
+    ],
+    "7:30pm": [
+      "20260904_kitchen-poured_39090b"
+    ],
+    "kitchen": [
+      "20260904_kitchen-poured_39090b"
+    ],
+    "poured": [
+      "20260904_kitchen-poured_39090b"
     ]
   }
 }

@@ -1,0 +1,21 @@
+{
+  "policy": "owner-window-v1",
+  "token": "e21908a1f1b0166d",
+  "slug": "20260904_kitchen-poured_39090b",
+  "files": {
+    "carousel.md": "a2ff4fa293cc4097fb39b825a47e3a3465169c311f263f7b183a99d76a7475a8",
+    "contact_sheet.png": "f8826071ee38947ea4aca5a37edf1dbee4656bfa55461572d68c096164ef9f0b",
+    "slides/checks.json": "5251846fa00b3efa76fe562ff5ccadf8ee8a651a7950ff6e2b1e4a7b52323b62",
+    "slides/01_slide_1_hook.png": "a0f9b3974270c507fd72ed76505f8f34b5ab703c392a5bc137efb55ee2ad236d",
+    "slides/02_slide_2_agitation.png": "e5efac4883b4e5771fcf154ae811ff53a969ab5b05ce9144abd69cc751f2da25",
+    "slides/03_slide_3_source_anchor.png": "ab3d83a2a645df282d0d3771fa0d3f3a606ae0f9037945967a3b6838e31922ba",
+    "slides/04_slide_4_value_step_1.png": "fdba2f1966156c5785df7ec41509ef2f738c1709eecc127e03670534541d5ed7",
+    "slides/05_slide_5_value_step_2.png": "077543b958103ab3c7f971d6e4f1beac2fb18d1344b5e4f41e34c3e7315957e4",
+    "slides/06_slide_6_value_step_3.png": "e0fd6198c09ea4384a6b8c33a611947455f30711f715b7e3070844628ea8a680",
+    "slides/07_slide_7_value_step_4.png": "08b6d516ff9b850c8fc6920e209f2488e412e2ae5f76c7e06df28ea5aed7be81",
+    "slides/08_slide_8_cheat_sheet.png": "1dad7db043cd8a47a66f3e302c6232327e4b93413c8dbcef4ea471ca4c3454c5",
+    "slides/09_slide_9_cta.png": "013a42210cafaa3e5791a5bf0a25686aad44d8c41e2ade38a738be6aa809a4a3"
+  },
+  "parent": null,
+  "manifest": "9f670af887c659a534793cd31f8ccaa1f93d0bc24bf10e1f568f1de82a6f02a0"
+}
