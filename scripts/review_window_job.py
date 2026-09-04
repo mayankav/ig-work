@@ -254,4 +254,13 @@ def main():
     else: finish(args.token, args.action_id, failed=args.operation == 'fail')
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as exc:
+        reason = f'{type(exc).__name__}: {exc}'
+        for name, value in os.environ.items():
+            if value and len(value) >= 8 and any(word in name for word in ('TOKEN', 'SECRET', 'PASSWORD', 'API_KEY')):
+                reason = reason.replace(value, '[hidden]')
+        output(reason=' '.join(reason.split())[:400])
+        raise

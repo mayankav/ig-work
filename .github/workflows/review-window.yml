@@ -122,6 +122,8 @@ jobs:
           git push
       - name: Report an unfinished action
         if: failure()
+        env:
+          ACTION_REASON: ${{ steps.act.outputs.reason || 'Hosting, preview delivery or state saving failed. See the run for details.' }}
         run: |
           python scripts/notify.py --subject "Carousel review action did not finish" \
-            --body "The review action did not finish. Check the run before another request. A redo has no active posting timer until its new preview is delivered. A confirmed Instagram post will not be sent twice."
+            --body "This action stopped: $ACTION_REASON A redo has no posting timer until its new preview is delivered. A confirmed Instagram post will not be sent twice."

@@ -13,7 +13,8 @@ Implementation:
 - [x] Explicit V1 artwork policy, generation and render evidence.
 - [x] Build/host/preview integration and immutable revision artifacts.
 - [x] Review actuator for approve, cancel, full redo and slide redo.
-- [ ] Python and Worker tests, deployment and live verification.
+- [x] Python and Worker tests and deployment.
+- [ ] First live preview and publication: blocked by missing claim source evidence.
 
 No existing experiment records, slot history or publication receipts may be reset. Existing force-held decks are not silently enrolled in timeout publication. A confirmed or uncertain Instagram upload must be reconciled before redo/cancel changes its deck.
 
@@ -32,3 +33,15 @@ Each preview has an immutable hosted revision, exact-byte manifest, 14-day recov
 The decision workflow claims the exact action before starting work. Replies can replace a queued action. Once work has started, the bot reports that the preview is closed. Instagram publication cannot be recalled by a late reply.
 
 An unresolved Instagram upload uses the existing publication reconciliation path. A rerun after confirmed publication only retries delivery of the Instagram link. It cannot publish a second post. Telegram acceptance is saved; it does not prove that a phone displayed a notification.
+
+## Validation and live result
+
+- 65 local Python suites passed, including the earlier research suites. All Worker suites passed.
+- A real Chromium render and slide-4 replacement preserved the markdown and the other eight PNGs byte for byte.
+- 84 recovery/slot tests passed after adding recovery of an unbuilt stopped slot with changed code; 75 focused tests passed after adding saved-preview recovery.
+- GitHub main contains the release. Worker deployment: `79c49bfb-85ce-48f4-81e5-13c4d58096b8`. The live private endpoint rejects unauthenticated requests and reaches durable storage with authentication.
+- GitHub variables: `SS_REVIEW_WINDOW_V1=1`; `REVIEW_WINDOW_URL=https://suresilly-dispatch.mayankav.workers.dev`. The shared secret is configured in both services.
+- Live recovery: https://github.com/mayankav/ig-work/actions/runs/33891116582 . All CI tests passed. The builder found usable artwork, composed and safety-checked a burnout moment, then stopped because no source-supported claim was available. No deck, preview timer or Instagram post was created. The failure notification was accepted by Telegram.
+- Citation inventory: 53 saved claims, zero current `claim_support` records. A direct source check for Christina Maslach's *The Truth About Burnout* (1997), Open Library work `/works/OL2528268W`, found its catalogue-linked scan, but the excerpt request returned HTTP 403. The access restriction was not bypassed.
+
+Next content task: obtain usable source passages and independently verify claims before trying another build. Do not repeatedly rerun this unchanged content failure or remove the evidence requirement.
