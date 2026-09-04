@@ -23,7 +23,16 @@
       "request_id": "gh-33896861923",
       "run_id": "33896861923",
       "created_at": "2026-09-04T16:45:02Z",
-      "result": null,
+      "result": {
+        "stage": "generation",
+        "outcome": "stopped",
+        "fault_code": "quality_refused",
+        "reason": "slide 9 Closing thought copies 'do not have to' straight out of this prompt. That is an example showing you a shape, not words you may use. Write the line from the moment you were given; slide 1's H1 and slide 2's H2 are the same line: 'you watch the clock at 615pm and dread the food'. Keep one, and write the other from scratch; slide 3's [faults per attempt: 8, 8, 8]",
+        "retryable": false,
+        "published": false,
+        "slug": "",
+        "held": false
+      },
       "revision": "556826f15de49179ae97d334ec13625df2694d4c",
       "code_revision": "43cec8f841ed344be307ebeacbc1ab5f89dccb14039d10cd083bf98e8305031f"
     }
