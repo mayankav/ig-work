@@ -134,7 +134,7 @@ export default {
   // log so the two daily slots are distinguishable.
   async scheduled(event, env, ctx) {
     const slot = postingSlot(event.scheduledTime, event.cron);
-    ctx.waitUntil(dispatch(env, event.cron, "publish", { slot_id: slot }).then((result) => {
+    ctx.waitUntil(dispatch(env, event.cron, "publish", { slot_id: slot, request_id: `clock-${slot}` }).then((result) => {
       if (result.status !== 204) throw new Error(`Scheduled dispatch failed (${result.status})`);
     }));
   },

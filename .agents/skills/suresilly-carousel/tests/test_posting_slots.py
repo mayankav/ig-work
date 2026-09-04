@@ -218,7 +218,7 @@ def test_unhelpful_retry_gets_an_answer_not_silent_duplicate():
     outputs = dict(accepted="false", decision="retry_refused", reason="A saved result is missing.")
     value = run_result({"slot": {"outcome": "success", "outputs": outputs}}, mode="publish",
                        slug="", verdict="", reason="", retry=False, published=None)
-    assert value["outcome"] == "stopped" and value["reason"] == outputs["reason"]
+    assert value["outcome"] == "blocked" and value["reason"] == outputs["reason"]
     assert not value["retryable"]
 
 

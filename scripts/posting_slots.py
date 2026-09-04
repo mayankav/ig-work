@@ -8,6 +8,7 @@ an unfinished attempt is never silently retried after a crash.
 from __future__ import annotations
 
 import argparse
+import hashlib
 from datetime import datetime, timedelta, timezone
 import json
 import os
@@ -60,6 +61,11 @@ def identify(event: dict, event_name: str, created_at: str, run_id: str) -> tupl
     if event_name != "workflow_dispatch":
         raise ValueError("Unsupported event.")
     supplied = inputs.get("slot_id", "")
+    recover = inputs.get("recover", False) in (True, "true")
+    if recover and not supplied:
+        raise ValueError("Recovery requires the exact failed slot_id.")
+    if recover and (mode != "publish" or retry):
+        raise ValueError("Recovery requires publish mode and retry turned off.")
     if mode != "publish":
         if retry or supplied:
             raise ValueError("Build-only and force requests cannot claim a posting slot.")
@@ -69,8 +75,8 @@ def identify(event: dict, event_name: str, created_at: str, run_id: str) -> tupl
         raise ValueError("Invalid posting slot.")
     due = timestamp(slot[:10] + "T" + slot[11:13] + ":00:00+05:30")
     age = timestamp(created_at) - due
-    if not timedelta(0) <= age < timedelta(hours=24):
-        raise ValueError("Posting slot is in the future or more than one day old.")
+    if not timedelta(0) <= age < timedelta(days=7 if recover else 1):
+        raise ValueError("Posting slot is outside the allowed window: one day for new work, seven days for recovery.")
     return slot, request, retry
 
 
@@ -90,24 +96,46 @@ def load(path: Path) -> dict | None:
 
 
 def reserve(path: Path, slot: str, request: str, run_id: str, created_at: str,
-            retry: bool) -> tuple[dict | None, str, str]:
+            retry: bool, *, recover: bool = False, revision: str = "",
+            code_revision: str = "", previous_code: str = "") -> tuple[dict | None, str, str]:
     """Pure decision; caller must push the returned record before doing work."""
     previous = load(path)
     attempts = previous["attempts"] if previous else []
     if any(a["request_id"] == request or a["run_id"] == run_id for a in attempts):
         return None, "This request was already accepted. No work was repeated.", "duplicate"
+    resume_slug, resume_run = "", ""
     if attempts:
-        final = attempts[-1].get("result")
-        if not retry:
-            return None, "This posting slot was already claimed. No work was repeated.", "duplicate"
-        if (not isinstance(final, dict) or final.get("retryable") is not True
+        prior = attempts[-1]
+        final = prior.get("result")
+        link = f"https://github.com/{os.getenv('GITHUB_REPOSITORY', 'mayankav/ig-work')}/actions/runs/{prior['run_id']}"
+        if recover:
+            if not isinstance(final, dict) or final.get("outcome") != "error" or final.get("held") is True:
+                return None, f"Recovery needs a saved failed attempt. Check {link}. Nothing new was started.", "recovery_refused"
+            old_code = prior.get("code_revision") or previous_code
+            if (final.get("stage") in {"setup", "tests"} and final.get("published") is False
+                    and not final.get("slug") and old_code and code_revision and old_code != code_revision):
+                pass
+            elif (final.get("slug") and final.get("stage") in {"setup", "tests", "hosting", "posting", "state saving"}):
+                resume_slug = safe_id(final["slug"])
+                resume_run = safe_id(prior.get("resume_run") or prior["run_id"])
+            else:
+                return None, f"Recovery cannot start. Fix the code after a test failure, or check the saved deck. Previous run: {link}. Nothing new was started.", "recovery_refused"
+        elif not retry:
+            detail = ("The previous attempt has no saved result. Check it before recovery."
+                      if not isinstance(final, dict) else
+                      f"Previous result: {final.get('reason', 'unknown')}")
+            return None, f"This slot is already claimed. {detail} Previous run: {link}. Nothing new was started.", "duplicate"
+        elif (not isinstance(final, dict) or final.get("retryable") is not True
                 or final.get("published") is not False
                 or final.get("outcome") not in {"stopped", "error"}
                 or final.get("stage") != "generation"):
-            return None, "Retry cannot safely help this attempt. No new work was started.", "retry_refused"
-    elif retry:
-        return None, "There is no saved attempt to retry. No new work was started.", "retry_refused"
-    attempt = dict(request_id=request, run_id=run_id, created_at=created_at, result=None)
+            return None, f"Retry cannot help this attempt. Use recovery after a code fix or check the saved deck. Previous run: {link}.", "retry_refused"
+    elif retry or recover:
+        return None, "There is no saved attempt to recover. No new work was started.", "retry_refused"
+    attempt = dict(request_id=request, run_id=run_id, created_at=created_at, result=None,
+                   revision=revision, code_revision=code_revision)
+    if resume_slug:
+        attempt.update(resume_slug=resume_slug, resume_run=resume_run)
     return dict(version=1, slot_id=slot, attempts=[*attempts, attempt]), "Work reserved.", "accepted"
 
 
@@ -130,6 +158,18 @@ def finish(path: Path, run_id: str, result: dict) -> dict:
 
 def git(root: Path, *args: str) -> str:
     return subprocess.check_output(["git", *args], cwd=root, text=True).strip()
+
+
+def should_alert(event_name: str, request: str, repeated: bool, run_attempt: int = 1) -> bool:
+    return (event_name == 'workflow_dispatch' and not request.startswith('clock-')
+            and (not repeated or run_attempt > 1))
+
+
+def code_at(root: Path, revision: str) -> str:
+    paths = ["scripts", ".github/workflows", "ops/dispatch-worker",
+             ".agents/skills/suresilly-carousel/scripts", ".agents/skills/suresilly-carousel/tests",
+             ".agents/skills/suresilly-carousel/requirements.txt"]
+    return hashlib.sha256(git(root, "ls-tree", "-r", revision, "--", *paths).encode()).hexdigest()
 
 
 def persist(root: Path, path: Path, value: dict) -> None:
@@ -179,10 +219,47 @@ def main() -> None:
             created = os.environ["RUN_CREATED_AT"]
             slot, request, retry = identify(event, os.environ["GITHUB_EVENT_NAME"], created, run_id)
             path = ROOT / "state/slots" / (slot + ".json")
-            value, reason, decision = reserve(path, slot, request, run_id, created, retry)
+            inputs = event.get("inputs") or {}
+            recover = inputs.get("recover", False) in (True, "true")
+            revision = git(ROOT, "rev-parse", "HEAD")
+            previous_code = ""
+            prior = load(path)
+            if recover and prior:
+                last = prior["attempts"][-1]
+                # Legacy records did not save code revisions. Read the actual
+                # run from GitHub, and only recover completed runs.
+                meta = json.loads(subprocess.check_output([
+                    "gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{safe_id(last['run_id'])}"
+                ], text=True))
+                if meta.get("status") != "completed":
+                    raise ValueError("Previous run is still active.")
+                if not last.get("code_revision"):
+                    previous_code = code_at(ROOT, meta["head_sha"])
+            value, reason, decision = reserve(path, slot, request, run_id, created, retry,
+                recover=recover, revision=revision, code_revision=code_at(ROOT, revision),
+                previous_code=previous_code)
             if value is not None:
                 persist(ROOT, path, value)
-            output(accepted=str(value is not None).lower(), slot_id=slot, reason=reason, decision=decision)
+            # Only repeated deliveries and clock duplicates stay quiet. A new
+            # manual request always gets an answer, even if it cannot start.
+            repeated = prior and any(a["request_id"] == request or a["run_id"] == run_id for a in prior["attempts"])
+            alert = value is None and should_alert(os.environ["GITHUB_EVENT_NAME"], request,
+                                                   bool(repeated), int(os.getenv("GITHUB_RUN_ATTEMPT", "1")))
+            if alert:
+                last_result = (prior["attempts"][-1].get("result") or {}) if prior else {}
+                if last_result.get("outcome") == "error":
+                    reason += f" Open auto-post, set mode=publish, slot_id={slot}, recover=true after fixing the fault."
+                elif last_result.get("outcome") == "held":
+                    reason += " Use the separate publish reply to release the held deck."
+                elif last_result.get("published") is True:
+                    reason += " A post is already confirmed. Do not post it again."
+                else:
+                    reason += " Check the previous run before starting more work."
+                reason += " Silence leaves this slot unchanged."
+            attempt = value["attempts"][-1] if value else {}
+            output(accepted=str(value is not None).lower(), slot_id=slot, reason=reason, decision=decision,
+                   alert=str(bool(alert)).lower(), resume_slug=attempt.get("resume_slug", ""),
+                   resume_run=attempt.get("resume_run", ""))
             print(reason)
         else:
             slot = safe_id(os.environ["SLOT_ID"])

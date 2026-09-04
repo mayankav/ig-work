@@ -49,6 +49,8 @@ generation is ON by default on this path (invariant 2), so leave the flag off un
 building to read the copy.
 
 Read `references/strategy.md` before changing any of it.
+For failed-slot recovery, saved-deck restoration, Telegram receipts and independent
+pool refill, read the repository document `docs/slot-recovery.md`.
 
 ## Rendering a written deck
 

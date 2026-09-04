@@ -99,6 +99,15 @@ COMMAND = re.compile(r"^\s*(?P<verb>[a-z]+)\s*(?P<slug>[\w-]*)\s*$", re.I)
 
 
 def _api(token: str, method: str, params: dict) -> dict:
+    if method == "sendMessage":
+        # Share delivery receipts and bounded retries with run alerts. A failed
+        # reply never repeats the action that was already performed.
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        import notify
+        ok, note = notify._telegram("", params["text"], None, params.get("parse_mode"))
+        if not ok:
+            print("::warning::Telegram did not confirm the reply: " + note)
+        return {"ok": ok}
     url = API.format(token=token, method=method) + "?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers={"User-Agent": "suresilly-carousel/3.0"})
     try:

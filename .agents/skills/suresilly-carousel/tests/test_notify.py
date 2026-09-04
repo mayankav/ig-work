@@ -28,6 +28,10 @@ class Response:
         self.ok, self.status_code, self.text = ok, status, text
 
 
+    def json(self):
+        return {"ok": self.ok, "result": {"message_id": 123}} if self.ok else {"ok": False}
+
+
 class Stub:
     """Stands in for requests, and records what would have been sent."""
 
@@ -46,6 +50,8 @@ class Stub:
 def run() -> int:
     failures = []
     real = notify.requests
+    real_sleep = notify.time.sleep
+    notify.time.sleep = lambda _: None
 
     with tempfile.TemporaryDirectory() as tmpdir:
         sheet = pathlib.Path(tmpdir) / "contact_sheet.png"
@@ -160,6 +166,7 @@ def run() -> int:
         with_env()
 
     notify.requests = real
+    notify.time.sleep = real_sleep
 
     total = 18
     if failures:

@@ -19,9 +19,10 @@ def result(steps: dict, *, mode: str, slug: str, verdict: str, reason: str,
     def record(stage, outcome, code, why, can_retry=False):
         return dict(stage=stage, outcome=outcome, fault_code=code,
                     reason=why, retryable=can_retry,
-                    published=confirmed)
+                    published=confirmed, slug=slug, held=verdict == "held")
     stages = [("slot", "work reservation"), ("install", "setup"), ("gates", "tests"), ("verbs", "tests"),
-              ("test_state", "tests"), ("build", "generation"),
+              ("test_state", "tests"), ("restore", "hosting"), ("build", "generation"),
+              ("archive", "state saving"),
               ("host", "hosting"), ("reachable", "hosting"),
               ("post", "posting"), ("fetch_host", "hosting"),
               ("prune", "hosting"), ("record", "state saving"), ("save_attempt", "state saving")]
@@ -37,8 +38,9 @@ def result(steps: dict, *, mode: str, slug: str, verdict: str, reason: str,
                           key == "build" and retry)
     slot = steps.get("slot", {})
     if slot.get("outcome") == "success" and slot.get("outputs", {}).get("accepted") == "false":
-        if slot.get("outputs", {}).get("decision") == "retry_refused":
-            return record("work reservation", "stopped", "retry_not_helpful",
+        if (slot.get("outputs", {}).get("decision") in {"retry_refused", "recovery_refused"}
+                or slot.get("outputs", {}).get("alert") == "true"):
+            return record("work reservation", "blocked", "request_blocked",
                           slot["outputs"]["reason"])
         return record("work reservation", "duplicate", "work_not_repeated",
                       slot.get("outputs", {}).get("reason") or "No repeated work.")

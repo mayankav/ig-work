@@ -240,6 +240,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--carousel", required=True, help="Path to carousel.md")
     ap.add_argument("--base-url", help="Public base URL for slides, e.g. https://media.suresilly.com/slides/<slug>/slides")
+    ap.add_argument("--recover", action="store_true", help="Check saved publication state and reuse the original request")
     ap.add_argument("--dry-run", action="store_true", help="Do not call API, just log")
     args = ap.parse_args()
 
@@ -257,7 +258,9 @@ def main():
     carousel_dir = md_path.parent
     for name in (PUBLISHED_FILENAME, PUBLICATION_PENDING):
         marker = carousel_dir / name
-        if marker.exists() or marker.is_symlink():
+        if marker.is_symlink():
+            sys.exit("Publication record is a link. Nothing was posted.")
+        if marker.exists() and not args.recover:
             sys.exit("This deck has a completed or unresolved publication record. Refusing a duplicate post.")
     caption = parse_caption(md_path)
     print(f"Caption length {len(caption)} chars, {len(caption.split())} words")
@@ -279,7 +282,34 @@ def main():
     if not ig_user_id or not token:
         sys.exit("IG_USER_ID or IG_ACCESS_TOKEN not set. Nothing was posted.")
 
+    if args.recover:
+        import reconcile_publication
+        reconcile_publication.require_owner(Path(__file__).resolve().parents[1], carousel_dir.name,
+                                             os.getenv("SLOT_ID", ""), os.getenv("GITHUB_RUN_ID", ""))
+
+    if args.recover and (Path(__file__).resolve().parents[1] / "state/pending" / f"{carousel_dir.name}.json").exists():
+        sys.exit("This deck is held. Use the separate publish decision.")
+
+    if args.recover and (carousel_dir / PUBLISHED_FILENAME).exists():
+        receipt = publication_record.read(carousel_dir / PUBLISHED_FILENAME, carousel_dir.name)
+        publication_outputs(confirmed_media_id=receipt['media_id'], confirmed_deck_slug=carousel_dir.name)
+        print("This deck already has a confirmed post. Nothing was sent.")
+        return
+
     check_export(carousel_dir, md_path)
+
+    if args.recover and (carousel_dir / PUBLICATION_PENDING).exists():
+        import reconcile_publication
+        pending_record = reconcile_publication.read_pending(Path(__file__).resolve().parents[1], carousel_dir.resolve())
+        state, identifier = reconcile_publication.inspect(
+            requests, graph_base(token), ig_user_id, token, pending_record, caption)
+        if state == "ready":
+            check_hosted_images(carousel_dir, list_images(carousel_dir, base_url))
+            identifier = publish(ig_user_id, token, identifier)
+        publication_outputs(confirmed_media_id=identifier, confirmed_deck_slug=carousel_dir.name)
+        record_publication(carousel_dir, identifier)
+        (carousel_dir / PUBLICATION_PENDING).unlink()
+        return
 
     urls = list_images(carousel_dir, base_url)
     if len(urls) != 9:

@@ -110,3 +110,11 @@ jobs:
           python -m pip install --quiet requests
           python scripts/notify.py --subject "[SILLY-ERROR] Reply could not start" \
             --body "${REASON:-The reply could not be reserved. Nothing was posted.} Do not retry until the saved state is checked."
+
+      - name: Save message delivery records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: message-delivery-${{ github.run_id }}
+          path: ${{ runner.temp }}/suresilly-notifications.jsonl
+          if-no-files-found: ignore

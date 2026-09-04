@@ -33,6 +33,10 @@ from __future__ import annotations
 import argparse
 import base64
 import html
+import hashlib
+import json
+import time
+from datetime import datetime, timezone
 import os
 import sys
 from pathlib import Path
@@ -109,6 +113,8 @@ def _telegram(subject: str, body: str, attach: Path | None,
         text = f"<b>{html.escape(subject)}</b>\n\n{body}".strip()
     else:
         text = f"{subject}\n\n{body}".strip()
+    if not subject:
+        text = body.strip()
     base = f"https://api.telegram.org/bot{token}"
 
     def _mode(data: dict) -> dict:
@@ -118,28 +124,77 @@ def _telegram(subject: str, body: str, attach: Path | None,
             data["parse_mode"] = parse_mode
         return data
 
+    def send(method, data, files=None, part=0):
+        for attempt in range(1, 4):
+            status, message_id, accepted, retry_after = None, None, False, None
+            note = "Unknown response"
+            try:
+                if files:
+                    files['document'][1].seek(0)
+                response = requests.post(f"{base}/{method}", data=_mode(data),
+                                         files=files, timeout=TIMEOUT)
+                status = response.status_code
+                payload = response.json()
+                message_id = payload.get('result', {}).get('message_id') if isinstance(payload, dict) else None
+                accepted = (response.ok and isinstance(payload, dict) and payload.get('ok') is True
+                            and type(message_id) is int)
+                note = 'accepted' if accepted else f'HTTP {status}; no message receipt'
+                if isinstance(payload, dict):
+                    retry_after = payload.get('parameters', {}).get('retry_after')
+            except Exception as exc:
+                # Request exception strings can contain the bot token.
+                note = type(exc).__name__
+            delivery_record(channel='telegram', part=part, attempt=attempt,
+                            accepted=accepted, message_id=message_id if accepted else None,
+                            http_status=status, note=note,
+                            message_hash=hashlib.sha256(text.encode()).hexdigest())
+            if accepted:
+                return True, 'accepted'
+            if status is not None and status != 429 and status < 500:
+                return False, note
+            if attempt < 3:
+                delay = retry_after if type(retry_after) is int else attempt * 2
+                if not 0 <= delay <= 30:
+                    return False, 'Telegram asked for a longer wait. No further attempt in this run.'
+                time.sleep(delay)
+        return False, note
+
     try:
+        rest, part = text, 0
         if attach and attach.is_file():
             caption, rest = split_for_caption(text)
-            with attach.open("rb") as handle:
-                response = requests.post(
-                    f"{base}/sendDocument",
-                    data=_mode({"chat_id": chat, "caption": caption}),
-                    files={"document": (attach.name, handle, "image/png")},
-                    timeout=TIMEOUT)
-            if response.ok and rest:
-                requests.post(f"{base}/sendMessage",
-                              data=_mode({"chat_id": chat, "text": rest[:4000]}),
-                              timeout=TIMEOUT)
-        else:
-            response = requests.post(f"{base}/sendMessage",
-                                     data=_mode({"chat_id": chat, "text": text[:4000]}),
-                                     timeout=TIMEOUT)
-        if response.ok:
-            return True, "sent"
-        return False, f"HTTP {response.status_code}: {response.text[:160]}"
+            with attach.open('rb') as handle:
+                ok, note = send('sendDocument', {'chat_id': chat, 'caption': caption},
+                                {'document': (attach.name, handle, 'image/png')}, part)
+            if not ok:
+                return False, note
+            part += 1
+        while rest:
+            chunk, rest = split_for_caption(rest, 4000)
+            ok, note = send('sendMessage', {'chat_id': chat, 'text': chunk}, part=part)
+            if not ok:
+                return False, f'Message part {part + 1} failed: {note}'
+            part += 1
+        return True, 'accepted'
     except Exception as exc:
-        return False, f"{type(exc).__name__}: {exc}"
+        return False, type(exc).__name__
+
+
+def delivery_record(**fields):
+    """Keep safe API receipts apart from publication state and message contents."""
+    target = os.environ.get('NOTIFY_RECEIPTS')
+    if not target and os.environ.get('RUNNER_TEMP'):
+        target = str(Path(os.environ['RUNNER_TEMP']) / 'suresilly-notifications.jsonl')
+    if not target:
+        return
+    record = dict(at=datetime.now(timezone.utc).isoformat(), run_id=os.getenv('GITHUB_RUN_ID', ''), **fields)
+    try:
+        with open(target, 'a', encoding='utf-8') as handle:
+            handle.write(json.dumps(record) + '\n')
+            handle.flush()
+            os.fsync(handle.fileno())
+    except OSError:
+        print('::warning::Could not save the message delivery receipt.')
 
 
 def _resend(subject: str, body: str, attach: Path | None, to: str) -> tuple[bool, str]:
@@ -203,7 +258,10 @@ def notify(subject: str, body: str, attach: Path | None, to: str,
 
     configured = {name: r for name, r in results.items() if r[1] != "not configured"}
     for name, (ok, note) in results.items():
-        print(f"  {name:9} {'sent' if ok else note}")
+        print(f"  {name:9} {'accepted' if ok else note}")
+        delivery_record(channel=name, summary=True, accepted=ok, note=note)
+        if not ok and note != 'not configured':
+            print(f"::warning::notify: {name} did not confirm the complete message")
 
     if not configured:
         # Not an error. It is how this behaves before anything is set up, and it

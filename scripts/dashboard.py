@@ -65,7 +65,7 @@ IST = timezone(timedelta(hours=5, minutes=30))
 # octagon — the wrong signal for the one outcome that means a gate did its job
 # and nothing is wrong. Amber now, so the phone can be read at a glance:
 # ✅ posted · ⏸ waiting for you · ⚠️ nothing today, nothing broken · ❌ broken.
-ICON = {"ok": "✅", "held": "⏸", "stopped": "⚠️", "error": "❌"}
+ICON = {"ok": "✅", "held": "⏸", "stopped": "⚠️", "blocked": "⚠️", "error": "❌"}
 
 # THE COLOUR KEY.
 #
@@ -75,7 +75,7 @@ ICON = {"ok": "✅", "held": "⏸", "stopped": "⚠️", "error": "❌"}
 # test_message.py asserts every emoji a message prints comes from here or from
 # REPLIES, because a key that is only a convention is one edit from being wrong.
 MARK = {
-    "ok": "🟢", "held": "🟠", "stopped": "🔴", "error": "🔴",
+    "ok": "🟢", "held": "🟠", "stopped": "🔴", "blocked": "🟠", "error": "🔴",
     "pass": "✔", "fail": "✘", "look": "⚠️", "no": "🚫", "problem": "❌",
     "what": "📝", "self": "🔁", "you": "💬", "idle": "⏰",
     "logs": "🔗", "note": "ℹ️", "eye": "👆",
@@ -90,6 +90,7 @@ TITLE = {
     "ok": "POSTED",
     "held": "READY — WAITING FOR YOU",
     "stopped": "NOTHING WAS POSTED",
+    "blocked": "NO NEW WORK STARTED",
     "error": "SOMETHING IS BROKEN",
 }
 
@@ -101,6 +102,7 @@ TITLE = {
 # and loses its emoji to 🚫: hiding the word would make the owner think it does
 # not exist, and they would go looking for it.
 REPLIES = {
+    "blocked": [("📋", "list", "Show what waits for your answer.")],
     "ok": [("📋", "list", "Show what waits for your answer.")],
     "held": [("✅", "publish {id}", "Post it now, as it is."),
              ("🗑", "rerun {id}", "Throw it away. Tonight builds another."),
@@ -116,6 +118,7 @@ REPLIES = {
 # What happens if the message is ignored. Asked on every alert this engine has
 # ever sent, and answered on none of them.
 IDLE = {
+    "blocked": "This request stays blocked. The saved attempt is unchanged.",
     "ok": "Nothing to do. The next run is {next}.",
     "held": "Nothing happens until you reply. It will not post on its own.",
     "stopped": "The next run starts {next}. Nothing is lost.",
@@ -579,6 +582,8 @@ def _assemble(status: str, slug: str | None, note: str, score: str | None,
 
     if status == "ok":
         lines += _body_ok(slug, esc, bold)
+    elif status == "blocked":
+        lines += [esc(part) for part in _wrap(note)]
     elif status == "held":
         lines += _body_held(note, score, objections or [], esc, bold)
     else:
@@ -777,7 +782,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--status", default="ok",
-                    choices=["ok", "held", "stopped", "error"])
+                    choices=["ok", "held", "stopped", "blocked", "error"])
     ap.add_argument("--slug")
     ap.add_argument("--note", default="",
                     help="the real reason, as run.py printed it. For a refusal "

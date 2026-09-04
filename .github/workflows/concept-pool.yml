@@ -1,0 +1,99 @@
+name: Keep the concept pool ready
+on:
+  schedule:
+    - cron: "30 23 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: suresilly-state
+  cancel-in-progress: false
+jobs:
+  topup:
+    if: vars.SS_HALT != '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SS_HALT: ${{ vars.SS_HALT }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    steps:
+      # Read the latest pool and refill claim under the shared state lock.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
+
+      # A refill is bounded by the pool ceiling and a saved 24-hour cooldown.
+      - name: Is a top-up due?
+        id: due
+        run: |
+          python scripts/concept_topup.py --low-only
+
+      - name: Prove more concepts
+        if: steps.due.outputs.due == 'yes'
+        run: |
+          echo "${{ steps.due.outputs.note }}"
+          # An empty result exits normally. A crash must remain a failed step.
+          python .agents/skills/suresilly-carousel/scripts/discovery.py \
+            --refresh --scan 250 --limit 25
+
+      - name: Record what was proved
+        if: always() && steps.due.outputs.due == 'yes'
+        run: |
+          git config user.name "suresilly-bot"
+          git config user.email "bot@suresilly.com"
+          for path in .agents/skills/suresilly-carousel/references/concepts.json \
+                      .agents/skills/suresilly-carousel/concept_demand.json \
+                      state/vendor_quotas.json state/flux_neurons.json; do
+            [ -e "$path" ] || continue
+            git add "$path"
+          done
+          if ! git diff --staged --quiet; then
+            git commit -m "auto: topped up the concept vocabulary [skip ci]"
+          fi
+          git pull --rebase --quiet
+          git push
+
+      - name: Keep unsaved top-up records
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topup-records-${{ github.run_id }}
+          include-hidden-files: true
+          path: |
+            .agents/skills/suresilly-carousel/references/concepts.json
+            .agents/skills/suresilly-carousel/concept_demand.json
+            state/vendor_quotas.json
+            state/flux_neurons.json
+
+      - name: Report a refill failure
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+        run: |
+          python -m pip install --quiet requests
+          python scripts/notify.py --subject "[SILLY-ERROR] Concept refill failed" \
+            --body "The concept refill failed. Check this run. Silence leaves the pool as it is; the next daily check can try again. https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      - name: Save message delivery records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: message-delivery-${{ github.run_id }}
+          path: ${{ runner.temp }}/suresilly-notifications.jsonl
+          if-no-files-found: ignore

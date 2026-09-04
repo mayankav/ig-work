@@ -34,7 +34,7 @@ try {
   await worker.scheduled(event, {GH_DISPATCH_TOKEN: "test"}, ctx);
   await Promise.all(pending);
   assert.equal(calls.length, 2);
-  assert.deepEqual(calls[0].inputs, {mode: "publish", slot_id: cases[0][2]});
+  assert.deepEqual(calls[0].inputs, {mode: "publish", slot_id: cases[0][2], request_id: `clock-${cases[0][2]}`});
   assert.deepEqual(calls[1].inputs, calls[0].inputs);
   assert.equal(calls[0].ref, "main");
   globalThis.fetch = async () => new Response(null, {status: 503});

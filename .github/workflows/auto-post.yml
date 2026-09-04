@@ -25,6 +25,11 @@ on:
         description: "Stable delivery id; leave blank for a manual run"
         required: false
         type: string
+      recover:
+        description: "Recover a failed slot after a fix, or resume its saved deck"
+        required: false
+        default: false
+        type: boolean
       retry:
         description: "Retry only a saved failure which can recover"
         required: false
@@ -33,6 +38,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
   pages: write
   id-token: write
 
@@ -49,7 +55,7 @@ jobs:
     timeout-minutes: 25
     outputs:
       accepted: ${{ steps.slot.outputs.accepted }}
-      deck_built: ${{ steps.build.outputs.slug != '' }}
+      deck_built: ${{ steps.build.outputs.slug != '' && steps.slot.outputs.resume_slug == '' }}
     env:
       SS_HALT: ${{ vars.SS_HALT }}
       # A scheduled run publishes. A manual run builds unless you say otherwise,
@@ -164,8 +170,19 @@ jobs:
           fi
           echo "state/ untouched by the suite"
 
+      - name: Restore the saved deck
+        id: restore
+        if: steps.slot.outputs.accepted == 'true' && steps.slot.outputs.resume_slug != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESUME_SLUG: ${{ steps.slot.outputs.resume_slug }}
+          RESUME_RUN: ${{ steps.slot.outputs.resume_run }}
+        run: python scripts/restore_deck.py
+
       - name: Build the deck
         id: build
+        env:
+          RESUME_SLUG: ${{ steps.restore.outputs.slug }}
         if: steps.slot.outputs.accepted == 'true'
         run: |
           # --force only when the run was dispatched with mode=force, which only
@@ -173,9 +190,25 @@ jobs:
           # reach it: MODE is 'publish' on a schedule. The forced deck is held by
           # run.py itself and every publish step below is gated on MODE ==
           # 'publish', so there are two independent reasons it cannot post.
+          if [ -n "$RESUME_SLUG" ]; then
+            echo "slug=$RESUME_SLUG" >> "$GITHUB_OUTPUT"
+            echo "deck=carousels/$RESUME_SLUG/carousel.md" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           FORCE=""
           if [ "$MODE" = "force" ]; then FORCE="--force"; fi
           python .agents/skills/suresilly-carousel/scripts/run.py --no-post $FORCE
+
+      - name: Save the exact deck for recovery
+        id: archive
+        if: always() && steps.build.outputs.slug != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-deck
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+          path: carousels/${{ steps.build.outputs.slug }}/
 
       # Instagram fetches the images itself, so they have to be public before
       # the post exists. This is why building and posting are separate steps
@@ -213,12 +246,16 @@ jobs:
 
       - name: Post to Instagram
         id: post
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish'
+        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.verdict != 'held'
         env:
+          RECOVER: ${{ inputs.recover && steps.slot.outputs.resume_slug != '' }}
+          SLOT_ID: ${{ steps.slot.outputs.slot_id }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
         run: |
-          python scripts/post_to_ig.py \
+          RECOVERY=""
+          if [ "$RECOVER" = "true" ]; then RECOVERY="--recover"; fi
+          python scripts/post_to_ig.py $RECOVERY \
             --carousel "${{ steps.build.outputs.deck }}" \
             --base-url "https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides"
 
@@ -355,7 +392,7 @@ jobs:
         env:
           STEPS_JSON: ${{ toJSON(steps) }}
           SLOT_ID: ${{ steps.slot.outputs.slot_id }}
-          SLUG: ${{ steps.build.outputs.slug }}
+          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
           VERDICT: ${{ steps.build.outputs.verdict }}
           REASON: ${{ steps.build.outputs.reason }}
           CAN_RETRY: ${{ steps.build.outputs.retry }}
@@ -368,7 +405,7 @@ jobs:
         if: always()
         env:
           STEPS_JSON: ${{ toJSON(steps) }}
-          SLUG: ${{ steps.build.outputs.slug }}
+          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
           VERDICT: ${{ steps.build.outputs.verdict }}
           REASON: ${{ steps.build.outputs.reason }}
           CAN_RETRY: ${{ steps.build.outputs.retry }}
@@ -402,7 +439,7 @@ jobs:
           # Read as data, never interpolated into the script. A ${{ }} expansion
           # of model-written text lands inside the shell as code — a reason
           # holding a backtick or a $( would run. As an env var it is a string.
-          SLUG: ${{ steps.build.outputs.slug }}
+          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
           VERDICT: ${{ steps.result.outputs.outcome }}
           REASON: ${{ steps.result.outputs.reason }}
           CAN_RETRY: ${{ steps.result.outputs.retryable }}
@@ -428,6 +465,13 @@ jobs:
           elif [ "$OUTCOME" = "duplicate" ]; then
             echo "### No repeated work: $REASON" >> "$GITHUB_STEP_SUMMARY"
             exit 0
+          elif [ "$OUTCOME" = "blocked" ]; then
+            SUBJECT="[SILLY-BLOCKED] No new work started"
+            BODY=$(python scripts/dashboard.py --status blocked --note "$REASON" --run-url "$RUN_URL")
+            HTML=$(python scripts/dashboard.py --status blocked --note "$REASON" --run-url "$RUN_URL" --format html)
+            ATTACH=""
+            echo "### No new work started" >> "$GITHUB_STEP_SUMMARY"
+            echo "$REASON" >> "$GITHUB_STEP_SUMMARY"
           elif [ "$OUTCOME" = "built" ]; then
             echo "### Built only: $SLUG. Not posted." >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -488,6 +532,14 @@ jobs:
             python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML"
           fi
 
+      - name: Save message delivery records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: message-delivery-${{ github.run_id }}
+          path: ${{ runner.temp }}/suresilly-notifications.jsonl
+          if-no-files-found: ignore
+
   # ── topping up the concept vocabulary ────────────────────────────────
   #
   # A separate job, and that is the whole point. Proving concepts takes about
@@ -504,6 +556,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      SS_HALT: ${{ vars.SS_HALT }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -511,11 +564,11 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
     steps:
-      # Checked out fresh, after the post job has pushed, so the deck it just
-      # built is counted.
+      # Read the latest pool and refill claim under the shared state lock.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -524,21 +577,11 @@ jobs:
       - name: Install
         run: pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
 
-      # Two conditions, and both have to hold. Every fifth deck is the schedule;
-      # the ceiling stops the pool growing without bound, because a top-up adds
-      # more than the five decks between top-ups spend.
+      # A refill is bounded by the pool ceiling and a saved 24-hour cooldown.
       - name: Is a top-up due?
         id: due
         run: |
-          python - <<'EOF' >> "$GITHUB_OUTPUT"
-          import sys
-          sys.path.insert(0, ".agents/skills/suresilly-carousel/scripts")
-          import discovery, memory
-          decks, pool = memory.used_count(), len(discovery.load_pool())
-          due = decks % 5 == 0 and pool < 60
-          print(f"due={'yes' if due else 'no'}")
-          print(f"note={decks} decks, {pool} concepts")
-          EOF
+          python scripts/concept_topup.py
 
       - name: Prove more concepts
         if: steps.due.outputs.due == 'yes'
