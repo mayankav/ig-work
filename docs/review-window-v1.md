@@ -56,3 +56,14 @@ The first live V1 preview exposed a content error: the deck claimed that minor t
 The reviewer now receives the exact source evidence and checks factual effects throughout the carousel and caption. The same live deck was rejected by Groq in a real recheck; the response is in `docs/source-audit/live-deck-recheck.json`. Writer instructions now forbid invented causes and promised effects. A saved whole-deck review is bound to the markdown, source record and current review code. V1 publication requires that record. Old previews without it stay blocked; changing artwork alone cannot fix unsupported text.
 
 Telegram accepted the preview and a later correction explaining the content hold. The owner signed in to Telegram. Their approve command reached the Worker and dispatched run 33896305256; it stopped before upload because the temporary pause was active. A real disapprove command then closed the preview; the bot confirmed cancellation. The pause was lifted after release 39a5ba0. Replacement recovery run 33896861923 uses the previously failed morning slot. The shared Cloudflare ledger reached 9,928.68 of 10,000 daily free neurons, leaving less than one 114.84-neuron image request. No paid use was enabled. Slide regeneration needs the next allowance. Code tests are separate from these pending live checks.
+
+
+## Live verification at 22:30 IST
+
+- Source release: `70afc0a`; whole-deck review release: `39a5ba0`; clear action errors: `9c0e460`, all pushed to main.
+- All 67 local Python suites and all Worker suites passed after the content changes. The latest recovery also passed its GitHub code tests.
+- Preview delivery: confirmed. Owner approval: received and dispatched. Its upload was blocked by the temporary pause before anything reached Instagram.
+- Cancellation: confirmed through the real Telegram conversation and successful run 33896847387. The old preview is cancelled, not waiting. `SS_HALT=0` restores the normal schedule.
+- Replacement run 33896861923 stopped during writing, before rendering or review delivery. Its three revisions had 8, 8, 8 faults. The saved result names repeated headings and prompt copying. The full rejected edit responses were not retained, so the exact cause of no progress is not proved. No identical retry was started.
+- Still unconfirmed: successful full redo, successful slide-image redo, automatic publication after a real hour, Instagram post ID/permalink and Telegram delivery of that permalink. No completion claim is made.
+- Next work: retain draft/repair responses on failure and inspect the rejected edits without starting another full posting run. Resume image testing after the free allowance resets; do not enable paid services or weaken checks.

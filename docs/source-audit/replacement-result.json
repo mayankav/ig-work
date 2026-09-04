@@ -1,0 +1,10 @@
+{
+  "stage": "generation",
+  "outcome": "stopped",
+  "fault_code": "quality_refused",
+  "reason": "slide 9 Closing thought copies 'do not have to' straight out of this prompt. That is an example showing you a shape, not words you may use. Write the line from the moment you were given; slide 1's H1 and slide 2's H2 are the same line: 'you watch the clock at 615pm and dread the food'. Keep one, and write the other from scratch; slide 3's [faults per attempt: 8, 8, 8]",
+  "retryable": false,
+  "published": false,
+  "slug": "",
+  "held": false
+}
