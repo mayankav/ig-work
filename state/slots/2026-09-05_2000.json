@@ -6,7 +6,16 @@
       "request_id": "clock-2026-09-05_2000",
       "run_id": "33972006695",
       "created_at": "2026-09-05T14:30:21Z",
-      "result": null,
+      "result": {
+        "stage": "tests",
+        "outcome": "error",
+        "fault_code": "gates_failed",
+        "reason": "Failed tests: test_coherence.py",
+        "retryable": false,
+        "published": false,
+        "slug": "",
+        "held": false
+      },
       "revision": "4462206fc34941f8102780214930e7986471bc77",
       "code_revision": "caf063d4993e274f4e37f878a29cc9a18235a3687a47ae1eb06eebd1e5c34851"
     }
