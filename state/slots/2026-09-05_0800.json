@@ -23,7 +23,16 @@
       "request_id": "gh-33939867641",
       "run_id": "33939867641",
       "created_at": "2026-09-05T02:43:11Z",
-      "result": null,
+      "result": {
+        "stage": "generation",
+        "outcome": "stopped",
+        "fault_code": "quality_refused",
+        "reason": "the override cannot apply to this deck: slide 5 Say copies 'before i sit down' straight out of this prompt. That is an example showing you a shape, not words you may use. Write the line from the moment you were given; slide 8 Callout copies 'before i sit down' straight out of this prompt. That is an example showing you a shape, not words  [these two faults are never overridable]",
+        "retryable": true,
+        "published": false,
+        "slug": "",
+        "held": false
+      },
       "revision": "1c9718a49711c8fa782144347cec21de7e5f5460",
       "code_revision": "efc13d8468db5d061fcd174d33d7441dc4b59b76e565f07aae8653ba3ebd620c"
     }
