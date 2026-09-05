@@ -9,7 +9,8 @@
     "20260902_6pm-picked-up_068b42",
     "20260903_6pm-carried-the_ca942f",
     "20260903_desk-cleared-my_7c11e0",
-    "20260904_kitchen-poured_39090b"
+    "20260904_kitchen-poured_39090b",
+    "20260905_sofa-swept-the_29016a"
   ],
   "anchors": {
     "action": [
@@ -56,7 +57,8 @@
       "20260901_door-unlocked-the_572b21"
     ],
     "7:15pm": [
-      "20260901_door-washed-the_cd4b3a"
+      "20260901_door-washed-the_cd4b3a",
+      "20260905_sofa-swept-the_29016a"
     ],
     "sink": [
       "20260901_door-washed-the_cd4b3a"
@@ -86,6 +88,9 @@
     ],
     "poured": [
       "20260904_kitchen-poured_39090b"
+    ],
+    "sofa": [
+      "20260905_sofa-swept-the_29016a"
     ]
   }
 }

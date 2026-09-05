@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "contract": "ed7b907149c444705a8c2e99c3609d709d183882e086645e0e24dde7d3f4bbf5",
+  "markdown_sha256": "fe6dfebb87410401af76cc2b2db9b01f952266afda04afbeb6b2db439cffbaa3",
+  "source_sha256": "5cc4f5733b15e6d39d99e32e06056d09a8eafa4b49e173c303d86f3a9508254a",
+  "written_by": "gemini",
+  "outcome": "publish",
+  "score": 85,
+  "reason": "This deck discusses the concept of focus drift and how it can affect individuals with executive dysfunction, using a relatable scenario of sweeping the rug at 7:15pm. The deck provides a source anchor from Edward M. Hallowell's book 'Driven to Distraction' and offers practical tips to help readers manage focus drift.",
+  "objections": [],
+  "style_notes": [
+    "slide 1's H1 and slide 2's H2 are the same line: 'the tools stay by the sofa until morning'. Keep one, and write the other from scratch",
+    "slide 3's Source Claim and slide 3's What This Explains Here are the same line: 'hallowell describes a man whose focus kept breaking '. Keep one, and write the other from scratch",
+    "slide 3 source is not specific enough"
+  ]
+}

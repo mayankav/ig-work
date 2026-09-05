@@ -1,0 +1,24 @@
+{
+  "policy": "owner-window-v1",
+  "token": "fdf4aa481c60a367",
+  "slug": "20260905_sofa-swept-the_29016a",
+  "files": {
+    "carousel.md": "fe6dfebb87410401af76cc2b2db9b01f952266afda04afbeb6b2db439cffbaa3",
+    "contact_sheet.png": "8480eee07e842fdc9b6cc9791b3c306f227b377b183e2e5aaf196394266627d0",
+    "slides/checks.json": "b5d52ebae363353e639d949c3019fc079fbd0f44eef39e7f3bdfb2bfa5caac09",
+    "slides/01_slide_1_hook.png": "b90fe7877445f229022e037eaf39d754c35b576f908cd5f46133f3acbdc3d441",
+    "slides/02_slide_2_agitation.png": "df3b3887c40b938595a44512c54b816593bcbb6df17f4e70be465bffa37c2876",
+    "slides/03_slide_3_source_anchor.png": "bf68bcbf324a3257208ccff8b0f3f61b39b2d304c1d7b969e57b442c0daba8d8",
+    "slides/04_slide_4_value_step_1.png": "e59fa566b14c311aaa98c3d9af6ab8709f820bd059589372f560f05a29330708",
+    "slides/05_slide_5_value_step_2.png": "baab78258f2cc90d3ddeaaa2d53537f3f504af5437ba03b0f862f2a36e1ab258",
+    "slides/06_slide_6_value_step_3.png": "3f5b6c60c383a5db4276e4183027472bad3b89bf7f4f27b49ad0cfc291f8f2e8",
+    "slides/07_slide_7_value_step_4.png": "86d9a6434a29568b995714aa666c54b6fb45d072d0edecaf16ed15c69a849396",
+    "slides/08_slide_8_cheat_sheet.png": "7a832db152001dabf2100c33f4526527531e9853b1dd0b9ad63aad3020928453",
+    "slides/09_slide_9_cta.png": "186341b9d3abad7f7f0300180d51eab54274d7c37e24c5889a0d76410c2d0420",
+    "content_review.json": "0f1ad9d2c876d8bb3ef4af986620d5a91c3e8964720e64487e620fe9e16508e0",
+    "caption.txt": "7ac00c0b58f05fac3ad7cb8ce15a178dd48bb3dd4d3bc85ae057e64efe325129",
+    "review_notes.txt": "ab613773337a7b86ad8ed30d91d9e4942b5b65ba73ad741dab797d21a6b32d58"
+  },
+  "parent": null,
+  "manifest": "3ecde04c22bcd31b967696b4165583dccc7400de6b8ece48205a48eb694812da"
+}

@@ -34,5 +34,12 @@
     "neurons": 229.68,
     "text_calls": 5,
     "text_neurons": 9699.0
+  },
+  "2026-09-05": {
+    "calls": 9,
+    "last": "owner-review fresh image",
+    "neurons": 1034.46,
+    "text_calls": 2,
+    "text_neurons": 2958.0
   }
 }
