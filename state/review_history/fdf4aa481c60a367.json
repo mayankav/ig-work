@@ -22,11 +22,17 @@
       "at": 1788579562822,
       "decision": "redo",
       "request_id": "tg-602066206"
+    },
+    {
+      "at": 1788581375449,
+      "decision": "redo",
+      "request_id": "tg-602066207"
     }
   ],
   "seen": {
     "tg-602066205": true,
-    "tg-602066206": true
+    "tg-602066206": true,
+    "tg-602066207": true
   },
   "issue_receipts": [
     84
@@ -36,18 +42,18 @@
   "delivered_at": 1788577221973,
   "deadline": 1788580821973,
   "action": {
-    "id": "rv-fdf4aa481c60a367-tg-602066206",
+    "id": "rv-fdf4aa481c60a367-tg-602066207",
     "decision": "redo",
     "slide": 0,
     "slides": [],
     "attempts": 1,
     "dispatched": true,
-    "retry_at": 1788580164134
+    "retry_at": 1788581976734
   },
   "claimed": false,
-  "claim_expires": 1788582008964,
+  "claim_expires": 1788583821467,
   "result": {
-    "action_id": "rv-fdf4aa481c60a367-tg-602066206",
+    "action_id": "rv-fdf4aa481c60a367-tg-602066207",
     "state": "held",
     "token": "fdf4aa481c60a367"
   }
