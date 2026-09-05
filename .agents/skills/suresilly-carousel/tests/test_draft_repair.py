@@ -153,3 +153,10 @@ def test_grammar_match_is_not_evidence_of_copied_content():
     assert writer.check_leak(text, {'do not have to'}) == []
     copied='### Slide 9 · CTA\n- **Closing thought:** A bicycle needs new tires.\n'
     assert writer.check_leak(copied, {'bicycle needs new tires'})
+
+
+def test_common_action_fragment_is_not_an_example_but_subject_words_are():
+    ordinary = '### Slide 5 · Script\n- **Say:** I will do this before I sit down.\n'
+    assert writer.check_leak(ordinary, {'before i sit down'}) == []
+    subject = '### Slide 5 · Script\n- **Say:** Move the cup to the sink.\n'
+    assert writer.check_leak(subject, {'move the cup to'})

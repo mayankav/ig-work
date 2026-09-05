@@ -2207,6 +2207,12 @@ LEAK_ALLOWED = ("send this to", "this to the", "to the friend")
 # A run made only of grammar words cannot identify a copied idea or example.
 # "do not have to" caused three identical failed repairs in run 33896861923.
 LEAK_GRAMMAR_WORDS = frozenset("a an the i you we they he she it do does did not no have has had to of in on at for and or but is are was were be been am can could will would should may might this that these those your our their its my his her".split())
+# A four-word fragment made of grammar plus one ordinary action does not carry
+# an example's subject or idea. Run 33939867641 was stopped by "before I sit
+# down", taken from a library-book example even though neither "library" nor
+# "book" survived. Two content words still identify the example and still fail.
+LEAK_COMMON_ACTIONS = frozenset("sit stand walk look talk wait start stop finish leave go come".split())
+LEAK_PARTICLES = frozenset("before after up down out off back away".split())
 
 
 def _ngrams(text: str, size: int) -> set[str]:
@@ -2260,7 +2266,11 @@ def check_leak(markdown: str, shown: set[str] | None = None) -> list[str]:
     for where, text in copy_lines(markdown):
         line = re.sub(r"\[\[|\]\]", "", text)
         for gram in sorted(_ngrams(line, LEAK_N) & shown):
-            if any(ok in gram for ok in LEAK_ALLOWED) or set(gram.split()) <= LEAK_GRAMMAR_WORDS:
+            words = set(gram.split())
+            informative = words - LEAK_GRAMMAR_WORDS - LEAK_PARTICLES
+            if (any(ok in gram for ok in LEAK_ALLOWED) or
+                    words <= LEAK_GRAMMAR_WORDS or
+                    len(informative) == 1 and informative <= LEAK_COMMON_ACTIONS):
                 continue
             problems.append(
                 f"{where} copies {gram!r} straight out of this prompt. That is an example "
