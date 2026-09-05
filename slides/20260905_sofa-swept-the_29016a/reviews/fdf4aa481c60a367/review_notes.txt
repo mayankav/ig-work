@@ -1,0 +1,3 @@
+- slide 1's H1 and slide 2's H2 are the same line: 'the tools stay by the sofa until morning'. Keep one, and write the other from scratch
+- slide 3's Source Claim and slide 3's What This Explains Here are the same line: 'hallowell describes a man whose focus kept breaking '. Keep one, and write the other from scratch
+- slide 3 source is not specific enough
