@@ -821,7 +821,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         novelty.record(fingerprint)
         bibliography.remember(slug, plan["citation_id"])
         if source == "concept":
-            discovery.remember(slug, best["id"])
+            discovery.remember(slug, selected["id"])
         memory.mark_used(moment, slug, mode=mode)
         say("recorded", "fingerprint written, moment retired")
 

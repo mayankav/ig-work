@@ -116,12 +116,23 @@ jobs:
         run: |
           git config user.name suresilly-bot
           git config user.email bot@suresilly.local
-          git add state/ carousels/ .agents/skills/suresilly-carousel/palette_history.json .agents/skills/suresilly-carousel/mascot/usage_history.json
+          for path in state carousels \
+                      .agents/skills/suresilly-carousel/mascot/poses.json \
+                      .agents/skills/suresilly-carousel/mascot/library \
+                      .agents/skills/suresilly-carousel/mascot/checks \
+                      .agents/skills/suresilly-carousel/mascot/usage_history.json \
+                      .agents/skills/suresilly-carousel/palette_history.json \
+                      .agents/skills/suresilly-carousel/citation_history.json \
+                      .agents/skills/suresilly-carousel/references/citations.json \
+                      .agents/skills/suresilly-carousel/concept_history.json; do
+            [ -e "$path" ] || continue
+            git add "$path"
+          done
           git diff --staged --quiet || git commit -m "review: save decision and receipts [skip ci]"
           git pull --rebase --quiet
           git push
       - name: Report an unfinished action
-        if: failure()
+        if: failure() && steps.act.outputs.result != 'replacement_ready'
         env:
           ACTION_REASON: ${{ steps.act.outputs.reason || 'Hosting, preview delivery or state saving failed. See the run for details.' }}
         run: |
