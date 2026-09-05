@@ -225,15 +225,21 @@ def draw_concept() -> dict:
     vocabulary knows what it is CALLED, which is the thing a harvested moment
     never arrives with.
     """
-    chosen = discovery.pick()
-    if not chosen:
+    candidates = []
+    avoided = discovery.recent()
+    for _ in range(3):
+        chosen = discovery.pick(avoid=avoided + [item["id"] for item in candidates])
+        if not chosen:
+            break
+        candidates.append(chosen)
+    if not candidates:
         # The one amber ending a retry cannot fix. The pool only refills when
         # the topup job runs, so offering "reply retry" here would be offering
         # a button that does nothing.
         raise Refused("no unused concept in the vocabulary. Run discovery.py "
                       "--refresh to prove more, or use the feed for this run",
                       retry=False)
-    return {"candidates": [chosen], "route": "concept", "fetched": 1,
+    return {"candidates": candidates, "route": "concept", "fetched": len(candidates),
             "tally": {}, "note": None}
 
 
@@ -690,9 +696,9 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             say("done", "looked only, nothing written or used")
             return 0
 
-        # One concept means one attempt. The feed hands over eight candidates
-        # and the loop below is built to spend up to five of them; a concept run
-        # has exactly one and must not report five failures after one.
+        # Try up to three proved concepts. A model can fail to turn one abstract
+        # term into a concrete scene; that must not make a full redo stop after
+        # one idea when other checked concepts are ready.
 
         # A moment that will not rewrite cleanly is not a failed run. The
         # firewall refuses often and on purpose — a rewrite that keeps eight of
@@ -708,14 +714,16 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
         # The judge sits inside this loop rather than after it because its
         # refusals are about the moment, not the deck. A moment with no feeling
         # in it is the next moment's problem to solve, not this run's.
-        moment = topic = judge_provider = reason = None
+        moment = topic = judge_provider = reason = selected = None
         refusals: list[str] = []
+        refusal_details: list[str] = []
         for attempt, candidate in enumerate(candidates[:MAX_ATTEMPTS], 1):
             try:
                 candidate_moment, candidate_topic = invent(candidate)
             except Skip as why:
                 say(f"attempt {attempt}", f"could not compose a moment: {str(why)[:70]}")
                 refusals.append("compose")
+                refusal_details.append(str(why))
                 continue
 
             # The judge answers one question: may this be published. The subject
@@ -731,9 +739,10 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
                 print(f"      judged: {candidate_moment.text[:104]}")
                 print(f"      reason: {str(why)[:104]}")
                 refusals.append("judge")
+                refusal_details.append(str(why))
                 continue
 
-            moment, reason, topic = candidate_moment, why, candidate_topic
+            moment, reason, topic, selected = candidate_moment, why, candidate_topic, candidate
             say("composed", f"on attempt {attempt}, the seed discarded")
             break
 
@@ -744,7 +753,8 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             # judge is the harvest, or a judge that has gone strict.
             where = ", ".join(f"{refusals.count(k)} at the {k}"
                               for k in ("compose", "judge") if refusals.count(k))
-            raise Refused(f"no moment survived {tried} attempts ({where})")
+            detail = f": {refusal_details[-1]}" if refusal_details else ""
+            raise Refused(f"no moment survived {tried} attempts ({where}){detail}")
 
         print(f"\n  moment  {moment.text}\n")
         say("safety judge", f"allowed by {judge_provider}, subject {topic}")
@@ -764,7 +774,7 @@ def run(mode: str, source: str = "feed", fresh: bool = True,
             # The field's name for the idea, on a concept run. It is what makes
             # a concept deck different from a harvested one: without it the
             # concept only picks the subject and is then thrown away.
-            term=best["term"] if source == "concept" else "",
+            term=selected["term"] if source == "concept" else "",
             # The owner standing in for a copy-craft gate, this run only, by an
             # explicit typed verb. It cannot reach a safety gate, an artwork gate,
             # the citation proof or the novelty check — those all run outside the

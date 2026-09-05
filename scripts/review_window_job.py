@@ -199,6 +199,28 @@ def run_child(args, **kwargs):
     return result
 
 
+def read_outputs(path):
+    """Read both GitHub's one-line and heredoc output formats."""
+    lines = Path(path).read_text().splitlines()
+    values = {}
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if '<<' in line:
+            name, end = line.split('<<', 1)
+            index += 1
+            body = []
+            while index < len(lines) and lines[index] != end:
+                body.append(lines[index])
+                index += 1
+            values[name] = '\n'.join(body)
+        elif '=' in line:
+            name, value = line.split('=', 1)
+            values[name] = value
+        index += 1
+    return values
+
+
 def act(token, action_id, deck):
     prior = window.api(token, 'status')
     if prior.get('state') == 'published' and prior.get('action', {}).get('id') == action_id:
@@ -233,8 +255,10 @@ def act(token, action_id, deck):
             with tempfile.NamedTemporaryFile() as outputs:
                 env['GITHUB_OUTPUT'] = outputs.name
                 run_child([sys.executable, str(ENGINE / 'run.py'), '--no-post', '--source', 'concept'], cwd=ROOT, env=env)
-                values = dict(line.split('=', 1) for line in Path(outputs.name).read_text().splitlines() if '=' in line)
-            if not values.get('review_token') or not values.get('slug'): raise ValueError('The new carousel did not pass its checks')
+                values = read_outputs(outputs.name)
+            if not values.get('review_token') or not values.get('slug'):
+                reason = values.get('reason') or 'The new carousel did not pass its checks'
+                raise ValueError(reason)
             revised = ROOT / 'carousels' / values['slug']
             replacement = json.loads((revised / 'slides/checks.json').read_text())
             old_hashes = {value['sha256'] for value in previous['artwork'].values()}

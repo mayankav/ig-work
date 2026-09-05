@@ -123,6 +123,30 @@ def test_child_failure_preserves_the_actual_reason(monkeypatch):
         job.run_child(['python','publisher.py'])
 
 
+def test_child_outputs_read_github_heredocs(tmp_path):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[4]/'scripts'))
+    import review_window_job as job
+    path = tmp_path / 'outputs'
+    path.write_text('reason<<END\nno moment survived: no place\nEND\nverdict=refused\n')
+    assert job.read_outputs(path) == {
+        'reason': 'no moment survived: no place',
+        'verdict': 'refused',
+    }
+
+
+def test_concept_run_has_three_checked_ideas(monkeypatch):
+    import run as runner
+    concepts = [{'id': str(n), 'term': f'term-{n}'} for n in range(1, 5)]
+    monkeypatch.setattr(runner.discovery, 'recent', lambda: ['old'])
+    monkeypatch.setattr(
+        runner.discovery, 'pick',
+        lambda avoid=None: next((item for item in concepts if item['id'] not in set(avoid or [])), None),
+    )
+    result = runner.draw_concept()
+    assert [item['id'] for item in result['candidates']] == ['1', '2', '3']
+    assert result['fetched'] == 3
+
+
 def test_caption_is_frozen_and_changes_break_approval(deck):
     before=window.read(deck)
     assert 'caption.txt' in before['files']
