@@ -881,6 +881,40 @@ def validate_plan(plan: dict, moment: str, topic: str, term: str = "", *, requir
     return problems
 
 
+def blocking_plan_faults(plan: dict, topic: str) -> list[str]:
+    """Return only faults that make a preview unsafe or impossible to build.
+
+    Wording, length, order of ideas, hooks, scripts, and labels are visible to
+    the owner and belong in the review report. The outline may not bypass its
+    fixed nine-slide shape or use an unproved source claim.
+    """
+    problems: list[str] = []
+    beats = plan["beats"]
+    if [b["n"] for b in beats] != list(range(1, 10)):
+        problems.append("the beats are not numbered 1 to 9 in order")
+    if [b["role"] for b in beats] != list(ROLES):
+        problems.append("the beats are not in the fixed role order")
+    for number, beat in enumerate(beats, 1):
+        links = beat["depends_on"]
+        if len(set(links)) != len(links) or any(link >= number or link < 1 for link in links):
+            problems.append(f"slide {number} must depend only on distinct earlier slides")
+
+    citations = load_citations()
+    citation = citations.get(plan["citation_id"])
+    if not citation:
+        problems.append(f"citation {plan['citation_id']!r} is not on the allowlist")
+    elif plan["claim_index"] >= len(citation["claims"]):
+        problems.append(f"claim {plan['claim_index']} does not exist for {plan['citation_id']}")
+    elif topic not in citation["pillars"]:
+        problems.append(f"{plan['citation_id']} does not cover {topic}")
+    else:
+        try:
+            bibliography.require_claim_support(citation, plan["claim_index"])
+        except bibliography.Unverified as why:
+            problems.append(str(why))
+    return problems
+
+
 CONCRETE = re.compile(r"\d|\bclock|phone|inbox|bed|kitchen|desk|email|text|message|"
                       r"chest|heart|stomach|door|screen|laptop|car\b", re.I)
 
@@ -1054,10 +1088,8 @@ def plan_deck(moment: str, topic: str, term: str = "", review_plan: bool = False
     # Same trajectory rule as the draft loop below: a fault count that stopped
     # falling is a gate no wording satisfies, and offering a retry into it wastes
     # a run. The trail rides on the exception so the alert can print it.
-    reviewable = (best_problems and all(problem.startswith(
-        ("the cheat sheet exports something new:", "not one hook is usable —"))
-        for problem in best_problems))
-    if review_plan and best_plan is not None and reviewable:
+    if (review_plan and best_plan is not None and
+            not blocking_plan_faults(best_plan, topic)):
         return best_plan, axes, original_provider, list(dict.fromkeys(best_problems))
     shape, _ = outcomes.trajectory(history)
     raise Refused(

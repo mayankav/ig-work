@@ -128,10 +128,35 @@ def test_owner_review_keeps_only_reviewable_outline_faults(monkeypatch):
     assert writer.best_hook(kept, kept["scene_token"], allow_review=True) in kept["hooks"]
 
 
-def test_owner_review_never_overrides_source_or_protocol_faults():
+def test_owner_review_never_overrides_source_or_broken_shape():
     plan = valid()
     plan["citation_id"] = "not-a-source"
-    faults = writer.validate_plan(plan, MOMENT, "sleep")
-    assert any("allowlist" in fault for fault in faults)
-    assert not all(fault.startswith(("the cheat sheet exports something new:",
-                                     "not one hook is usable —")) for fault in faults)
+    assert any("allowlist" in fault for fault in writer.blocking_plan_faults(plan, "sleep"))
+    plan = valid()
+    plan["beats"][4]["n"] = 7
+    assert "the beats are not numbered 1 to 9 in order" in writer.blocking_plan_faults(plan, "sleep")
+
+
+def test_owner_review_accepts_all_visible_outline_faults(monkeypatch):
+    plan = valid()
+    source = writer.load_citations()[plan["citation_id"]]
+    monkeypatch.setattr(writer.bibliography, "discover", lambda *a: (None, []))
+    monkeypatch.setattr(writer.bibliography, "recent", lambda: [])
+    monkeypatch.setattr(writer.bibliography, "supported_indices", lambda c: [0])
+    monkeypatch.setattr(writer.bibliography, "require_claim_support", lambda *a: None)
+    monkeypatch.setattr(writer, "citations_for", lambda *a: [source])
+    monkeypatch.setattr(writer, "recent_formulas", lambda: [])
+    plan["pattern_name"] = "alexithymia"
+    for hook in plan["hooks"]:
+        hook["h1"] = "This entire long cover line cannot fit on the card at all"
+    expected = writer.validate_plan(plan, MOMENT, "sleep", require_support=True)
+    assert expected and not writer.blocking_plan_faults(plan, "sleep")
+    calls = []
+    def ask(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            return deepcopy(plan), "gemini"
+        return {"edits": [{"path": "/field_1", "value": "unchanged", "fault": "fault-1"}]}, "gemini"
+    monkeypatch.setattr(writer.llm, "ask", ask)
+    kept, _, _, notes = writer.plan_deck(MOMENT, "sleep", review_plan=True)
+    assert kept == plan and notes == expected
