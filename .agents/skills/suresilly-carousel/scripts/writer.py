@@ -1884,10 +1884,10 @@ def hard_faults(markdown: str) -> list[str]:
                       own instructions, including a sentence the prompt quotes
                       in order to forbid it. A human saying "post it anyway"
                       cannot make that stop being plagiarised from ourselves.
-      check_mascots   a brief asks for lettering in the artwork (invariants 3,
-                      28). It is refused here, before any art is drawn, and
-                      again at render by cutout.assert_no_text. Overriding this
-                      one would put text on the mascot.
+      mascot lettering a brief asks for text in the artwork (invariants 3, 28).
+                      It is refused here, before any art is drawn, and again at
+                      render by cutout.assert_no_text. Other mascot-writing
+                      faults are review notes because the owner can judge them.
 
     Everything else genuinely dangerous is out of reach of an override already,
     because it runs somewhere else entirely: the citation is proved in
@@ -1896,8 +1896,16 @@ def hard_faults(markdown: str) -> list[str]:
     and the pixel gates run at render. So this list is short by construction —
     it is only the non-craft checks that happen to live INSIDE this loop.
     """
-    return check_leak(markdown) + check_mascots(
-        re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown))
+    problems = check_leak(markdown)
+    briefs = re.findall(r"(?m)^- \*\*Mascot:\*\* (.+)$", markdown)
+    for i, brief in enumerate(briefs, 1):
+        found = MASCOT_TEXT.search(brief)
+        if found:
+            problems.append(
+                f"mascot {i} puts text or a number in the artwork: "
+                f"{found.group(0)!r} in {brief[:60]!r}. Describe what the "
+                f"donkey DOES instead — no quoted words, no lettering")
+    return problems
 
 
 def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
@@ -2095,7 +2103,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         raise Refused(
             "the override cannot apply to this deck: "
             + "; ".join(dict.fromkeys(blocking))[:300]
-            + " [these two faults are never overridable]",
+            + " [these faults are never overridable]",
             retry=True, history=history)
 
     # Refused, not llm.ModelRefused — see the matching raise at the end of

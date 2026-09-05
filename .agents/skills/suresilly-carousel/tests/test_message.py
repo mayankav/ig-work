@@ -384,6 +384,15 @@ def run() -> int:
         failures.append("FORCE hard_faults fired on an ordinary brief, so force "
                         "can never override anything")
 
+    # Posture wording and repeated scene wording are visible review issues. They
+    # do not request unsafe artwork and must not stop an owner review preview.
+    reviewable = "\n".join(
+        f"## Slide {number}\n\n- **Mascot:** A small donkey looks relaxed beside a chair"
+        for number in range(1, 10)
+    )
+    if writer.hard_faults(reviewable):
+        failures.append("FORCE hard_faults blocked reviewable mascot wording")
+
     # And the flag itself is opt-in: an ordinary run is byte-identical to before.
     import inspect
     signature = inspect.signature(writer.write_deck)
