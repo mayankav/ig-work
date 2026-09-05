@@ -1,0 +1,11 @@
+{
+  "deck_slug": "20260905_00pm-at_306196",
+  "container_id": "18116963285303983",
+  "status": "publication_requested",
+  "requested_at": "2026-09-05T05:34:25.147621+00:00",
+  "artifacts": {
+    "carousels/20260905_00pm-at_306196/carousel.md": "b8b3b8edcd872e7cb20310ed1100f936bd01ac2a910d711e1939954fa0bd93e8",
+    "carousels/20260905_00pm-at_306196/contact_sheet.png": "8fdbc969b6435adedb70c53b5f51ca2d60f5f9dc079c3edf08fd3202897b598a",
+    "carousels/20260905_00pm-at_306196/slides/checks.json": "9c7eee317455724ec4292d9b73130a37943367c5f3a5fa63856dad379bfac980"
+  }
+}
