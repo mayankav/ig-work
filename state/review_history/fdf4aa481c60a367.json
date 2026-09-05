@@ -10,15 +10,39 @@
   ],
   "manual_required": false,
   "resources": "Resources \u2014 05 Sep 2026 08:30 IST\nCloudflare AI: 3,992.46/10,000 units used; 6,007.54 left (recorded use).\nCloudflare reset: 06 Sep 2026 05:30 IST.\nGemini data: 05 Sep 2026 08:27 IST.\n  gemini-2.5-flash: 33 requests recorded; limit reached.\n  gemini-2.5-flash-lite: 31 requests recorded; limit reached.\n  gemini-3.1-flash-lite: 3 requests recorded.\n  gemini-3.5-flash-lite: 47 requests recorded.\nGemini remaining: unknown; no account ceiling reported.\nGemini daily reset: 05 Sep 2026 12:30 IST.\nGroq openai/gpt-oss-120b \u2014 data: 04 Sep 2026 22:58 IST.\n  requests: 999/1000 left at that reading.\n  Full refill if unused: 04 Sep 2026 22:59 IST.\n  tokens: 3671/8000 left at that reading.\n  Full refill if unused: 04 Sep 2026 22:58 IST.\nInstagram API allowance: remaining and reset unknown; no reading available.\nTelegram API: daily remaining not reported; any retry delay is handled from its response.\nOld readings are not live balances; other use may reduce what remains.",
-  "state": "waiting",
+  "state": "held",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1788577507874,
+      "decision": "redo",
+      "request_id": "tg-602066205"
+    }
+  ],
+  "seen": {
+    "tg-602066205": true
+  },
   "issue_receipts": [
     84
   ],
   "resources_accepted": true,
   "message_id": 83,
   "delivered_at": 1788577221973,
-  "deadline": 1788580821973
+  "deadline": 1788580821973,
+  "action": {
+    "id": "rv-fdf4aa481c60a367-tg-602066205",
+    "decision": "redo",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1788578109365
+  },
+  "claimed": false,
+  "claim_expires": 1788579955228,
+  "result": {
+    "action_id": "rv-fdf4aa481c60a367-tg-602066205",
+    "state": "held",
+    "token": "fdf4aa481c60a367"
+  }
 }
