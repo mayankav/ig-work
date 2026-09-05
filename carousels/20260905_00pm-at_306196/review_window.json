@@ -1,0 +1,24 @@
+{
+  "policy": "owner-window-v1",
+  "token": "c51b1ae256f2370b",
+  "slug": "20260905_00pm-at_306196",
+  "files": {
+    "carousel.md": "b8b3b8edcd872e7cb20310ed1100f936bd01ac2a910d711e1939954fa0bd93e8",
+    "contact_sheet.png": "8fdbc969b6435adedb70c53b5f51ca2d60f5f9dc079c3edf08fd3202897b598a",
+    "slides/checks.json": "9c7eee317455724ec4292d9b73130a37943367c5f3a5fa63856dad379bfac980",
+    "slides/01_slide_1_hook.png": "0be9661ff814fb0b6f91bacff5d4ac3c2164234a6f550a33d23f0fbc143ed864",
+    "slides/02_slide_2_agitation.png": "705005062f999b131a7d71d193f4c2684529bbc36ca2c9f7cbcf366a4fa7c1b0",
+    "slides/03_slide_3_source_anchor.png": "153133d91d147f4a6f28203742c3bc5b4d1ea0fe2d5a2c95773bb541ccb38a70",
+    "slides/04_slide_4_value_step_1.png": "4538f3229a702c5423d63da434d5c01b72fa854c97c613f833e6c93dbab59710",
+    "slides/05_slide_5_value_step_2.png": "2df4403225a4ae9a83fc67a3a67bbb8a1c2574f0c71be7121a454559c11fbf45",
+    "slides/06_slide_6_value_step_3.png": "bf2f51c53bd56b128b18afcb29c36cc17953183ff8f93a0b5e9bba88600f517b",
+    "slides/07_slide_7_value_step_4.png": "fb17ed24f0b5aba74448e248c8b9db1e1bec7ef0f318e125d457fe5bea1bc570",
+    "slides/08_slide_8_cheat_sheet.png": "f58ec46098dc35e3ffe54bed9bfa5fcdfbe39e3698bc436c3519622fcd13db59",
+    "slides/09_slide_9_cta.png": "fb8253f6320a167d4f58ff317a72964aa793874fe7029b39002248e101299447",
+    "content_review.json": "ac96750527dc3ae25d0836bf8189dd177e1aab8efb77d0598455696e7daa383c",
+    "caption.txt": "1c75929ca265a74616037c8eb58a70ae0617e0e4c5a95bebb40855aca799ba97",
+    "review_notes.txt": "ca6ba7240d32d331395e3d727121f6602e85c00e09ee03fc906cb5e41903fca9"
+  },
+  "parent": null,
+  "manifest": "f272e240980726aa7b7b38eccb7b5fc95d40c8e20d112056383efb22b3735efc"
+}

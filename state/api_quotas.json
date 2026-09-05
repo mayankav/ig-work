@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-09-05T05:34:31.989138+00:00",
+  "instagram": {
+    "quota_usage": 0,
+    "config": {
+      "quota_total": 100,
+      "quota_duration": 86400
+    }
+  }
+}
