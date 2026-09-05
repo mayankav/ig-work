@@ -99,3 +99,39 @@ def test_live_outline_path_repairs_fields_with_original_provider(monkeypatch, st
         assert len(calls) == 2 and provider == "gemini"
         assert not check(fixed)
         assert fixed["hooks"] == plan["hooks"] and fixed["citation_id"] == plan["citation_id"]
+
+
+def test_owner_review_keeps_only_reviewable_outline_faults(monkeypatch):
+    plan = valid()
+    source = writer.load_citations()[plan["citation_id"]]
+    monkeypatch.setattr(writer.bibliography, "discover", lambda *a: (None, []))
+    monkeypatch.setattr(writer.bibliography, "recent", lambda: [])
+    monkeypatch.setattr(writer.bibliography, "supported_indices", lambda c: [0])
+    monkeypatch.setattr(writer.bibliography, "require_claim_support", lambda *a: None)
+    monkeypatch.setattr(writer, "citations_for", lambda *a: [source])
+    monkeypatch.setattr(writer, "recent_formulas", lambda: [])
+    for hook in plan["hooks"]:
+        hook["h2"] = "this subtitle has far too many words to fit"
+    faults = writer.validate_plan(plan, MOMENT, "sleep", require_support=True)
+    assert len(faults) == 1 and faults[0].startswith("not one hook is usable")
+    calls = []
+    def ask(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 1:
+            return deepcopy(plan), "gemini"
+        # A vendor that makes no progress must not cause an endless retry.
+        return {"edits": [{"path": "/field_1", "value": "unchanged", "fault": "fault-1"}]}, "gemini"
+    monkeypatch.setattr(writer.llm, "ask", ask)
+    kept, _, provider, notes = writer.plan_deck(MOMENT, "sleep", review_plan=True)
+    assert kept == plan and provider == "gemini" and notes == faults
+    assert len(calls) == 3
+    assert writer.best_hook(kept, kept["scene_token"], allow_review=True) in kept["hooks"]
+
+
+def test_owner_review_never_overrides_source_or_protocol_faults():
+    plan = valid()
+    plan["citation_id"] = "not-a-source"
+    faults = writer.validate_plan(plan, MOMENT, "sleep")
+    assert any("allowlist" in fault for fault in faults)
+    assert not all(fault.startswith(("the cheat sheet exports something new:",
+                                     "not one hook is usable —")) for fault in faults)

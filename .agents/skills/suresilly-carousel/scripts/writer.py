@@ -885,7 +885,7 @@ CONCRETE = re.compile(r"\d|\bclock|phone|inbox|bed|kitchen|desk|email|text|messa
                       r"chest|heart|stomach|door|screen|laptop|car\b", re.I)
 
 
-def best_hook(plan: dict, token: str = "") -> dict:
+def best_hook(plan: dict, token: str = "", allow_review: bool = False) -> dict:
     """The best usable hook, which is not simply the shortest one.
 
     A cover has to be one breath, so length matters. But "The maths started" is
@@ -898,12 +898,18 @@ def best_hook(plan: dict, token: str = "") -> dict:
         return (not has_token, not bool(CONCRETE.search(h1)), len(_words(h1)))
 
     usable = [h for h in plan["hooks"] if hook_ok(h, plan.get("pattern_name", "").strip())]
+    if not usable and allow_review:
+        # V1 shows the least-bad cover and every remaining fault to the owner.
+        # This is only reached after plan_deck has proved that the outstanding
+        # plan faults are reviewable writing/structure notes rather than source
+        # or safety failures.
+        usable = list(plan["hooks"])
     if not usable:
         raise Refused("No usable scene-first cover remains", retry=False)
     return sorted(usable, key=rank)[0]
 
 
-def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]:
+def plan_deck(moment: str, topic: str, term: str = "", review_plan: bool = False):
     """Plan one deck. Returns (plan, axes, provider), or raises.
 
     `term` is the field's name for the idea, when the deck was built from a
@@ -1016,7 +1022,7 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
                 temperature=0.4, providers=providers)
             plan, problems = plan_repair.apply(best_plan, best_problems, reply, plan_schema, checked_outline)
         if not problems:
-            return plan, axes, provider
+            return (plan, axes, provider, []) if review_plan else (plan, axes, provider)
         history.append(len(problems))
         signatures.append(outcomes.fault_signature(problems))
         if best_problems is None or len(problems) < len(best_problems):
@@ -1048,6 +1054,11 @@ def plan_deck(moment: str, topic: str, term: str = "") -> tuple[dict, dict, str]
     # Same trajectory rule as the draft loop below: a fault count that stopped
     # falling is a gate no wording satisfies, and offering a retry into it wastes
     # a run. The trail rides on the exception so the alert can print it.
+    reviewable = (best_problems and all(problem.startswith(
+        ("the cheat sheet exports something new:", "not one hook is usable —"))
+        for problem in best_problems))
+    if review_plan and best_plan is not None and reviewable:
+        return best_plan, axes, original_provider, list(dict.fromkeys(best_problems))
     shape, _ = outcomes.trajectory(history)
     raise Refused(
         f"{'; '.join(dict.fromkeys(best_problems or []))[:340]} "
@@ -1922,12 +1933,21 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
     written, so the one thing this page cannot afford to get wrong is not
     something a model is able to get wrong.
     """
-    plan, axes, _ = plan_deck(moment, topic, term=term)
+    if review_draft:
+        planned = plan_deck(moment, topic, term=term, review_plan=True)
+        # Test and extension callers written before plan notes return the
+        # original three values. Treat that as a clean outline.
+        plan, axes, _ = planned[:3]
+        plan_notes = planned[3] if len(planned) > 3 else []
+    else:
+        plan, axes, _ = plan_deck(moment, topic, term=term)
+        plan_notes = []
     citation = load_citations()[plan["citation_id"]]
     # A second boundary protects against a changed pool and applies to force.
     bibliography.require_claim_support(citation, plan["claim_index"])
     claim = citation["claims"][plan["claim_index"]]
-    hook = best_hook(plan, plan["scene_token"])
+    hook = (best_hook(plan, plan["scene_token"], True) if plan_notes
+            else best_hook(plan, plan["scene_token"]))
 
     # The scene is handed to the model because a gate has always enforced it and
     # nothing ever stated it. The draft was rejected for naming a kitchen by a
@@ -2034,7 +2054,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
             copy, problems = draft_repair.apply(best_copy, best_problems, reply, schema, checked)
         markdown = assembled(copy)
         if not problems:
-            return markdown, plan, axes, wrote, []
+            return markdown, plan, axes, wrote, plan_notes
         history.append(len(problems))
         signatures.append(outcomes.fault_signature(problems))
         if best_problems is None or len(problems) < len(best_problems):
@@ -2069,7 +2089,7 @@ def write_deck(moment: str, topic: str, title: str, pattern: str, pillar: str,
         blocking = hard_faults(best_markdown)
         if not blocking:
             return (best_markdown, plan, axes, best_wrote,
-                    list(dict.fromkeys(best_problems or [])))
+                    list(dict.fromkeys(plan_notes + (best_problems or []))))
         # Refused for a different reason than running out of attempts, and the
         # message has to say so — otherwise the owner types `force` again.
         raise Refused(
