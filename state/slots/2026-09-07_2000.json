@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "slot_id": "2026-09-07_2000",
+  "attempts": [
+    {
+      "request_id": "clock-2026-09-07_2000",
+      "run_id": "34133314903",
+      "created_at": "2026-09-07T14:30:22Z",
+      "result": null,
+      "revision": "ebc44c8e6119751fed1c2e762f6ba309ddbde6fc",
+      "code_revision": "caf063d4993e274f4e37f878a29cc9a18235a3687a47ae1eb06eebd1e5c34851"
+    }
+  ]
+}
