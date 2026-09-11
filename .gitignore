@@ -1,51 +1,26 @@
 __pycache__/
 *.pyc
 .venv/
-.next/
 node_modules/
+.pytest_cache/
 
-# Local credentials. Never committed. Create it yourself:
-#   printf 'GROQ_API_KEY=gsk_...\n' > .env.local
-# llm.py reads this file directly, so nothing has to be exported first.
+# Local credentials. Never committed. Example:
+#   printf 'GEMINI_API_KEY=...\nGROQ_API_KEY=...\n' > .env.local
 .env.local
 .env
 
-# The rendered slides. Instagram fetches each image once, at container creation,
-# and serves the post from its own CDN afterwards, so the copy in git is written
-# and never read. Nine PNGs is 5.6 MB per deck, twice a day, in permanent
-# history. What is worth keeping is the markdown, the published id and the
-# contact sheet — and by invariant 8 the contact sheet is what a deck is judged
-# by anyway.
-#
-# One exception, and auto-post.yml makes it: a deck held for review can be
-# posted days later from a fresh checkout, and post_to_ig.py builds its URLs
-# from the local filenames, so the slides of anything still in state/pending are
-# force-added.
-carousels/*/slides/*.png
+# Rendered slides live in the review artifact and on media.suresilly.com; the repo
+# keeps post.json, caption.txt and contact_sheet.png.
+posts/*/slides/
 
-# The per-deck mascot working folder, for the same reason and a bigger number.
-#
-# With generation on by default (invariant 2), every deck writes the raw frame
-# and the library candidate for each of its nine poses into carousels/<slug>/
-# mascot/. That measured 2.6 MB for two generated poses, so about 7.3 MB a deck
-# and ~15 MB a day in permanent history — the same order as the slides problem
-# that invariant 18 exists to stop, arriving through a different folder.
-#
-# Nothing is lost by ignoring it. A generated pose ALSO goes into
-# mascot/library/ through import_poses.py, where the library's own gates and
-# matte decide, and that copy is committed and reused by every later deck. The
-# per-deck folder is the intermediate, not the artwork.
-carousels/*/mascot/
-
-# The gh-pages working copy the retention step clones into. It is the published
-# branch, checked out beside the repo, and it is never part of main.
+# Working copies the workflows create.
+/.review-host/
 /gh-pages/
 
-# Immutable review revision staged for the public media host.
-/.review-host/
-
-# Local research output and downloaded model runtimes. Curated evidence belongs
-# in docs/; these folders can contain large binaries and publisher excerpts.
+# Local scratch.
 /output/
 /tmp/
-docs/image-detail-trials/**/screen.lock
+
+# Output the old engine left on local disks. Kept out of main.
+/carousels/
+/docs/image-detail-trials/

@@ -86,7 +86,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import instagram_api  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CAROUSELS_DIR = REPO_ROOT / "carousels"
+CAROUSELS_DIR = REPO_ROOT / "posts"
 STATE_DIR = REPO_ROOT / "state"
 INSIGHTS_PATH = STATE_DIR / "insights.jsonl"
 

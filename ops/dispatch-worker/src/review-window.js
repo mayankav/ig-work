@@ -6,6 +6,22 @@ export const REVIEW_TOKEN = /^[a-f0-9]{16}$/;
 const SLUG = /^[a-zA-Z0-9_-]{1,140}$/;
 const json = (value, status = 200) => Response.json(value, { status });
 
+// Slide URLs must sit inside this exact preview's folder on the media host.
+export function validPhotos(photos, slug, token) {
+  const prefix = `https://media.suresilly.com/slides/${slug}/reviews/${token}/slides/`;
+  return Array.isArray(photos) && photos.length >= 1 && photos.length <= 9 &&
+    photos.every(url => typeof url === 'string' && url.startsWith(prefix) && /^[0-9]{2}\.(jpg|png)$/.test(url.slice(prefix.length)));
+}
+
+async function telegram(env, method, body) {
+  const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, signal: AbortSignal.timeout(20000),
+    body: JSON.stringify({chat_id: env.TELEGRAM_CHAT_ID, ...body})});
+  const receipt = await response.json();
+  if (!response.ok || receipt.ok !== true) throw new Error('No Telegram receipt');
+  return Array.isArray(receipt.result) ? receipt.result[receipt.result.length - 1] : receipt.result;
+}
+
 export function parseWindowReply(text, replyText = '') {
   const match = /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)(?:\s+([a-f0-9]{16}))?(?:\s+(.+?))?\s*$/i.exec(text || '');
   if (!match) return null;
@@ -37,8 +53,9 @@ export class ReviewWindow {
     if (route === '/register') {
       if (!REVIEW_TOKEN.test(input.token || '') || !SLUG.test(input.slug || '') ||
           !/^[0-9]+$/.test(String(input.run_id || '')) || !/^[a-f0-9]{64}$/.test(input.manifest || '') ||
-          typeof input.caption !== 'string' || input.caption.length > 1000 ||
-          !input.caption.includes(`Review ID: ${input.token}`)) return json({error: 'Invalid preview'}, 400);
+          typeof input.caption !== 'string' || input.caption.length > (input.photos ? 3900 : 1000) ||
+          !input.caption.replace(/<[^>]+>/g, '').includes(`Review ID: ${input.token}`)) return json({error: 'Invalid preview'}, 400);
+      if (input.photos !== undefined && !validPhotos(input.photos, input.slug, input.token)) return json({error: 'Invalid preview photos'}, 400);
       const url = new URL(input.sheet_url);
       if (url.origin !== 'https://media.suresilly.com' || url.search || url.hash ||
           url.pathname !== `/slides/${input.slug}/reviews/${input.token}/contact_sheet.png`) return json({error: 'Invalid preview URL'}, 400);
@@ -51,11 +68,23 @@ export class ReviewWindow {
       await this.ctx.storage.put('review', record);
       let receipt;
       try {
-        const response = await fetch(`https://api.telegram.org/bot${this.env.TELEGRAM_BOT_TOKEN}/sendDocument`, {
-          method: 'POST', headers: {'Content-Type': 'application/json'}, signal: AbortSignal.timeout(15000),
-          body: JSON.stringify({chat_id: this.env.TELEGRAM_CHAT_ID, document: input.sheet_url, caption: input.caption})});
-        receipt = await response.json();
-        if (!response.ok || receipt.ok !== true || !Number.isSafeInteger(receipt.result?.message_id)) throw new Error('No Telegram receipt');
+        if (input.photos) {
+          // The real slides as a swipeable album, then the card you reply to.
+          if (!record.album_sent) {
+            await telegram(this.env, input.photos.length === 1 ? 'sendPhoto' : 'sendMediaGroup',
+              input.photos.length === 1 ? {photo: input.photos[0]} : {media: input.photos.map(url => ({type: 'photo', media: url}))});
+            record.album_sent = true; await this.ctx.storage.put('review', record);
+          }
+          receipt = {result: await telegram(this.env, 'sendMessage', {text: input.caption, parse_mode: input.html ? 'HTML' : undefined,
+            link_preview_options: {is_disabled: true}})};
+        } else {
+          const response = await fetch(`https://api.telegram.org/bot${this.env.TELEGRAM_BOT_TOKEN}/sendDocument`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, signal: AbortSignal.timeout(15000),
+            body: JSON.stringify({chat_id: this.env.TELEGRAM_CHAT_ID, document: input.sheet_url, caption: input.caption})});
+          receipt = await response.json();
+          if (!response.ok || receipt.ok !== true) throw new Error('No Telegram receipt');
+        }
+        if (!Number.isSafeInteger(receipt.result?.message_id)) throw new Error('No Telegram receipt');
       } catch {
         record.state = 'delivery_failed'; await this.ctx.storage.put('review', record);
         return json({error: 'Telegram did not confirm the preview. No automatic posting.'}, 502);
@@ -76,7 +105,8 @@ export class ReviewWindow {
         }
       } catch {record.state='delivery_failed';await this.ctx.storage.put('review',record);return json({error:'Issue report delivery failed. Posting remains paused.'},502);}
       // Resource delivery is informational: it cannot reopen or veto approval.
-      try {
+      // An empty string means the caller wants no quota message at all.
+      if (input.resources !== '') try {
         const summary = typeof input.resources === 'string' && input.resources.length <= 3000 ? input.resources : await resources(this.env);
         const response = await fetch(`https://api.telegram.org/bot${this.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST', headers: {'Content-Type':'application/json'}, signal: AbortSignal.timeout(10000),

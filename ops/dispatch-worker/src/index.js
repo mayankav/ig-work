@@ -1,4 +1,3 @@
-import {resources} from './resource-status.js';
 import { ReviewWindow, parseWindowReply } from "./review-window.js";
 export { ReviewWindow };
 // Off-GitHub timer for the @suresilly auto-post workflow.
@@ -119,7 +118,8 @@ async function ack(env, text) {
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: text + '\n\n' + await resources(env) }),
+      body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text, parse_mode: "HTML",
+                             link_preview_options: { is_disabled: true } }),
     });
   } catch (e) {
     console.log(`ack failed (ignored): ${e}`);
@@ -171,8 +171,8 @@ export default {
     const key = url.searchParams.get("key");
     if (!env.TRIGGER_KEY || key !== env.TRIGGER_KEY) {
       return new Response(
-        "suresilly-dispatch is running. Cron fires 02:30 and 14:30 UTC " +
-          "(08:00 and 20:00 IST).\nAdd ?key=<TRIGGER_KEY> to build now, " +
+        "suresilly-dispatch is running. Posts are made at 08:00 and 20:00 IST " +
+          "(02:30 and 14:30 UTC).\nAdd ?key=<TRIGGER_KEY> to build now, " +
           "or ?key=<TRIGGER_KEY>&mode=publish to publish now.\n",
         { status: key ? 403 : 200 },
       );
@@ -229,15 +229,18 @@ export default {
       const stub = env.REVIEW_WINDOWS.get(env.REVIEW_WINDOWS.idFromName(windowCommand.token));
       const response = await stub.fetch(new Request("https://review/decide", {method: "POST", body: JSON.stringify({...windowCommand, request_id: `tg-${update.update_id}`})}));
       const result = await response.json();
-      await ack(env, response.ok ? (result.duplicate ? "This reply was already received." :
-        windowCommand.decision === "drop" ? "Cancelled this carousel. Future posts are unchanged." :
-        windowCommand.decision === "publish" ? "Approval received. Publication is queued." :
-        "Redo received. Automatic posting is paused for this carousel.") : (result.error || "The review action failed."));
+      await ack(env, response.ok ? (result.duplicate ? "👍 Already got that reply." :
+        windowCommand.decision === "drop" ? "🗑 Cancelling it. Nothing will be posted." :
+        windowCommand.decision === "publish" ? "✅ Approved. Posting now, and the link arrives in about a minute." :
+        "🔁 On it. A fresh preview arrives in about 3 minutes, and this one won't post on its own now.") :
+        "⚠️ " + (result.error || "That reply didn't go through."));
       return new Response("ok", {status: response.status >= 500 ? 502 : 200});
     }
     if (env.REVIEW_WINDOWS && (/Review ID:/i.test(message.reply_to_message?.caption || message.reply_to_message?.text || "") ||
         /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)\b/i.test(message.text || ""))) {
-      await ack(env, "No change made. Reply to a review or include its ID. Use one action: approve ID; disapprove ID; redo ID all; redo ID images 2,4,7; redo ID images all. Use unique numbers 1–9. Ranges and mixed actions are not accepted.");
+      await ack(env, "🤔 <b>No change made.</b> Reply to the preview card with one of:\n" +
+        "<code>approve</code> · <code>disapprove</code> · <code>redo all</code> · <code>redo images 2,4</code>\n" +
+        "Or add its Review ID, like <code>approve 1a2b3c4d5e6f7a8b</code>.");
       return new Response("ok");
     }
     const command = parseReply(message.text);
@@ -278,10 +281,11 @@ export default {
           ...(forced ? {} : {slot_id: slot}) });
       console.log(`telegram: dispatched auto-post ${command.decision} status=${r.status}`);
       if (r.status !== 204) {
-        await ack(env, "The request could not start on GitHub. Nothing was confirmed. Telegram will try delivery again.");
+        await ack(env, "⚠️ The request could not start on GitHub. Telegram will resend your reply shortly.");
         return new Response("dispatch failed", {status: 502});
       }
-      await ack(env, forced ? "⏳ on it — building it anyway…" : "⏳ on it — retrying…");
+      await ack(env, forced ? "⏳ On it. Making a post that waits for your reply." :
+        "⏳ On it. Making a fresh post, and the preview arrives in about 3 minutes.");
       return new Response("ok", { status: 200 });
     }
 
@@ -294,10 +298,10 @@ export default {
       `telegram ${command.decision} ${command.slug || "(none)"}`);
     console.log(`telegram: dispatched review ${command.decision} ${command.slug || "(none)"} status=${r.status}`);
     if (r.status !== 204) {
-      await ack(env, "The request could not start on GitHub. Nothing was confirmed. Telegram will try delivery again.");
+      await ack(env, "⚠️ The request could not start on GitHub. Telegram will resend your reply shortly.");
       return new Response("dispatch failed", {status: 502});
     }
-    await ack(env, `⏳ on it — ${what}…`);
+    await ack(env, `⏳ On it: <code>${what}</code>…`);
     return new Response("ok", { status: 200 });
   },
 };

@@ -1,37 +1,36 @@
-name: auto-post
+name: Make a post
 
-# Twice a day, spaced far apart. Instagram balances how much it shows from one
-# account, so two posts close together compete with each other.
+# The clock is the Cloudflare Worker in ops/dispatch-worker. It dispatches this at
+# 08:00 and 20:00 IST with mode=publish. There is deliberately no `schedule:` here:
+# GitHub's own cron runs late or not at all.
+#
+# publish  write + draw → preview on Telegram → posts after `approve`, or by itself after 1 hour
+# force    the same preview, but it waits for your reply (no timer)
+# build    write + draw only; the post is kept as a run artifact
 on:
-  schedule:
-    - cron: "30 2 * * *"    # 08:00 IST
-    - cron: "30 14 * * *"   # 20:00 IST
   workflow_dispatch:
     inputs:
       mode:
-        description: "publish, build only, or force past a style check"
+        description: "publish = Telegram preview (posts after approve or 1 hour) · force = preview that waits · build = just make it"
         required: false
-        default: "build"
+        default: build
         type: choice
-        # force builds a deck a copy-craft gate refused and HOLDS it. It is not
-        # publish, and the publish steps below test for that exact word, so a
-        # forced deck cannot go out until a separate `publish <id>` reply.
-        options: ["build", "publish", "force"]
+        options: [build, publish, force]
       slot_id:
-        description: "Posting slot supplied by the clock; leave blank for a manual run"
+        description: "Posting slot from the clock (leave blank)"
         required: false
         type: string
       request_id:
-        description: "Stable delivery id; leave blank for a manual run"
+        description: "Delivery id from the clock or Telegram (leave blank)"
         required: false
         type: string
-      recover:
-        description: "Recover a failed slot after a fix, or resume its saved deck"
+      retry:
+        description: "Make a new post even if this slot already has one"
         required: false
         default: false
         type: boolean
-      retry:
-        description: "Retry only a saved failure which can recover"
+      recover:
+        description: "Older name for retry, kept so old dispatches still validate"
         required: false
         default: false
         type: boolean
@@ -39,8 +38,6 @@ on:
 permissions:
   contents: write
   actions: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: suresilly-state
@@ -48,623 +45,108 @@ concurrency:
 
 jobs:
   post:
-    # The kill switch. A repository variable, so it can be thrown from a phone
-    # and takes effect even while a run is queued.
-    if: vars.SS_HALT != '1'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    outputs:
-      accepted: ${{ steps.slot.outputs.accepted }}
-      deck_built: ${{ steps.build.outputs.slug != '' && steps.slot.outputs.resume_slug == '' }}
+    timeout-minutes: 20
     env:
-      PYTHONUNBUFFERED: '1'
+      MODE: ${{ inputs.mode || 'build' }}
       SS_HALT: ${{ vars.SS_HALT }}
-      SS_REVIEW_WINDOW_V1: ${{ vars.SS_REVIEW_WINDOW_V1 }}
-      REVIEW_WINDOW_URL: ${{ vars.REVIEW_WINDOW_URL }}
-      REVIEW_WINDOW_SECRET: ${{ secrets.REVIEW_WINDOW_SECRET }}
-      # A scheduled run publishes. A manual run builds unless you say otherwise,
-      # because the usual reason to press the button is to look at something.
-      MODE: ${{ github.event_name == 'schedule' && 'publish' || inputs.mode || 'build' }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      # Optional. A key from a SECOND Google Cloud project is a second daily
-      # allowance — quota is counted per project per model, so a second key
-      # from the same project shares the first one's and adds nothing.
       GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      # A third vendor, so the critic always has one that did not write the deck.
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      # Anonymous search is refused from a data-centre address. Signed in, the
-      # account's own server answers instead.
-      BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
-      BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
-      # On the JOB, not on the report step, because the build step sends a
-      # message too: a deck that scores below the bar is held, and run.py asks
-      # you there and then whether to publish it or build another. That message
-      # was the one thing in the pipeline a person is required to answer, and it
-      # was the one message with no credentials in scope — it printed "nothing
-      # configured" into the log and the deck waited in state/pending forever.
+      REVIEW_WINDOW_URL: ${{ vars.REVIEW_WINDOW_URL }}
+      REVIEW_WINDOW_SECRET: ${{ secrets.REVIEW_WINDOW_SECRET }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Reserve this work before spending quota
-        id: slot
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          export RUN_CREATED_AT=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)
-          python scripts/posting_slots.py reserve
+          cache: pip
 
       - name: Install
-        id: install
-        if: steps.slot.outputs.accepted == 'true'
         run: |
-          pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
-          python -m playwright install chromium --with-deps
+          pip install --quiet -r requirements.txt
+          python -m playwright install --with-deps chromium
 
-      # Every gate runs before anything is generated. A broken gate must never
-      # be discovered by a published post.
-      - name: Check the gates still work
-        id: gates
-        env:
-          SS_REVIEW_WINDOW_V1: '0'
-        if: steps.slot.outputs.accepted == 'true'
-        run: |
-          # Every suite in the directory, not a hand-kept list. The list had
-          # drifted: six suites existed that CI never ran, including the ones
-          # covering the wiring between layers, which is where the bugs were.
-          #
-          # Two styles of suite live here and they must be run differently.
-          # Most are plain scripts with a __main__ that prints "n/n passed".
-          # Four are pytest-style: bare test_* functions, pytest.raises,
-          # pytest.mark.parametrize, and NO __main__.
-          #
-          # Running them the wrong way fails silently in both directions:
-          # a pytest-style suite run as a script defines its functions, runs
-          # nothing and exits 0 having checked nothing; a plain-script suite
-          # collected by pytest offers no test functions and also reports
-          # success. Both look like a pass. That is worse than a red build.
-          #
-          # This is not hypothetical. The four pytest-style suites — 151 real
-          # tests over the pose gates and the quota ledger — ran nowhere at all:
-          # `import pytest` was absent from requirements.txt so CI died on the
-          # import, and a developer running them locally got silence and a zero
-          # exit. Two scheduled runs on 2026-08-31 failed here and posted
-          # nothing.
-          python scripts/check_content_data.py
-          python scripts/check_suites.py
-
-      # The Worker is JavaScript and lives outside the engine, so the loop above
-      # cannot see it — but it decides what a Telegram reply does, and "rerun"
-      # means DROP while "retry" means build again. Those two being swapped would
-      # discard a held deck on a request for another attempt. Node is already on
-      # the runner and the check has no dependencies, so this costs a second.
-      - name: Check the Telegram verbs
-        id: verbs
-        if: steps.slot.outputs.accepted == 'true'
-        run: |
-          node ops/dispatch-worker/test/parse-reply.test.mjs
-          node ops/dispatch-worker/test/posting-slot.test.mjs
-          node ops/dispatch-worker/test/review-window.test.mjs
-          node ops/dispatch-worker/test/resource-status.test.mjs
-
-      # A test may never write committed state. state/ carries what has been
-      # used and what a vendor last said it had left; a suite that manufactures
-      # an exhausted quota to check the fallback must not leave that reading
-      # behind for the next real run to believe. Cheap to check, and it fails
-      # the build rather than being discovered weeks later in a diff.
-      - name: No test may write committed state
-        id: test_state
-        if: steps.slot.outputs.accepted == 'true'
-        run: |
-          dirty=$(git status --porcelain state/)
-          if [ -n "$dirty" ]; then
-            echo "::error::the gate run modified committed state:"
-            echo "$dirty"
-            git diff -- state/ | head -40
-            exit 1
-          fi
-          echo "state/ untouched by the suite"
-
-      - name: Restore the saved deck
-        id: restore
-        if: steps.slot.outputs.accepted == 'true' && steps.slot.outputs.resume_slug != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RESUME_SLUG: ${{ steps.slot.outputs.resume_slug }}
-          RESUME_RUN: ${{ steps.slot.outputs.resume_run }}
-        run: python scripts/restore_deck.py
-
-      - name: Build the deck
+      - name: Write and draw the post
         id: build
-        env:
-          RESUME_SLUG: ${{ steps.restore.outputs.slug }}
-        if: steps.slot.outputs.accepted == 'true'
-        run: |
-          # --force only when the run was dispatched with mode=force, which only
-          # a `force` reply or the manual button can set. A scheduled run cannot
-          # reach it: MODE is 'publish' on a schedule. The forced deck is held by
-          # run.py itself and every publish step below is gated on MODE ==
-          # 'publish', so there are two independent reasons it cannot post.
-          if [ -n "$RESUME_SLUG" ]; then
-            if [ -f "carousels/$RESUME_SLUG/review_window.json" ]; then
-              python scripts/review_window_job.py resume --deck "carousels/$RESUME_SLUG"
-              exit 0
-            fi
-            echo "slug=$RESUME_SLUG" >> "$GITHUB_OUTPUT"
-            echo "deck=carousels/$RESUME_SLUG/carousel.md" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          FORCE=""
-          if [ "$MODE" = "force" ]; then FORCE="--force"; fi
-          python .agents/skills/suresilly-carousel/scripts/run.py --no-post $FORCE
+        run: >
+          python -m suresilly.run build --slot "${{ inputs.slot_id }}"
+          ${{ (inputs.retry || inputs.recover || inputs.mode == 'force' || inputs.slot_id == '') && '--new' || '' }}
 
-      - name: Save the exact deck for recovery
-        id: archive
-        if: always() && steps.build.outputs.slug != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: recovery-deck
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 14
-          path: carousels/${{ steps.build.outputs.slug }}/
+      - name: Freeze it for review
+        id: stage
+        if: steps.build.outputs.slug != '' && env.MODE != 'build'
+        run: python -m suresilly.run stage --post "posts/${{ steps.build.outputs.slug }}"
 
-      - name: Prepare the owner review preview
-        id: owner_preview
-        if: steps.build.outputs.review_token != '' && env.MODE == 'publish'
-        env:
-          DECK: carousels/${{ steps.build.outputs.slug }}
-        run: python scripts/review_window_job.py stage --deck "$DECK"
-
-      - name: Save the owner review artifact
-        id: owner_archive
-        if: steps.owner_preview.outputs.review_token != ''
+      - name: Keep the exact post for your reply
+        if: steps.stage.outputs.review_token != ''
         uses: actions/upload-artifact@v4
         with:
           name: review-deck
+          path: posts/${{ steps.build.outputs.slug }}/
           include-hidden-files: true
           retention-days: 14
           if-no-files-found: error
-          path: carousels/${{ steps.build.outputs.slug }}/
 
-      - name: Host the owner review revision
-        id: owner_host
-        if: steps.owner_preview.outputs.review_token != ''
+      - name: Put the preview images online
+        if: steps.stage.outputs.review_token != ''
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ steps.owner_preview.outputs.host_dir }}
-          destination_dir: slides/${{ steps.build.outputs.slug }}/reviews/${{ steps.owner_preview.outputs.review_token }}
+          publish_dir: ${{ steps.stage.outputs.host_dir }}
+          destination_dir: slides/${{ steps.build.outputs.slug }}/reviews/${{ steps.stage.outputs.review_token }}
           keep_files: true
           cname: media.suresilly.com
 
-      - name: Send the preview and open its hour
-        id: owner_delivery
-        if: steps.owner_preview.outputs.review_token != ''
-        env:
-          DECK: carousels/${{ steps.build.outputs.slug }}
-        run: python scripts/review_window_job.py register --deck "$DECK"
+      - name: Send the preview to Telegram
+        id: register
+        if: steps.stage.outputs.review_token != ''
+        run: python -m suresilly.run register --post "posts/${{ steps.build.outputs.slug }}" ${{ env.MODE == 'force' && '--manual' || '' }}
 
-      # Instagram fetches the images itself, so they have to be public before
-      # the post exists. This is why building and posting are separate steps
-      # rather than one --publish run.
-      #
-      # Only the slides folder goes up, not the whole deck. The URL is unchanged
-      # — publish_dir/destination_dir both gained the same `/slides` — but the
-      # contact sheet and the markdown stop being uploaded, which is 1.2 MB a
-      # publish that nothing has ever fetched. The host is the path Instagram
-      # reads from; the archive is the repo.
-      - name: Publish the slides
-        id: host
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.review_token == ''
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Keep a build-only post as an artifact
+        if: steps.build.outputs.slug != '' && env.MODE == 'build'
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./carousels/${{ steps.build.outputs.slug }}/slides
-          destination_dir: slides/${{ steps.build.outputs.slug }}/slides
-          keep_files: true
-          cname: media.suresilly.com
+          name: post-${{ steps.build.outputs.slug }}
+          path: posts/${{ steps.build.outputs.slug }}/
+          retention-days: 7
 
-      - name: Wait for the slides to be reachable
-        id: reachable
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.review_token == ''
+      - name: Save the post record
+        if: always() && steps.build.outputs.slug != '' && env.MODE != 'build'
         run: |
-          URL="https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides/01_slide_1_hook.png"
-          for i in $(seq 1 12); do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo 000)
-            [ "$CODE" = "200" ] && { echo "live on try $i"; exit 0; }
-            echo "try $i: $CODE"
-            sleep 10
-          done
-          echo "::error::slides never became reachable at $URL"
-          exit 1
+          git config user.name suresilly-bot
+          git config user.email bot@suresilly.local
+          git add posts state
+          git diff --staged --quiet || git commit -m "auto: post ${{ steps.build.outputs.slug }} [skip ci]"
+          git pull --rebase --quiet
+          git push
 
-      - name: Post to Instagram
-        id: post
-        if: steps.build.outputs.slug != '' && env.MODE == 'publish' && steps.build.outputs.verdict != 'held'
-        env:
-          RECOVER: ${{ inputs.recover && steps.slot.outputs.resume_slug != '' }}
-          SLOT_ID: ${{ steps.slot.outputs.slot_id }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-        run: |
-          RECOVERY=""
-          if [ "$RECOVER" = "true" ]; then RECOVERY="--recover"; fi
-          python scripts/post_to_ig.py $RECOVERY \
-            --carousel "${{ steps.build.outputs.deck }}" \
-            --base-url "https://media.suresilly.com/slides/${{ steps.build.outputs.slug }}/slides"
-
-      # ── the host is a delivery path, not an archive ───────────────────────
-      #
-      # Instagram cURLs each image once, at container creation, and serves the
-      # published carousel from its own CDN afterwards. The window in which a
-      # slide URL has to answer is the two minutes above plus the length of a
-      # post. Everything kept past that is archive, and the archive belongs in
-      # the repo, not on the path Instagram fetches from. Nothing removed it, so
-      # `slides/` grew by about 11 MB a day against a 1 GB Pages limit.
-      #
-      # AFTER the post, on purpose. Housekeeping must never be able to cost a
-      # deck, so it cannot run anywhere before the images are live. It is also
-      # not continue-on-error: a failure here turns the run red, while `Record
-      # what happened` and `Report the result` still run because both are
-      # always(). Housekeeping that fails quietly is housekeeping nobody notices
-      # has stopped, and prune_slides.py refuses rather than reporting a tidy
-      # nothing when it cannot tell what it is looking at.
-      - name: Fetch the published branch
-        id: fetch_host
-        if: ${{ !cancelled() && steps.post.outcome == 'success' }}
+      - name: Fetch the image host
+        if: steps.stage.outputs.review_token != ''
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Take down the slides that are past the window
-        id: prune
-        if: ${{ !cancelled() && steps.post.outcome == 'success' }}
+      - name: Clear hosted images older than 14 days
+        if: steps.stage.outputs.review_token != ''
+        continue-on-error: true
         run: |
-          # --protect is also a check that the publish landed: the script aborts
-          # if the deck this run put up is not on the host.
-          #
-          # Held decks need protecting too, and for a different reason. A deck
-          # in state/pending is posted by release.py DAYS later, straight from
-          # this host. Prune it on the window and the owner's "publish" reply
-          # fetches nine 404s. --protect-if-present keeps them without making a
-          # already-pruned slug wedge every future run.
-          PROTECT=()
-          for f in state/pending/*.json; do
-            [ -e "$f" ] || continue
-            slug=$(basename "$f" .json)
-            PROTECT+=(--protect-if-present "$slug")
-            echo "holding on host for review: $slug"
-          done
-          python scripts/prune_slides.py \
-            --root gh-pages/slides \
-            --days 14 \
-            --protect "${{ steps.build.outputs.slug }}" \
-            "${PROTECT[@]}"
+          python -m suresilly.run prune --root gh-pages/slides --days 14
           cd gh-pages
-          git config user.name "suresilly-bot"
-          git config user.email "bot@suresilly.com"
-          git add -A slides
-          git diff --staged --quiet && { echo "nothing came off the host"; exit 0; }
-          git commit -m "prune: slides older than 14 days [skip ci]"
-          # No `|| true`. This workflow is the only writer of gh-pages and its
-          # concurrency group serialises it, so a push that fails here means
-          # something is wrong rather than something is busy.
-          git push
+          git config user.name suresilly-bot
+          git config user.email bot@suresilly.local
+          git add -A
+          git diff --staged --quiet || { git commit -m "prune: images older than 14 days"; git push; }
 
-      # Committed whatever happened. The used list and the fingerprints are how
-      # the next run knows what has already been done, and a run that built a
-      # deck and failed to record it would let that moment come round again.
-      #
-      # The slide PNGs are gitignored now — 5.6 MB a deck, twice a day, written
-      # into permanent history and never read back. The markdown, the published
-      # id and the contact sheet are the record, and the contact sheet is what a
-      # deck is judged by (invariant 8). `git add carousels` skips the ignored
-      # files without complaining.
-      - name: Record what happened
-        id: record
-        if: always() && steps.slot.outputs.accepted == 'true'
-        run: |
-          content_status=0
-          python scripts/check_content_data.py --quarantine || content_status=$?
-          if [ "$content_status" != 0 ]; then
-            echo "reason=Invalid saved claims were quarantined. Usage records were kept." >> "$GITHUB_OUTPUT"
-          fi
-          git config user.name "suresilly-bot"
-          git config user.email "bot@suresilly.com"
-          # The one deck whose slides must stay in git: a held deck is posted
-          # later, by release.py, from a fresh checkout of this repo, and
-          # post_to_ig.py builds its image URLs from the local filenames. Ignore
-          # the ignore for exactly as long as a person still has to answer.
-          for record in state/pending/*.json; do
-            [ -e "$record" ] || continue
-            slug=$(basename "$record" .json)
-            [ -d "carousels/$slug/slides" ] || continue
-            echo "held deck $slug: keeping its slides in git until it is answered"
-            git add -f "carousels/$slug/slides"
-          done
-          # One pathspec at a time, and only the ones that exist.
-          #
-          # `git add a b missing.json` does not add a and b and grumble about
-          # the third — it exits 128 having staged NOTHING. That is one command
-          # with `|| true` on the end, so the run went on to commit an empty
-          # index, print "nothing to record" and push nothing. On 2026-09-01 it
-          # posted a deck to Instagram and committed neither the deck, nor its
-          # novelty fingerprint, nor the moment being retired in used.jsonl, nor
-          # a day of the neuron ledger — so the moment is still unretired and
-          # can be drawn again, and the deck is absent from the novelty
-          # blocklist it is supposed to join. The absent pathspec was
-          # concept_history.json, a file that has never existed in this repo.
-          #
-          # A history file that does not exist yet is legitimate and skipped. An
-          # add that genuinely fails is not, and must not be swallowed.
-          for path in state carousels \
-                      .agents/skills/suresilly-carousel/mascot/poses.json \
-                      .agents/skills/suresilly-carousel/mascot/library \
-                      .agents/skills/suresilly-carousel/mascot/checks \
-                      .agents/skills/suresilly-carousel/mascot/usage_history.json \
-                      .agents/skills/suresilly-carousel/palette_history.json \
-                      .agents/skills/suresilly-carousel/citation_history.json \
-                      .agents/skills/suresilly-carousel/references/citations.json \
-                      .agents/skills/suresilly-carousel/concept_history.json; do
-            [ -e "$path" ] || continue
-            if [ "$path" = ".agents/skills/suresilly-carousel/references/citations.json" ]; then
-              python scripts/check_content_data.py || continue
-            fi
-            git add "$path"
-          done
-          if ! git diff --staged --quiet; then
-            git commit -m "auto: record run $GITHUB_RUN_ID [skip ci]"
-          fi
-          git pull --rebase --quiet
-          git push
-          exit "$content_status"
-
-      - name: Save the result of this attempt
-        id: save_attempt
-        if: always() && steps.slot.outputs.accepted == 'true' && steps.record.outcome == 'success'
-        env:
-          STEPS_JSON: ${{ toJSON(steps) }}
-          SLOT_ID: ${{ steps.slot.outputs.slot_id }}
-          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
-          VERDICT: ${{ steps.build.outputs.verdict }}
-          REASON: ${{ steps.build.outputs.reason }}
-          CAN_RETRY: ${{ steps.build.outputs.retry }}
-        run: |
-          python scripts/run_result.py
-          python scripts/posting_slots.py finish --result "$RUNNER_TEMP/suresilly-result.json"
-
-      - name: Resolve the actual result
-        id: result
-        if: always()
-        env:
-          STEPS_JSON: ${{ toJSON(steps) }}
-          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
-          VERDICT: ${{ steps.build.outputs.verdict }}
-          REASON: ${{ steps.build.outputs.reason }}
-          CAN_RETRY: ${{ steps.build.outputs.retry }}
-        run: python scripts/run_result.py
-
-      - name: Preserve the result and test logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: run-evidence-${{ github.run_id }}
-          include-hidden-files: true
-          path: |
-            ${{ runner.temp }}/suresilly-result.json
-            ${{ runner.temp }}/suresilly-tests-*
-            .agents/skills/suresilly-carousel/mascot/checks/
-
-      # Two channels on purpose. Telegram is the alert that reaches a phone;
-      # email is the archive that is still searchable in a year. A channel that
-      # only runs when the other has failed is a channel nobody notices is broken.
-      #
-      # THREE outcomes, not two. A gate refusing and a vendor being unreachable
-      # used to arrive here identically — both with an empty slug, both with the
-      # build step red — so both were reported the same way and both showed the
-      # same red dot in the actions list. A red that fires for the ordinary case
-      # is a red that stops being read, which is the exact state in which a real
-      # outage goes unnoticed. run.py exits 0 for the benign ones now, so
-      # steps.build.outcome is the signal and no marker file is needed.
-      - name: Report the result
-        if: always()
-        env:
-          # Read as data, never interpolated into the script. A ${{ }} expansion
-          # of model-written text lands inside the shell as code — a reason
-          # holding a backtick or a $( would run. As an env var it is a string.
-          SLUG: ${{ steps.build.outputs.slug || steps.slot.outputs.resume_slug }}
-          VERDICT: ${{ steps.result.outputs.outcome }}
-          REASON: ${{ steps.result.outputs.reason }}
-          CAN_RETRY: ${{ steps.result.outputs.retryable }}
-          OUTCOME: ${{ steps.result.outputs.outcome }}
-        run: |
-          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          # The body is a dashboard, not a sentence. scripts/dashboard.py reads
-          # local state only and cannot fail the step: every section it cannot
-          # read prints as "unknown". See its header for why one line was not
-          # enough.
-          # dashboard.py is rendered twice: plain text for the email archive and
-          # the run log, and HTML for the Telegram alert (bold labels, a linked
-          # logs line). Same facts, one styled for a phone and one for a year from
-          # now. The HTML uses only single-line tags, so notify.py can split a
-          # long caption at a newline without landing inside one.
-          if [ "$VERDICT" = "held" ]; then
-            # hold_for_review already sent the owner the deck, the picture and the
-            # reply list. A second message here would be a "POSTED" dashboard
-            # about a deck still sitting in state/pending — which is what happened
-            # before `verdict` existed and the step read the slug alone.
-            echo "### ⏸ held \`$SLUG\` — waiting for a reply" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          elif [ "$OUTCOME" = "duplicate" ]; then
-            echo "### No repeated work: $REASON" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          elif [ "$OUTCOME" = "blocked" ]; then
-            SUBJECT="[SILLY-BLOCKED] No new work started"
-            BODY=$(python scripts/dashboard.py --status blocked --note "$REASON" --run-url "$RUN_URL")
-            HTML=$(python scripts/dashboard.py --status blocked --note "$REASON" --run-url "$RUN_URL" --format html)
-            ATTACH=""
-            echo "### No new work started" >> "$GITHUB_STEP_SUMMARY"
-            echo "$REASON" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "$OUTCOME" = "built" ]; then
-            echo "### Built only: $SLUG. Not posted." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          elif [ "$OUTCOME" = "ok" ]; then
-            SUBJECT="[SILLY-OK] $SLUG"
-            BODY=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL")
-            HTML=$(python scripts/dashboard.py --status ok --slug "$SLUG" --run-url "$RUN_URL" --format html)
-            ATTACH="carousels/$SLUG/contact_sheet.png"
-            echo "### ✅ posted \`$SLUG\`" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "$OUTCOME" = "stopped" ]; then
-            # AMBER. The build ran and exited 0 with no deck, which only happens
-            # when a gate said no. The warning annotation is as close to an amber
-            # dot as Actions gets: the run stays green, and the summary says why.
-            #
-            # The note is the REASON THE RUN GAVE. It used to be a constant here —
-            # "a gate refused, which is the system working" — and on 2026-09-03
-            # the owner got that same sentence for two entirely different faults
-            # in one day, replied `retry` to a gate no wording could satisfy, and
-            # waited seven minutes for it to fail identically. run.py has printed
-            # the real reason since the day it was written; this step never read
-            # it. Fall back to the old sentence only if the output is missing.
-            SUBJECT="[SILLY-STOPPED] $(date -u +%Y-%m-%d)"
-            NOTE="${REASON:-No deck was built. A quality check refused every attempt.}"
-            RETRY_FLAG=""
-            if [ "$CAN_RETRY" = "false" ]; then RETRY_FLAG="--no-retry"; fi
-            BODY=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG)
-            HTML=$(python scripts/dashboard.py --status stopped --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG --format html)
-            ATTACH=""
-            echo "::warning::no deck today — a gate refused: ${NOTE:0:180}"
-            echo "### ⚠️ nothing today — a gate refused, nothing is broken" >> "$GITHUB_STEP_SUMMARY"
-            echo "$NOTE" >> "$GITHUB_STEP_SUMMARY"
-          else
-            # RED, and note what reaches here: `failure` AND `skipped`. A suite
-            # failing above skips the build, and a skipped build is not a gate
-            # refusing — it is CI red with nobody told. Amber is claimed only by
-            # an explicit success, so every other outcome, named or not, is red.
-            #
-            # A run.py handler that exits 1 writes its reason to $GITHUB_OUTPUT
-            # BEFORE it exits, and an output written before a non-zero exit
-            # survives — so the red path names the vendor too, and only falls back
-            # to the generic sentence when the build died before it could speak.
-            SUBJECT="[SILLY-ERROR] $(date -u +%Y-%m-%d)"
-            NOTE="${REASON:-The build did not finish ($OUTCOME). A gate suite failed before the build ran, or the run died before it could say why.}"
-            RETRY_FLAG="--no-retry"
-            if [ "$CAN_RETRY" = "true" ]; then RETRY_FLAG=""; fi
-            BODY=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG)
-            HTML=$(python scripts/dashboard.py --status error --run-url "$RUN_URL" --note "$NOTE" $RETRY_FLAG --format html)
-            ATTACH=""
-            echo "### ❌ broken (build $OUTCOME) — see the log" >> "$GITHUB_STEP_SUMMARY"
-            echo "$NOTE" >> "$GITHUB_STEP_SUMMARY"
-          fi
-          # Slot refusal happens before the main dependency install. The alert
-          # still needs its small HTTP client; duplicate events exit above.
-          python -c 'import requests' || python -m pip install --quiet requests
-          if [ -n "$ATTACH" ] && [ -f "$ATTACH" ]; then
-            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML" --attach "$ATTACH"
-          else
-            python scripts/notify.py --subject "$SUBJECT" --body "$BODY" --telegram-html "$HTML"
-          fi
-
-      - name: Save message delivery records
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: message-delivery-${{ github.run_id }}
-          path: ${{ runner.temp }}/suresilly-notifications.jsonl
-          if-no-files-found: ignore
-
-  # ── topping up the concept vocabulary ────────────────────────────────
-  #
-  # A separate job, and that is the whole point. Proving concepts takes about
-  # eight minutes and the post job is capped at 25, so doing this inline would
-  # eventually push a real post past the cap and lose it. Here it runs AFTER the
-  # post has gone out, so it cannot delay one and cannot fail one.
-  #
-  # Every fifth deck, because each deck spends a concept and nothing else
-  # replaces them. Left alone, 32 concepts is sixteen days and then
-  # `--source concept` returns nothing at all.
-  topup:
-    needs: post
-    if: always() && vars.SS_HALT != '1' && needs.post.result == 'success' && needs.post.outputs.accepted == 'true' && needs.post.outputs.deck_built == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      PYTHONUNBUFFERED: '1'
-      SS_HALT: ${{ vars.SS_HALT }}
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-
-    steps:
-      # Read the latest pool and refill claim under the shared state lock.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: main
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install
-        run: pip install --quiet -r .agents/skills/suresilly-carousel/requirements.txt
-
-      # A refill is bounded by the pool ceiling and a saved 24-hour cooldown.
-      - name: Is a top-up due?
-        id: due
-        run: |
-          python scripts/concept_topup.py
-
-      - name: Prove more concepts
-        if: steps.due.outputs.due == 'yes'
-        run: |
-          echo "${{ steps.due.outputs.note }}"
-          # An empty result exits normally. A crash must remain a failed step.
-          python .agents/skills/suresilly-carousel/scripts/discovery.py \
-            --refresh --scan 250 --limit 25
-
-      - name: Record what was proved
-        if: always() && steps.due.outputs.due == 'yes'
-        run: |
-          git config user.name "suresilly-bot"
-          git config user.email "bot@suresilly.com"
-          for path in .agents/skills/suresilly-carousel/references/concepts.json \
-                      .agents/skills/suresilly-carousel/concept_demand.json \
-                      state/vendor_quotas.json state/flux_neurons.json; do
-            [ -e "$path" ] || continue
-            git add "$path"
-          done
-          if ! git diff --staged --quiet; then
-            git commit -m "auto: topped up the concept vocabulary [skip ci]"
-          fi
-          git pull --rebase --quiet
-          git push
-
-      - name: Keep unsaved top-up records
+      - name: Tell the owner it didn't work
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: topup-records-${{ github.run_id }}
-          include-hidden-files: true
-          path: |
-            .agents/skills/suresilly-carousel/references/concepts.json
-            .agents/skills/suresilly-carousel/concept_demand.json
-            state/vendor_quotas.json
-            state/flux_neurons.json
+        env:
+          FAILURE_REASON: ${{ steps.build.outputs.reason || steps.stage.outputs.reason || steps.register.outputs.reason }}
+        run: |
+          pip install --quiet requests
+          python -m suresilly.run notify-failure --slot "${{ inputs.slot_id }}"

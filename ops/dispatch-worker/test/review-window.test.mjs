@@ -99,3 +99,30 @@ for (const tail of ['images 0','images 10','images 2,2','images 2-4','images 2,'
  assert.equal((await call(obj,'decide',decision(101))).status,409);
  globalThis.fetch=original;
 }
+{
+ // The album preview: the real slides first, then an HTML card that carries the
+ // Review ID, and no quota message when resources is ''.
+ const original=globalThis.fetch, sent=[];
+ globalThis.fetch=async(url,init)=>{
+  if(!url.includes('telegram.org')) return original(url,init);
+  sent.push({method:url.split('/').pop(),body:JSON.parse(init.body)});
+  return Response.json({ok:true,result:url.endsWith('/sendMediaGroup')?[{message_id:7},{message_id:8}]:{message_id:43}});
+ };
+ const photos=[1,2].map(n=>`https://media.suresilly.com/slides/a-deck/reviews/${token}/slides/0${n}.jpg`);
+ const card=`<b>New post ready</b>\nReview ID: <code>${token}</code>`;
+ const {obj,storage}=object();
+ const r=await call(obj,'register',{...preview,caption:card,html:true,photos,resources:''});
+ assert.equal(r.state,'waiting'); assert.equal(r.message_id,43); assert.equal(storage.alarm,now+REVIEW_HOUR);
+ assert.deepEqual(sent.map(x=>x.method),['sendMediaGroup','sendMessage']);
+ assert.equal(sent[1].body.parse_mode,'HTML'); assert.equal(sent[1].body.text,card);
+ assert.equal(parseWindowReply('approve',card.replace(/<[^>]+>/g,'')).decision,'publish');
+ sent.length=0;
+ const one=object();
+ await call(one.obj,'register',{...preview,caption:card,html:true,photos:photos.slice(0,1),resources:''});
+ assert.deepEqual(sent.map(x=>x.method),['sendPhoto','sendMessage']);
+ for (const bad of [['https://evil.example/01.jpg'],photos.map(u=>u.replace('/01.jpg','/1.jpg')),[],Array(10).fill(photos[0])]) {
+  assert.equal((await call(object().obj,'register',{...preview,caption:card,photos:bad})).status,400);
+ }
+ globalThis.fetch=original;
+ console.log('review-window: album preview, HTML card and photo checks passed');
+}

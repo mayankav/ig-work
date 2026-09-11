@@ -1,0 +1,5 @@
+# Exact versions: the posting runs install this on a fresh runner with nobody watching.
+playwright==1.62.0
+pillow==12.3.0
+requests==2.34.2
+pytest==9.1.1
