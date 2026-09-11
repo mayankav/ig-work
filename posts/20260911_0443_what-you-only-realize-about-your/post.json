@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "things you only understand after a certain age or a certain life change",
+  "slides": [
+    {
+      "text": "what you only realize about your older sibling years later",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "they had to do everything first, with no one to show them how.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "[[they took the loudest yells]] so the hallway would be quiet by the time you got there.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "they let you win the fights over the front seat and the remote.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    },
+    {
+      "text": "they were [[just a kid themselves]], even when they felt like an adult to you.",
+      "mood": "sad",
+      "pose": "curled_up"
+    },
+    {
+      "text": "they kept your secrets from the kitchen table without ever asking for a favor.",
+      "mood": "wise",
+      "pose": "lantern_bearer"
+    },
+    {
+      "text": "they fought all the strict rules so your curfew could be later.",
+      "mood": "calm",
+      "pose": "cardigan_mug"
+    },
+    {
+      "text": "send this to [[the one who went first]]",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "i didn't see it when we were sharing a hallway,\nbut i see it now.\nthank you for going first.\nsend this to your older sibling.\n\n#siblings #family #growingup #oldersibling",
+  "alt": "A series of slides about the quiet sacrifices of an older sibling, featuring a small green donkey in the corner of each slide.",
+  "hook_options": [
+    "what you only realize about your older sibling years later",
+    "things you only see about your older sibling after you leave home",
+    "why the older sibling always had it a little bit harder"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "",
+  "created_at": "2026-09-11T04:43:35Z",
+  "slug": "20260911_0443_what-you-only-realize-about-your"
+}
