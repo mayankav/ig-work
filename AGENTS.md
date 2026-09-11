@@ -1,3 +1,5 @@
+> **OBSOLETE (2026-09-11).** Frozen snapshot of carousel engine v1. See `OBSOLETE.md`. `main` has moved on.
+
 # @suresilly — Instagram carousel engine
 
 Writes and renders 9-slide carousels, 1080×1350, with a donkey mascot. Posts twice a day on its own.

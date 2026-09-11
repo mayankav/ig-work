@@ -1,3 +1,5 @@
+> **OBSOLETE (2026-09-11).** Frozen snapshot of carousel engine v1. See `OBSOLETE.md`. `main` has moved on.
+
 # @suresilly — carousel engine
 
 **Posts to Instagram by itself. Two carousels a day, 08:00 and 20:00 IST.**
