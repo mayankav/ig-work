@@ -67,6 +67,24 @@ def review_card(post: dict, token: str, *, manual: bool = False, redo_of: str | 
     return card
 
 
+def plain_card(post: dict, token: str, *, manual: bool = False, redo_of: str | None = None) -> str:
+    """The same card in plain text, under 1000 characters, for a Worker without HTML cards."""
+    title = "🔁 Redo ready" if redo_of else "🫏 New post ready"
+    timer = "✋ This one waits for you. It won't post on its own." if manual else "⏰ Posts itself in 1 hour if you don't reply."
+    label = summary(post).replace("&amp;", "&")
+    hook = post["slides"][0]["text"].replace("[[", "").replace("]]", "")[:300]
+    return (f"{title}\n{label}\n\n“{hook}”\n\n{timer}\n\n↩️ Reply to this message with:\n"
+            f"✅ approve · post it now\n🗑 disapprove · cancel it\n🔁 redo all · write a new one\n"
+            f"🎨 redo images 2,4 · new donkey on those slides\n\nReview ID: {token}")
+
+
+def plain_details(post: dict) -> str:
+    """Slide texts and caption in plain text, under 2900 characters."""
+    lines = [f"{n}. {s['text'].replace('[[', '').replace(']]', '')}" for n, s in enumerate(post["slides"], 1)]
+    text = ("📝 Slides\n" + "\n".join(lines) + "\n\n" if len(lines) > 1 else "") + "✍️ Caption\n" + post["caption"]
+    return text if len(text) <= 2900 else text[:2899] + "…"
+
+
 def posted(post: dict, link: str) -> str:
     where = f'<a href="{html.escape(link)}">Open it on Instagram ↗</a>' if link else "It's live on Instagram."
     return (f"✅ <b>Posted!</b>\n{summary(post)}\n<b>“{esc(post['slides'][0]['text'])}”</b>\n\n{where}\n\n"

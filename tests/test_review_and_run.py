@@ -110,3 +110,26 @@ def test_instagram_refuses_after_an_unfinished_attempt(tmp_path):
     (post / "publication_pending.json").write_text("{}")
     with pytest.raises(instagram.InstagramError, match="Check Instagram"):
         instagram.publish(post, ["https://a/1.jpg"], "hi")
+
+
+def test_register_falls_back_to_the_plain_preview(tmp_path, monkeypatch):
+    post = make_post(tmp_path / "20260911_0800_x")
+    (post / "post.json").write_text(json.dumps({"format": "list", "topic": "love", "caption": "c",
+                                                "slides": [{"text": "hook"}, {"text": "two"}]}))
+    review.prepare(post)
+    sent = []
+
+    def api(token, operation, body=None):
+        if operation == "register":
+            sent.append(body)
+            if "photos" in body:
+                raise ValueError("The review service refused register: Invalid preview")
+            return {"state": "waiting", "message_id": 5}
+        return {"state": "waiting"}
+
+    monkeypatch.setattr(run, "wait_for_hosting", lambda record: None)
+    monkeypatch.setattr(run.review, "api", api)
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    run.register(post)
+    assert len(sent) == 2 and "photos" not in sent[1] and "Review ID:" in sent[1]["caption"]
+    assert sent[1]["resources"].startswith("📝 Slides")

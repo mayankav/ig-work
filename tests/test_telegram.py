@@ -51,3 +51,11 @@ def test_next_slot():
 def test_posted_and_dropped_messages():
     assert "Open it on Instagram" in telegram.posted(post(), "https://www.instagram.com/p/x/")
     assert "Nothing was posted" in telegram.dropped(post())
+
+
+def test_plain_card_fits_an_older_worker():
+    long = post(caption="x" * 5000, count=9)
+    long["slides"][0]["text"] = "a very long hook " * 40
+    card = telegram.plain_card(long, "0123456789abcdef")
+    assert len(card) <= 1000 and "Review ID: 0123456789abcdef" in card and "<" not in card
+    assert len(telegram.plain_details(long)) <= 2900

@@ -149,13 +149,22 @@ def wait_for_hosting(record: dict, tries: int = 18) -> None:
 def register(post_dir: Path, manual: bool = False) -> None:
     record = review.read(post_dir)
     wait_for_hosting(record)
-    card = telegram.review_card(load(post_dir), record["token"], manual=manual, redo_of=record.get("parent"))
-    receipt = review.api(record["token"], "register", {
-        "token": record["token"], "slug": record["slug"], "manifest": record["manifest"],
-        "run_id": os.environ.get("GITHUB_RUN_ID", "0"),
-        "sheet_url": f"{review.base_url(record)}/contact_sheet.png",
-        "photos": review.slide_urls(record), "caption": card, "html": True,
-        "issue_pages": [], "manual_required": manual, "resources": ""})
+    post = load(post_dir)
+    base = {"token": record["token"], "slug": record["slug"], "manifest": record["manifest"],
+            "run_id": os.environ.get("GITHUB_RUN_ID", "0"), "issue_pages": [], "manual_required": manual,
+            "sheet_url": f"{review.base_url(record)}/contact_sheet.png"}
+    try:
+        receipt = review.api(record["token"], "register", {
+            **base, "photos": review.slide_urls(record), "html": True, "resources": "",
+            "caption": telegram.review_card(post, record["token"], manual=manual, redo_of=record.get("parent"))})
+    except ValueError as exc:
+        if "Invalid preview" not in str(exc):
+            raise
+        # A Worker that predates album previews: contact sheet, plain card, details.
+        print("The Worker has no album previews yet; sending the plain version.")
+        receipt = review.api(record["token"], "register", {
+            **base, "resources": telegram.plain_details(post),
+            "caption": telegram.plain_card(post, record["token"], manual=manual, redo_of=record.get("parent"))})
     if receipt.get("state") != "waiting" or not receipt.get("message_id"):
         raise ValueError("Telegram did not confirm the preview.")
     (post_dir / "review_delivery.json").write_text(json.dumps(receipt, indent=2) + "\n")
