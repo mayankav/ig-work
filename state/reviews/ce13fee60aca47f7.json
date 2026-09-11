@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 love \u00b7 1 image\n\n<b>\u201ci want to be left entirely alone, but i want you to be alone in the same room with me.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>our own quiet corners,\nbut under the same ceiling.\nthat is my favorite place.\nsend this to your person.\n\n#suresilly #tinytruths #quietlove #together</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>ce13fee60aca47f7</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1789140776454,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 119,
   "delivered_at": 1789137176427,
-  "deadline": 1789140776427
+  "deadline": 1789140776427,
+  "action": {
+    "id": "rv-ce13fee60aca47f7-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789141377867
+  },
+  "claimed": false,
+  "claim_expires": 1789143218273,
+  "result": {
+    "action_id": "rv-ce13fee60aca47f7-timeout",
+    "state": "published",
+    "media_id": "18368513482215076",
+    "token": "ce13fee60aca47f7"
+  }
 }
