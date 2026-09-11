@@ -21,7 +21,7 @@ The writer reads `GEMINI_API_KEY` (or `GROQ_API_KEY`) from the environment or fr
 2. `write.py` writes the post: a draft, then an editor pass. Gemini writes it, with Groq as the backup.
 3. `render.py` draws 1080×1350 JPEGs. `mascot.py` picks a donkey pose for each slide's mood.
 4. The images go up to `media.suresilly.com` (the `gh-pages` branch). Telegram gets the slides as an album, followed by a card.
-5. You reply to the card with `approve`, `disapprove`, `redo all` or `redo images 2,4`. If you stay silent for 1 hour, it posts.
+5. You reply to the card with `approve`, `disapprove`, `redo all` or `redo images 2,4`. If you stay silent for 1 hour, it posts. Every reply case, including repeated or conflicting replies, is in `docs/telegram-approval.md`.
 6. `review-window.yml` carries out your reply, and the Instagram link comes back in Telegram.
 
 Mornings alternate between a **list** (7–9 slides) and a **story** (6–8 slides). Evenings are a **one-liner** (1 image).
