@@ -1,0 +1,24 @@
+{
+  "format": "oneliner",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "yesterday you washing your favorite mug so it is ready for you this morning. [[the quietest love]] is the kind you never mention.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    }
+  ],
+  "caption": "doing a small favor for the person you will be tomorrow.\nit counts.\nsave this to remember to be kind to yourself tonight.\n\n#suresilly #nightroutine #selflove #quietmoments",
+  "alt": "a small green donkey wipes its hooves on a yellow cloth next to text about yesterday you washing your favorite mug as a quiet act of love.",
+  "hook_options": [
+    "yesterday you washing your favorite mug so it is ready for you this morning. [[the quietest love]] is the kind you never mention.",
+    "yesterday you leaving a full glass of water by the bed. [[the quietest love]] is the kind you never mention.",
+    "yesterday you setting up the coffee so you only have to press start. [[the quietest love]] is the kind you never mention."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-12_2000",
+  "created_at": "2026-09-12T14:32:09Z",
+  "slug": "20260912_1432_yesterday-you-washing-your-favorite-mug"
+}
