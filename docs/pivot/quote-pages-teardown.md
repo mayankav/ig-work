@@ -161,3 +161,29 @@ The flow is the same as before, with better messages:
 ### How we judge it
 - Measure **sends and saves per reach**, not followers. `scripts/insights.py` records both, 3 days after posting.
 - **After 60 posts** (about 4 weeks at 2 a day), shift the mix toward whichever format wins on sends per reach.
+
+---
+
+## Addendum, 2026-09-12: nine more pages
+
+Read logged out, the same way. Grid alt text, bio, and one or two post pages each for likes and captions. `successoutright` is age-gated and unreadable logged out. The linked post `Dc1HsNCErkZ` is best.memory__ ("Quote that rewired my mind", 16.5K likes).
+
+| Page | Followers | What they post | Typical likes | Note |
+|---|---|---|---|---|
+| hustlingtortoise | 134K | one black-and-white storybook illustration of a tortoise, a headline, a long first-person caption | ~470 (0.35%) | the closest to us: a character, one look, daily |
+| hugmymind.hmm | 33K | one handwritten-style line on a poster | ~425 (1.3%) | highest engagement rate here; lines with a turn ("peace is not boring") |
+| therelatablewall | 1.1M | text posts; caption is a two-paragraph comfort essay | ~590, one pinned 100K | shape: name a pain the reader has, then the comfort |
+| spiritualgoal | 1.5M | "Today's advice", "signs of high intelligence", "read the caption" hooks | hidden | asks for a comment or a save in the image itself |
+| powerback.system | 125K | reels with text, one repeated opener ("Detachment means...") and one repeated product post | low | a named series with a fixed first word |
+| businessbrainy | 491K | numbered lists of 50, "poor vs rich mindset" comparisons | 45 on a recent post | text-dense and argued with in the comments; not us |
+| best.memory__ | 2.1M | 4-5 a day, "Day N of 365" series, repeated follow-us posts | 3K-16K | volume and a numbered series |
+
+What to take (formats, never words):
+
+1. **Pain first, comfort second.** therelatablewall's best shape: "not everyone has X" then "some people learned to Y". Our lists start soft; a line that names the hard part first hits harder. Fits the evening one-liner.
+2. **A named series with a fixed opener.** "Day 255 of 365", "Detachment means...". Cheap recognition. Ours could be a fixed opener per weekday.
+3. **A line with a turn.** hugmymind's lines end on a reversal. Our one-liner rule already asks for it; the lists do not. Add it to the second-last list item.
+4. **Ask inside the image, not only the caption.** spiritualgoal puts "save this" and "leave a heart" on the slide. Our last slide already says "send this to"; add "save this" on lists.
+5. **The caption can carry the story.** hustlingtortoise writes 150 words under a one-line image and gets comments. Our captions are 2-4 lines by rule; a story format could keep a longer caption.
+
+What not to take: numbered lists of 50, mindset comparisons, follow-us posts, and anything argued in the comments.

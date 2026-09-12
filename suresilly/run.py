@@ -195,23 +195,27 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
     try:
         if decision == "publish":
             caption = (post_dir / "caption.txt").read_text().strip()
-            media_id = instagram.publish(post_dir, review.slide_urls(local), caption)
+            alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
+            media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
             review.api(token, "complete", {"action_id": action_id, "state": "published", "media_id": media_id})
             telegram.send(telegram.posted(post, instagram.permalink(media_id)))
             output(result="published")
         elif decision == "drop":
             review.api(token, "complete", {"action_id": action_id, "state": "cancelled"})
             telegram.send(telegram.dropped(post))
+            telegram.send(*telegram.why_card(post, token))
             output(result="cancelled")
         elif decision == "redo_slide":
             redraw(post_dir, record["action"].get("slides") or [record["action"]["slide"]])
             stage(post_dir, parent=token)
+            note_why(token, "donkey")  # a redo of the pictures is itself the answer
             output(result="replacement_ready")
         elif decision == "redo":
             replacement = build(post["format"], post.get("slot", ""), new=True)
             if replacement is None:
                 raise ValueError("Posting is switched off, so no redo was made.")
             stage(replacement, parent=token)
+            telegram.send(*telegram.why_card(post, token))
             output(result="replacement_ready")
         else:
             raise ValueError(f"Unknown decision {decision!r}.")
@@ -255,7 +259,83 @@ def open_reviews(days: int = 3) -> list[dict]:
     return rows
 
 
-def legacy(decision: str, slug: str) -> None:
+WATCHLIST = ROOT / "docs" / "craft-watchlist.md"
+
+
+def hook_for(token: str) -> tuple[str, str]:
+    """(slug, first line) for a review token, from the saved record or the post folder."""
+    saved = STATE / "reviews" / f"{token}.json"
+    slug = json.loads(saved.read_text()).get("slug", "") if saved.exists() else ""
+    if not slug:
+        for path in POSTS.glob("*/review.json"):
+            if json.loads(path.read_text()).get("token") == token:
+                slug = path.parent.name
+                break
+    if slug and (POSTS / slug / "post.json").exists():
+        return slug, load(POSTS / slug)["slides"][0]["text"]
+    return slug or token, ""
+
+
+def note_why(token: str, note: str) -> tuple[str, int]:
+    """Write one rejection reason to the watchlist. Returns (reason as read, how many times so far).
+
+    Codes: an area ("hook"), a cause ("hook.slow"), a slide ("slide3", "all"), or free text.
+    A cause or a slide refines the latest line for the same post instead of adding one.
+    """
+    code = telegram.resolve(note)
+    slug, hook = hook_for(token)
+    WATCHLIST.parent.mkdir(parents=True, exist_ok=True)
+    existing = WATCHLIST.read_text() if WATCHLIST.exists() else "# Craft watchlist\n\n"
+    lines = existing.rstrip("\n").split("\n")
+    latest = next((i for i in range(len(lines) - 1, -1, -1) if lines[i].startswith("- ") and f" · {slug} · " in lines[i]), None)
+
+    which = re.fullmatch(r"slide([1-9])|(all)", code)
+    if which and latest is not None:
+        where = which.group(1) or "all"
+        lines[latest] = lines[latest].split(" · slide ")[0] + f" · slide {where}"
+        WATCHLIST.write_text("\n".join(lines) + "\n")
+        return f"slide {where}", 0
+
+    if "." in code and code in telegram.INSTRUCTIONS and latest is not None:
+        area = code.split(".")[0]
+        parts = lines[latest][2:].split(" · ")
+        if parts[1] == area:  # refine the area line the first tap wrote
+            key = area if code.endswith(".unsure") else code
+            parts[1], parts[2] = key, telegram.REASONS.get(key, parts[2])
+            lines[latest] = "- " + " · ".join(parts)
+            WATCHLIST.write_text("\n".join(lines) + "\n")
+            count = sum(1 for line in lines if line.startswith("- ") and f" · {key} · " in line)
+            return telegram.REASONS.get(key, key), count
+
+    key = code if code in telegram.REASONS else "other"
+    reason = telegram.REASONS.get(key, " ".join(note.split())[:200])
+    count = sum(1 for line in lines if line.startswith("- ") and f" · {key} · " in line) + 1
+    lines.append(f"- {date.today().isoformat()} · {key} · {reason} · {slug} · “{hook}”")
+    WATCHLIST.write_text("\n".join(lines) + "\n")
+    return reason, count
+
+
+def legacy(decision: str, slug: str, note: str = "") -> None:
+    if decision == "why":
+        if not slug:
+            telegram.send("🤔 I don't know which post that was about. Reply to the card or to the question.")
+            return
+        reason, count = note_why(slug, note)
+        code = telegram.resolve(note)
+        area = code.split(".")[0]
+        folder, hook = hook_for(slug)
+        if count == 0:  # a slide number
+            telegram.send(telegram.slide_noted(reason.removeprefix("slide ")))
+        elif code in telegram.AREAS and telegram.AREAS[code][1]:  # an area with causes: ask which
+            telegram.send(*telegram.why_detail_card(code, slug))
+        else:
+            telegram.send(telegram.noted(reason, count, hook))
+            if area in telegram.SLIDE_AREAS and (POSTS / folder / "post.json").exists():
+                post = load(POSTS / folder)
+                if len(post["slides"]) > 1:
+                    telegram.send(*telegram.which_slide_card(post, slug))
+        output(changed="true")
+        return
     rows = open_reviews()
     if decision == "list":
         telegram.send(telegram.open_reviews(rows))
@@ -286,6 +366,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--post", type=Path)
     parser.add_argument("--manual", action="store_true", help="the preview waits for a reply; no timer")
     parser.add_argument("--decision", default="list")
+    parser.add_argument("--note", default="")
     parser.add_argument("--slug", default="")
     parser.add_argument("--what", default="The post you asked for")
     parser.add_argument("--root", type=Path)
@@ -308,7 +389,7 @@ def main(argv: list[str] | None = None) -> None:
     elif args.operation == "list":
         legacy("list", "")
     elif args.operation == "legacy":
-        legacy(args.decision, args.slug)
+        legacy(args.decision, args.slug, args.note)
     elif args.operation == "notify-failure":
         run = os.environ.get("GITHUB_RUN_ID")
         url = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'mayankav/ig-work')}/actions/runs/{run}" if run else ""

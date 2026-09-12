@@ -52,7 +52,36 @@ def _wait_until_ready(base: str, container: str, token: str, tries: int = 30) ->
     raise InstagramError("Instagram took too long to process the upload.")
 
 
-def publish(post: Path, urls: list[str], caption: str) -> str:
+def alt_text(slide_text: str) -> str:
+    """What a screen reader hears for one slide: its own words, then the donkey."""
+    words = " ".join(slide_text.replace("[[", "").replace("]]", "").split())
+    if words[-1:].isalnum():
+        words += "."
+    return f"{words} A small green donkey is in the corner.".strip()[:1000]  # Instagram's limit
+
+
+def _image(base: str, user: str, token: str, alt: str, **params) -> str:
+    """Make one image container. Alt text is a nice-to-have: if Instagram refuses the call, try once without it."""
+    if alt:
+        try:
+            return _call("POST", f"{base}/{user}/media", alt_text=alt, access_token=token, **params)["id"]
+        except InstagramError as error:
+            print(f"Trying this image again without alt text: {error}")
+    return _call("POST", f"{base}/{user}/media", access_token=token, **params)["id"]
+
+
+def _alt_text_live(base: str, media_id: str, token: str, carousel: bool) -> str:
+    """How many images show alt text on Instagram now, like "7/8". Only a note, so it never raises."""
+    try:
+        media = _call("GET", f"{base}/{media_id}", fields="children{alt_text}" if carousel else "alt_text",
+                      access_token=token)
+        images = media["children"]["data"] if carousel else [media]
+        return f"{sum(bool(image.get('alt_text')) for image in images)}/{len(images)}"
+    except Exception as error:  # the post is already live; a failed check must not look like a failed post
+        return f"unknown: {error}"
+
+
+def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = None) -> str:
     """Post it and return the media id. Never posts the same folder twice."""
     if (post / PUBLISHED).exists():
         return json.loads((post / PUBLISHED).read_text())["media_id"]
@@ -60,15 +89,15 @@ def publish(post: Path, urls: list[str], caption: str) -> str:
         raise InstagramError("An earlier attempt may already be live. Check Instagram before trying again.")
     if not 1 <= len(urls) <= 10:
         raise InstagramError(f"A post needs 1 to 10 images, not {len(urls)}.")
+    if len(alts or []) != len(urls):
+        alts = [""] * len(urls)  # never describe a slide with another slide's words
     user, token = credentials()
     base = graph_base(token)
     if len(urls) == 1:
-        container = _call("POST", f"{base}/{user}/media", image_url=urls[0], caption=caption, access_token=token)["id"]
+        container = _image(base, user, token, alts[0], image_url=urls[0], caption=caption)
     else:
-        children = []
-        for url in urls:
-            child = _call("POST", f"{base}/{user}/media", image_url=url, is_carousel_item="true", access_token=token)["id"]
-            children.append(child)
+        children = [_image(base, user, token, alt, image_url=url, is_carousel_item="true")
+                    for url, alt in zip(urls, alts)]
         for child in children:
             _wait_until_ready(base, child, token)
         container = _call("POST", f"{base}/{user}/media", media_type="CAROUSEL", children=",".join(children),
@@ -82,6 +111,9 @@ def publish(post: Path, urls: list[str], caption: str) -> str:
               "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
     (post / PENDING).unlink()
+    if any(alts):
+        record["alt_text"] = _alt_text_live(base, str(media_id), token, len(urls) > 1)
+        (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
     return str(media_id)
 
 

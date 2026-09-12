@@ -116,12 +116,136 @@ def open_reviews(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def send(text: str) -> None:
+# Why a post was sent back. Two taps: the area, then the specific cause inside it.
+# Every cause carries the one sentence the writer will be told, so a rejection
+# never becomes a guess. "unsure" is always an option and records the area only.
+AREAS = {
+    "hook": ("slide 1 didn't pull me in", {
+        "slow": ("took too long to say what it's about", "slide 1 took too long to name its subject: put the subject in the first four words"),
+        "unclear": ("i didn't get what it meant", "slide 1 was not understood on one read: plain words, one idea, no cleverness"),
+        "notme": ("not about me or my people", "slide 1 did not feel like the reader's life: name a person or a moment most readers have, in second person"),
+        "noreason": ("gave me no reason to swipe", "slide 1 gave no reason to swipe: promise something the reader wants to see, an open loop, not a label"),
+        "seen": ("seen that hook before", "slide 1 used a hook shape the reader has seen: use a different shape from the recent posts"),
+    }),
+    "line": ("a line was off", {
+        "generic": ("could be about anyone", "that line could be about anyone: give it one detail most readers share"),
+        "private": ("too specific, not my life", "that line was too private: swap the detail for one most readers have lived"),
+        "preachy": ("preachy or advice-y", "that line lectured: state the moment, cut the lesson"),
+        "flat": ("true but flat, no feeling", "that line was true but flat: add the second half, what it cost or meant"),
+        "machine": ("sounds like a machine wrote it", "that line sounded machine-made: no not-X-but-Y, no triad, no self-answered question"),
+        "long": ("too long to read", "that line was too long: under 20 words, one idea"),
+    }),
+    "ending": ("the last slide", {
+        "moral": ("it preached", "the last slide preached: end on a picture or one plain warm sentence, never a lesson"),
+        "repeat": ("it just repeated the post", "the last slide repeated the post: end on one image or one sentence that adds something"),
+        "ask": ("it ended on a question or an ask", "the last slide ended on a question or an ask: end on a statement"),
+        "abrupt": ("stopped too early, felt unfinished", "the last slide felt unfinished: land the turn, one more beat"),
+        "down": ("left me feeling low", "the last slide left the reader low: end warm, even after a sad middle"),
+    }),
+    "topic": ("wrong topic or person", {
+        "person": ("not this person again", "the owner does not want this person again for now: pick a different person"),
+        "subject": ("this subject isn't us", "this subject is not the page: stay with family, friendship, growing up and love"),
+        "recent": ("we did this recently", "this topic was posted recently: pick a topic not in the recent posts"),
+    }),
+    "format": ("format or length", {
+        "long": ("too many slides", "too many slides: 7 or 8 at most, cut the weakest"),
+        "short": ("too thin, needed more", "too thin: one more strong item, not padding"),
+        "oneliner": ("should have been a one-liner", "this idea was a one-liner, not a carousel: one slide, one twist"),
+    }),
+    "tone": ("tone off", {
+        "sad": ("too sad", "too sad: keep the warmth in every slide, not only the last"),
+        "cute": ("too cute, greeting card", "too cute: cut the sweetness, keep the specific thing"),
+        "clever": ("trying too hard", "trying too hard: plain words, no wordplay"),
+        "cold": ("no warmth", "no warmth: the reader should feel liked, not observed"),
+    }),
+    "caption": ("caption or send line", {
+        "generic": ("send line generic", "the send line was generic: name one specific person to send it to"),
+        "repeat": ("repeats slide 1", "the caption repeated slide 1: add one new thought"),
+        "long": ("too long", "the caption was too long: 2 to 4 short lines"),
+        "tags": ("hashtags off", "the hashtags were off: 3 to 5 lowercase tags from the topic's list, none branded or catch-all"),
+    }),
+    "donkey": ("donkey didn't fit", {}),
+    "whole": ("the whole thing felt off", {
+        "generated": ("felt generated", "the post read as generated: fewer parallel shapes, one odd true detail per slide"),
+        "boring": ("nothing surprising in it", "nothing surprised the reader: one line must turn or reveal"),
+        "dejavu": ("felt like a repeat of us", "the post felt like a repeat of this page: change the shape, the person and the objects"),
+    }),
+    "fine": ("nothing to learn, just not this one", {}),
+}
+# Areas where knowing the slide helps. Asked as one more tap.
+SLIDE_AREAS = {"line", "donkey"}
+# Every code the watchlist can carry: an area, or area.cause. Typed shorthand like
+# "preachy" resolves to the one cause with that name.
+REASONS = {area: label for area, (label, _) in AREAS.items()}
+REASONS.update({f"{area}.{cause}": label for area, (_, causes) in AREAS.items() for cause, (label, _) in causes.items()})
+INSTRUCTIONS = {f"{area}.{cause}": tell for area, (_, causes) in AREAS.items() for cause, (_, tell) in causes.items()}
+_TRY = {"hook": "hook shape", "line": "shape for that line", "ending": "ending", "topic": "topic and person", "format": "format",
+        "tone": "tone", "caption": "caption", "donkey": "pose", "whole": "overall shape"}
+INSTRUCTIONS.update({area: f"the owner felt: {AREAS[area][0]}, and could not say more. try a different {noun}; change nothing else that worked"
+                     for area, noun in _TRY.items()})
+INSTRUCTIONS.update({f"{area}.unsure": INSTRUCTIONS[area] for area in _TRY})
+_names = [c for _, (_, causes) in AREAS.items() for c in causes]
+ALIASES = {c: f"{a}.{c}" for a, (_, causes) in AREAS.items() for c in causes if _names.count(c) == 1}
+
+
+def resolve(code: str) -> str:
+    code = code.strip().lower()
+    return code if code in REASONS else ALIASES.get(code, code)
+
+
+def why_card(post: dict, token: str) -> tuple[str, list[list[tuple[str, str]]]]:
+    """The first question after a rejection: which area. Text plus inline buttons (label, callback data)."""
+    text = (f"🧐 <b>Why did this one go?</b>\n<i>“{esc(post['slides'][0]['text'])}”</i>\n\n"
+            "Tap the area, then the bot asks one more question so the note is exact. "
+            "Or reply to this message with <code>why: your own words</code>.\n"
+            "Nothing changes on its own: the next post reads the note, and the same note twice earns a rule. "
+            "If you stay quiet, nothing is recorded.\n\n"
+            f"Review ID: {token}")
+    areas = list(AREAS.items())
+    buttons = [[(label, f"why:{token}:{area}") for area, (label, _) in areas[i:i + 2]] for i in range(0, len(areas), 2)]
+    return text, buttons
+
+
+def why_detail_card(area: str, token: str) -> tuple[str, list[list[tuple[str, str]]]]:
+    """The second question: which cause inside the area. 'not sure' keeps the area only."""
+    label, causes = AREAS[area]
+    text = f"<b>{esc(label)}</b>: what exactly? Tap one, or skip it.\n\nReview ID: {token}"
+    items = [(cause_label, f"why:{token}:{area}.{cause}") for cause, (cause_label, _) in causes.items()]
+    items.append(("not sure", f"why:{token}:{area}.unsure"))
+    return text, [items[i:i + 2] for i in range(0, len(items), 2)]
+
+
+def which_slide_card(post: dict, token: str) -> tuple[str, list[list[tuple[str, str]]]]:
+    """The second tap: which slide. Numbers 1-9 and 'all'; silence means 'not sure'."""
+    count = min(len(post.get("slides", [])), 9)
+    text = ("Which slide? Tap a number, or <code>all</code>. Skip it if you're not sure.\n\n"
+            f"Review ID: {token}")
+    numbers = [(str(n), f"why:{token}:slide{n}") for n in range(1, count + 1)] + [("all", f"why:{token}:all")]
+    return text, [numbers[i:i + 5] for i in range(0, len(numbers), 5)]
+
+
+def slide_noted(which: str) -> str:
+    return f"👍 Got it: slide {which}." if which != "all" else "👍 Got it: the whole post."
+
+
+def noted(reason: str, count: int, hook: str) -> str:
+    times = {1: "first time", 2: "second time", 3: "third time"}.get(count, f"{count}th time")
+    nudge = ("" if count == 1 else
+             "\nThat's twice: it goes into the editor's strike list in the brief." if count == 2 else
+             "\nThree times: it becomes a banned word or a writer rule.")
+    return (f"📝 <b>Noted:</b> {esc(reason)} ({times}).\n<i>“{esc(hook)}”</i>{nudge}\n\n"
+            "Nothing else to do. It's written in docs/craft-watchlist.md.")
+
+
+def send(text: str, buttons: list[list[tuple[str, str]]] | None = None) -> None:
     token, chat = os.environ.get("TELEGRAM_BOT_TOKEN", ""), os.environ.get("TELEGRAM_CHAT_ID", "")
     if not token or not chat:
         print("Telegram is not configured; message not sent:\n" + text)
         return
-    response = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", timeout=20, json={
-        "chat_id": chat, "text": text, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}})
+    body = {"chat_id": chat, "text": text, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}}
+    if buttons:
+        body["reply_markup"] = {"inline_keyboard": [[{"text": label, "callback_data": data} for label, data in row]
+                                                    for row in buttons]}
+    response = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", timeout=20, json=body)
     if response.status_code != 200 or not response.json().get("ok"):
         raise RuntimeError(f"Telegram did not accept the message (HTTP {response.status_code}).")

@@ -38,6 +38,27 @@ Send these as a normal message, not as a reply to a card. As a reply to a card, 
 
 The words are strict on purpose, so that ordinary chat can never post something by accident.
 
+## After `disapprove` or `redo all`: the bot asks why
+
+Right after a cancel or a full redo, the bot asks **"Why did this one go?"** in two taps, so the note is exact and the writer never guesses.
+
+**Tap 1, the area:** slide 1 didn't pull me in · a line was off · the last slide · wrong topic or person · format or length · tone off · caption or send line · donkey didn't fit · the whole thing felt off · nothing to learn.
+
+**Tap 2, the cause.** Each area offers its own causes plus "not sure". For example, slide 1:
+
+| Cause | What the writer is told next time |
+|---|---|
+| took too long to say what it's about | put the subject in the first four words |
+| i didn't get what it meant | plain words, one idea, no cleverness |
+| not about me or my people | name a person or a moment most readers have |
+| gave me no reason to swipe | promise something, an open loop, not a label |
+| seen that hook before | use a different hook shape |
+| not sure | try a different hook shape; change nothing else |
+
+**Tap 3, which slide**, only for "a line was off" and the donkey. Or reply to any of these messages with `why: your own words`. Tap nothing and nothing is recorded; skip tap 2 and the area alone is kept.
+
+Every answer is one line in `docs/craft-watchlist.md`. The next post reads it as one exact instruction and changes only that thing. The same cause twice goes into the editor's strike list in the brief; three times becomes a rule.
+
 ## Replying more than once to the same preview
 
 | First reply | Then you send | Result |
@@ -57,6 +78,7 @@ The ~1–2 minutes is the time between your reply and the GitHub job starting to
 | Piece | File |
 |---|---|
 | Reading your reply | `ops/dispatch-worker/src/review-window.js` (`parseWindowReply`) and `src/index.js` |
+| Reading a why answer (tap or `why: ...`) | `src/index.js` (`parseWhy`) → `.github/workflows/review.yml` → `python -m suresilly.run legacy --decision why` |
 | Remembering the decision and the 1-hour timer | the `ReviewWindow` Durable Object in `src/review-window.js` |
 | Acting on it (post, cancel, redo) | `.github/workflows/review-window.yml` → `python -m suresilly.run act` |
 | The card's wording | `suresilly/telegram.py` |

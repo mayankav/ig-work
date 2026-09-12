@@ -4,10 +4,10 @@ from __future__ import annotations
 import json
 import random
 import re
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 
-from . import POSTS
-from . import mascot
+from . import PACKAGE, POSTS, ROOT, mascot
 from .llm import chat_json
 
 # Slides per format. Nine is the ceiling because Telegram's `redo images` reply
@@ -21,8 +21,10 @@ MAX_HIGHLIGHTS = 3
 # Who the post is quietly about, and the topic label that goes with them.
 PEOPLE = {
     "a best friend from school": "friendship", "a friend you drifted from": "friendship",
+    "a best friend who moved away": "friendship",
     "an old roommate": "adult life", "mum": "parents", "dad": "parents", "a grandparent": "family",
-    "an older sibling": "siblings", "a cousin you grew up with": "nostalgia", "a partner": "love",
+    "an older sibling": "siblings", "a sister": "siblings", "a cousin you grew up with": "nostalgia",
+    "a partner": "love",
     "your younger self": "growing up", "a favourite teacher": "school days",
     "a stranger who was kind": "kindness", "yourself, on a hard week": "being kind to yourself",
 }
@@ -38,7 +40,8 @@ SHAPES = {
         "things that feel like home, even when you're far from it",
         "rare kinds of people, and why you should keep them close",
         "little things that quietly fix a bad day",
-        "things we lose while growing up, without noticing",
+        "last times you didn't know were the last time",
+        "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
         "habits of people who are easy to love",
     ),
     "story": (
@@ -48,6 +51,7 @@ SHAPES = {
         "someone waits a long time for something, and it arrives in a small way",
         "what looked like a small annoyance turns out to be love",
         "a younger self and an older self, one small moment apart",
+        "the first time you look after someone who used to look after you, in one small everyday way",
     ),
     "oneliner": (
         "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
@@ -55,7 +59,26 @@ SHAPES = {
         "someone does a small thing for you and never mentions it; name that as love",
         "the best version of an everyday thing is a surprisingly small answer",
         "some people feel like a cosy everyday comparison",
+        "a small thing you fought as a kid and would welcome now, pinned to one object",
+        "a small everyday annoyance someone causes now, seen from the day it stops",
+        "someone who lives far away now, and the one small habit you both kept",
     ),
+}
+
+# What people search under each topic, from the 2026-09-13 keyword dig (sizes and sources in
+# .agents/skills/suresilly-writer/references/keyword-dfs-2026-09-13.md). A topic with no list
+# gets none, and the writer picks its own under the caption rule.
+TAGS = {
+    "friendship": "#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+    "parents": "#mother #momquotes #mumquotes #motherdaughter #motherson #dad #dadquotes #fatherdaughter #fatherson",
+    "family": "#grandma #grandparents #grandmashouse",
+    "siblings": "#siblings #sisterlove #brotherandsister #siblinglove #oldersiblings #growingupwithsiblings",
+    "nostalgia": "#childhoodmemories #nostalgia #childhoodfriends #grandmashouse #growinguptogether",
+    "love": "#relationshipquotes #quotesaboutlove",
+    "growing up": "#growingup #childhoodmemories",
+    "school days": "#childhoodmemories #schoolmemories",
+    "kindness": "#kindnessmatters #kindnessquotes #randomactsofkindness",
+    "being kind to yourself": "#selflovequotes #bekindtoyourself",
 }
 
 BANNED = ("tapestry", "whisper", "whispers", "whispered", "sigh", "sighs", "sighed", "symphony",
@@ -68,38 +91,12 @@ def banned_in(text: str) -> list[str]:
     text = plain(text).lower().replace("’", "'")
     return [word for word in BANNED if re.search(rf"\b{re.escape(word)}\b", text)]
 
-SYSTEM = """You write posts for @suresilly, an easy-going Instagram page of tiny truths. \
-A small green donkey sits on every slide, but it never speaks and is never mentioned.
+# The craft rules live in craft.md, one file the writer, the editor and the humans read.
+# Everything above "## editor" is the writer's brief; the rest is the editor's pass.
+_CRAFT = (PACKAGE / "craft.md").read_text(encoding="utf-8").replace("{{BANNED}}", ", ".join(BANNED))
+_WRITER_CRAFT, _EDITOR_CRAFT = (part.strip() for part in _CRAFT.split("\n## editor\n", 1))
 
-The goal: a reader stops, feels seen, and sends the post to one specific person.
-
-How the words should feel:
-- all lowercase, including "i". simple, everyday english. short words, short lines.
-- concrete beats abstract: name the object, the room, the time of day, the small action.
-- talk to "you" or say "we". never preachy, never an advice column, never therapy-speak.
-- universal: a 16-year-old and a 60-year-old should both nod.
-- original lines only. never quote anyone. never name an author, book, celebrity or brand.
-- no hashtags, emojis, links, em dashes or en dashes on the slides.
-- never use these words: """ + ", ".join(BANNED) + """.
-- you may wrap ONE key phrase in [[double brackets]] to highlight it, on at most 3 slides \
-of the whole post. highlight the phrase a reader would underline, not decoration.
-
-Formats:
-- list: slide 1 is the list's title: an open loop under 12 words, no full stop, that makes \
-someone need to see the items. then 6 or 7 slides, one item each: one standalone line under \
-30 words that still works as a screenshot on its own. the last slide is a warm line about who \
-to send it to or why to save it. 8 or 9 slides in total.
-- story: 6 to 8 slides. slide 1 opens a small everyday moment and stops on a question or an \
-unfinished beat, so the reader has to swipe. the middle slides move time forward, one or two \
-sentences each. the second-last slide turns it. the last slide is one quotable line.
-- oneliner: exactly 1 slide, under 25 words, with a small twist at the end.
-
-First think of three different opening lines and pick the one a stranger would stop \
-scrolling for. Put all three in "hook_options"; slide 1 must be the one you picked.
-
-Caption: 2 to 4 short lines that add one new thought (never a repeat of the slides), then one \
-plain call to action on its own line (send it to someone, save it, or tag someone), then 3 to \
-5 lowercase hashtags.
+SYSTEM = _WRITER_CRAFT + """
 
 Every slide names the donkey's pose. The donkey is the reader, not a character in the \
 story: pick the pose for what the line makes the reader feel or do. Rules:
@@ -121,17 +118,7 @@ Reply with JSON only:
 "caption": "...", "alt": "one sentence describing the post for screen readers"}"""
 
 
-EDITOR = SYSTEM + """
-
-You are now the editor, not the writer. You get a draft post as JSON. Make it better:
-- slide 1 must be something a stranger stops scrolling for. if it isn't, rewrite it or use a \
-stronger line from hook_options.
-- every line must make literal sense on first read. a reader must never have to guess what \
-happened or why. fix any story whose logic has a gap.
-- replace vague lines with concrete ones. cut anything that sounds like a greeting card.
-- a oneliner must end on a small twist or a short verdict.
-- keep the same format, the same number of slides (or trim a list item that is weak), and \
-every rule above. reply with the improved post in the same JSON shape."""
+EDITOR = SYSTEM + "\n\n" + _EDITOR_CRAFT
 
 
 class WriteError(RuntimeError):
@@ -166,10 +153,68 @@ def previous_hooks(root=POSTS) -> list[str]:
     return hooks
 
 
+def recent_posts(root=POSTS, days: int = 14, limit: int = 10) -> list[str]:
+    """Our own last posts, one string each, newest first: the do-not-reuse list."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y%m%d")
+    lines = []
+    for path in sorted(root.glob("*/post.json"), reverse=True):
+        if path.parent.name[:8] < cutoff:
+            break
+        try:
+            slides = json.loads(path.read_text())["slides"]
+        except (OSError, ValueError, KeyError):
+            continue
+        lines.append(" / ".join(plain(s["text"]) for s in slides))
+        if len(lines) >= limit:
+            break
+    return lines
+
+
+def owner_notes(path=None, days: int = 14, limit: int = 8) -> list[str]:
+    """What the owner said when sending a post back, newest first. 'fine' means nothing to learn."""
+    path = path or ROOT / "docs" / "craft-watchlist.md"
+    if not path.exists():
+        return []
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).date().isoformat()
+    notes = []
+    for line in path.read_text().splitlines():
+        parts = [p.strip() for p in line[2:].split(" · ")] if line.startswith("- ") else []
+        if len(parts) < 5 or parts[0] < cutoff or parts[1] in ("fine", "okay", "loved"):
+            continue
+        from .telegram import INSTRUCTIONS
+        tell = INSTRUCTIONS.get(parts[1], f"the owner said: {parts[2]}")
+        slide = f" ({parts[5]})" if len(parts) > 5 else ""  # the line already says "slide 3"
+        notes.append(f"{tell}{slide}. the post: {parts[4]}")
+    return list(reversed(notes))[:limit]
+
+
+def context(previous_posts: list[str], notes: list[str]) -> str:
+    """The part of the brief that changes every day: what not to repeat, and what the owner said."""
+    text = ""
+    if previous_posts:
+        text += ("Already posted in the last two weeks. Do not reuse their objects, their openings, "
+                 "their people or their sentence shapes; a reader who saw one should not feel they are "
+                 "reading it again:\n" + "\n".join(f"- {p}" for p in previous_posts) + "\n\n")
+    if notes:
+        text += ("Recent notes from the owner on posts that were sent back, newest first. Each note "
+                 "names one exact thing. Change that one thing and nothing else: keep every other "
+                 "habit of the page that the note does not mention. Do not copy the quoted post.\n"
+                 + "\n".join(f"- {n}" for n in notes) + "\n\n")
+    return text
+
+
 def draw(fmt: str, seed: str) -> dict:
     rng = random.Random(seed)
     person = rng.choice(sorted(PEOPLE))
     return {"topic": PEOPLE[person], "person": person, "shape": rng.choice(SHAPES[fmt])}
+
+
+def ask(fmt: str, angle: dict, daily: str = "", note: str = "") -> str:
+    """The user message: what changes every day, the drawn angle, and its topic's hashtags."""
+    tags = TAGS.get(angle["topic"])
+    tags = f"Hashtags for this topic (use only the ones this post is about): {tags}\n" if tags else ""
+    return (f"{daily}Format: {fmt}\nShape to use: {angle['shape']}\n"
+            f"Who it is quietly about: {angle['person']}\n{tags}{note}Write it.")
 
 
 def problems(post: dict, fmt: str) -> list[str]:
@@ -231,16 +276,18 @@ def tidy(post: dict, fmt: str) -> list[dict]:
 
 
 def write_post(fmt: str, seed: str, previous: list[str] | None = None,
-               chat: Callable[[str, str], tuple[dict, str]] = chat_json) -> dict:
+               chat: Callable[[str, str], tuple[dict, str]] = chat_json,
+               recent: list[str] | None = None, notes: list[str] | None = None) -> dict:
     if fmt not in FORMATS:
         raise WriteError(f"Unknown format {fmt!r}.")
     angle = draw(fmt, seed)
     previous = previous if previous is not None else previous_hooks()
+    daily = context(recent if recent is not None else recent_posts(),
+                    notes if notes is not None else owner_notes())
     note = ""
     faults: list[str] = []
     for _ in range(3):
-        user = (f"Format: {fmt}\nShape to use: {angle['shape']}\n"
-                f"Who it is quietly about: {angle['person']}\n{note}Write it.")
+        user = ask(fmt, angle, daily, note)
         post, model = chat(SYSTEM, user)
         faults = problems(post, fmt)
         if not faults:

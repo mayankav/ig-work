@@ -23,7 +23,7 @@
 //                the dispatch URL is the claim. globalThis.fetch is stubbed, so
 //                no network is touched and no workflow is really dispatched.
 
-import worker, { parseReply, VERBS } from "../src/index.js";
+import worker, { parseReply, parseWhy, VERBS } from "../src/index.js";
 
 const ENV = {
   TELEGRAM_WEBHOOK_SECRET: "shh",
@@ -54,6 +54,31 @@ async function reply(text, { chatId = ENV.TELEGRAM_CHAT_ID, secret = "shh", ghSt
       },
       body: JSON.stringify({ update_id: 123, message: { chat: { id: chatId }, text,
         date: Date.parse("2026-09-04T02:35:00Z") / 1000 } }),
+    });
+    const response = await worker.fetch(request, ENV);
+    return { status: response.status, seen };
+  } finally {
+    globalThis.fetch = realFetch;
+    console.log = realLog;
+  }
+}
+
+/** Push one button tap (a callback_query) through the handler. */
+async function tap(data, { chatId = ENV.TELEGRAM_CHAT_ID } = {}) {
+  const seen = [];
+  const realFetch = globalThis.fetch;
+  const realLog = console.log;
+  globalThis.fetch = async (url, init) => {
+    seen.push({ url: String(url), body: init?.body ? JSON.parse(init.body) : null });
+    return new Response(null, { status: 204 });
+  };
+  console.log = () => {};
+  try {
+    const request = new Request("https://w.example/telegram", {
+      method: "POST",
+      headers: { "X-Telegram-Bot-Api-Secret-Token": "shh", "Content-Type": "application/json" },
+      body: JSON.stringify({ update_id: 777, callback_query: { id: "cb1", data,
+        message: { chat: { id: chatId }, text: "🧐 Why did this one go?" } } }),
     });
     const response = await worker.fetch(request, ENV);
     return { status: response.status, seen };
@@ -112,6 +137,50 @@ async function run() {
   if (VERBS.rerun !== "drop") {
     failures.push(`PARSE VERBS.rerun is now ${VERBS.rerun} — it has always been drop, ` +
                   "and a deck would be discarded by somebody asking for another run");
+  }
+
+  // ── why ──
+  //
+  // The answer to "why did this one go?" is data that lands in a markdown file.
+  // A tap carries the token in its data; a typed reply borrows the Review ID of
+  // the message it answers. Without a token there is nothing to attach it to.
+  const whys = [
+    [["", "", "why:0123456789abcdef:preachy"], { token: "0123456789abcdef", note: "preachy" }, "a button tap"],
+    [["why: the hook was flat", "Review ID: 0123456789abcdef", ""], { token: "0123456789abcdef", note: "the hook was flat" }, "typed, replying to the card"],
+    [["WHY   too  private", "Review ID: 0123456789abcdef"], { token: "0123456789abcdef", note: "too private" }, "case and spacing"],
+    [["why: no idea", "", ""], { token: "", note: "no idea" }, "typed with nothing to attach to"],
+    [["whyever would you", "Review ID: 0123456789abcdef", ""], null, "not the word why"],
+    [["approve", "Review ID: 0123456789abcdef", ""], null, "a decision is not a why"],
+    [["", "", "why:0123456789abcdef:slide3"], { token: "0123456789abcdef", note: "slide3" }, "a tap naming a slide"],
+    [["", "", "why:0123456789abcdef:hook.slow"], { token: "0123456789abcdef", note: "hook.slow" }, "the second tap, naming the cause"],
+    [["", "", "why:0123456789abcdef:not a code!"], null, "malformed button data"],
+  ];
+  for (const [args, want, label] of whys) {
+    const got = parseWhy(...args);
+    if (JSON.stringify(got) !== JSON.stringify(want)) {
+      failures.push(`WHY ${label}: got ${JSON.stringify(got)}, wanted ${JSON.stringify(want)}`);
+    }
+  }
+  const tapped = await tap("why:0123456789abcdef:generic");
+  const tapHits = dispatches(tapped.seen);
+  if (tapHits.length !== 1 || !tapHits[0].url.includes("review.yml")) {
+    failures.push(`WHY a tap made ${tapHits.length} dispatches, wanted one to review.yml`);
+  } else {
+    const inputs = tapHits[0].body?.inputs || {};
+    if (inputs.decision !== "why" || inputs.slug !== "0123456789abcdef" || inputs.note !== "generic") {
+      failures.push(`WHY a tap dispatched ${JSON.stringify(inputs)}`);
+    }
+  }
+  if (!tapped.seen.some((c) => c.url.includes("answerCallbackQuery"))) {
+    failures.push("WHY a tap was not answered, so the button would spin forever");
+  }
+  const stranger = await tap("why:0123456789abcdef:generic", { chatId: "999" });
+  if (dispatches(stranger.seen).length !== 0) {
+    failures.push("WHY a tap from another chat was dispatched");
+  }
+  const typed = await reply("why: preachy");
+  if (dispatches(typed.seen).length !== 0) {
+    failures.push("WHY a typed why with no Review ID was dispatched to nothing");
   }
 
   // ── the route ──

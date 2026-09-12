@@ -1,4 +1,5 @@
 import json
+import re
 
 import pytest
 
@@ -61,6 +62,15 @@ def test_draw_ties_topic_to_person():
     assert angle["shape"] in write.SHAPES["list"]
 
 
+def test_hashtag_lists_belong_to_topics_and_reach_the_writer():
+    assert set(write.TAGS) <= set(write.PEOPLE.values())
+    for tags in write.TAGS.values():
+        assert all(re.fullmatch(r"#[a-z]+", tag) for tag in tags.split())
+    angle = {"topic": "siblings", "person": "a sister", "shape": "x"}
+    assert "#sisterlove" in write.ask("list", angle) and write.ask("list", angle).endswith("Write it.")
+    assert "Hashtags" not in write.ask("list", {**angle, "topic": "adult life"})
+
+
 def test_retries_then_uses_the_editor():
     calls = []
 
@@ -115,3 +125,27 @@ def test_tidy_takes_the_pose_by_name_and_derives_the_mood():
 def test_the_prompt_lists_every_pose():
     from suresilly import mascot
     assert all(name in write.SYSTEM for name in mascot.NOTES)
+
+
+def test_the_brief_carries_recent_posts_and_owner_notes_but_not_fine(tmp_path):
+    folder = tmp_path / "99990101_0800_x"
+    folder.mkdir()
+    (folder / "post.json").write_text(json.dumps({"slides": [{"text": "old [[hook]]"}, {"text": "the porch light"}]}))
+    assert write.recent_posts(tmp_path) == ["old hook / the porch light"]
+    watch = tmp_path / "w.md"
+    watch.write_text("# Craft watchlist\n\n- 9999-01-01 · line.preachy · preachy or advice-y · slug · “a hook” · slide 3\n"
+                     "- 9999-01-02 · fine · nothing to learn · slug2 · “b”\n"
+                     "- 9999-01-03 · other · too long, sister said so · slug3 · “c”\n")
+    assert write.owner_notes(watch) == ["the owner said: too long, sister said so. the post: “c”",
+                                        "that line lectured: state the moment, cut the lesson (slide 3). the post: “a hook”"]
+    seen = []
+
+    def chat(system, user):
+        seen.append(user)
+        return good_list(), "m"
+
+    write.write_post("list", "s", previous=[], chat=chat, recent=["old hook / the porch light"],
+                     notes=["preachy or advice-y: “a hook”"])
+    assert "Already posted" in seen[0] and "the porch light" in seen[0] and "preachy or advice-y" in seen[0]
+    write.write_post("list", "s", previous=[], chat=chat, recent=[], notes=[])
+    assert "Already posted" not in seen[-1] and "notes from the owner" not in seen[-1]

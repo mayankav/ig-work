@@ -2,7 +2,8 @@ name: Answer a Telegram command
 
 # The Worker sends the older one-word replies here: list, publish <id>, drop <id>.
 # Decisions now live on the preview card, so this lists what is waiting and says
-# exactly what to reply.
+# exactly what to reply. It also records `why` answers (a tap on the question the
+# bot asks after disapprove or redo all) into docs/craft-watchlist.md.
 on:
   workflow_dispatch:
     inputs:
@@ -11,7 +12,7 @@ on:
         required: true
         default: list
         type: choice
-        options: [list, publish, drop]
+        options: [list, publish, drop, why]
       slug:
         description: "Which post (optional)"
         required: false
@@ -20,9 +21,17 @@ on:
         description: "Telegram delivery id (leave blank)"
         required: false
         type: string
+      note:
+        description: "For why: the reason code or your words"
+        required: false
+        type: string
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: suresilly-state
+  cancel-in-progress: false
 
 jobs:
   answer:
@@ -39,4 +48,19 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install --quiet requests
-      - run: python -m suresilly.run legacy --decision "${{ inputs.decision }}" --slug "${{ inputs.slug }}"
+      # The note is the owner's own words. It goes through an environment
+      # variable, never into the command line, so a quote mark cannot break out.
+      - id: answer
+        env:
+          NOTE: ${{ inputs.note }}
+        run: python -m suresilly.run legacy --decision "${{ inputs.decision }}" --slug "${{ inputs.slug }}" --note "$NOTE"
+
+      - name: Keep the watchlist
+        if: steps.answer.outputs.changed == 'true'
+        run: |
+          git config user.name suresilly-bot
+          git config user.email bot@suresilly.local
+          git add docs/craft-watchlist.md
+          git diff --staged --quiet || git commit -m "why: one more line on the watchlist [skip ci]"
+          git pull --rebase --quiet
+          git push

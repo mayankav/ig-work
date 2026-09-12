@@ -56,10 +56,27 @@ function parseReply(text) {
   return { decision, slug: match[2].trim() };
 }
 
+// The answer to "why did this one go?". Either a tap on the question's buttons
+// (callback data `why:<token>:<code>`) or a typed `why: your words` sent as a
+// reply to the card or to the question, both of which carry a Review ID. The
+// words are DATA: they travel as a workflow input and end up in a markdown file.
+const WHY_TEXT = /^\s*why\b[:\s]*(.*)$/is;
+const WHY_DATA = /^why:([a-f0-9]{16}):([a-z0-9_.]{1,24})$/;
+
+function parseWhy(text, replyText = "", callbackData = "") {
+  const tapped = WHY_DATA.exec(callbackData || "");
+  if (tapped) return { token: tapped[1], note: tapped[2] };
+  const match = WHY_TEXT.exec(text || "");
+  if (!match) return null;
+  const token = /Review ID:\s*([a-f0-9]{16})/i.exec(replyText || "")?.[1];
+  const note = match[1].replace(/\s+/g, " ").trim().slice(0, 200);
+  return { token: token || "", note };
+}
+
 // Named alongside the default export purely so test/parse-reply.test.mjs can
 // reach them. Cloudflare loads the default export and ignores these; a Worker is
 // allowed other named exports (that is how Durable Objects are declared).
-export { parseReply, VERBS };
+export { parseReply, parseWhy, VERBS };
 
 // Use the trigger's intended time, never the time a delayed handler starts.
 // This is the same IST date-and-slot contract as scripts/posting_slots.py.
@@ -214,7 +231,8 @@ export default {
       return new Response("ok", { status: 200 });
     }
 
-    const message = update.message || update.channel_post || {};
+    const tap = update.callback_query;
+    const message = update.message || update.channel_post || tap?.message || {};
     const chatId = String((message.chat || {}).id ?? "");
     // 2. Is this really the owner? The whole security gate, before the text is
     //    read. Every other chat is ignored.
@@ -222,6 +240,35 @@ export default {
       console.log(`telegram: chat ${chatId || "(none)"} is not the owner, ignored`);
       return new Response("ok", { status: 200 });
     }
+
+    // A "why" answer: a button tap on the question, or a typed `why: ...` reply.
+    const why = parseWhy(tap ? "" : message.text,
+      message.reply_to_message?.caption || message.reply_to_message?.text || "", tap?.data || "");
+    if (why) {
+      if (!Number.isSafeInteger(update.update_id) || update.update_id < 0) return new Response("ok", {status: 200});
+      if (!why.token) {
+        await ack(env, "🤔 Which post? Reply <code>why: ...</code> to the card or to the question itself.");
+        return new Response("ok", {status: 200});
+      }
+      const r = await ghDispatch(env, REVIEW_WORKFLOW,
+        { decision: "why", slug: why.token, request_id: `tg-${update.update_id}`, note: why.note || "other" },
+        `telegram why ${why.token}`);
+      if (tap?.id && env.TELEGRAM_BOT_TOKEN) {
+        try {
+          await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ callback_query_id: tap.id, text: r.status === 204 ? "Noted." : "Didn't go through, tap again." }),
+          });
+        } catch (e) { console.log(`answerCallbackQuery failed (ignored): ${e}`); }
+      }
+      if (r.status !== 204) {
+        await ack(env, "⚠️ The note could not start on GitHub. Try the button again in a minute.");
+        return new Response("dispatch failed", {status: 502});
+      }
+      if (!tap) await ack(env, "📝 Writing that down…");
+      return new Response("ok", {status: 200});
+    }
+    if (tap) return new Response("ok", {status: 200});  // some other button; nothing to do
 
     const windowCommand = parseWindowReply(message.text, message.reply_to_message?.caption || message.reply_to_message?.text || "");
     if (windowCommand) {

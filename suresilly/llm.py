@@ -1,7 +1,8 @@
 """A JSON-returning chat call: Gemini first (better prose), Groq as the fallback.
 
-Keys come from the environment or from .env.local: GEMINI_API_KEY, GEMINI_API_KEY_2
-and GROQ_API_KEY. Any that are missing are skipped.
+Keys come from the environment or from .env.local: GEMINI_API_KEY, GEMINI_API_KEY_2,
+GEMINI_API_KEY_3 and GROQ_API_KEY. Any that are missing are skipped. Each Gemini key should
+come from its own Google project: the free tier allows 20 requests a day per model per project.
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ import requests
 from . import ROOT
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-GEMINI_MODELS = ("gemini-3.5-flash", "gemini-2.5-flash")
+GEMINI_MODELS = ("gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.5-flash")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODELS = ("openai/gpt-oss-120b",)
 
@@ -64,7 +65,7 @@ def _groq_text(body: dict) -> str:
 def routes() -> list[tuple[str, str, object, object]]:
     found = []
     for model in GEMINI_MODELS:
-        for name in ("GEMINI_API_KEY", "GEMINI_API_KEY_2"):
+        for name in ("GEMINI_API_KEY", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3"):
             if key(name):
                 found.append((model, key(name), _gemini, _gemini_text))
     for model in GROQ_MODELS:
@@ -94,7 +95,8 @@ def chat_json(system: str, user: str, temperature: float = 0.9) -> tuple[dict, s
                     last = f"{model}: the reply was not JSON"
                     continue
             last = f"{model}: HTTP {response.status_code}"
-            if response.status_code == 429 and "per day" in response.text.lower():
+            # Groq says "tokens per day"; Gemini says "GenerateRequestsPerDayPerProjectPerModel".
+            if response.status_code == 429 and "perday" in response.text.lower().replace(" ", ""):
                 break  # this model's daily allowance is gone; try the next one
             if response.status_code == 429 or response.status_code >= 500 or "json_validate_failed" in response.text:
                 try:

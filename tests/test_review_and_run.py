@@ -112,6 +112,76 @@ def test_instagram_refuses_after_an_unfinished_attempt(tmp_path):
         instagram.publish(post, ["https://a/1.jpg"], "hi")
 
 
+class Reply:
+    def __init__(self, status, body):
+        self.status_code, self.body, self.text = status, body, json.dumps(body)
+
+    def json(self):
+        return self.body
+
+
+def fake_graph(monkeypatch, refuse=None, live=None):
+    """Stub requests for the Graph API. `refuse(data)` may return an error message for a container POST;
+    `live` is Instagram's reply when asked, after posting, which images carry alt text."""
+    monkeypatch.setenv("IG_USER_ID", "1")
+    monkeypatch.setenv("IG_ACCESS_TOKEN", "IGAAtoken")
+    sent = []
+
+    def request(method, url, timeout=None, data=None, params=None):
+        sent.append((method, url.rsplit("/", 1)[-1], data or params))
+        if method == "GET" and params["fields"] != "status_code":
+            return live or Reply(200, {})
+        if method == "GET":
+            return Reply(200, {"status_code": "FINISHED"})
+        if url.endswith("media_publish"):
+            return Reply(200, {"id": "17900000000000001"})
+        if refuse and refuse(data):
+            return Reply(400, {"error": {"message": refuse(data), "code": 100}})
+        return Reply(200, {"id": f"c{len(sent)}"})
+
+    monkeypatch.setattr(instagram.requests, "request", request)
+    return sent
+
+
+def test_alt_text_goes_on_each_carousel_child_and_not_the_parent(tmp_path, monkeypatch):
+    # after posting, Instagram shows alt text on only one of the two slides
+    sent = fake_graph(monkeypatch, live=Reply(200, {"children": {"data": [{"id": "c1", "alt_text": "x"}, {"id": "c2"}]}}))
+    alts = [instagram.alt_text(text) for text in ("a short [[title]]", "you said,\n[[i missed you]].")]
+    assert alts == ["a short title. A small green donkey is in the corner.",
+                    "you said, i missed you. A small green donkey is in the corner."]
+    post = make_post(tmp_path / "p")
+    instagram.publish(post, ["https://a/1.jpg", "https://a/2.jpg"], "hello", alts)
+    posts = [data for method, _, data in sent if method == "POST"]
+    children = [data for data in posts if data.get("is_carousel_item") == "true"]
+    assert [child["alt_text"] for child in children] == alts
+    parent = [data for data in posts if data.get("media_type") == "CAROUSEL"]
+    assert len(parent) == 1 and "alt_text" not in parent[0]
+    assert all("alt_text" not in data for _, name, data in sent if name == "media_publish")
+    assert sent[-1][2]["fields"] == "children{alt_text}"
+    assert json.loads((post / "published.json").read_text())["alt_text"] == "1/2"
+
+
+def test_a_refused_alt_text_is_dropped_and_the_post_still_goes_out(tmp_path, monkeypatch):
+    sent = fake_graph(monkeypatch, refuse=lambda data: "alt_text" in data and "(#100) Invalid parameter")
+    post = make_post(tmp_path / "p", count=1)
+    assert instagram.publish(post, ["https://a/1.jpg"], "hi", ["words. A small green donkey is in the corner."])
+    first, retry = [data for method, name, data in sent if method == "POST" and name == "media"]
+    assert first["alt_text"] and "alt_text" not in retry and retry["caption"] == first["caption"] == "hi"
+    assert json.loads((post / "published.json").read_text())["alt_text"] == "0/1"
+    # a refusal that has nothing to do with alt text still fails, after one try without it
+    sent = fake_graph(monkeypatch, refuse=lambda data: "The image URL could not be fetched")
+    with pytest.raises(instagram.InstagramError, match="could not be fetched"):
+        instagram.publish(make_post(tmp_path / "q", count=1), ["https://a/1.jpg"], "hi", ["words."])
+    assert [("alt_text" in data) for _, _, data in sent] == [True, False]
+
+
+def test_a_failed_alt_text_check_never_fails_a_live_post(tmp_path, monkeypatch):
+    fake_graph(monkeypatch, live=Reply(400, {"error": {"message": "(#100) Tried accessing nonexisting field"}}))
+    post = make_post(tmp_path / "p", count=1)
+    assert instagram.publish(post, ["https://a/1.jpg"], "hi", ["words."]) == "17900000000000001"
+    assert json.loads((post / "published.json").read_text())["alt_text"].startswith("unknown: ")
+
+
 def test_register_falls_back_to_the_plain_preview(tmp_path, monkeypatch):
     post = make_post(tmp_path / "20260911_0800_x")
     (post / "post.json").write_text(json.dumps({"format": "list", "topic": "love", "caption": "c",
@@ -133,3 +203,32 @@ def test_register_falls_back_to_the_plain_preview(tmp_path, monkeypatch):
     run.register(post)
     assert len(sent) == 2 and "photos" not in sent[1] and "Review ID:" in sent[1]["caption"]
     assert sent[1]["resources"].startswith("📝 Slides")
+
+
+def test_note_why_records_area_then_refines_with_cause_and_slide(tmp_path, monkeypatch):
+    post = make_post(tmp_path / "20260913_0800_x", count=4)
+    monkeypatch.setattr(run, "POSTS", tmp_path)
+    monkeypatch.setattr(run, "STATE", tmp_path / "state")
+    monkeypatch.setattr(run, "WATCHLIST", tmp_path / "docs" / "craft-watchlist.md")
+    token = review.prepare(post)["token"]
+    assert run.note_why(token, "line") == ("a line was off", 1)
+    assert run.note_why(token, "line.preachy") == ("preachy or advice-y", 1)
+    assert run.note_why(token, "slide3") == ("slide 3", 0)
+    text = run.WATCHLIST.read_text()
+    assert text.count("\n- ") == 1 and "· line.preachy · preachy or advice-y · 20260913_0800_x · “line 1” · slide 3" in text
+    # a typed shorthand resolves to the same cause and counts as the second time
+    assert run.note_why(token, "PREACHY ") == ("preachy or advice-y", 2)
+    # unsure keeps the area
+    assert run.note_why(token, "hook") == ("slide 1 didn't pull me in", 1)
+    assert run.note_why(token, "hook.unsure") == ("slide 1 didn't pull me in", 1)
+    # free text is kept as the owner's words
+    reason, count = run.note_why(token, "the joke\nlanded flat | honestly")
+    assert (reason, count) == ("the joke landed flat | honestly", 1) and "· other · the joke landed flat" in run.WATCHLIST.read_text()
+
+
+def test_note_why_survives_an_unknown_token(tmp_path, monkeypatch):
+    monkeypatch.setattr(run, "POSTS", tmp_path)
+    monkeypatch.setattr(run, "STATE", tmp_path / "state")
+    monkeypatch.setattr(run, "WATCHLIST", tmp_path / "w.md")
+    assert run.note_why("0123456789abcdef", "hook.slow") == ("took too long to say what it's about", 1)
+    assert "0123456789abcdef" in run.WATCHLIST.read_text()
