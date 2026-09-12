@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "i was holding the flashlight for him in the cold garage, trying to keep the beam perfectly still.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "we never talked much during these projects. just the click of a socket wrench and the smell of lawnmower gas.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "he was trying to fix a small engine that had been dead since july, his knuckles gray with dust.",
+      "mood": "tired",
+      "pose": "propped_up"
+    },
+    {
+      "text": "usually, this is where he would tell me to check my oil, or ask if i had enough money for groceries.",
+      "mood": "calm",
+      "pose": "stretching"
+    },
+    {
+      "text": "but he stopped, wiped his grease-stained hands on a yellow rag, and looked at the wall.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "without turning around, he said, [[i'm really glad you came home.]]",
+      "mood": "warm",
+      "pose": "winking"
+    },
+    {
+      "text": "we stood there in the cold for another hour, and for once, i didn't mind holding the light.",
+      "mood": "wise",
+      "pose": "explaining"
+    }
+  ],
+  "caption": "some people don't have the words\nuntil they are standing in a drafty garage\nwith grease on their hands.\nsend this to him.\n\n#dad #growingup #family #home",
+  "alt": "a seven-slide story about holding a flashlight for a father in a cold garage, ending with him saying he is glad you came home.",
+  "hook_options": [
+    "i was holding the flashlight for him in the cold garage, trying to keep the beam perfectly still.",
+    "he was driving me to the station in the dark, the heater blowing too loud.",
+    "we were sitting on the back porch steps, scraping dried paint off our fingers."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-12_0800",
+  "created_at": "2026-09-12T02:35:17Z",
+  "slug": "20260912_0235_i-was-holding-the-flashlight-for"
+}
