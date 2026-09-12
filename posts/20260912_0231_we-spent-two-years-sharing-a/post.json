@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "we spent two years sharing a kitchen and only spoke through sticky notes on the fridge.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "we'd see each other across the counter, but the words stayed in our heads.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "we just watched tv in the dark, our feet on opposite ends of the same cheap sofa.",
+      "mood": "tired",
+      "pose": "face_down"
+    },
+    {
+      "text": "then the lease ended, we packed our boxes, and we went our separate ways with a quick wave.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "yesterday we ran into each other by the fruit stand, both holding the same cheap grocery bags we used to stack under the sink.",
+      "mood": "warm",
+      "pose": "self_hug"
+    },
+    {
+      "text": "we stood there, ready for the brief hello and quick walk away we always did, when you stopped.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "you looked at me and said, [[i really missed you]].",
+      "mood": "warm",
+      "pose": "flower"
+    },
+    {
+      "text": "some people leave a mark on your life without ever making a sound.",
+      "mood": "wise",
+      "pose": "explaining"
+    }
+  ],
+  "caption": "sometimes the quietest years are the ones that stick to you the most.\ni hope you are doing well, wherever you are living now.\nsend this to an old roommate.\n\n#roommates #oldfriends #movingout #apartments",
+  "alt": "A series of minimalist slides with a small green donkey in the corner, telling a story about running into an old roommate and finally hearing them say they missed you.",
+  "hook_options": [
+    "we lived together for three years and knew every creak in the hallway floorboards.",
+    "we split the electric bill down to the cent but never talked about the cold.",
+    "we spent two years sharing a kitchen and only spoke through sticky notes on the fridge."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-2.5-flash",
+  "slot": "2026-09-12_0800",
+  "created_at": "2026-09-12T02:31:39Z",
+  "slug": "20260912_0231_we-spent-two-years-sharing-a"
+}
