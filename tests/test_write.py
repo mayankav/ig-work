@@ -98,3 +98,20 @@ def test_previous_hooks_reads_post_folders(tmp_path):
     folder.mkdir()
     (folder / "post.json").write_text(json.dumps({"slides": [{"text": "old hook"}]}))
     assert write.previous_hooks(tmp_path) == ["old hook"]
+
+
+def test_tidy_takes_the_pose_by_name_and_derives_the_mood():
+    post = {"slides": [{"text": "title", "pose": "sitting"},          # not an invite pose: dropped
+                       {"text": "a", "pose": "warm_mug"},
+                       {"text": "b", "pose": "point_right"},          # invite pose mid-post: dropped
+                       {"text": "c", "pose": "no_such_pose", "mood": "sad"},
+                       {"text": "d", "pose": "presenting"}]}
+    tidied = write.tidy(post, "list")
+    assert [(s["mood"], s["pose"]) for s in tidied] == [
+        ("invite", None), ("warm", "warm_mug"), ("warm", None), ("sad", None), ("warm", None)]
+    assert write.tidy({"slides": [{"text": "one", "pose": "listening"}]}, "oneliner")[0]["pose"] == "listening"
+
+
+def test_the_prompt_lists_every_pose():
+    from suresilly import mascot
+    assert all(name in write.SYSTEM for name in mascot.NOTES)

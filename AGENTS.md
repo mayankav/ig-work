@@ -44,7 +44,7 @@ The Worker dispatches `auto-post.yml`, `review-window.yml` and `review.yml` by n
 
 ```
 suresilly/          write · render · mascot · review · instagram · telegram · run · llm
-suresilly/assets/   fonts (Fraunces, Inter; both OFL) and 53 donkey poses
+suresilly/assets/   fonts (Fraunces, Inter; both OFL) and 75 donkey poses
 posts/<slug>/       post.json · caption.txt · contact_sheet.png · review.json · published.json
                     (slides/ is gitignored; the review artifact and media host keep them)
 state/reviews/      the Worker's record of each preview

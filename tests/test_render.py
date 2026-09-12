@@ -45,3 +45,22 @@ def test_renders_slides_at_instagram_size(tmp_path):
             assert image.size == (1080, 1350) and image.format == "JPEG"
     sheet = render.contact_sheet(files, tmp_path / "sheet.png")
     assert sheet.exists()
+
+
+def test_every_pose_on_disk_has_a_note_and_a_mood():
+    on_disk = {p.stem for p in mascot.LIBRARY.glob("*.png")}
+    assert set(mascot.NOTES) == on_disk
+    assert set(mascot.MOOD_OF) == on_disk
+
+
+def test_choose_keeps_the_writers_pose_and_falls_back_by_mood():
+    slides = [{"text": "t", "mood": "invite", "pose": "presenting"},
+              {"text": "a", "mood": "warm", "pose": "warm_mug"},
+              {"text": "b", "mood": "sad", "pose": "warm_mug"},       # repeat: falls back
+              {"text": "c", "mood": "joy", "pose": "not_a_pose"},     # unknown: falls back
+              {"text": "d", "mood": "calm", "pose": None}]
+    chosen = mascot.choose(slides, "seed")
+    assert chosen[:2] == ["presenting", "warm_mug"]
+    assert chosen[2] in mascot.POSES["sad"] and chosen[3] in mascot.POSES["joy"] and chosen[4] in mascot.POSES["calm"]
+    assert len(set(chosen)) == 5
+    assert mascot.choose(slides, "seed") == chosen

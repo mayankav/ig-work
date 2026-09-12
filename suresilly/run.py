@@ -90,8 +90,8 @@ def build(fmt: str | None, slot: str, new: bool = False) -> Path | None:
     fmt = fmt or format_for(slot)
     seed = f"{slot or now.isoformat()}-{os.urandom(4).hex()}"
     post = write_post(fmt, seed)
-    for slide, pose in zip(post["slides"], mascot.pick([s["mood"] for s in post["slides"]], seed)):
-        slide["pose"] = pose
+    for slide, pose in zip(post["slides"], mascot.choose(post["slides"], seed)):
+        slide["pose"] = pose  # the writer's pick when it named a real pose, else one for the mood
     post.update(slot=slot or "", created_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"))
     post_dir = POSTS / f"{now:%Y%m%d_%H%M}_{slugify(post['slides'][0]['text'])}"
     post_dir.mkdir(parents=True, exist_ok=False)

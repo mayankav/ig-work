@@ -7,6 +7,7 @@ import re
 from typing import Callable
 
 from . import POSTS
+from . import mascot
 from .llm import chat_json
 
 # Slides per format. Nine is the ceiling because Telegram's `redo images` reply
@@ -100,11 +101,23 @@ Caption: 2 to 4 short lines that add one new thought (never a repeat of the slid
 plain call to action on its own line (send it to someone, save it, or tag someone), then 3 to \
 5 lowercase hashtags.
 
-Every slide has a mood for the donkey's pose, one of: warm, calm, wistful, sad, tired, joy, \
-wise, invite. use "invite" only on slide 1 of a list or a story.
+Every slide names the donkey's pose. The donkey is the reader, not a character in the \
+story: pick the pose for what the line makes the reader feel or do. Rules:
+- pick from the list below, by exact name. never the same pose twice in one post.
+- a pose marked OBJECT only when the line is about that object or that exact moment \
+(a mug for tea or a slow morning, a book for reading, a phone for a text). otherwise a \
+plain-body pose. when the line does name a thing we have a pose for, prefer that pose.
+- lying-down poses (curled_up, face_down, on_back, propped_up) only for rest, collapse \
+or a lazy evening, never for a tender line.
+- slide 1 of a list or a story: point_right, beckoning or presenting.
+- the last slide of a list: offering, waving, holding_heart or beckoning.
+- winking and approving are cheeky; never on the line that carries the feeling.
+
+Poses:
+""" + mascot.notes() + """
 
 Reply with JSON only:
-{"hook_options": ["...", "...", "..."], "slides": [{"text": "...", "mood": "..."}], \
+{"hook_options": ["...", "...", "..."], "slides": [{"text": "...", "pose": "..."}], \
 "caption": "...", "alt": "one sentence describing the post for screen readers"}"""
 
 
@@ -198,19 +211,22 @@ def tidy_caption(caption: str) -> str:
 
 
 def tidy(post: dict, fmt: str) -> list[dict]:
+    """Slides with text, a real pose name (or none), and the mood that pose belongs to."""
     slides, highlights = [], 0
     for number, slide in enumerate(post["slides"], 1):
-        mood = slide.get("mood") if slide.get("mood") in MOODS else "calm"
+        pose = slide.get("pose") if slide.get("pose") in mascot.NOTES else None
+        mood = mascot.MOOD_OF[pose] if pose else (slide.get("mood") if slide.get("mood") in MOODS else "calm")
         if fmt != "oneliner" and number == 1:
-            mood = "invite"  # the donkey points you into the swipe
+            if mood != "invite":  # the donkey points you into the swipe
+                mood, pose = "invite", None
         elif mood == "invite":
-            mood = "warm"
+            mood, pose = "warm", None
         text = " ".join(re.sub(r"\s*[—–]\s*", ", ", slide["text"]).split()).replace(" ,", ",")
         if "[[" in text:
             highlights += 1
             if highlights > MAX_HIGHLIGHTS:
                 text = plain(text)
-        slides.append({"text": text, "mood": mood})
+        slides.append({"text": text, "mood": mood, "pose": pose})
     return slides
 
 
