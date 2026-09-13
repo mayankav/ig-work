@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some friends feel like the local station you lose past the county line. [[you still know every word]].",
+      "mood": "wistful",
+      "pose": "looking_far"
+    }
+  ],
+  "caption": "we don't talk every week anymore, but when you pick up, we start mid-sentence.\ni still look for your car at the junction.\nsend this to the best friend who knows your kitchen by heart.",
+  "alt": "a small green donkey stands looking into the distance with a hoof shading its eyes next to text about friends who feel like a local radio station you still know every word to.",
+  "hook_options": [
+    "some friends feel like the local station you lose past the county line",
+    "some people feel like the old kitchen clock that always ran five minutes fast",
+    "some friends feel like that local radio station you lose past the state line"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-13_2000",
+  "created_at": "2026-09-13T14:31:27Z",
+  "slug": "20260913_1431_some-friends-feel-like-the-local",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "wistful"
+  }
+}
