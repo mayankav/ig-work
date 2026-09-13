@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "things you only understand after a certain age or a certain life change",
+  "slides": [
+    {
+      "text": "things that make sense only after a really heavy week",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "going to bed at nine with the kitchen light still on isn't giving up. [[you are just saving some strength]] for tomorrow.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "the pile of clean laundry sitting on the chair all week is not a failure. you just needed the sleep more than an empty room.",
+      "mood": "tired",
+      "pose": "floor_slumped"
+    },
+    {
+      "text": "saying 'i don't know yet' out loud stops you from pacing the hallway at midnight.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "sitting on the bathroom rug with the door locked for five minutes is how you find a quiet room when the house is too loud.",
+      "mood": "sad",
+      "pose": "knees_hugged"
+    },
+    {
+      "text": "letting the phone ring on your kitchen counter doesn't mean you are a bad friend. you just have nothing left to say tonight.",
+      "mood": "sad",
+      "pose": "phone_down"
+    },
+    {
+      "text": "you do not have to fix your whole life on a wednesday night. [[you just have to wash your face]] and turn off the light.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "save this for the quiet nights when you forget how much you are carrying.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "you spent all week carrying everything at once. you do not have to solve the next five years before tomorrow morning.\nsave this for a night when you need some grace.\n\n#selflovequotes #bekindtoyourself",
+  "alt": "A list of comforting truths about giving yourself grace on a hard week, with a small green donkey on each slide.",
+  "hook_options": [
+    "things that make sense only after a really heavy week",
+    "things you only understand after a few hard years",
+    "what nobody tells you about growing into yourself"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-13_0800",
+  "created_at": "2026-09-13T02:48:36Z",
+  "slug": "20260913_0248_things-that-make-sense-only-after"
+}

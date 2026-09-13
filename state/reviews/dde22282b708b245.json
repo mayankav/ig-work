@@ -19,13 +19,37 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 being kind to yourself \u00b7 8 slides\n\n<b>\u201cthe quiet last times you didn't know were happening\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. the quiet last times you didn't know were happening\n2. the last time you sat in the car with the engine off before walking through the front door.\n3. the last time you counted loose coins in your coat pocket, hoping the bus fare hadn't gone up.\n4. the last time you ate toast standing over the kitchen sink because making a plate felt like too much.\n5. the last evening you waited by the window hoping someone would check in first.\n6. the last night you stared at the ceiling convinced you had ruined your whole life.\n7. the last morning you woke up and thought this heavy weight was never going to lift.\n8. save this for the quiet days when you forget how much you have already survived.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you spent so long bracing for the next bad day that you never noticed when the hardest season ended.\nyou made it out of rooms you thought would keep you forever.\nsave this for a week when everything feels too heavy.\n\n#selflovequotes #bekindtoyourself #harddays</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>dde22282b708b245</code>",
-  "state": "waiting",
+  "state": "replaced",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789267674847,
+      "decision": "redo",
+      "request_id": "tg-602066211"
+    }
+  ],
+  "seen": {
+    "tg-602066211": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 152,
   "delivered_at": 1789266889564,
-  "deadline": 1789270489564
+  "deadline": 1789270489564,
+  "action": {
+    "id": "rv-dde22282b708b245-tg-602066211",
+    "decision": "redo",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789268276277
+  },
+  "claimed": false,
+  "claim_expires": 1789270116627,
+  "result": {
+    "action_id": "rv-dde22282b708b245-tg-602066211",
+    "state": "replaced",
+    "token": "dde22282b708b245"
+  }
 }
