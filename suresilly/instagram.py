@@ -60,18 +60,18 @@ def alt_text(slide_text: str) -> str:
     return f"{words} A small green donkey is in the corner.".strip()[:1000]  # Instagram's limit
 
 
-def _image(base: str, user: str, token: str, alt: str, **params) -> str:
-    """Make one image container. Alt text is a nice-to-have: if Instagram refuses the call, try once without it."""
+def _container(base: str, user: str, token: str, alt: str, **params) -> str:
+    """Make one image or Reel container. Alt text is a nice-to-have: if Instagram refuses the call, try once without it."""
     if alt:
         try:
             return _call("POST", f"{base}/{user}/media", alt_text=alt, access_token=token, **params)["id"]
         except InstagramError as error:
-            print(f"Trying this image again without alt text: {error}")
+            print(f"Trying this {'Reel' if params.get('media_type') == 'REELS' else 'image'} again without alt text: {error}")
     return _call("POST", f"{base}/{user}/media", access_token=token, **params)["id"]
 
 
 def _alt_text_live(base: str, media_id: str, token: str, carousel: bool) -> str:
-    """How many images show alt text on Instagram now, like "7/8". Only a note, so it never raises."""
+    """How many images (or the Reel) show alt text on Instagram now, like "7/8". Only a note, so it never raises."""
     try:
         media = _call("GET", f"{base}/{media_id}", fields="children{alt_text}" if carousel else "alt_text",
                       access_token=token)
@@ -103,16 +103,21 @@ def _go_live(post: Path, base: str, user: str, token: str, container: str) -> di
     return record
 
 
-def publish_reel(post: Path, video_url: str, caption: str) -> str:
+def publish_reel(post: Path, video_url: str, caption: str, alt: str = "") -> str:
     """Post the video as a Reel that also shows on the grid, and return the media id. Never twice."""
     if done := _already(post):
         return done
     user, token = credentials()
     base = graph_base(token)
-    container = _call("POST", f"{base}/{user}/media", media_type="REELS", video_url=video_url, caption=caption,
-                      share_to_feed="true", access_token=token)["id"]
+    # Meta's docs say Reels don't take alt text; send it anyway and let the check below say what stuck.
+    container = _container(base, user, token, alt, media_type="REELS", video_url=video_url, caption=caption,
+                           share_to_feed="true")
     _wait_until_ready(base, container, token, tries=75)  # a video takes longer than an image: allow 5 minutes
-    return _go_live(post, base, user, token, container)["media_id"]
+    record = _go_live(post, base, user, token, container)
+    if alt:
+        record["alt_text"] = _alt_text_live(base, record["media_id"], token, carousel=False)
+        (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
+    return record["media_id"]
 
 
 def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = None) -> str:
@@ -126,9 +131,9 @@ def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = 
     user, token = credentials()
     base = graph_base(token)
     if len(urls) == 1:
-        container = _image(base, user, token, alts[0], image_url=urls[0], caption=caption)
+        container = _container(base, user, token, alts[0], image_url=urls[0], caption=caption)
     else:
-        children = [_image(base, user, token, alt, image_url=url, is_carousel_item="true")
+        children = [_container(base, user, token, alt, image_url=url, is_carousel_item="true")
                     for url, alt in zip(urls, alts)]
         for child in children:
             _wait_until_ready(base, child, token)

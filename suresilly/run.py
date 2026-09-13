@@ -202,7 +202,8 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
         if decision == "publish":
             caption = (post_dir / "caption.txt").read_text().strip()
             if review.reel_url(local):
-                media_id = instagram.publish_reel(post_dir, review.reel_url(local), caption)
+                alt = instagram.alt_text(post["slides"][0].get("text", ""))
+                media_id = instagram.publish_reel(post_dir, review.reel_url(local), caption, alt)
             else:
                 alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
                 media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)

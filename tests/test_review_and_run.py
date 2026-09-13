@@ -211,6 +211,22 @@ def test_a_refused_alt_text_is_dropped_and_the_post_still_goes_out(tmp_path, mon
     assert [("alt_text" in data) for _, _, data in sent] == [True, False]
 
 
+def test_a_reel_sends_alt_text_and_still_goes_out_if_refused(tmp_path, monkeypatch):
+    sent = fake_graph(monkeypatch, live=Reply(200, {"alt_text": "x"}))
+    post = make_post(tmp_path / "p", count=1)
+    assert instagram.publish_reel(post, "https://a/reel.mp4", "hi", "words. A small green donkey is in the corner.")
+    reel = [data for method, name, data in sent if method == "POST" and name == "media"]
+    assert len(reel) == 1 and reel[0]["media_type"] == "REELS" and reel[0]["alt_text"].startswith("words.")
+    assert sent[-1][2]["fields"] == "alt_text"
+    assert json.loads((post / "published.json").read_text())["alt_text"] == "1/1"
+    sent = fake_graph(monkeypatch, refuse=lambda data: "alt_text" in data and "(#100) Invalid parameter")
+    post = make_post(tmp_path / "q", count=1)
+    assert instagram.publish_reel(post, "https://a/reel.mp4", "hi", "words.")
+    first, retry = [data for method, name, data in sent if method == "POST" and name == "media"]
+    assert "alt_text" in first and "alt_text" not in retry and retry["media_type"] == "REELS"
+    assert json.loads((post / "published.json").read_text())["alt_text"] == "0/1"
+
+
 def test_a_failed_alt_text_check_never_fails_a_live_post(tmp_path, monkeypatch):
     fake_graph(monkeypatch, live=Reply(400, {"error": {"message": "(#100) Tried accessing nonexisting field"}}))
     post = make_post(tmp_path / "p", count=1)
