@@ -104,7 +104,7 @@ jobs:
         run: python -m suresilly.run finish-redo
 
       - name: Hold an unfinished action
-        if: failure() && steps.review.outputs.accepted == 'true'
+        if: (failure() || cancelled()) && steps.review.outputs.accepted == 'true'
         run: python -m suresilly.run fail
 
       - name: Save the record
@@ -118,9 +118,10 @@ jobs:
           git push
 
       - name: Tell the owner it didn't work
-        if: failure()
+        if: failure() || cancelled()
         env:
           FAILURE_REASON: ${{ steps.act.outputs.reason || steps.register.outputs.reason || steps.review.outputs.reason }}
+          JOB_STATUS: ${{ job.status }}
         run: |
           pip install --quiet requests
-          python -m suresilly.run notify-failure --what "Your reply"
+          python -m suresilly.run notify-failure --what "Your reply" --kind reply

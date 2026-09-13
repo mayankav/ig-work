@@ -22,6 +22,18 @@ async function telegram(env, method, body) {
   return Array.isArray(receipt.result) ? receipt.result[receipt.result.length - 1] : receipt.result;
 }
 
+// What the owner reads, as a reply to the preview card, when its post gets stuck.
+export const STUCK = {
+  dispatch_failed: "GitHub didn't accept our request to act on it, 3 times in a row. This is usually a short GitHub problem.",
+  held: "The GitHub run working on it stopped without finishing. Open Instagram first: it may already be there.",
+};
+export function stuckMessage(why) {
+  return `🔴 <b>The post on this card is stuck</b>\n\n<b>What went wrong:</b> ${STUCK[why]}\n` +
+    "<b>What you can do:</b> reply <code>approve</code> to this card to try again, <code>redo all</code> for a new post, " +
+    "or <code>disapprove</code> to drop it.\n" +
+    "<b>If you do nothing:</b> it stays unposted. The next post still comes at its usual time.";
+}
+
 export function parseWindowReply(text, replyText = '') {
   const match = /^\s*(approve|approval|publish|disapprove|disapproval|cancel|reject|redo)(?:\s+([a-f0-9]{16}))?(?:\s+(.+?))?\s*$/i.exec(text || '');
   if (!match) return null;
@@ -138,6 +150,7 @@ export class ReviewWindow {
       record.seen[input.request_id] = true;
       record.history.push({at: Date.now(), decision: input.decision, request_id: input.request_id});
       record.state = input.decision === 'drop' ? 'cancelled' : 'queued';
+      delete record.told; // a new try that gets stuck again deserves a new notice
       record.action = {id: `rv-${record.token}-${input.request_id}`, decision: input.decision, slide: input.slide || 0, slides:input.slides || [], attempts: 0};
       await this.ctx.storage.deleteAlarm();
       await this.ctx.storage.put('review', record); // A redo/cancel stops timeout posting before dispatch.
@@ -183,9 +196,19 @@ export class ReviewWindow {
       return {state: record.state, accepted: true};
     } catch {
       if (record.action.attempts < 3) await this.ctx.storage.setAlarm(Date.now() + 60000);
-      else { record.state = record.state === 'cancelled' ? 'cancelled' : 'dispatch_failed'; await this.ctx.storage.put('review', record); }
+      else { record.state = record.state === 'cancelled' ? 'cancelled' : 'dispatch_failed'; await this.ctx.storage.put('review', record); await this.tell(record); }
       return {state: record.state, accepted: true, dispatch_pending: true};
     }
+  }
+  // Say so once, as a reply to the card, when a post gets stuck. Best effort: never throws.
+  async tell(record) {
+    if (!STUCK[record.state] || record.told === record.state) return;
+    try {
+      await telegram(this.env, 'sendMessage', {text: stuckMessage(record.state), parse_mode: 'HTML',
+        ...(record.message_id ? {reply_parameters: {message_id: record.message_id, allow_sending_without_reply: true}} : {})});
+      record.told = record.state;
+      await this.ctx.storage.put('review', record);
+    } catch (error) { console.log('stuck notice failed (ignored):', error.message); }
   }
   async alarm() {
     return this.ctx.blockConcurrencyWhile(async () => {
@@ -195,6 +218,7 @@ export class ReviewWindow {
         record.state = 'held'; record.claimed = false;
         await this.ctx.storage.put('review', record);
         await this.ctx.storage.deleteAlarm();
+        await this.tell(record);
         return;
       }
       if (record.state === 'waiting') {
@@ -213,6 +237,7 @@ export class ReviewWindow {
         else {
           if (record.state !== 'cancelled') record.state = 'dispatch_failed';
           await this.ctx.storage.put('review', record); await this.ctx.storage.deleteAlarm();
+          await this.tell(record);
         }
       }
     });

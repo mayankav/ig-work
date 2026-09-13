@@ -63,8 +63,12 @@ def keep_alive() -> list[tuple[str, str]]:
     if not os.environ.get("SECRETS_PAT"):
         print("SECRETS_PAT is not set, so the tokens are not renewed automatically.")
         return []
+    try:
+        names = due()
+    except Exception as error:  # SECRETS_PAT is wrong or GitHub is down: nothing could be checked
+        return [("SECRETS_PAT", str(error)[:300])]
     problems = []
-    for name in due():
+    for name in names:
         try:
             renew(name)
             print(f"Renewed {name}; it now lasts 60 more days.")

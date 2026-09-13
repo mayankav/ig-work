@@ -90,23 +90,109 @@ def plain_details(post: dict) -> str:
 def posted(post: dict, link: str, threads: dict | None = None) -> str:
     where = f'<a href="{html.escape(link)}">Open it on Instagram ↗</a>' if link else "It's live on Instagram."
     if threads and threads.get("error"):
-        where += (f"\n🧵 Threads didn't take it: {esc(threads['error'])}. Instagram is fine. "
-                  "Nothing to reply; the next one-liner tries Threads again.")
+        where += (f"\n🧵 <b>Threads didn't get it.</b> {explain(threads['error'])[0]} Instagram is fine. "
+                  "Nothing to reply: the next one-liner tries Threads again."
+                  f"{details(threads['error'])}")
     elif threads:
         where += (f'\n🧵 <a href="{html.escape(threads["link"])}">Also on Threads ↗</a>' if threads.get("link")
                   else "\n🧵 Also on Threads.")
     return (f"✅ <b>Posted!</b>\n{summary(post)}\n<b>“{esc(post['slides'][0]['text'])}”</b>\n\n{where}\n\n"
-            f"📊 Saves and shares get measured in 3 days.\n⏭ Next post: {next_slot()}")
+            f"📊 Saves and shares get measured in 3 days.\n⏭ Next post: {next_slot()}" + tank())
+
+
+def tank() -> str:
+    """A line on what is left of today's free Gemini and Groq calls, or "" before anything was counted."""
+    from .llm import left_today
+    left = left_today()
+    if not left:
+        return ""
+    parts = []
+    if "gemini_left" in left:
+        parts.append(f"Gemini {left['gemini_left']} of {left['gemini_total']} calls")
+    if "groq_left" in left:
+        parts.append(f"Groq (backup) {left['groq_left']:,} of {left['groq_total']:,}")
+    line = "⛽ <b>Left today for writing posts:</b> " + " · ".join(parts) + ". A post uses 2 to 6 calls."
+    if "gemini_refill" in left:
+        line += f" Gemini refills at {left['gemini_refill']} IST."
+    if left.get("gemini_left") == 0:
+        line = line.replace("⛽", "⚠️ Gemini is used up, so posts are written by Groq (the backup AI).\n⛽", 1)
+    elif left.get("gemini_left", 99) < 12:
+        line = line.replace("⛽", "⚠️ Gemini calls are running low.\n⛽", 1)
+    return "\n" + line
+
+
+# Raw error text → what happened, in plain words, and what to do when it isn't the usual.
+# The first row whose fragment is in the error wins. The raw text still travels,
+# folded away under "Details for Claude", so a forwarded message is enough to fix it.
+PLAIN = (
+    ("switched off", "Posting is switched off: SS_HALT (the kill switch) is on.",
+     "send this message to Claude to switch posting back on."),
+    ("token has expired", "The token has expired (a token is the password our code uses to post).",
+     "send this message to Claude."),
+    ("session has expired", "The token has expired (a token is the password our code uses to post).",
+     "send this message to Claude."),
+    ("validating access token", "Instagram rejected the token (the password our code uses to post).",
+     "send this message to Claude."),
+    ("github refused", "GitHub refused SECRETS_PAT (the GitHub token that saves renewed tokens).",
+     "send this message to Claude."),
+    ("is not set", "A GitHub secret is missing (secrets are the passwords GitHub keeps for our code).",
+     "send this message to Claude."),
+    ("not configured", "A GitHub secret or setting is missing (secrets are the passwords GitHub keeps for our code).",
+     "send this message to Claude."),
+    ("already be live", "Instagram may have posted it already, so I stopped rather than post it twice.",
+     "open Instagram and look first. If it isn't there, {usual}"),
+    ("may or may not be live", "Instagram may have posted it already, so I stopped rather than post it twice.",
+     "open Instagram and look first. If it isn't there, {usual}"),
+    ("already on instagram", "This post is already on Instagram.", "nothing."),
+    ("threads said", "Threads turned the post down.", ""),
+    ("threads could not", "Threads couldn't take the picture.", ""),
+    ("threads took too long", "Threads took too long to take the picture.", ""),
+    ("meta said", "Meta (the company behind Instagram and Threads) turned the request down.", ""),
+    ("instagram", "Instagram turned the post down or couldn't finish it.", ""),
+    ("no writing model", "Gemini and Groq (the AIs that write our posts) didn't answer. "
+     "They're busy, or out of free calls for today.", ""),
+    ("writer could not", "Gemini (the AI that writes our posts) kept writing posts that broke our rules.", ""),
+    ("too much text", "The words were too long to fit on the slide.", ""),
+    ("font did not load", "The slide couldn't be drawn in our font (Fraunces).", ""),
+    ("reel", "The Reel's video couldn't be made (ffmpeg, the video tool, failed).", ""),
+    ("executable doesn't exist", "Chromium (the browser that draws our slides) didn't install on GitHub.", ""),
+    ("never went live", "The slides didn't finish uploading to media.suresilly.com (where the pictures are hosted) in time.", ""),
+    ("review service", "The Worker (the Cloudflare program behind the Telegram approvals) didn't answer.", ""),
+    ("telegram did not confirm", "Telegram didn't confirm it got the preview.", ""),
+    ("changed after its preview", "The post changed after you saw it, so I didn't post it.", ""),
+    ("different preview", "The post changed after you saw it, so I didn't post it.", ""),
+    ("github stopped", "GitHub stopped the run before it finished. It ran too long or was cancelled.", ""),
+)
+UNKNOWN = "A GitHub Actions step (the machine that runs our code) broke before our code could say why. This is usually a short GitHub problem."
+
+
+def explain(reason: str) -> tuple[str, str]:
+    """(what happened in plain words, what to do instead of the usual, or "")."""
+    low = (reason or "").lower()
+    for fragment, plain, todo in PLAIN:
+        if fragment in low:
+            return plain, todo
+    return (UNKNOWN if not low or "stopped before it could say why" in low else "Something unexpected broke."), ""
+
+
+def details(reason: str) -> str:
+    """The raw error, folded away, for Claude to read if you forward the message."""
+    return f"\n<blockquote expandable>Details for Claude (you can skip this): {esc(reason)}</blockquote>" if reason else ""
 
 
 def token_trouble(problems: list[tuple[str, str]]) -> str:
-    names = {"IG_ACCESS_TOKEN": "Instagram", "THREADS_ACCESS_TOKEN": "Threads"}
-    lines = "\n".join(f"• {names.get(name, name)}: {esc(reason)}" for name, reason in problems)
-    return (f"🔑 <b>A token couldn't be renewed.</b>\n{lines}\n\n"
-            "Posting carries on: a token keeps working until 60 days after its last renewal.\n"
-            "↩️ Nothing to reply. The next run tries again. If this message keeps coming, make a new token "
-            "(docs/threads.md shows how).\n"
-            "If you do nothing and it keeps failing, that app stops posting when the token runs out.")
+    names = {"IG_ACCESS_TOKEN": "Instagram", "THREADS_ACCESS_TOKEN": "Threads",
+             "SECRETS_PAT": "SECRETS_PAT (the GitHub token that saves renewed tokens)"}
+    lines = "\n".join(f"• <b>{names.get(name, name)}:</b> {explain(reason)[0]}{details(reason)}"
+                      for name, reason in problems)
+    dead = [names[name] for name, reason in problems if "expired" in reason.lower() and name in names]
+    if dead:  # renewing can't bring back a token that has already run out
+        todo, silence = "send this message to Claude.", f"{' and '.join(dead)} can't post until a new token is made."
+    else:
+        todo = "nothing yet. The next run tries again. If this message comes back for 3 days, send it to Claude."
+        silence = "posting carries on. The current token works until 60 days after it was last renewed."
+    return (f"🔑 <b>A token couldn't be renewed</b> (tokens are the passwords our code uses to post; each lasts 60 days)."
+            f"\n{lines}\n\n<b>What you can do:</b> {todo}\n<b>If you do nothing:</b> {silence}")
 
 
 def dropped(post: dict) -> str:
@@ -114,14 +200,27 @@ def dropped(post: dict) -> str:
             f"⏭ Next post: {next_slot()}. Reply <code>retry</code> if you want a new one now.")
 
 
-def failed(what: str, reason: str, *, can_retry: bool = True, run_url: str = "") -> str:
-    lines = [f"🔴 <b>{esc(what)} didn't happen</b>", "", f"<b>What went wrong:</b> {esc(reason)}"]
-    lines.append("<b>What you can do:</b> reply <code>retry</code> to try again now." if can_retry else
-                 "<b>What you can do:</b> nothing from here, this needs a code fix.")
-    lines.append(f"<b>If you do nothing:</b> the next post is at {next_slot()}.")
+# What the owner can do after a failure, by what failed: (what you can do, if you do nothing).
+AFTER = {
+    "post": ("reply <code>retry</code> to make a fresh post now.", "the next post is at {slot}."),
+    "reply": ("reply <code>approve</code> to the preview card again to try once more, or <code>disapprove</code> to drop it.",
+              "this post stays unposted. The next post is at {slot}."),
+    "message": ("send your message again.", "nothing changes. The next post is at {slot}."),
+    "numbers": ("nothing. It tries again within the hour.", "nothing breaks. Only the numbers for that post wait."),
+}
+
+
+def failed(what: str, reason: str, *, kind: str = "post", run_url: str = "") -> str:
+    plain, todo = explain(reason)
+    usual, silence = AFTER.get(kind, AFTER["post"])
+    if todo.startswith("send this message to Claude"):  # a missing key or setting: the next run fails the same way
+        silence = "every post fails the same way until this is fixed."
+    lines = [f"🔴 <b>{esc(what)} didn't happen</b>", "", f"<b>What went wrong:</b> {plain}",
+             f"<b>What you can do:</b> {todo.format(usual=usual) if todo else usual}", f"<b>If you do nothing:</b> {silence.format(slot=next_slot())}"]
+    text = "\n".join(lines) + tank() + details(reason)
     if run_url:
-        lines += ["", f'<a href="{html.escape(run_url)}">Open the run log ↗</a>']
-    return "\n".join(lines)
+        text += f'\n<a href="{html.escape(run_url)}">Technical log on GitHub ↗</a>'
+    return text
 
 
 def open_reviews(rows: list[dict]) -> str:

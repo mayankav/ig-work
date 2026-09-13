@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+import pytest
+
 from suresilly import telegram
 
 
@@ -40,9 +42,35 @@ def test_reel_card_says_it_is_a_reel():
 
 
 def test_failure_says_what_happened_what_to_do_and_what_silence_does():
-    text = telegram.failed("The 08:00 post", "Gemini was busy", run_url="https://x/y")
-    assert "Gemini was busy" in text and "<code>retry</code>" in text
-    assert "If you do nothing" in text and 'href="https://x/y"' in text
+    text = telegram.failed("The 08:00 post", "No writing model answered (gemini: 429)", run_url="https://x/y")
+    plain = text.split("<blockquote")[0]
+    assert "Gemini and Groq (the AIs that write our posts) didn't answer" in plain and "429" not in plain and "<code>retry</code>" in plain
+    assert "If you do nothing:" in plain and 'href="https://x/y"' in text and "gemini: 429" in text  # raw, folded
+
+
+@pytest.mark.parametrize("raw, plain", [
+    ("Instagram said HTTP 400: Invalid parameter", "Instagram turned the post down"),
+    ("Instagram said HTTP 400: Error validating access token: Session has expired", "The token has expired (a token is the password our code uses to post)"),
+    ("An earlier attempt may already be live. Check Instagram before trying again.", "may have posted it already"),
+    ("ffmpeg could not make the Reel: moov atom not found", "Reel's video couldn't be made (ffmpeg, the video tool, failed)"),
+    ("Slide 1 has too much text to fit.", "too long to fit"),
+    ("The preview files never went live on media.suresilly.com.", "didn't finish uploading to media.suresilly.com"),
+    ("The review service refused register: 502", "The Worker (the Cloudflare program behind the Telegram approvals)"),
+    ("GitHub stopped the run (it ran too long or was cancelled).", "GitHub stopped the run"),
+    ("A step stopped before it could say why. The run log has it.", "A GitHub Actions step (the machine that runs our code) broke"),
+    ("KeyError: 'slides'", "Something unexpected broke"),
+])
+def test_every_known_failure_reads_in_plain_words(raw, plain):
+    assert plain in telegram.explain(raw)[0]
+
+
+def test_what_to_do_depends_on_what_failed():
+    reply = telegram.failed("Your reply", "Instagram said HTTP 500: oops", kind="reply")
+    assert "reply <code>approve</code> to the preview card again" in reply and "stays unposted" in reply
+    live = telegram.failed("Your reply", "Instagram gave no post id. It may or may not be live.", kind="reply")
+    assert "open Instagram and look first. If it isn't there, reply <code>approve</code> to the preview card" in live
+    numbers = telegram.failed("The 3-day numbers check", "", kind="numbers")
+    assert "tries again within the hour" in numbers and "<code>retry</code>" not in numbers
 
 
 def test_next_slot():
@@ -105,3 +133,9 @@ def test_posted_says_where_threads_went():
     failed = telegram.posted(one, "", {"error": "the Threads token has expired"})
     assert "token has expired" in failed and "Instagram is fine" in failed and "Nothing to reply" in failed
     assert "Threads" not in telegram.posted(one, "")
+
+
+def test_a_problem_that_blocks_everything_does_not_promise_the_next_post():
+    text = telegram.failed("The 20:00 post", "IG_USER_ID or IG_ACCESS_TOKEN is not set. Nothing was posted.")
+    assert "send this message to Claude" in text and "every post fails the same way" in text
+    assert "the next post is at" not in text

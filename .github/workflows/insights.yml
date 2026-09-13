@@ -36,6 +36,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: suresilly-state
@@ -98,6 +99,19 @@ jobs:
           fi
           git pull --rebase --quiet
           git push
+
+      - name: Tell the owner it didn't work
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JOB_STATUS: ${{ job.status }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # Hourly: tell the owner on the first failure, not every hour after it.
+          before=$(gh run list --workflow insights.yml --branch main --limit 2 --json conclusion --jq '.[1].conclusion')
+          if [ "$before" = "failure" ] || [ "$before" = "cancelled" ]; then echo "Already told the owner."; exit 0; fi
+          python -m suresilly.run notify-failure --what "The 3-day numbers check" --kind numbers
 
       - name: Keep unsaved measurements
         if: failure()

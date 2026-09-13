@@ -31,7 +31,7 @@ Mornings alternate between a **list** (7–9 slides) and a **story** (6–8 slid
 
 1. **Our own words only.** The writer never sees another page's posts and never quotes anyone.
 2. **The donkey comes from `suresilly/assets/mascot/`.** No new art, and no text inside the art.
-3. **Every Telegram message says three things:** what happened, what you can reply, and what happens if you stay quiet.
+3. **Every Telegram message says three things:** what happened, what you can reply, and what happens if you stay quiet. Errors are in plain words (`telegram.PLAIN`); the raw error goes underneath, folded, as "Details for Claude". Every workflow and the Worker message the owner when something fails or gets stuck. Posted! and failure messages end with what is left of today's free writing AI (`state/usage.json`).
 4. **Kill switch:** the repo variable `SS_HALT=1`, or a file at `state/HALT`.
 5. **Keep it small.** If a problem looks like it needs a new gate, try a better prompt first.
 
@@ -49,6 +49,7 @@ suresilly/assets/   fonts (Fraunces, Inter; both OFL) and 75 donkey poses
 posts/<slug>/       post.json · caption.txt · contact_sheet.png · review.json · published.json
                     (slides/ and reel.mp4 are gitignored; the review artifact and media host keep them)
 state/reviews/      the Worker's record of each preview
+state/usage.json    writer calls counted today, for the ⛽ line on Telegram
 scripts/insights.py reach, saves and shares after 3 days (insights.yml)
 tests/              pytest
 ```

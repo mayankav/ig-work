@@ -155,9 +155,10 @@ jobs:
         run: python -m suresilly.run tokens
 
       - name: Tell the owner it didn't work
-        if: failure()
+        if: failure() || cancelled()
         env:
           FAILURE_REASON: ${{ steps.build.outputs.reason || steps.stage.outputs.reason || steps.register.outputs.reason }}
+          JOB_STATUS: ${{ job.status }}
         run: |
           pip install --quiet requests
           python -m suresilly.run notify-failure --slot "${{ inputs.slot_id }}"

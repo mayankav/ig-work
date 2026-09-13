@@ -5,7 +5,7 @@
   python -m suresilly.run register --post posts/<slug> [--manual]
   python -m suresilly.run describe | act --post posts/<slug> | finish-redo | fail
   python -m suresilly.run list | legacy --decision publish --slug abc
-  python -m suresilly.run notify-failure --what "The 08:00 post"
+  python -m suresilly.run notify-failure --what "The 08:00 post" [--kind post|reply|message|numbers]
   python -m suresilly.run prune --root gh-pages/slides --days 14
   python -m suresilly.run tokens
 """
@@ -394,6 +394,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--note", default="")
     parser.add_argument("--slug", default="")
     parser.add_argument("--what", default="The post you asked for")
+    parser.add_argument("--kind", default="post", choices=tuple(telegram.AFTER), help="what failed, for what to tell you")
     parser.add_argument("--root", type=Path)
     parser.add_argument("--days", type=int, default=14)
     args = parser.parse_args(argv)
@@ -418,11 +419,13 @@ def main(argv: list[str] | None = None) -> None:
     elif args.operation == "notify-failure":
         run = os.environ.get("GITHUB_RUN_ID")
         url = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'mayankav/ig-work')}/actions/runs/{run}" if run else ""
-        reason = os.environ.get("FAILURE_REASON") or "A step stopped before it could say why. The run log has it."
+        reason = os.environ.get("FAILURE_REASON") or (
+            "GitHub stopped the run (it ran too long or was cancelled)." if os.environ.get("JOB_STATUS") == "cancelled"
+            else "A step stopped before it could say why. The run log has it.")
         what = args.what
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}_\d{4}", args.slot):
             what = f"The {args.slot[11:13]}:{args.slot[13:15]} post"
-        telegram.send(telegram.failed(what, reason, run_url=url))
+        telegram.send(telegram.failed(what, reason, kind=args.kind, run_url=url))
     elif args.operation == "prune":
         prune(args.root, args.days)
     elif args.operation == "tokens":

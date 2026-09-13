@@ -1,6 +1,6 @@
 // No network: exercise real scheduled dispatch and stable event time.
 import assert from "node:assert/strict";
-import worker, { postingSlot, replySlot } from "../src/index.js";
+import worker, { clockFailure, postingSlot, replySlot } from "../src/index.js";
 
 const cases = [
   ["2026-09-04T02:30:00Z", "30 2 * * *", "2026-09-04_0800"],
@@ -37,10 +37,18 @@ try {
   assert.deepEqual(calls[0].inputs, {mode: "publish", slot_id: cases[0][2], request_id: `clock-${cases[0][2]}`});
   assert.deepEqual(calls[1].inputs, calls[0].inputs);
   assert.equal(calls[0].ref, "main");
-  globalThis.fetch = async () => new Response(null, {status: 503});
+  const told = [];
+  globalThis.fetch = async (url, init) => {
+    if (url.includes("telegram.org")) { told.push(JSON.parse(init.body).text); return Response.json({ok: true}); }
+    return new Response(null, {status: 503});
+  };
   let failed;
-  await worker.scheduled(event, {GH_DISPATCH_TOKEN: "test"}, {waitUntil(promise) { failed = promise; }});
+  const env = {GH_DISPATCH_TOKEN: "test", TELEGRAM_BOT_TOKEN: "t", TELEGRAM_CHAT_ID: "1"};
+  await worker.scheduled(event, env, {waitUntil(promise) { failed = promise; }});
   await assert.rejects(failed, /Scheduled dispatch failed \(503\)/);
+  assert.deepEqual(told, [clockFailure(cases[0][2])]);
+  assert.match(told[0], /08:00 post didn't start[\s\S]*<code>retry<\/code>[\s\S]*next post is at 20:00 IST today/);
+  assert.match(clockFailure(cases[1][2]), /20:00 post[\s\S]*08:00 IST tomorrow/);
 } finally {
   globalThis.fetch = realFetch;
 }

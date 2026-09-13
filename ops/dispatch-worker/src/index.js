@@ -89,6 +89,15 @@ export function postingSlot(scheduledTime, cron) {
   return `${local.toISOString().slice(0, 10)}_${hour}00`;
 }
 
+// What the owner reads when GitHub would not start a scheduled post.
+export function clockFailure(slot) {
+  const hour = slot.slice(11, 13);
+  return `🔴 <b>The ${hour}:00 post didn't start</b>\n\n` +
+    "<b>What went wrong:</b> GitHub didn't accept our request to start it. This is usually a short GitHub problem.\n" +
+    "<b>What you can do:</b> reply <code>retry</code> in a few minutes.\n" +
+    `<b>If you do nothing:</b> the next post is at ${hour === "08" ? "20:00 IST today" : "08:00 IST tomorrow"}.`;
+}
+
 export function replySlot(messageTime) {
   if (!Number.isSafeInteger(messageTime) || messageTime < 0) throw new Error("Invalid reply time");
   const local = new Date(messageTime * 1000 + 330 * 60 * 1000);
@@ -154,9 +163,13 @@ export default {
   // log so the two daily slots are distinguishable.
   async scheduled(event, env, ctx) {
     const slot = postingSlot(event.scheduledTime, event.cron);
-    ctx.waitUntil(dispatch(env, event.cron, "publish", { slot_id: slot, request_id: `clock-${slot}` }).then((result) => {
-      if (result.status !== 204) throw new Error(`Scheduled dispatch failed (${result.status})`);
-    }));
+    ctx.waitUntil(dispatch(env, event.cron, "publish", { slot_id: slot, request_id: `clock-${slot}` })
+      .catch((error) => ({ status: 0, body: String(error) }))
+      .then(async (result) => {
+        if (result.status === 204) return;
+        await ack(env, clockFailure(slot)); // otherwise a missed post is silent
+        throw new Error(`Scheduled dispatch failed (${result.status})`);
+      }));
   },
 
   // Two doors, and only two.

@@ -373,4 +373,16 @@ def test_tokens_report_a_refusal_and_leave_other_tokens_alone(monkeypatch):
 def test_token_trouble_says_what_happened_what_to_do_and_what_silence_does():
     from suresilly import telegram
     text = telegram.token_trouble([("THREADS_ACCESS_TOKEN", "Meta said HTTP 400: Session has expired")])
-    assert "Threads: Meta said HTTP 400" in text and "Nothing to reply" in text and "If you do nothing" in text
+    plain = text.split("<blockquote")[0]
+    assert "<b>Threads:</b> The token has expired" in plain and "HTTP" not in plain
+    assert "What you can do:" in text and "If you do nothing:" in text and "Meta said HTTP 400" in text  # raw, folded
+    assert "Threads can't post until a new token is made" in text  # an expired token is not "carries on"
+    busy = telegram.token_trouble([("IG_ACCESS_TOKEN", "Meta said HTTP 500: try later")])
+    assert "posting carries on" in busy and "The next run tries again" in busy
+
+
+def test_a_broken_key_renewer_is_reported_not_crashed(monkeypatch):
+    from suresilly import tokens
+    monkeypatch.setenv("SECRETS_PAT", "pat")
+    monkeypatch.setattr(tokens, "due", lambda: (_ for _ in ()).throw(RuntimeError("GitHub refused `gh secret list`: 401")))
+    assert tokens.keep_alive() == [("SECRETS_PAT", "GitHub refused `gh secret list`: 401")]

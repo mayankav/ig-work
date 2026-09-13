@@ -3,8 +3,9 @@ import {ReviewWindow, REVIEW_HOUR, parseWindowReply} from '../src/review-window.
 const token = 'a'.repeat(16), manifest = 'b'.repeat(64);
 let now = 100000, deliveries = 0, dispatches = 0, telegramFails = false, githubFails = false;
 Date.now = () => now;
-globalThis.fetch = async url => {
-  if (url.includes('telegram.org')) { deliveries++; return Response.json(telegramFails ? {ok:false} : {ok:true,result:{message_id:42}}); }
+const said = [];
+globalThis.fetch = async (url, init) => {
+  if (url.includes('telegram.org')) { deliveries++; said.push(JSON.parse(init?.body || '{}').text || ''); return Response.json(telegramFails ? {ok:false} : {ok:true,result:{message_id:42}}); }
   dispatches++; return new Response(null, {status:githubFails ? 503 : 204});
 };
 function object() {
@@ -62,11 +63,15 @@ assert.equal(parseWindowReply('approve 4',preview.caption),null);
  const {obj,storage}=await setup();githubFails=true;await call(obj,'decide',decision(7));
  assert.equal(storage.alarm,now+60000);await obj.alarm();await obj.alarm();const calls=dispatches;await obj.alarm();
  assert.equal(dispatches,calls);assert.equal((await call(obj,'status')).state,'dispatch_failed');githubFails=false;
+ assert.equal(said.filter(s=>s.includes("GitHub didn't accept our request")).length,1);
+ assert.match(said.at(-1),/stuck[\s\S]*What you can do:[\s\S]*If you do nothing:/);
+ await obj.alarm();assert.equal(said.filter(s=>s.includes("GitHub didn't accept our request")).length,1); // said once
 }
 {
  const {obj,storage}=await setup();await call(obj,'decide',decision(8));const r=await call(obj,'status');
  await call(obj,'claim',{manifest,action_id:r.action.id});now+=40*60*1000;await obj.alarm();
  assert.equal((await call(obj,'status')).state,'held');assert.equal(storage.alarm,null);
+ assert.match(said.at(-1),/stopped without finishing/);
  assert.equal((await call(obj,'complete',{action_id:r.action.id,state:'published',media_id:'12'})).status,409);
 }
 {

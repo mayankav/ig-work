@@ -64,3 +64,10 @@ jobs:
           git diff --staged --quiet || git commit -m "why: one more line on the watchlist [skip ci]"
           git pull --rebase --quiet
           git push
+
+      - name: Tell the owner it didn't work
+        if: failure() || cancelled()
+        env:
+          FAILURE_REASON: ${{ steps.answer.outputs.reason }}
+          JOB_STATUS: ${{ job.status }}
+        run: python -m suresilly.run notify-failure --what "Answering your message" --kind message
