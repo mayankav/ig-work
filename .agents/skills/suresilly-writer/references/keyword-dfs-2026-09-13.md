@@ -119,7 +119,7 @@ Refused:
 - **Asking for both a send and a save.** poetsphere does it on every post, so it is probably a template. Measure it in insights first.
 - **A "chain of small chances" shape.** It is strong (124K and 101K), but it fits only a partner or a friend, and `draw()` pairs a shape with any person.
 - **"After naming what someone lacked, show what they did alone".** The obvious fill is the circulating text itself, and it drifts sad.
-- **The owner's "if you don't know X, you know nothing about Y".** In the hard wording it is a hook formula and a tribal split, both on the refused list. A softer one-liner shape that describes the idea without its words is being tested. It goes into `write.SHAPES` only if five test posts open in five different ways.
+- **The owner's "if you don't know X, you know nothing about Y".** In the hard wording it is a hook formula and a tribal split, both on the refused list. So the shape describes the idea without its words: "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived". Five test one-liners went through the real writer and editor, one each for mum, a friend who moved away, a sister, a hard week and a grandparent. They opened five different ways, none used a "you don't know X until Y" frame, and each reframed an ordinary thing: a bruised peach, a weather app, an unlocked bedroom door, an early night, a refilled plate. The shape replaced its near-duplicate, "the best version of an everyday thing is a surprisingly small answer", so one-liners still draw from 8 shapes. The shape reaches the model only on the evening it is drawn, and there is no example sentence for it anywhere.
 
 ## The format note (for the owner, not the writer)
 

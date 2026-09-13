@@ -57,7 +57,7 @@ SHAPES = {
         "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
         "nobody talks about a small, true feeling everyone has had",
         "someone does a small thing for you and never mentions it; name that as love",
-        "the best version of an everyday thing is a surprisingly small answer",
+        "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
         "some people feel like a cosy everyday comparison",
         "a small thing you fought as a kid and would welcome now, pinned to one object",
         "a small everyday annoyance someone causes now, seen from the day it stops",
