@@ -268,3 +268,58 @@ def test_note_why_survives_an_unknown_token(tmp_path, monkeypatch):
     monkeypatch.setattr(run, "WATCHLIST", tmp_path / "w.md")
     assert run.note_why("0123456789abcdef", "hook.slow") == ("took too long to say what it's about", 1)
     assert "0123456789abcdef" in run.WATCHLIST.read_text()
+
+
+def test_threads_posts_the_slide_with_its_line_and_topic(monkeypatch):
+    from suresilly import threads
+    monkeypatch.setenv("THREADS_USER_ID", "7")
+    monkeypatch.setenv("THREADS_ACCESS_TOKEN", "THtoken")
+    monkeypatch.setattr(threads.time, "sleep", lambda s: None)
+    sent, statuses = [], iter(["IN_PROGRESS", "FINISHED"])
+
+    def request(method, url, timeout=None, data=None, params=None):
+        sent.append((method, url.rsplit("/", 1)[-1], data or params))
+        if method == "GET" and params["fields"] == "permalink":
+            return Reply(200, {"permalink": "https://www.threads.com/@suresilly/post/abc"})
+        if method == "GET":
+            return Reply(200, {"status": next(statuses)})
+        return Reply(200, {"id": "c9" if url.endswith("/threads") else "18000000000000009"})
+
+    monkeypatch.setattr(threads.requests, "request", request)
+    post = {"topic": "being kind to yourself", "slides": [{"text": "you did [[enough]] today."}]}
+    assert threads.publish(post, "https://m/01.jpg") == ("18000000000000009", "https://www.threads.com/@suresilly/post/abc")
+    container = sent[0][2]
+    assert (container["media_type"], container["image_url"], container["text"], container["topic_tag"]) == (
+        "IMAGE", "https://m/01.jpg", "you did enough today.", "Self Love")
+    assert [s[1] for s in sent] == ["threads", "c9", "c9", "threads_publish", "18000000000000009"]
+
+
+def test_threads_names_an_expired_token(monkeypatch):
+    from suresilly import threads
+    monkeypatch.setattr(threads.requests, "request",
+                        lambda *a, **k: Reply(400, {"error": {"message": "Session has expired", "code": 190}}))
+    with pytest.raises(threads.ThreadsError, match="docs/threads.md"):
+        threads.publish({"slides": [{"text": "x"}]}, "https://m/01.jpg")
+
+
+def test_echo_puts_a_one_liner_on_threads_once_and_never_raises(tmp_path, monkeypatch):
+    post_dir = make_post(tmp_path / "20260913_2000_x", count=1)
+    (post_dir / "published.json").write_text(json.dumps({"media_id": "1"}))
+    record = {"slug": post_dir.name, "token": "0123456789abcdef", "files": {"slides/01.jpg": "d"}}
+    post = {"format": "oneliner", "slides": [{"text": "a line"}]}
+    calls = []
+    monkeypatch.setattr(run.threads, "publish", lambda p, url: calls.append(url) or ("55", "https://www.threads.com/p"))
+
+    assert run.echo(post_dir, post, record) is None  # no Threads secrets: off
+    monkeypatch.setenv("THREADS_USER_ID", "7")
+    monkeypatch.setenv("THREADS_ACCESS_TOKEN", "THtoken")
+    assert run.echo(post_dir, {**post, "format": "list"}, record) is None  # carousels stay on Instagram
+    assert run.echo(post_dir, post, record) == {"id": "55", "link": "https://www.threads.com/p"}
+    assert run.echo(post_dir, post, record) == {"id": "55", "link": "https://www.threads.com/p"}
+    assert calls == [f"https://media.suresilly.com/slides/{post_dir.name}/reviews/0123456789abcdef/slides/01.jpg"]
+
+    other = make_post(tmp_path / "20260914_2000_y", count=1)
+    (other / "published.json").write_text(json.dumps({"media_id": "2"}))
+    monkeypatch.setattr(run.threads, "publish", lambda p, url: (_ for _ in ()).throw(RuntimeError("Threads is down")))
+    assert run.echo(other, post, {**record, "slug": other.name}) == {"error": "Threads is down"}
+    assert json.loads((other / "published.json").read_text())["media_id"] == "2"

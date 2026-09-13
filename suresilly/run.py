@@ -21,7 +21,7 @@ import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from . import POSTS, ROOT, STATE, instagram, mascot, review, telegram
+from . import POSTS, ROOT, STATE, instagram, mascot, review, telegram, threads
 from .write import write_post
 
 HOST = ROOT / ".review-host"
@@ -206,7 +206,7 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
                 alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
                 media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
             review.api(token, "complete", {"action_id": action_id, "state": "published", "media_id": media_id})
-            telegram.send(telegram.posted(post, instagram.permalink(media_id)))
+            telegram.send(telegram.posted(post, instagram.permalink(media_id), threads=echo(post_dir, post, local)))
             output(result="published")
         elif decision == "drop":
             review.api(token, "complete", {"action_id": action_id, "state": "cancelled"})
@@ -233,6 +233,22 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
         raise
     finally:
         review.save_history(ROOT, token)
+
+
+def echo(post_dir: Path, post: dict, record: dict) -> dict | None:
+    """Put a one-liner on Threads after Instagram has it. Never raises; the result goes in published.json."""
+    if post["format"] != "oneliner" or not all(threads.credentials()):
+        return None
+    receipt = post_dir / "published.json"
+    published = json.loads(receipt.read_text())
+    if "threads" not in published:  # a rerun must not post it twice
+        try:
+            media, link = threads.publish(post, review.slide_urls(record)[0])
+            published["threads"] = {"id": media, "link": link}
+        except Exception as error:  # Instagram is already live; this is only the echo
+            published["threads"] = {"error": str(error)[:300]}
+        receipt.write_text(json.dumps(published, indent=2) + "\n")
+    return published["threads"]
 
 
 def finish(token: str, action_id: str, failed: bool) -> None:

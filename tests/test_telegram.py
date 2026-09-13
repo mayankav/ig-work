@@ -97,3 +97,11 @@ def test_which_slide_card_offers_each_slide_and_all():
     data = [d for row in rows for _, d in row]
     assert data == [f"why:0123456789abcdef:slide{n}" for n in range(1, 8)] + ["why:0123456789abcdef:all"]
     assert "Skip it" in text and telegram.slide_noted("3") == "👍 Got it: slide 3."
+
+
+def test_posted_says_where_threads_went():
+    one = post(count=1)
+    assert "Also on Threads" in telegram.posted(one, "", {"id": "5", "link": "https://www.threads.com/p"})
+    failed = telegram.posted(one, "", {"error": "the Threads token has expired"})
+    assert "token has expired" in failed and "Instagram is fine" in failed and "Nothing to reply" in failed
+    assert "Threads" not in telegram.posted(one, "")

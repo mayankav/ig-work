@@ -87,8 +87,14 @@ def plain_details(post: dict) -> str:
     return text if len(text) <= 2900 else text[:2899] + "…"
 
 
-def posted(post: dict, link: str) -> str:
+def posted(post: dict, link: str, threads: dict | None = None) -> str:
     where = f'<a href="{html.escape(link)}">Open it on Instagram ↗</a>' if link else "It's live on Instagram."
+    if threads and threads.get("error"):
+        where += (f"\n🧵 Threads didn't take it: {esc(threads['error'])}. Instagram is fine. "
+                  "Nothing to reply; the next one-liner tries Threads again.")
+    elif threads:
+        where += (f'\n🧵 <a href="{html.escape(threads["link"])}">Also on Threads ↗</a>' if threads.get("link")
+                  else "\n🧵 Also on Threads.")
     return (f"✅ <b>Posted!</b>\n{summary(post)}\n<b>“{esc(post['slides'][0]['text'])}”</b>\n\n{where}\n\n"
             f"📊 Saves and shares get measured in 3 days.\n⏭ Next post: {next_slot()}")
 
