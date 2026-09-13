@@ -28,12 +28,23 @@ It stays off until the two repo secrets below exist.
    gh secret set THREADS_ACCESS_TOKEN
    ```
 
-## Every 60 days
+## Every 60 days: automatic
 
-The token dies 60 days after it was made or last refreshed. When it does, the "Posted!" message says "the Threads token has expired". Refresh it before then (the token must be at least 1 day old), then save the new one with `gh secret set THREADS_ACCESS_TOKEN`:
+A Meta token dies 60 days after it was made or last renewed, and there is no token that lasts forever. So the 08:00 and 20:00 runs (`python -m suresilly.run tokens`) renew any Instagram or Threads token whose secret is more than a week old, and save the new one over the secret. If a renewal fails, Telegram says so; the old token keeps working until its own 60 days run out.
 
-```bash
-curl "https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=CURRENT_TOKEN"
-```
+This needs one GitHub token, made once:
 
-If it has already expired, repeat step 4.
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token.
+2. Name: `suresilly token renewer`. Expiration: **No expiration**. Repository access: **Only select repositories** → `ig-work`.
+3. Permissions → Repository permissions → **Secrets: Read and write**. Nothing else.
+4. Generate, copy it, and save it:
+
+   ```bash
+   pbpaste | gh secret set SECRETS_PAT
+   ```
+
+It can change this repo's secrets and nothing else.
+
+## If a token dies anyway
+
+Repeat step 4 of the setup for Threads and save the result with `pbpaste | gh secret set THREADS_ACCESS_TOKEN`.

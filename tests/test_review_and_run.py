@@ -323,3 +323,54 @@ def test_echo_puts_a_one_liner_on_threads_once_and_never_raises(tmp_path, monkey
     monkeypatch.setattr(run.threads, "publish", lambda p, url: (_ for _ in ()).throw(RuntimeError("Threads is down")))
     assert run.echo(other, post, {**record, "slug": other.name}) == {"error": "Threads is down"}
     assert json.loads((other / "published.json").read_text())["media_id"] == "2"
+
+
+def test_tokens_renew_only_what_is_a_week_old_and_never_print_it(monkeypatch, capsys):
+    from datetime import datetime, timezone
+    from suresilly import tokens
+    listing = json.dumps([{"name": "IG_ACCESS_TOKEN", "updatedAt": "2026-08-31T08:43:12Z"},
+                          {"name": "THREADS_ACCESS_TOKEN", "updatedAt": "2026-09-13T05:50:13Z"},
+                          {"name": "GROQ_API_KEY", "updatedAt": "2026-01-01T00:00:00Z"}])
+    saved = []
+
+    def gh(*args, stdin=None):
+        if args[:2] == ("secret", "list"):
+            return listing
+        saved.append((args, stdin))
+        return ""
+
+    monkeypatch.setattr(tokens, "_gh", gh)
+    assert tokens.due(datetime(2026, 9, 14, tzinfo=timezone.utc)) == ["IG_ACCESS_TOKEN"]
+    assert tokens.due(datetime(2026, 9, 21, tzinfo=timezone.utc)) == ["IG_ACCESS_TOKEN", "THREADS_ACCESS_TOKEN"]
+
+    monkeypatch.setenv("SECRETS_PAT", "pat")
+    monkeypatch.setenv("IG_ACCESS_TOKEN", "IGAAold")
+    monkeypatch.setenv("THREADS_ACCESS_TOKEN", "THold")
+    asked = []
+    monkeypatch.setattr(tokens.requests, "get", lambda url, params, timeout: asked.append((url, params)) or
+                        Reply(200, {"access_token": "NEWTOKEN", "expires_in": 5184000}))
+    monkeypatch.setattr(tokens, "due", lambda: ["IG_ACCESS_TOKEN", "THREADS_ACCESS_TOKEN"])
+    assert tokens.keep_alive() == []
+    assert [p["grant_type"] for _, p in asked] == ["ig_refresh_token", "th_refresh_token"]
+    assert saved == [(("secret", "set", "IG_ACCESS_TOKEN"), "NEWTOKEN"), (("secret", "set", "THREADS_ACCESS_TOKEN"), "NEWTOKEN")]
+    assert "NEWTOKEN" not in capsys.readouterr().out
+
+
+def test_tokens_report_a_refusal_and_leave_other_tokens_alone(monkeypatch):
+    from suresilly import tokens
+    monkeypatch.setenv("SECRETS_PAT", "pat")
+    monkeypatch.setenv("IG_ACCESS_TOKEN", "EAAfacebooktoken")  # not an Instagram-login token: skipped
+    monkeypatch.setenv("THREADS_ACCESS_TOKEN", "THold")
+    monkeypatch.setattr(tokens, "due", lambda: ["IG_ACCESS_TOKEN", "THREADS_ACCESS_TOKEN"])
+    monkeypatch.setattr(tokens, "_gh", lambda *a, **k: pytest.fail("nothing should be saved"))
+    monkeypatch.setattr(tokens.requests, "get", lambda url, params, timeout:
+                        Reply(400, {"error": {"message": "Session has expired", "code": 190}}))
+    assert tokens.keep_alive() == [("THREADS_ACCESS_TOKEN", "Meta said HTTP 400: Session has expired")]
+    monkeypatch.delenv("SECRETS_PAT")
+    assert tokens.keep_alive() == []
+
+
+def test_token_trouble_says_what_happened_what_to_do_and_what_silence_does():
+    from suresilly import telegram
+    text = telegram.token_trouble([("THREADS_ACCESS_TOKEN", "Meta said HTTP 400: Session has expired")])
+    assert "Threads: Meta said HTTP 400" in text and "Nothing to reply" in text and "If you do nothing" in text

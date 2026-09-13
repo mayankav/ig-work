@@ -7,6 +7,7 @@
   python -m suresilly.run list | legacy --decision publish --slug abc
   python -m suresilly.run notify-failure --what "The 08:00 post"
   python -m suresilly.run prune --root gh-pages/slides --days 14
+  python -m suresilly.run tokens
 """
 from __future__ import annotations
 
@@ -21,7 +22,7 @@ import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from . import POSTS, ROOT, STATE, instagram, mascot, review, telegram, threads
+from . import POSTS, ROOT, STATE, instagram, mascot, review, telegram, threads, tokens
 from .write import write_post
 
 HOST = ROOT / ".review-host"
@@ -383,7 +384,7 @@ def prune(root: Path, days: int) -> None:
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("operation", choices=("build", "stage", "register", "describe", "act", "finish-redo",
-                                              "fail", "list", "legacy", "notify-failure", "prune"))
+                                              "fail", "list", "legacy", "notify-failure", "prune", "tokens"))
     parser.add_argument("--slot", default="")
     parser.add_argument("--format", choices=("list", "story", "oneliner"))
     parser.add_argument("--new", action="store_true", help="make a post even if this slot already has one")
@@ -424,6 +425,10 @@ def main(argv: list[str] | None = None) -> None:
         telegram.send(telegram.failed(what, reason, run_url=url))
     elif args.operation == "prune":
         prune(args.root, args.days)
+    elif args.operation == "tokens":
+        problems = tokens.keep_alive()
+        if problems:
+            telegram.send(telegram.token_trouble(problems))
 
 
 if __name__ == "__main__":

@@ -145,6 +145,15 @@ jobs:
           git add -A
           git diff --staged --quiet || { git commit -m "prune: images older than 14 days"; git push; }
 
+      - name: Keep the Instagram and Threads tokens alive
+        if: always()
+        continue-on-error: true
+        env:
+          SECRETS_PAT: ${{ secrets.SECRETS_PAT }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+        run: python -m suresilly.run tokens
+
       - name: Tell the owner it didn't work
         if: failure()
         env:

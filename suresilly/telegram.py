@@ -99,6 +99,16 @@ def posted(post: dict, link: str, threads: dict | None = None) -> str:
             f"📊 Saves and shares get measured in 3 days.\n⏭ Next post: {next_slot()}")
 
 
+def token_trouble(problems: list[tuple[str, str]]) -> str:
+    names = {"IG_ACCESS_TOKEN": "Instagram", "THREADS_ACCESS_TOKEN": "Threads"}
+    lines = "\n".join(f"• {names.get(name, name)}: {esc(reason)}" for name, reason in problems)
+    return (f"🔑 <b>A token couldn't be renewed.</b>\n{lines}\n\n"
+            "Posting carries on: a token keeps working until 60 days after its last renewal.\n"
+            "↩️ Nothing to reply. The next run tries again. If this message keeps coming, make a new token "
+            "(docs/threads.md shows how).\n"
+            "If you do nothing and it keeps failing, that app stops posting when the token runs out.")
+
+
 def dropped(post: dict) -> str:
     return (f"🗑 <b>Cancelled.</b> Nothing was posted.\n<i>“{esc(post['slides'][0]['text'])}”</i>\n\n"
             f"⏭ Next post: {next_slot()}. Reply <code>retry</code> if you want a new one now.")

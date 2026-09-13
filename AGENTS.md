@@ -23,7 +23,7 @@ The writer reads `GEMINI_API_KEY` (or `GROQ_API_KEY`) from the environment or fr
 3. `render.py` draws 1080×1350 JPEGs. `mascot.py` picks a donkey pose for each slide's mood. For the evening one-liner, `reel.py` also makes a 9:16 Reel: the slide held 2 s + 2.5 words a second (at least 8 s), with a tune `music.py` composes from the mood. No one else's music, ever.
 4. The images go up to `media.suresilly.com` (the `gh-pages` branch). Telegram gets the slides as an album, followed by a card.
 5. You reply to the card with `approve`, `disapprove`, `redo all` or `redo images 2,4`. If you stay silent for 1 hour, it posts. Every reply case, including repeated or conflicting replies, is in `docs/telegram-approval.md`.
-6. `review-window.yml` carries out your reply, and the Instagram link comes back in Telegram. A one-liner then goes to Threads too (`threads.py`; setup in `docs/threads.md`). A Threads failure never touches the Instagram post.
+6. `review-window.yml` carries out your reply, and the Instagram link comes back in Telegram. A one-liner then goes to Threads too (`threads.py`; setup in `docs/threads.md`). A Threads failure never touches the Instagram post. The 08:00 and 20:00 runs renew the Instagram and Threads tokens weekly (`tokens.py`; needs the `SECRETS_PAT` secret).
 
 Mornings alternate between a **list** (7–9 slides) and a **story** (6–8 slides). Evenings are a **one-liner**, posted as a Reel.
 
