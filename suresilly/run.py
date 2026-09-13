@@ -195,7 +195,8 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
     try:
         if decision == "publish":
             caption = (post_dir / "caption.txt").read_text().strip()
-            media_id = instagram.publish(post_dir, review.slide_urls(local), caption)
+            alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
+            media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
             review.api(token, "complete", {"action_id": action_id, "state": "published", "media_id": media_id})
             telegram.send(telegram.posted(post, instagram.permalink(media_id)))
             output(result="published")
