@@ -1,0 +1,64 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "little things that quietly fix a bad day",
+  "slides": [
+    {
+      "text": "the quiet things an older sibling does when your day went wrong",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "they broke the chocolate bar in half and slid you the bigger piece without looking up.",
+      "mood": "warm",
+      "pose": "offering"
+    },
+    {
+      "text": "they turned the car radio all the way down so you didn't have to talk over the noise.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "they left their big sweater on your chair so you could borrow it without asking.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "they dropped a bag of chips onto your bed and closed the door without asking any questions.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "they started a loud debate about nothing at dinner so everyone would stop looking at you.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "[[they didn't give you a speech.]] they just sat on the floor of your room until the house got quiet.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "they stood between you and the rest of the house, and [[never once asked for credit]].",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "save this for the one who always knew when to leave you alone, and when to sit on the floor.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "they didn't always know what to say.\nso they just left their door open, or stayed at the kitchen table so you could slip away.\nsave this for the day you need to remember how they looked out for you.\n\n#siblings #siblinglove #oldersiblings #brotherandsister #growingupwithsiblings",
+  "alt": "A carousel of slides illustrating the quiet, thoughtful ways an older sibling makes a difficult day better.",
+  "hook_options": [
+    "the quiet things an older sibling does when your day went wrong",
+    "little ways an older sibling quietly fixes a bad day",
+    "small things an older sibling does when the day gets too heavy"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-13_0800",
+  "created_at": "2026-09-13T02:56:02Z",
+  "slug": "20260913_0256_the-quiet-things-an-older-sibling"
+}

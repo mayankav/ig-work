@@ -19,13 +19,37 @@
   "html": true,
   "resources": "",
   "caption": "\ud83d\udd01 <b>Redo ready</b>\n\ud83d\udcda List \u00b7 being kind to yourself \u00b7 8 slides\n\n<b>\u201cthings that make sense only after a really heavy week\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. things that make sense only after a really heavy week\n2. going to bed at nine with the kitchen light still on isn't giving up. you are just saving some strength for tomorrow.\n3. the pile of clean laundry sitting on the chair all week is not a failure. you just needed the sleep more than an empty room.\n4. saying 'i don't know yet' out loud stops you from pacing the hallway at midnight.\n5. sitting on the bathroom rug with the door locked for five minutes is how you find a quiet room when the house is too loud.\n6. letting the phone ring on your kitchen counter doesn't mean you are a bad friend. you just have nothing left to say tonight.\n7. you do not have to fix your whole life on a wednesday night. you just have to wash your face and turn off the light.\n8. save this for the quiet nights when you forget how much you are carrying.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you spent all week carrying everything at once. you do not have to solve the next five years before tomorrow morning.\nsave this for a night when you need some grace.\n\n#selflovequotes #bekindtoyourself</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>95f0e3393d26be6e</code>",
-  "state": "waiting",
+  "state": "replaced",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789268126090,
+      "decision": "redo",
+      "request_id": "tg-602066213"
+    }
+  ],
+  "seen": {
+    "tg-602066213": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 164,
   "delivered_at": 1789267897999,
-  "deadline": 1789271497999
+  "deadline": 1789271497999,
+  "action": {
+    "id": "rv-95f0e3393d26be6e-tg-602066213",
+    "decision": "redo",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789268727142
+  },
+  "claimed": false,
+  "claim_expires": 1789270562599,
+  "result": {
+    "action_id": "rv-95f0e3393d26be6e-tg-602066213",
+    "state": "replaced",
+    "token": "95f0e3393d26be6e"
+  }
 }

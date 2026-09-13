@@ -1,0 +1,20 @@
+{
+  "token": "5e14df1c94b08441",
+  "slug": "20260913_0256_the-quiet-things-an-older-sibling",
+  "files": {
+    "post.json": "e7f6df861616f5c40499b309ae0fdea2df9ca46942bea4f54724554c6013ec40",
+    "caption.txt": "71e8926ac701cbd758b70b3be1d97036b02971a0301d300de65633eb6d104fd3",
+    "contact_sheet.png": "a9fbed6c08aeb717c0b56c2dbc29937d621a9569aede41779f9fd9b6794611bd",
+    "slides/01.jpg": "e3ac46233749a7450f8fc76e56c8ea327e93b12a509c0bf53790ed30e9aedc0e",
+    "slides/02.jpg": "20ab452c4a888d54ff7a9514baea0299d08b5c622e3965c5d4d72930c97610af",
+    "slides/03.jpg": "5a0df9a4974c2fa9192f1356d53c33cb87ca678d3ceba70c88cb7114a70c2e4e",
+    "slides/04.jpg": "b659504243bff4404a06680835f1279eb1092a5f12b9c7b9af88de8aaa16af05",
+    "slides/05.jpg": "8ee055572119448451a2ae907849f2d30824e547f1f038f45f24fc7159d747e6",
+    "slides/06.jpg": "91efb58de9352d563f5eb56d649787def24127e3379fc84b384c1034fd9bef94",
+    "slides/07.jpg": "4e600eaa2bd5f2b3f80a79f4e6fc6f0990db7f432a5fce6fa5a21c79b072cddb",
+    "slides/08.jpg": "cd6712c79cbd406ea31882ff1c44c2a4b19dfad2cc256bcf6a829777c9bfe40a",
+    "slides/09.jpg": "2d64bfa87d0d3465b67d9808a47f4abdde05f4a19d66f5cd085caa5d89f64dc2"
+  },
+  "parent": "95f0e3393d26be6e",
+  "manifest": "101114a74af179a46cfd06196895d9085af45e18456868901838b6c44790c22e"
+}
