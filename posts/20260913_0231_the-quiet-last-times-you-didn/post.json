@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "last times you didn't know were the last time",
+  "slides": [
+    {
+      "text": "the quiet last times you didn't know were happening",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "the last time you sat in the car with the engine off before walking through the front door.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "the last time you counted loose coins in your coat pocket, hoping the bus fare hadn't gone up.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "the last time you ate toast standing over the kitchen sink because making a plate felt like too much.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "the last evening you waited by the window hoping someone would check in first.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "the last night you stared at the ceiling convinced [[you had ruined your whole life]].",
+      "mood": "sad",
+      "pose": "sleepless"
+    },
+    {
+      "text": "the last morning you woke up and thought [[this heavy weight was never going to lift]].",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "save this for the quiet days when you forget how much you have already survived.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "you spent so long bracing for the next bad day that you never noticed when the hardest season ended.\nyou made it out of rooms you thought would keep you forever.\nsave this for a week when everything feels too heavy.\n\n#selflovequotes #bekindtoyourself #harddays",
+  "alt": "An eight-slide list about the quiet, difficult moments in life that you survived without even realizing they were the last time you would have to go through them.",
+  "hook_options": [
+    "the quiet last times you didn't know were happening",
+    "the hard things you will never have to survive again",
+    "the small last times you got through without noticing"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-13_0800",
+  "created_at": "2026-09-13T02:31:46Z",
+  "slug": "20260913_0231_the-quiet-last-times-you-didn"
+}
