@@ -26,6 +26,8 @@ def files(post: Path) -> dict[str, str]:
     paths += sorted((post / "slides").glob("*.jpg"))
     if any(not path.is_file() or path.is_symlink() for path in paths) or len(paths) < 4:
         raise ValueError("The post folder is incomplete.")
+    if (post / "reel.mp4").is_file() and not (post / "reel.mp4").is_symlink():
+        paths.append(post / "reel.mp4")
     return {str(path.relative_to(post)): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 
 
@@ -58,6 +60,11 @@ def base_url(record: dict) -> str:
 def slide_urls(record: dict) -> list[str]:
     names = sorted(name for name in record["files"] if name.startswith("slides/"))
     return [f"{base_url(record)}/{name}" for name in names]
+
+
+def reel_url(record: dict) -> str:
+    """Where the frozen Reel is hosted, or "" for a post that goes out as images."""
+    return f"{base_url(record)}/reel.mp4" if "reel.mp4" in record["files"] else ""
 
 
 def api(token: str, operation: str, body: dict | None = None) -> dict:

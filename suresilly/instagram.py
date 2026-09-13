@@ -1,4 +1,4 @@
-"""Publish a single image or a carousel through the Instagram Graph API."""
+"""Publish a single image, a carousel or a Reel through the Instagram Graph API."""
 from __future__ import annotations
 
 import json
@@ -81,12 +81,44 @@ def _alt_text_live(base: str, media_id: str, token: str, carousel: bool) -> str:
         return f"unknown: {error}"
 
 
-def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = None) -> str:
-    """Post it and return the media id. Never posts the same folder twice."""
+def _already(post: Path) -> str:
+    """The media id if this folder is already live; raises if an earlier attempt may be."""
     if (post / PUBLISHED).exists():
         return json.loads((post / PUBLISHED).read_text())["media_id"]
     if (post / PENDING).exists():
         raise InstagramError("An earlier attempt may already be live. Check Instagram before trying again.")
+    return ""
+
+
+def _go_live(post: Path, base: str, user: str, token: str, container: str) -> dict:
+    """Publish a finished container and write the receipt."""
+    (post / PENDING).write_text(json.dumps({"container_id": container}) + "\n")
+    media_id = _call("POST", f"{base}/{user}/media_publish", creation_id=container, access_token=token).get("id", "")
+    if not str(media_id).isdigit():
+        raise InstagramError("Instagram gave no post id. It may or may not be live. Check before trying again.")
+    record = {"media_id": str(media_id), "deck_slug": post.name,
+              "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
+    (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
+    (post / PENDING).unlink()
+    return record
+
+
+def publish_reel(post: Path, video_url: str, caption: str) -> str:
+    """Post the video as a Reel that also shows on the grid, and return the media id. Never twice."""
+    if done := _already(post):
+        return done
+    user, token = credentials()
+    base = graph_base(token)
+    container = _call("POST", f"{base}/{user}/media", media_type="REELS", video_url=video_url, caption=caption,
+                      share_to_feed="true", access_token=token)["id"]
+    _wait_until_ready(base, container, token, tries=75)  # a video takes longer than an image: allow 5 minutes
+    return _go_live(post, base, user, token, container)["media_id"]
+
+
+def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = None) -> str:
+    """Post it and return the media id. Never posts the same folder twice."""
+    if done := _already(post):
+        return done
     if not 1 <= len(urls) <= 10:
         raise InstagramError(f"A post needs 1 to 10 images, not {len(urls)}.")
     if len(alts or []) != len(urls):
@@ -103,18 +135,11 @@ def publish(post: Path, urls: list[str], caption: str, alts: list[str] | None = 
         container = _call("POST", f"{base}/{user}/media", media_type="CAROUSEL", children=",".join(children),
                           caption=caption, access_token=token)["id"]
     _wait_until_ready(base, container, token)
-    (post / PENDING).write_text(json.dumps({"container_id": container}) + "\n")
-    media_id = _call("POST", f"{base}/{user}/media_publish", creation_id=container, access_token=token).get("id", "")
-    if not str(media_id).isdigit():
-        raise InstagramError("Instagram gave no post id. It may or may not be live. Check before trying again.")
-    record = {"media_id": str(media_id), "deck_slug": post.name,
-              "published_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
-    (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
-    (post / PENDING).unlink()
+    record = _go_live(post, base, user, token, container)
     if any(alts):
-        record["alt_text"] = _alt_text_live(base, str(media_id), token, len(urls) > 1)
+        record["alt_text"] = _alt_text_live(base, record["media_id"], token, len(urls) > 1)
         (post / PUBLISHED).write_text(json.dumps(record, indent=2) + "\n")
-    return str(media_id)
+    return record["media_id"]
 
 
 def permalink(media_id: str) -> str:

@@ -8,6 +8,7 @@ The old gated carousel engine is frozen on the `obsolete/carousel-engine-v1` bra
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python -m playwright install chromium
+brew install ffmpeg                                           # Reels; the workflows apt-get it
 .venv/bin/python -m suresilly.run build --format list        # writes posts/<slug>/
 .venv/bin/python -m pytest -q
 (cd ops/dispatch-worker && npm test)
@@ -19,12 +20,12 @@ The writer reads `GEMINI_API_KEY` (or `GROQ_API_KEY`) from the environment or fr
 
 1. At 08:00 and 20:00 IST the Cloudflare Worker (`ops/dispatch-worker`) dispatches `auto-post.yml` with `mode=publish`.
 2. `write.py` writes the post: a draft, then an editor pass. Gemini writes it, with Groq as the backup.
-3. `render.py` draws 1080×1350 JPEGs. `mascot.py` picks a donkey pose for each slide's mood.
+3. `render.py` draws 1080×1350 JPEGs. `mascot.py` picks a donkey pose for each slide's mood. For the evening one-liner, `reel.py` also makes a 9:16 Reel: the slide held 2 s + 2.5 words a second (at least 8 s), with a tune `music.py` composes from the mood. No one else's music, ever.
 4. The images go up to `media.suresilly.com` (the `gh-pages` branch). Telegram gets the slides as an album, followed by a card.
 5. You reply to the card with `approve`, `disapprove`, `redo all` or `redo images 2,4`. If you stay silent for 1 hour, it posts. Every reply case, including repeated or conflicting replies, is in `docs/telegram-approval.md`.
 6. `review-window.yml` carries out your reply, and the Instagram link comes back in Telegram.
 
-Mornings alternate between a **list** (7–9 slides) and a **story** (6–8 slides). Evenings are a **one-liner** (1 image).
+Mornings alternate between a **list** (7–9 slides) and a **story** (6–8 slides). Evenings are a **one-liner**, posted as a Reel.
 
 ## Loose rules
 
@@ -43,10 +44,10 @@ The Worker dispatches `auto-post.yml`, `review-window.yml` and `review.yml` by n
 ## Layout
 
 ```
-suresilly/          write · render · mascot · review · instagram · telegram · run · llm
+suresilly/          write · render · mascot · reel · music · review · instagram · telegram · run · llm
 suresilly/assets/   fonts (Fraunces, Inter; both OFL) and 75 donkey poses
 posts/<slug>/       post.json · caption.txt · contact_sheet.png · review.json · published.json
-                    (slides/ is gitignored; the review artifact and media host keep them)
+                    (slides/ and reel.mp4 are gitignored; the review artifact and media host keep them)
 state/reviews/      the Worker's record of each preview
 scripts/insights.py reach, saves and shares after 3 days (insights.yml)
 tests/              pytest

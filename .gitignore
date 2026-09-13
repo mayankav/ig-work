@@ -9,9 +9,10 @@ node_modules/
 .env.local
 .env
 
-# Rendered slides live in the review artifact and on media.suresilly.com; the repo
-# keeps post.json, caption.txt and contact_sheet.png.
+# Rendered slides and Reels live in the review artifact and on media.suresilly.com; the
+# repo keeps post.json, caption.txt and contact_sheet.png.
 posts/*/slides/
+posts/*/reel.mp4
 
 # Working copies the workflows create.
 /.review-host/

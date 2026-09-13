@@ -52,6 +52,7 @@ jobs:
         run: |
           pip install --quiet -r requirements.txt
           python -m playwright install --with-deps chromium
+          sudo apt-get install -y --no-install-recommends ffmpeg
 
       - name: Which decision is this
         id: review

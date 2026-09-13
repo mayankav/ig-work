@@ -33,6 +33,12 @@ def test_one_liner_card_has_no_slide_list():
     assert "📝" not in card and "1 image" in card
 
 
+def test_reel_card_says_it_is_a_reel():
+    one = post(count=1)
+    one["reel"] = {"seconds": 10.4, "tune": "warm"}
+    assert "Reel, 10.4s, warm tune" in telegram.review_card(one, "0123456789abcdef")
+
+
 def test_failure_says_what_happened_what_to_do_and_what_silence_does():
     text = telegram.failed("The 08:00 post", "Gemini was busy", run_url="https://x/y")
     assert "Gemini was busy" in text and "<code>retry</code>" in text

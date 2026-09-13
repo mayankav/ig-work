@@ -18,6 +18,7 @@ jobs:
       - run: |
           pip install --quiet -r requirements.txt
           python -m playwright install --with-deps chromium
+          sudo apt-get install -y --no-install-recommends ffmpeg
       - run: python -m pytest -q
 
   worker:

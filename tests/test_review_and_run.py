@@ -112,6 +112,42 @@ def test_instagram_refuses_after_an_unfinished_attempt(tmp_path):
         instagram.publish(post, ["https://a/1.jpg"], "hi")
 
 
+
+def test_a_reel_is_part_of_the_frozen_post_and_has_a_hosted_url(tmp_path):
+    post = make_post(tmp_path / "20260911_2000_x", count=1)
+    assert review.reel_url(review.prepare(post)) == ""
+    (post / "reel.mp4").write_bytes(b"video")
+    record = review.prepare(post)
+    assert review.reel_url(record).endswith(f"/reviews/{record['token']}/reel.mp4")
+    (post / "reel.mp4").write_bytes(b"another video")
+    with pytest.raises(ValueError, match="changed"):
+        review.read(post)
+
+
+def test_instagram_reel_publish_asks_for_a_reel_on_the_grid(tmp_path, monkeypatch):
+    post = make_post(tmp_path / "p", count=1)
+    monkeypatch.setenv("IG_USER_ID", "1")
+    monkeypatch.setenv("IG_ACCESS_TOKEN", "IGAAtoken")
+    calls = []
+
+    def fake(method, url, **params):
+        calls.append((method, url.rsplit("/", 1)[-1], params))
+        if method == "GET":
+            return {"status_code": "FINISHED"}
+        if url.endswith("media_publish"):
+            return {"id": "17900000000000002"}
+        return {"id": "c1"}
+
+    monkeypatch.setattr(instagram, "_call", fake)
+    media = instagram.publish_reel(post, "https://a/reel.mp4", "hello")
+    assert media == "17900000000000002"
+    container = calls[0][2]
+    assert (container["media_type"], container["video_url"], container["share_to_feed"], container["caption"]) == (
+        "REELS", "https://a/reel.mp4", "true", "hello")
+    assert json.loads((post / "published.json").read_text())["media_id"] == media
+    count = len(calls)
+    assert instagram.publish_reel(post, "https://a/reel.mp4", "hello") == media and len(calls) == count
+
 class Reply:
     def __init__(self, status, body):
         self.status_code, self.body, self.text = status, body, json.dumps(body)

@@ -70,9 +70,12 @@ def slot_taken(slot: str) -> bool:
 # ── making a post ──────────────────────────────────────────────────────────
 
 def draw(post: dict, post_dir: Path) -> None:
+    from . import reel
     from .render import contact_sheet, render
     slides = render(post, post_dir / "slides")
     contact_sheet(slides, post_dir / "contact_sheet.png")
+    if post["format"] == "oneliner":  # evenings go out as a Reel; the tune follows the folder, so a redraw keeps it
+        reel.make(post, post_dir)
     (post_dir / "post.json").write_text(json.dumps(post, indent=2, ensure_ascii=False) + "\n")
     (post_dir / "caption.txt").write_text(post["caption"] + "\n")
 
@@ -125,6 +128,8 @@ def stage(post_dir: Path, parent: str | None = None) -> dict:
     for path in (post_dir / "slides").glob("*.jpg"):
         shutil.copy2(path, folder / "slides" / path.name)
     shutil.copy2(post_dir / "contact_sheet.png", folder / "contact_sheet.png")
+    if "reel.mp4" in record["files"]:
+        shutil.copy2(post_dir / "reel.mp4", folder / "reel.mp4")
     output(slug=record["slug"], review_token=record["token"], host_dir=folder)
     return record
 
@@ -132,7 +137,7 @@ def stage(post_dir: Path, parent: str | None = None) -> dict:
 def wait_for_hosting(record: dict, tries: int = 18) -> None:
     import requests
     wanted = {name: digest for name, digest in record["files"].items()
-              if name == "contact_sheet.png" or name.startswith("slides/")}
+              if name in ("contact_sheet.png", "reel.mp4") or name.startswith("slides/")}
     for attempt in range(tries):
         try:
             for name, digest in wanted.items():
@@ -142,7 +147,7 @@ def wait_for_hosting(record: dict, tries: int = 18) -> None:
             return
         except (requests.RequestException, ValueError):
             if attempt == tries - 1:
-                raise ValueError("The preview images never went live on media.suresilly.com.")
+                raise ValueError("The preview files never went live on media.suresilly.com.")
             time.sleep(10)
 
 
@@ -195,8 +200,11 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
     try:
         if decision == "publish":
             caption = (post_dir / "caption.txt").read_text().strip()
-            alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
-            media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
+            if review.reel_url(local):
+                media_id = instagram.publish_reel(post_dir, review.reel_url(local), caption)
+            else:
+                alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
+                media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
             review.api(token, "complete", {"action_id": action_id, "state": "published", "media_id": media_id})
             telegram.send(telegram.posted(post, instagram.permalink(media_id)))
             output(result="published")

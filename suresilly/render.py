@@ -13,6 +13,7 @@ from . import ASSETS
 from .mascot import path as pose_path
 
 SIZE = (1080, 1350)
+REEL = (1080, 1920)  # 9:16; the slide sits in the middle, where the profile grid crops to
 FONTS = ASSETS / "fonts"
 HANDLE = "@suresilly"
 
@@ -20,7 +21,8 @@ CSS = """
 @font-face { font-family: 'Fraunces'; src: url('%(fraunces)s') format('truetype'); font-weight: 100 900; }
 @font-face { font-family: 'Inter'; src: url('%(inter)s') format('truetype'); font-weight: 100 900; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 1080px; height: 1350px; overflow: hidden; }
+html, body { width: 1080px; height: %(height)spx; overflow: hidden; }
+.sheet { position: absolute; left: 0; top: %(top)spx; width: 1080px; height: 1350px; }
 body { position: relative; background: #f4ecde url('%(paper)s') no-repeat; color: #2e2822;
        font-family: 'Fraunces', serif; -webkit-font-smoothing: antialiased; }
 .vignette { position: absolute; inset: 0;
@@ -70,17 +72,17 @@ def markup(text: str) -> str:
     return re.sub(r"\[\[(.+?)\]\]", r'<span class="mark">\1</span>', safe)
 
 
-def paper(target: Path) -> Path:
+def paper(target: Path, size: tuple[int, int] = SIZE) -> Path:
     """A fixed sheet of warm paper: fine grain plus faint fibres. Same every time."""
     rng = random.Random(1350)
-    width, height = SIZE
-    grain = Image.frombytes("L", SIZE, rng.randbytes(width * height)).filter(ImageFilter.GaussianBlur(0.8))
+    width, height = size
+    grain = Image.frombytes("L", size, rng.randbytes(width * height)).filter(ImageFilter.GaussianBlur(0.8))
     cloud = (Image.frombytes("L", (18, 22), rng.randbytes(18 * 22))
-             .resize(SIZE, Image.BICUBIC).filter(ImageFilter.GaussianBlur(60)))
+             .resize(size, Image.BICUBIC).filter(ImageFilter.GaussianBlur(60)))
     mixed = ImageChops.add(grain, cloud, scale=2.0)
     # Shadows lean warm: blue darkens most, red least, so the paper never goes grey.
     channels = [mixed.point(lambda v, k=k: max(0, min(255, int(250 + (v - 128) * k)))) for k in (0.16, 0.2, 0.27)]
-    cream = Image.new("RGB", SIZE, (247, 240, 227))
+    cream = Image.new("RGB", size, (247, 240, 227))
     ImageChops.multiply(cream, Image.merge("RGB", channels)).save(target)
     return target
 
@@ -89,45 +91,57 @@ def page(text: str, pose: str, kind: str, count: str, assets: dict) -> str:
     css = CSS % assets
     counter = f'<div class="count">{count}</div>' if count else ""
     return (f"<!doctype html><html><head><meta charset='utf-8'><style>{css}</style></head>"
-            f"<body class='{kind}'><div class='vignette'></div>{counter}"
+            f"<body class='{kind}'><div class='vignette'></div><div class='sheet'>{counter}"
             f"<div class='box'><p>{markup(text)}</p></div>"
             f"<img class='donkey' src='{pose_path(pose).as_uri()}'>"
-            f"<div class='sign'>{HANDLE}</div></body></html>")
+            f"<div class='sign'>{HANDLE}</div></div></body></html>")
 
 
 def render(post: dict, out_dir: Path) -> list[Path]:
     """Render every slide of `post` (slides need text, mood, pose) to out_dir/NN.jpg."""
-    from playwright.sync_api import sync_playwright
-
     out_dir.mkdir(parents=True, exist_ok=True)
     for old in out_dir.glob("*.jpg"):
         old.unlink()
     slides = post["slides"]
     total = len(slides)
+    return _shoot([(slide["text"], slide["pose"],
+                    "single" if total == 1 else ("cover" if number == 1 else "inner"),
+                    f"{number} / {total}" if total > 1 and number > 1 else "",
+                    out_dir / f"{number:02d}.jpg") for number, slide in enumerate(slides, 1)], SIZE)
+
+
+def reel_frame(post: dict, target: Path) -> Path:
+    """The one-liner's slide on a tall 9:16 page for its Reel: same paper, words and donkey."""
+    slide = post["slides"][0]
+    return _shoot([(slide["text"], slide["pose"], "single", "", target)], REEL)[0]
+
+
+def _shoot(pages: list[tuple[str, str, str, str, Path]], size: tuple[int, int]) -> list[Path]:
+    """Screenshot each (text, pose, kind, count, target) page at `size`."""
+    from playwright.sync_api import sync_playwright
+
     written = []
     with tempfile.TemporaryDirectory(prefix="suresilly-") as scratch:
         scratch = Path(scratch)
         assets = {"fraunces": (FONTS / "Fraunces-Variable.ttf").as_uri(),
                   "inter": (FONTS / "Inter-Variable.ttf").as_uri(),
-                  "paper": paper(scratch / "paper.png").as_uri()}
+                  "paper": paper(scratch / "paper.png", size).as_uri(),
+                  "height": size[1], "top": (size[1] - SIZE[1]) // 2}
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             try:
-                view = browser.new_page(viewport={"width": SIZE[0], "height": SIZE[1]}, device_scale_factor=1)
-                for number, slide in enumerate(slides, 1):
-                    kind = "single" if total == 1 else ("cover" if number == 1 else "inner")
-                    count = f"{number} / {total}" if total > 1 and number > 1 else ""
+                view = browser.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
+                for number, (text, pose, kind, count, target) in enumerate(pages, 1):
                     source = scratch / f"{number:02d}.html"
-                    source.write_text(page(slide["text"], slide["pose"], kind, count, assets), encoding="utf-8")
+                    source.write_text(page(text, pose, kind, count, assets), encoding="utf-8")
                     view.goto(source.as_uri(), wait_until="load")
                     status = view.evaluate(FIT)
                     if status == "fonts":
                         raise RenderError("A font did not load, so the slide would render in a fallback face.")
                     if status == "overflow":
                         raise RenderError(f"Slide {number} has too much text to fit.")
-                    target = out_dir / f"{number:02d}.jpg"
                     view.screenshot(path=str(target), type="jpeg", quality=92,
-                                    clip={"x": 0, "y": 0, "width": SIZE[0], "height": SIZE[1]})
+                                    clip={"x": 0, "y": 0, "width": size[0], "height": size[1]})
                     written.append(target)
             finally:
                 browser.close()

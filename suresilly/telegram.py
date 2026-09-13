@@ -32,6 +32,8 @@ def next_slot(now: datetime | None = None) -> str:
 def summary(post: dict) -> str:
     count = len(post["slides"])
     size = "1 image" if count == 1 else f"{count} slides"
+    if post.get("reel"):
+        size = f"🎬 Reel, {post['reel']['seconds']:g}s, {post['reel']['tune']} tune"
     return f"{LABEL.get(post['format'], post['format'])} · {esc(post.get('topic', ''))} · {size}"
 
 

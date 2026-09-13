@@ -64,3 +64,48 @@ def test_choose_keeps_the_writers_pose_and_falls_back_by_mood():
     assert chosen[2] in mascot.POSES["sad"] and chosen[3] in mascot.POSES["joy"] and chosen[4] in mascot.POSES["calm"]
     assert len(set(chosen)) == 5
     assert mascot.choose(slides, "seed") == chosen
+
+
+def test_reel_length_follows_the_words():
+    from suresilly import reel
+    assert reel.seconds_for("five little words right here") == 8.0          # never under 8
+    assert reel.seconds_for(" ".join(["w"] * 20)) == 10.0
+    assert reel.seconds_for("[[" + " ".join(["w"] * 23) + "]]") == 11.2   # highlight marks aren't words
+
+
+def test_every_pose_mood_has_a_tune_and_the_same_seed_gives_the_same_tune(tmp_path):
+    import wave
+    from suresilly import music
+    assert set(mascot.POSES) <= set(music.MOODS)
+    a = music.compose("warm", "slug-1", 8.0, tmp_path / "a.wav")
+    b = music.compose("warm", "slug-1", 8.0, tmp_path / "b.wav")
+    c = music.compose("warm", "slug-2", 8.0, tmp_path / "c.wav")
+    assert a.read_bytes() == b.read_bytes() != c.read_bytes()
+    with wave.open(str(a)) as tune:
+        assert (tune.getnchannels(), tune.getframerate(), tune.getnframes()) == (2, 44100, 8 * 44100)
+
+
+def test_makes_a_reel_instagram_accepts(tmp_path):
+    import json
+    import shutil
+    import subprocess
+    from suresilly import reel
+    pytest.importorskip("playwright")
+    if not shutil.which("ffprobe"):
+        pytest.skip("ffmpeg is not installed")
+    post = {"format": "oneliner", "slides": [{"text": "a line [[worth]] sending " * 3, "mood": "wistful", "pose": "photo_frame"}]}
+    folder = tmp_path / "20260913_2000_a-line"
+    folder.mkdir()
+    try:
+        video = reel.make(post, folder)
+    except Exception as exc:
+        if "Executable doesn't exist" in str(exc):
+            pytest.skip("chromium is not installed")
+        raise
+    assert post["reel"] == {"seconds": 8.0, "tune": "wistful"}
+    probe = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                                       "stream=codec_name,width,height,pix_fmt:format=duration",
+                                       "-of", "json", str(video)], capture_output=True, text=True).stdout)
+    streams = {s["codec_name"]: s for s in probe["streams"]}
+    assert (streams["h264"]["width"], streams["h264"]["height"], streams["h264"]["pix_fmt"]) == (1080, 1920, "yuv420p")
+    assert "aac" in streams and abs(float(probe["format"]["duration"]) - 8.0) < 0.1
