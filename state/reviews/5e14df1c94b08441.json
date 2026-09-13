@@ -20,13 +20,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83d\udd01 <b>Redo ready</b>\n\ud83d\udcda List \u00b7 siblings \u00b7 9 slides\n\n<b>\u201cthe quiet things an older sibling does when your day went wrong\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. the quiet things an older sibling does when your day went wrong\n2. they broke the chocolate bar in half and slid you the bigger piece without looking up.\n3. they turned the car radio all the way down so you didn't have to talk over the noise.\n4. they left their big sweater on your chair so you could borrow it without asking.\n5. they dropped a bag of chips onto your bed and closed the door without asking any questions.\n6. they started a loud debate about nothing at dinner so everyone would stop looking at you.\n7. they didn't give you a speech. they just sat on the floor of your room until the house got quiet.\n8. they stood between you and the rest of the house, and never once asked for credit.\n9. save this for the one who always knew when to leave you alone, and when to sit on the floor.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>they didn't always know what to say.\nso they just left their door open, or stayed at the kitchen table so you could slip away.\nsave this for the day you need to remember how they looked out for you.\n\n#siblings #siblinglove #oldersiblings #brotherandsister #growingupwithsiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>5e14df1c94b08441</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789268537105,
+      "decision": "publish",
+      "request_id": "tg-602066215"
+    }
+  ],
+  "seen": {
+    "tg-602066215": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 177,
   "delivered_at": 1789268350116,
-  "deadline": 1789271950116
+  "deadline": 1789271950116,
+  "action": {
+    "id": "rv-5e14df1c94b08441-tg-602066215",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789269138458
+  },
+  "claimed": false,
+  "claim_expires": 1789270987139,
+  "result": {
+    "action_id": "rv-5e14df1c94b08441-tg-602066215",
+    "state": "published",
+    "media_id": "18002326970793054",
+    "token": "5e14df1c94b08441"
+  }
 }
