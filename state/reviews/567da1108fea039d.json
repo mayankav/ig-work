@@ -12,13 +12,37 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 parents \u00b7 \ud83c\udfac Reel, 10.4s, warm tune\n\n<b>\u201ci fought you every winter over that scratchy wool scarf in the hallway, but today i'd let you wrap it twice.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she stood by the front door making sure you were ready for the wind.\nsend this to the mum who still asks if you brought a jacket before you walk out her door.</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>567da1108fea039d</code>",
-  "state": "waiting",
+  "state": "replaced",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789396802490,
+      "decision": "redo",
+      "request_id": "tg-602066219"
+    }
+  ],
+  "seen": {
+    "tg-602066219": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 202,
   "delivered_at": 1789396713998,
-  "deadline": 1789400313998
+  "deadline": 1789400313998,
+  "action": {
+    "id": "rv-567da1108fea039d-tg-602066219",
+    "decision": "redo",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789397403734
+  },
+  "claimed": false,
+  "claim_expires": 1789399257075,
+  "result": {
+    "action_id": "rv-567da1108fea039d-tg-602066219",
+    "state": "replaced",
+    "token": "567da1108fea039d"
+  }
 }

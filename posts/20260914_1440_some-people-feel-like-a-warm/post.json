@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some people feel like a warm blanket on a rainy night, and you’re the one that never drifts away",
+      "mood": "warm",
+      "pose": "flower"
+    }
+  ],
+  "caption": "they hum a tune while the dishes clink\nthey always leave the kettle on just in case\nsend this to the one who always leaves the kettle on for you\n\n#relationshipquotes #quotesaboutlove #partner",
+  "alt": "oneliner comparing a partner to a warm blanket on a rainy night",
+  "hook_options": [
+    "some people feel like a warm blanket on a rainy night, and you’re the one that never drifts away",
+    "imagine a soft pillow that always lands right where you need it, that’s how they feel",
+    "think of the smell of fresh bread that greets you each morning, that’s the feeling"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-14_2000",
+  "created_at": "2026-09-14T14:40:57Z",
+  "slug": "20260914_1440_some-people-feel-like-a-warm",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "warm"
+  }
+}
