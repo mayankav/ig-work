@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "i fought you every winter over [[that scratchy wool scarf]] in the hallway, but today i'd let you wrap it twice.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "she stood by the front door making sure you were ready for the wind.\nsend this to the mum who still asks if you brought a jacket before you walk out her door.",
+  "alt": "a single slide with a small green donkey holding a hoof to its chest, looking touched. the text reads: i fought you every winter over that scratchy wool scarf in the hallway, but today i'd let you wrap it twice.",
+  "hook_options": [
+    "i fought you every winter over [[that scratchy wool scarf]] in the hallway, but today i'd let you wrap it twice.",
+    "i fought so hard to pull my hand away at the crosswalk, but today i'd [[hold on the whole way]] down the street.",
+    "i used to fight you about wearing [[that heavy yellow raincoat]], but today i'd let you zip it all the way to my chin."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-14_2000",
+  "created_at": "2026-09-14T14:31:27Z",
+  "slug": "20260914_1431_i-fought-you-every-winter-over",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "warm"
+  }
+}
