@@ -12,13 +12,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83d\udd01 <b>Redo ready</b>\n\ud83d\udcac One-liner \u00b7 love \u00b7 \ud83c\udfac Reel, 9.6s, warm tune\n\n<b>\u201csome people feel like a warm blanket on a rainy night, and you\u2019re the one that never drifts away\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>they hum a tune while the dishes clink\nthey always leave the kettle on just in case\nsend this to the one who always leaves the kettle on for you\n\n#relationshipquotes #quotesaboutlove #partner</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>fafd23fa4b387b09</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789398115106,
+      "decision": "publish",
+      "request_id": "tg-602066220"
+    }
+  ],
+  "seen": {
+    "tg-602066220": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 207,
   "delivered_at": 1789397610994,
-  "deadline": 1789401210994
+  "deadline": 1789401210994,
+  "action": {
+    "id": "rv-fafd23fa4b387b09-tg-602066220",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789398717144
+  },
+  "claimed": false,
+  "claim_expires": 1789400566714,
+  "result": {
+    "action_id": "rv-fafd23fa4b387b09-tg-602066220",
+    "state": "published",
+    "media_id": "18074230109524300",
+    "token": "fafd23fa4b387b09"
+  }
 }
