@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "the teacher keeps the handwritten thank‑you note from your first essay, quiet champion",
+      "mood": "warm",
+      "pose": "holding_note"
+    }
+  ],
+  "caption": "a single folded paper can hold a whole class's memory\nit lives in a drawer, untouched for years\nit shows why they stayed in the room\nsend this to the teacher who still keeps your first thank‑you note\n\n#childhoodmemories #schoolmemories #teacherappreciation",
+  "alt": "a line about a teacher keeping a handwritten thank‑you note from a student's first essay, ending with the two‑word verdict quiet champion",
+  "hook_options": [
+    "the one thing a teacher keeps forever",
+    "what stayed on the desk since day one",
+    "a tiny reminder of your first class"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-15_2000",
+  "created_at": "2026-09-15T14:31:37Z",
+  "slug": "20260915_1431_the-teacher-keeps-the-handwritten-thank",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}

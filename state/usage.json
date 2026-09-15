@@ -1,36 +1,36 @@
 {
-  "gemini_day": "2026-09-14",
+  "gemini_day": "2026-09-15",
   "gemini": {
     "gemini-3.8-flash \u00b7 key 1": {
-      "used": 12,
+      "used": 4,
       "empty": false
     },
     "gemini-3.8-flash \u00b7 key 2": {
-      "used": 11,
+      "used": 4,
       "empty": false
     },
     "gemini-3.8-flash \u00b7 key 3": {
-      "used": 10,
+      "used": 4,
       "empty": false
     },
     "gemini-3.7-flash \u00b7 key 1": {
-      "used": 10,
+      "used": 4,
       "empty": false
     },
     "gemini-3.7-flash \u00b7 key 2": {
-      "used": 10,
+      "used": 4,
       "empty": false
     },
     "gemini-3.7-flash \u00b7 key 3": {
-      "used": 8,
+      "used": 4,
       "empty": false
     },
     "gemini-3.5-flash \u00b7 key 1": {
-      "used": 7,
+      "used": 4,
       "empty": false
     },
     "gemini-3.5-flash \u00b7 key 2": {
-      "used": 6,
+      "used": 4,
       "empty": false
     },
     "gemini-3.5-flash \u00b7 key 3": {
@@ -52,6 +52,6 @@
   "groq": {
     "left": 999,
     "limit": 1000,
-    "at": "2026-09-14T14:52:35Z"
+    "at": "2026-09-15T14:39:24Z"
   }
 }
