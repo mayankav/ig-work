@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "signs you grew up with more love than you realised",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "sleeping on three folded blankets on the living room carpet, talking until someone banged on the wall.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "getting sent to the kids' table every holiday and having [[the louder room]].",
+      "mood": "joy",
+      "pose": "laughing"
+    },
+    {
+      "text": "sneaking down to the kitchen at midnight to split the last cold slice of pie on a paper plate.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "when you broke a plate by the back door, they walked over and said 'we did it' before anyone came in.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "having someone who remembers your childhood bedroom, and the exact tone of your mother's voice when you were in trouble.",
+      "mood": "wistful",
+      "pose": "photo_frame"
+    },
+    {
+      "text": "standing by the counter after two years apart and sliding right back into [[the same running joke]].",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "save this for the one person you never had to explain your family to.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "a cousin who grew up beside you remembers the whole house without you having to describe it once.\nyou never have to pretend to be an adult around them.\nsave this for the next holiday weekend around the kitchen table.\n\n#childhoodmemories #grandmashouse #growinguptogether",
+  "alt": "An eight-slide carousel listing small, universal signs of growing up with a cousin you were close with.",
+  "hook_options": [
+    "signs you grew up with more love than you realised",
+    "signs your childhood had a quiet kind of safety",
+    "small signs you had someone on your side early on"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-15_0800",
+  "created_at": "2026-09-15T02:31:33Z",
+  "slug": "20260915_0231_signs-you-grew-up-with-more"
+}
