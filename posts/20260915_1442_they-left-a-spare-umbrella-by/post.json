@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "they left a spare umbrella by the door for anyone caught in the rain, [[quiet hero]]",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "the coat stays dry while the world keeps drizzling\nsmall acts keep strangers from getting soaked\nit’s a reminder that kindness can be left on a hook\nsend this to the neighbor who always keeps an umbrella ready\n\n#kindnessmatters #kindnessquotes #randomactsofkindness",
+  "alt": "a line about a stranger leaving a spare umbrella by the door for anyone caught in rain, described as a quiet hero",
+  "hook_options": [
+    "they left a spare umbrella by the door for anyone caught in the rain, [[quiet hero]]",
+    "they kept a fresh loaf of bread on the kitchen counter for strangers who stopped by, [[silent savior]]",
+    "they tucked a warm pair of socks in the hallway for cold feet, [[gentle guardian]]"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-15_2000",
+  "created_at": "2026-09-15T14:42:08Z",
+  "slug": "20260915_1442_they-left-a-spare-umbrella-by",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "calm"
+  }
+}
