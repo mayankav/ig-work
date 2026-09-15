@@ -12,13 +12,37 @@
   "html": true,
   "resources": "",
   "caption": "\ud83d\udd01 <b>Redo ready</b>\n\ud83d\udcac One-liner \u00b7 friendship \u00b7 \ud83c\udfac Reel, 9.6s, warm tune\n\n<b>\u201cthe day they stopped borrowing my favorite pen, i finally wrote without hunting, and the page felt mine again\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>i still hear their laugh when the kettle whistles.\nthe empty chair at the table feels less heavy now.\nsometimes i find their old mixtape and smile.\nsend this to the friend who always hides your pens.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>3520d92d4c702b0e</code>",
-  "state": "waiting",
+  "state": "replaced",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789484536783,
+      "decision": "redo",
+      "request_id": "tg-602066227"
+    }
+  ],
+  "seen": {
+    "tg-602066227": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 236,
   "delivered_at": 1789484398968,
-  "deadline": 1789487998968
+  "deadline": 1789487998968,
+  "action": {
+    "id": "rv-3520d92d4c702b0e-tg-602066227",
+    "decision": "redo",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789485138520
+  },
+  "claimed": false,
+  "claim_expires": 1789487000650,
+  "result": {
+    "action_id": "rv-3520d92d4c702b0e-tg-602066227",
+    "state": "replaced",
+    "token": "3520d92d4c702b0e"
+  }
 }

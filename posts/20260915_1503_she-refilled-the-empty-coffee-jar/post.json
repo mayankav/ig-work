@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "she refilled the empty coffee jar at night, never said a word, [[that’s love]]",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "tiny habits outlast grand gestures\nshe knows your coffee needs before you even think about them\nsend this to the mum who always has a fresh cup waiting for you\n\n#mother #mumquotes #momquotes",
+  "alt": "a green donkey holding a heart beside a one‑line note about a mother refilling the coffee jar at night, calling that love",
+  "hook_options": [
+    "she refilled the empty coffee jar at night, never said a word, [[that’s love]]",
+    "she saved the last slice of bread for you without asking, [[that’s love]]",
+    "she tucked the laundry into the dryer while you were still in pajamas, [[that’s love]]"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-15_2000",
+  "created_at": "2026-09-15T15:03:20Z",
+  "slug": "20260915_1503_she-refilled-the-empty-coffee-jar",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}
