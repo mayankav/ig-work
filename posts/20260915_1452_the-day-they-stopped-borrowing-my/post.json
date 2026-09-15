@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "the day they stopped borrowing [[my favorite pen]], i finally wrote without hunting, and the page felt mine again",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "i still hear their laugh when the kettle whistles.\nthe empty chair at the table feels less heavy now.\nsometimes i find their old mixtape and smile.\nsend this to the friend who always hides your pens.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "a point_right green donkey beside the line about a friend stopping borrowing the narrator's favorite pen, allowing them to write freely",
+  "hook_options": [
+    "the day they stopped borrowing [[my favorite pen]], i finally wrote without hunting, and the page felt mine again",
+    "the night they stopped playing their loud guitar at midnight, i finally slept through the dark",
+    "the morning they stopped stealing my left sock, i finally found a pair that matched"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-15_2000",
+  "created_at": "2026-09-15T14:52:40Z",
+  "slug": "20260915_1452_the-day-they-stopped-borrowing-my",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "warm"
+  }
+}
