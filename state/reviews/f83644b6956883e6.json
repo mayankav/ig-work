@@ -19,13 +19,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 nostalgia \u00b7 8 slides\n\n<b>\u201csigns you grew up with more love than you realised\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. signs you grew up with more love than you realised\n2. sleeping on three folded blankets on the living room carpet, talking until someone banged on the wall.\n3. getting sent to the kids' table every holiday and having the louder room.\n4. sneaking down to the kitchen at midnight to split the last cold slice of pie on a paper plate.\n5. when you broke a plate by the back door, they walked over and said 'we did it' before anyone came in.\n6. having someone who remembers your childhood bedroom, and the exact tone of your mother's voice when you were in trouble.\n7. standing by the counter after two years apart and sliding right back into the same running joke.\n8. save this for the one person you never had to explain your family to.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>a cousin who grew up beside you remembers the whole house without you having to describe it once.\nyou never have to pretend to be an adult around them.\nsave this for the next holiday weekend around the kitchen table.\n\n#childhoodmemories #grandmashouse #growinguptogether</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>f83644b6956883e6</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789439958245,
+      "decision": "publish",
+      "request_id": "tg-602066224"
+    }
+  ],
+  "seen": {
+    "tg-602066224": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 221,
   "delivered_at": 1789439807121,
-  "deadline": 1789443407121
+  "deadline": 1789443407121,
+  "action": {
+    "id": "rv-f83644b6956883e6-tg-602066224",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789440559909
+  },
+  "claimed": false,
+  "claim_expires": 1789442427666,
+  "result": {
+    "action_id": "rv-f83644b6956883e6-tg-602066224",
+    "state": "published",
+    "media_id": "17895531453398723",
+    "token": "f83644b6956883e6"
+  }
 }
