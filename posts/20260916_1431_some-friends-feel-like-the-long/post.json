@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend from school",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some friends feel like [[the long walk home]] after school. even when the streetlights came on, we never took the shortcut.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    }
+  ],
+  "caption": "remember when we used to drag our feet past the corner shop just to stretch out the afternoon?\nwe had absolutely nothing to say, and we said it for hours.\nsend this to the school friend who used to carry half your books.",
+  "alt": "a small green donkey looks back over its shoulder next to lowercase text that reads: some friends feel like the long walk home after school. even when the streetlights came on, we never took the shortcut.",
+  "hook_options": [
+    "some friends feel like the long walk home after school",
+    "some friends feel like the heavy school binder you shared",
+    "some friends feel like the song you both taped off the radio"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-16_2000",
+  "created_at": "2026-09-16T14:31:23Z",
+  "slug": "20260916_1431_some-friends-feel-like-the-long",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "wistful"
+  }
+}
