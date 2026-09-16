@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "what looked like a small annoyance turns out to be love",
+  "slides": [
+    {
+      "text": "you left the sink full of soapy water and two mugs last night.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "you usually can't sleep with a dish in the basin and crumbs on the counter.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "but yesterday at nine, you just turned off the tap and stood there.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "so you left the sponge in the water and went straight to bed.",
+      "mood": "sad",
+      "pose": "walking_away"
+    },
+    {
+      "text": "this morning, the mugs were still soaking by the faucet.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "but for the first time all week, you woke up before your alarm.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "[[the messy sink was just proof]] that you finally let yesterday end on time.",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "the dishes can sit in the cold water until tomorrow.\nsleep mattered more than a clean kitchen counter.\nsend this to a best friend who worked late and needs to leave the sink alone tonight.\n\n#selflovequotes #bekindtoyourself",
+  "alt": "A story about going to sleep without finishing the dishes after an exhausting day, illustrated with a little green donkey.",
+  "hook_options": [
+    "you left the sink full of soapy water and two mugs last night.",
+    "you walked away from a full sink last night and turned off the light.",
+    "you went to sleep with two unwashed mugs soaking in the basin."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-16_0800",
+  "created_at": "2026-09-16T02:31:21Z",
+  "slug": "20260916_0231_you-left-the-sink-full-of"
+}
