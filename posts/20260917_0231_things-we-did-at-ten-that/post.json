@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a friend you drifted from",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "things we did at ten that take nerve now",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "walking up your front steps and knocking on the door without texting first to see if you were home.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "asking 'do you want to be friends?' out loud before we even knew each other's last names.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "opening your fridge to grab a juice box without asking anyone in the kitchen.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "telling your mum i was staying for dinner before i even checked with my own.",
+      "mood": "wise",
+      "pose": "explaining"
+    },
+    {
+      "text": "saying [[i'm sorry]] five minutes after we flipped the board game across the rug.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "promising we would buy two houses right next door to each other and never move away.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "[[save this]] for the friend whose childhood phone number you still know by heart.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we spent whole summers together without ever having to make a plan.\nnow we look at each other's photos and wonder when we got so polite.\nsave this for an afternoon when you miss your childhood best friend.",
+  "alt": "a reflective carousel about small, fearless habits childhood best friends shared that take courage to do as adults.",
+  "hook_options": [
+    "things we did at ten that take nerve now",
+    "small things we used to do without asking",
+    "how easy it was to be brave back then"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.8-flash",
+  "slot": "2026-09-17_0800",
+  "created_at": "2026-09-17T02:31:31Z",
+  "slug": "20260917_0231_things-we-did-at-ten-that"
+}
