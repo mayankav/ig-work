@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "having someone who knows the exact [[floorboard that squeaks]] and steps right over it while you sleep. that's peace.",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "they do it without thinking, just to let you rest a little longer.\nsend this to the partner who always lets you sleep in.",
+  "alt": "A small green donkey stands peacefully with its eyes closed, illustrating the quiet care of a partner who avoids the squeaky floorboard to let you sleep.",
+  "hook_options": [
+    "having someone who knows the exact [[floorboard that squeaks]] and steps right over it while you sleep. that's peace.",
+    "having someone who automatically takes the [[middle seat on the plane]] so you can have the window. that's love.",
+    "having someone who remembers which [[side of the bed]] you need to sleep on to feel safe. that's home."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-17_2000",
+  "created_at": "2026-09-17T14:32:03Z",
+  "slug": "20260917_1432_having-someone-who-knows-the-exact",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "calm"
+  }
+}
