@@ -19,13 +19,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 parents \u00b7 8 slides\n\n<b>\u201ci pulled the yellow tape measure out of the kitchen drawer yesterday, just to see how far it would stretch.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. i pulled the yellow tape measure out of the kitchen drawer yesterday, just to see how far it would stretch.\n2. when i was small, my only job was holding the metal hook flat against the wall.\n3. i thought we were building something important, because you checked the pencil mark on the wood twice.\n4. but you were only putting up a crooked shelf for the shoes by the back door.\n5. so when i moved into my own place, i bought the exact same heavy yellow one.\n6. i hooked the end against the wall this morning to see if a desk would fit.\n7. but the metal snapped back across the room, because nobody was kneeling there to hold it down.\n8. thank you for pretending you needed two people to measure a piece of wood.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>he let me hold the heavy end anyway, just to keep me in the room.\nsend this to your dad if he still has a jar of mixed screws on his workbench.\n\n#dad #dadquotes #fatherdaughter #fatherson</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>2c39745febda466e</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789699574414,
+      "decision": "publish",
+      "request_id": "tg-602066235"
+    }
+  ],
+  "seen": {
+    "tg-602066235": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 289,
   "delivered_at": 1789699017201,
-  "deadline": 1789702617201
+  "deadline": 1789702617201,
+  "action": {
+    "id": "rv-2c39745febda466e-tg-602066235",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789700176094
+  },
+  "claimed": false,
+  "claim_expires": 1789702045345,
+  "result": {
+    "action_id": "rv-2c39745febda466e-tg-602066235",
+    "state": "published",
+    "media_id": "18121612756907795",
+    "token": "2c39745febda466e"
+  }
 }
