@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i pulled the yellow tape measure out of the kitchen drawer yesterday, just to see how far it would stretch.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "when i was small, my only job was holding the metal hook flat against the wall.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "i thought we were building something important, because you checked the pencil mark on the wood twice.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "but you were only putting up a crooked shelf for the shoes by the back door.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "so when i moved into my own place, i bought the exact same heavy yellow one.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "i hooked the end against the wall this morning to see if a desk would fit.",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "but the metal snapped back across the room, because nobody was kneeling there to hold it down.",
+      "mood": "sad",
+      "pose": "turning_away"
+    },
+    {
+      "text": "[[thank you for pretending]] you needed two people to measure a piece of wood.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "he let me hold the heavy end anyway, just to keep me in the room.\nsend this to your dad if he still has a jar of mixed screws on his workbench.\n\n#dad #dadquotes #fatherdaughter #fatherson",
+  "alt": "a story about remembering helping your dad measure things with a tape measure when you were little.",
+  "hook_options": [
+    "i pulled the yellow tape measure out of the kitchen drawer yesterday, just to see how far it would stretch.",
+    "there is a heavy yellow tape measure in my kitchen drawer that i never use to build anything.",
+    "you always handed me the metal hook of the tape measure and told me not to let go."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-18_0800",
+  "created_at": "2026-09-18T02:31:34Z",
+  "slug": "20260918_0231_i-pulled-the-yellow-tape-measure"
+}
