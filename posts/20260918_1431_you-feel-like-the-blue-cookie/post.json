@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "you feel like [[the blue cookie tin]] on the kitchen table: full of old buttons instead of sweets, but still the first thing i look for.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    }
+  ],
+  "caption": "my grandmother still has the drawing i made at seven taped inside her pantry door.\nshe never remembers how to use the remote, but she remembers how i take my tea.\nsend this to the one who still watches you from the window until your car turns the corner.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "a small green donkey with its head tilted, below the lowercase text: you feel like the blue cookie tin on the kitchen table: full of old buttons instead of sweets, but still the first thing i look for.",
+  "hook_options": [
+    "you feel like [[the blue cookie tin]] on the kitchen table: full of old buttons instead of sweets, but still the first thing i look for.",
+    "some people feel like [[the blue cookie tin]] on the shelf: full of buttons, but still home.",
+    "you feel like [[the blue cookie tin]] in the pantry that actually holds sewing needles."
+  ],
+  "model": "gemini-3.5-flash + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-18_2000",
+  "created_at": "2026-09-18T14:31:17Z",
+  "slug": "20260918_1431_you-feel-like-the-blue-cookie",
+  "reel": {
+    "seconds": 12.4,
+    "tune": "warm"
+  }
+}
