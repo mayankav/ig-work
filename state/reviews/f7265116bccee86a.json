@@ -19,13 +19,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 kindness \u00b7 8 slides\n\n<b>\u201chabits of strangers who are easy to love\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. habits of strangers who are easy to love\n2. hearing running shoes on the lobby tiles and holding a thumb flat against the door open button.\n3. turning around at the checkout with a full cart, seeing your one carton of milk, and waving you ahead.\n4. jogging twenty steps down a cold street just to tap your shoulder and hand back the glove you dropped.\n5. stopping at the intersection in the rain and flashing their headlights so you can finally turn onto the main road.\n6. sliding three paper towels under the stall door when they hear someone crying, and walking away without a word.\n7. answering a forgotten phone on the second ring at dusk, then waiting on the park bench until someone runs back out of breath.\n8. save this for the walk home, for when you need proof that people are still looking out for you.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>most of the people who helped us get through this year were faces we will never see again.\na stranger never owes anyone thirty seconds of patience, but they gave it anyway.\nsave this for a rainy tuesday evening when it feels like nobody is paying attention.\n\n#randomactsofkindness #kindnessmatters #kindnessquotes</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>f7265116bccee86a</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789786671248,
+      "decision": "publish",
+      "request_id": "tg-602066237"
+    }
+  ],
+  "seen": {
+    "tg-602066237": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 306,
   "delivered_at": 1789785236490,
-  "deadline": 1789788836490
+  "deadline": 1789788836490,
+  "action": {
+    "id": "rv-f7265116bccee86a-tg-602066237",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789787272831
+  },
+  "claimed": false,
+  "claim_expires": 1789789126997,
+  "result": {
+    "action_id": "rv-f7265116bccee86a-tg-602066237",
+    "state": "published",
+    "media_id": "18014353727955547",
+    "token": "f7265116bccee86a"
+  }
 }
