@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "habits of people who are easy to love",
+  "slides": [
+    {
+      "text": "habits of strangers who are easy to love",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "hearing running shoes on the lobby tiles and holding a thumb flat against [[the door open button]].",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "turning around at the checkout with a full cart, seeing your one carton of milk, and waving you ahead.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "jogging twenty steps down a cold street just to tap your shoulder and hand back the glove you dropped.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "stopping at the intersection in the rain and flashing their headlights so you can finally turn onto the main road.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "sliding three paper towels under the stall door when they hear someone crying, and walking away without a word.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "answering a forgotten phone on the second ring at dusk, then [[waiting on the park bench]] until someone runs back out of breath.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "save this for the walk home, for when you need proof that people are still looking out for you.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "most of the people who helped us get through this year were faces we will never see again.\na stranger never owes anyone thirty seconds of patience, but they gave it anyway.\nsave this for a rainy tuesday evening when it feels like nobody is paying attention.\n\n#randomactsofkindness #kindnessmatters #kindnessquotes",
+  "alt": "a list of quiet kindnesses from strangers, illustrated with a small green donkey.",
+  "hook_options": [
+    "habits of strangers who are easy to love",
+    "quiet things strangers do that stay with you for years",
+    "habits of strangers who made a hard day survivable"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-09-19_0800",
+  "created_at": "2026-09-19T02:31:41Z",
+  "slug": "20260919_0231_habits-of-strangers-who-are-easy"
+}

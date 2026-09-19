@@ -2,15 +2,15 @@
   "gemini_day": "2026-09-18",
   "gemini": {
     "gemini-3.8-flash \u00b7 key 1": {
-      "used": 3,
+      "used": 6,
       "empty": false
     },
     "gemini-3.8-flash \u00b7 key 2": {
-      "used": 4,
+      "used": 6,
       "empty": false
     },
     "gemini-3.8-flash \u00b7 key 3": {
-      "used": 4,
+      "used": 5,
       "empty": false
     },
     "gemini-3.7-flash \u00b7 key 1": {
