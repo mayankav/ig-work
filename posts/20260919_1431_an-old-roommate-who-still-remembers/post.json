@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "an old roommate who still remembers the exact angle you had to hold the key in your first door. [[that is wealth]].",
+      "mood": "wistful",
+      "pose": "holding_key"
+    }
+  ],
+  "caption": "we shared a fridge that buzzed too loud and a hallway that always smelled like toast.\nsome people only belong to one specific flat, but i am glad you stayed.\nsend this to the old roommate who survived that first drafty kitchen with you.",
+  "alt": "a small green donkey holding up a single small key, looking at it thoughtfully, with the text: an old roommate who still remembers the exact angle you had to hold the key in your first door. that is wealth.",
+  "hook_options": [
+    "an old roommate who still remembers the exact angle you had to hold the key in your first door.",
+    "still knowing the exact trick to the lock on the first apartment you shared.",
+    "having someone who still remembers which way to kick the kitchen radiator to make it stop buzzing."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-19_2000",
+  "created_at": "2026-09-19T14:31:24Z",
+  "slug": "20260919_1431_an-old-roommate-who-still-remembers",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "wistful"
+  }
+}
