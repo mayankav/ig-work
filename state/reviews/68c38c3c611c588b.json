@@ -19,13 +19,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 nostalgia \u00b7 8 slides\n\n<b>\u201cwe spent every holiday sharing the thin pull-out couch in grandma's back room.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. we spent every holiday sharing the thin pull-out couch in grandma's back room.\n2. you always claimed the side with the metal bar, so i could sleep near the window.\n3. we giggled about the grown-ups in the kitchen until we heard grandma's slippers in the hall.\n4. but we grew up, and we only saw each other at the big family events.\n5. we stood in the church hall yesterday, balancing dry cake on paper plates.\n6. you caught my eye across the crowd, walked past three aunts, and didn't ask any polite questions.\n7. you just sat on the low brick planter by the door, leaving exactly half the space for me.\n8. we don't fit on one couch anymore, but you still take the side with the bar.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>some people never let you stand alone in a crowded room.\nsend this to the cousin who always sat next to you at the kids' table.</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>68c38c3c611c588b</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1789874998943,
+      "decision": "publish",
+      "request_id": "tg-602066239"
+    }
+  ],
+  "seen": {
+    "tg-602066239": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 323,
   "delivered_at": 1789871975343,
-  "deadline": 1789875575343
+  "deadline": 1789875575343,
+  "action": {
+    "id": "rv-68c38c3c611c588b-tg-602066239",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789875600247
+  },
+  "claimed": false,
+  "claim_expires": 1789877450214,
+  "result": {
+    "action_id": "rv-68c38c3c611c588b-tg-602066239",
+    "state": "published",
+    "media_id": "18655205053032601",
+    "token": "68c38c3c611c588b"
+  }
 }
