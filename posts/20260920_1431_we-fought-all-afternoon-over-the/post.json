@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "we fought all afternoon over [[the second controller]] with the sticky button, but today you can have player one.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we only catch up in parking lots after family weddings now.\ntwenty years later and nothing has really changed.\nsend this to the cousin who used to pause the game right before you scored.\n\n#childhoodmemories #growinguptogether #childhoodfriends #nostalgia",
+  "alt": "a post about fighting over the broken video game controller with a cousin when you were kids and gladly giving them player one today.",
+  "hook_options": [
+    "we fought all afternoon over [[the second controller]] with the sticky button, but today you can have player one.",
+    "we spent every ride home fighting over [[the middle seat]], but today i would sit on the hump the whole way.",
+    "we fought every summer over [[the green garden hose]], but today i would stand there and let you soak my shoes."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-09-20_2000",
+  "created_at": "2026-09-20T14:31:28Z",
+  "slug": "20260920_1431_we-fought-all-afternoon-over-the",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "warm"
+  }
+}
