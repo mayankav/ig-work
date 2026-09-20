@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "a younger self and an older self, one small moment apart",
+  "slides": [
+    {
+      "text": "we spent every holiday sharing [[the thin pull-out couch]] in grandma's back room.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "you always claimed the side with the metal bar, so i could sleep near the window.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "we giggled about the grown-ups in the kitchen until we heard grandma's slippers in the hall.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "but we grew up, and we only saw each other at the big family events.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "we stood in the church hall yesterday, balancing dry cake on paper plates.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "you caught my eye across the crowd, walked past three aunts, and didn't ask any polite questions.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "you just sat on the low brick planter by the door, leaving exactly half the space for me.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "[[we don't fit on one couch anymore]], but you still take the side with the bar.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "some people never let you stand alone in a crowded room.\nsend this to the cousin who always sat next to you at the kids' table.",
+  "alt": "A series of slides featuring a small green donkey telling a story about growing up with a cousin, starting from sharing a thin pull-out couch at grandma's house to finding a quiet place to sit together at a crowded family event years later.",
+  "hook_options": [
+    "we spent every holiday sharing the thin pull-out couch in grandma's back room.",
+    "we spent every summer holiday sharing one rusted bike in grandma's backyard.",
+    "we used to sit on the kitchen counter and split one soda with two straws."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-20_0800",
+  "created_at": "2026-09-20T02:31:59Z",
+  "slug": "20260920_0231_we-spent-every-holiday-sharing-the"
+}
