@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 friendship \u00b7 8 slides\n\n<b>\u201chabits of friends who never make you feel late\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. habits of friends who never make you feel late\n2. sending a blurry photo of a street sign with no caption, just because it was your running joke at sixteen.\n3. answering an out-of-the-blue text like you only stepped out of the room for a glass of water.\n4. stopping to talk to your mum in the cereal aisle for ten minutes without mentioning how long it has been.\n5. picking up the phone on a tuesday night without once asking where have you been.\n6. mailing a birthday card every august, even if it still goes to your parents' old address.\n7. sliding into a diner booth across from you and picking up a sentence from three years ago.\n8. save this for the friend who never asks for an apology when life gets quiet.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we get busy with work, rent and tired evenings, but an old friend never counts the quiet months against you.\nsave this for a slow sunday when you finally dial their number.\n\n#childhoodfriends #longdistancefriendship #friendshipquotes</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>8f9b6d3b1e568f52</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1789961738500,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 340,
   "delivered_at": 1789958138446,
-  "deadline": 1789961738446
+  "deadline": 1789961738446,
+  "action": {
+    "id": "rv-8f9b6d3b1e568f52-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1789962339863
+  },
+  "claimed": false,
+  "claim_expires": 1789964197411,
+  "result": {
+    "action_id": "rv-8f9b6d3b1e568f52-timeout",
+    "state": "published",
+    "media_id": "18078291734709439",
+    "token": "8f9b6d3b1e568f52"
+  }
 }
