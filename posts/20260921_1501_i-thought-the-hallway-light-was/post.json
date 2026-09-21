@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
+  "slides": [
+    {
+      "text": "i thought the hallway light was just a switch, until my younger self chased its glow after bedtime",
+      "mood": "warm",
+      "pose": "head_tilt"
+    }
+  ],
+  "caption": "we thought a click was only a sound\nthe night we chased the hallway glow\nmy younger self still waits for that light\nsend this to the sibling who always leaves the hallway light on for you\n\n#growingup #childhoodmemories #hallwaylight #nostalgia",
+  "alt": "a brief truth about a child chasing a hallway light’s glow, recalling how a simple switch felt magical",
+  "hook_options": [
+    "i thought the hallway light was just a switch, until my younger self chased its glow after bedtime",
+    "i always assumed the kitchen timer was only a beep, until my younger self raced it and counted the seconds",
+    "i believed the front door knocker was just metal, until my younger self tapped it for secret messages"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-21_2000",
+  "created_at": "2026-09-21T15:01:41Z",
+  "slug": "20260921_1501_i-thought-the-hallway-light-was",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "warm"
+  }
+}
