@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a friend you drifted from",
+  "shape": "habits of people who are easy to love",
+  "slides": [
+    {
+      "text": "habits of friends who never make you feel late",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "sending a blurry photo of a street sign with no caption, just because it was your running joke at sixteen.",
+      "mood": "joy",
+      "pose": "laughing"
+    },
+    {
+      "text": "answering an out-of-the-blue text like you only stepped out of the room for a glass of water.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "stopping to talk to your mum in the cereal aisle for ten minutes without mentioning how long it has been.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "picking up the phone on a tuesday night without once asking [[where have you been]].",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "mailing a birthday card every august, even if it still goes to your parents' old address.",
+      "mood": "warm",
+      "pose": "holding_note"
+    },
+    {
+      "text": "sliding into a diner booth across from you and picking up a sentence from three years ago.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "save this for the friend who never asks for an apology when life gets quiet.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we get busy with work, rent and tired evenings, but an old friend never counts the quiet months against you.\nsave this for a slow sunday when you finally dial their number.\n\n#childhoodfriends #longdistancefriendship #friendshipquotes",
+  "alt": "A carousel post about the comforting habits of old friends who never make you feel guilty for drifting apart.",
+  "hook_options": [
+    "habits of friends who never make you feel late",
+    "habits of friends you haven't seen in three years",
+    "habits of friends who never let you become strangers"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-21_0800",
+  "created_at": "2026-09-21T02:31:36Z",
+  "slug": "20260921_0231_habits-of-friends-who-never-make"
+}
