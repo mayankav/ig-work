@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "i fought you for the red pen in class, but now i’d let you borrow it for my own notes.",
+      "mood": "warm",
+      "pose": "self_hug"
+    }
+  ],
+  "caption": "the red pen was the trophy of our classroom battles\nthe ink still smells like fresh worksheets\nthe desk now feels like a silent high‑five\nsend this to the teacher who always saves the extra eraser for you\n\n#childhoodmemories #schoolmemories",
+  "alt": "a short line about fighting a teacher over a red pen in class and now wanting to lend it back",
+  "hook_options": [
+    "i fought you for the red pen in class, but now i’d let you borrow it for my own notes.",
+    "we argued over the chalk dust on the desk, yet i’d gladly hand it to you today.",
+    "the last ruler on the shelf sparked a fight, now i’d share it with you without a word."
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-21_2000",
+  "created_at": "2026-09-21T14:31:19Z",
+  "slug": "20260921_1431_i-fought-you-for-the-red",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "warm"
+  }
+}
