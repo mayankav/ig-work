@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "you'd always hide the extra marble under the porch steps, and i never told anyone.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    }
+  ],
+  "caption": "the summer we built a fort from old sheets and swore it was our secret headquarters\ni still hear the creak of that attic ladder when i think of us\nsend this to the cousin who still keeps the marble under the porch steps\n\n#childhoodmemories #nostalgia #childhoodfriends #grandmashouse #growinguptogether",
+  "alt": "a short line about a cousin hiding an extra marble under the porch steps, ending with a quiet twist",
+  "hook_options": [
+    "you'd always hide the extra marble under the porch steps, and i never told anyone.",
+    "you'd leave the swing moving after we were done, and i never asked why.",
+    "our backyard tree was our meeting spot, and we both counted the rings in silence."
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-22_2000",
+  "created_at": "2026-09-22T14:31:43Z",
+  "slug": "20260922_1431_you-d-always-hide-the-extra",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "calm"
+  }
+}
