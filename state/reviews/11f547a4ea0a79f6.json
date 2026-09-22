@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 friendship \u00b7 8 slides\n\n<b>\u201cwe hadn't spoken in two years, but there you were in the fruit aisle, holding a basket with three lemons.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. we hadn't spoken in two years, but there you were in the fruit aisle, holding a basket with three lemons.\n2. we talked about your new flat and my job while the cash registers beeped behind us.\n3. we both kept our winter coats zipped to the chin, standing near the automatic doors.\n4. we walked out to the wet pavement together, carrying our paper bags in the rain.\n5. you stopped by the bike rack to pull your hood up, and i reached for my car keys.\n6. i was about to say the easy thing, the one about getting coffee sometime.\n7. but you looked at my single loaf of white bread and said, \"you don't even like that brand.\"\n8. \"i only came to this side of town,\" you said, \"because i hoped you still shopped here on thursdays.\"</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we didn't have a big fight. we just let the weeks get in the way, and then the months.\nyou still look for their name on your phone first.\nsend this to the one you still hope to run into.\n\n#friendshipquotes #bestfriendquotes #longdistancefriendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>11f547a4ea0a79f6</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790048404542,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 359,
   "delivered_at": 1790044804398,
-  "deadline": 1790048404398
+  "deadline": 1790048404398,
+  "action": {
+    "id": "rv-11f547a4ea0a79f6-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790049006072
+  },
+  "claimed": false,
+  "claim_expires": 1790050858323,
+  "result": {
+    "action_id": "rv-11f547a4ea0a79f6-timeout",
+    "state": "published",
+    "media_id": "18421842505154037",
+    "token": "11f547a4ea0a79f6"
+  }
 }
