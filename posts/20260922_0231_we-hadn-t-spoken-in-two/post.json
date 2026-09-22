@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "friendship",
+  "person": "a friend you drifted from",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "we hadn't spoken in two years, but there you were in the fruit aisle, holding a basket with three lemons.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "we talked about your new flat and my job while the cash registers beeped behind us.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "we both kept our winter coats zipped to the chin, standing near the automatic doors.",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "we walked out to the wet pavement together, carrying our paper bags in the rain.",
+      "mood": "tired",
+      "pose": "carrying_bags"
+    },
+    {
+      "text": "you stopped by the bike rack to pull your hood up, and i reached for my car keys.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "i was about to say the easy thing, the one about getting coffee sometime.",
+      "mood": "sad",
+      "pose": "turning_away"
+    },
+    {
+      "text": "but you looked at my single loaf of white bread and said, \"you don't even like that brand.\"",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "\"i only came to this side of town,\" you said, \"because i hoped [[you still shopped here]] on thursdays.\"",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we didn't have a big fight. we just let the weeks get in the way, and then the months.\nyou still look for their name on your phone first.\nsend this to the one you still hope to run into.\n\n#friendshipquotes #bestfriendquotes #longdistancefriendship",
+  "alt": "a comic strip featuring a small green donkey detailing a chance encounter with an old friend at the supermarket, realizing they both missed each other.",
+  "hook_options": [
+    "we hadn't spoken in two years, but there you were in the fruit aisle, holding a basket with three lemons.",
+    "we sat in the parked car for twenty minutes after the petrol pump clicked off, neither of us reaching for the keys.",
+    "i still have your old number saved under your middle name so i don't accidentally call it on a tuesday night."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-22_0800",
+  "created_at": "2026-09-22T02:31:26Z",
+  "slug": "20260922_0231_we-hadn-t-spoken-in-two"
+}
