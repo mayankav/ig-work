@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 nostalgia \u00b7 \ud83c\udfac Reel, 8s, calm tune\n\n<b>\u201cyou'd always hide the extra marble under the porch steps, and i never told anyone.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the summer we built a fort from old sheets and swore it was our secret headquarters\ni still hear the creak of that attic ladder when i think of us\nsend this to the cousin who still keeps the marble under the porch steps\n\n#childhoodmemories #nostalgia #childhoodfriends #grandmashouse #growinguptogether</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>71813686d89a1dd4</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790091985158,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 362,
   "delivered_at": 1790088384999,
-  "deadline": 1790091984999
+  "deadline": 1790091984999,
+  "action": {
+    "id": "rv-71813686d89a1dd4-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790092587284
+  },
+  "claimed": false,
+  "claim_expires": 1790094466985,
+  "result": {
+    "action_id": "rv-71813686d89a1dd4-timeout",
+    "state": "published",
+    "media_id": "18102768299369792",
+    "token": "71813686d89a1dd4"
+  }
 }
