@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "what someone taught you without ever saying it out loud",
+  "slides": [
+    {
+      "text": "what you taught me without ever saying a word",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "how to share a warm bottle of soda from the cooler by leaving [[exactly two sips]] at the bottom.",
+      "mood": "warm",
+      "pose": "offering"
+    },
+    {
+      "text": "staying on the cold basement stairs in silence when the kitchen upstairs got too loud.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "that a broken yellow vase is just a mistake if we sweep the pieces under the rug before dark.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "holding the heavy flashlight steady so i could climb the fence first, even when you wanted to go.",
+      "mood": "calm",
+      "pose": "flashlight"
+    },
+    {
+      "text": "how to pretend to be fast asleep in the backseat at midnight so the grown-ups would carry us both inside.",
+      "mood": "sad",
+      "pose": "curled_up"
+    },
+    {
+      "text": "that we could survive any long dinner by [[catching each other's eye]] across the crowded table.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "save this for the cousin who still remembers the jokes we made up under the garden table.",
+      "mood": "warm",
+      "pose": "waving"
+    }
+  ],
+  "caption": "we spent our summers dusty, sunburnt, and looking for trouble.\nnow we only see each other at the big family dinners once a year.\nbut when we sit next to each other, the years disappear.\nsave this for the cousin you grew up with.",
+  "alt": "A slide-by-slide list of silent lessons learned with a childhood cousin, illustrated with a small green donkey.",
+  "hook_options": [
+    "what you taught me without ever saying a word",
+    "things we learned in the yard while the adults talked",
+    "things my cousin taught me without a single lesson"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-23_0800",
+  "created_at": "2026-09-23T02:31:34Z",
+  "slug": "20260923_0231_what-you-taught-me-without-ever"
+}
