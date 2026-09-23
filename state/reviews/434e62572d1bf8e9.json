@@ -1,0 +1,45 @@
+{
+  "token": "434e62572d1bf8e9",
+  "slug": "20260923_1504_the-extra-blanket-behind-the-coat",
+  "manifest": "a00f3d57882a097bd6d1578bb559724644df668cbbe05fc342a56cf3e3d07239",
+  "run_id": "35878748587",
+  "issue_pages": [],
+  "manual_required": false,
+  "sheet_url": "https://media.suresilly.com/slides/20260923_1504_the-extra-blanket-behind-the-coat/reviews/434e62572d1bf8e9/contact_sheet.png",
+  "photos": [
+    "https://media.suresilly.com/slides/20260923_1504_the-extra-blanket-behind-the-coat/reviews/434e62572d1bf8e9/slides/01.jpg"
+  ],
+  "html": true,
+  "resources": "",
+  "caption": "\ud83d\udd01 <b>Redo ready</b>\n\ud83d\udcac One-liner \u00b7 being kind to yourself \u00b7 \ud83c\udfac Reel, 8.4s, warm tune\n\n<b>\u201cthe extra blanket behind the coat waited, so the storm never left me shivering, quiet triumph\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>sometimes the things we set aside become quiet heroes\nthey remind us that hard weeks hide small comforts\nsend this to the friend who always leaves a spare charger on the nightstand.\n\n#selflovequotes #bekindtoyourself #smallwins</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>434e62572d1bf8e9</code>",
+  "state": "published",
+  "delivery_attempts": 1,
+  "history": [
+    {
+      "at": 1790179914343,
+      "decision": "timeout_publish"
+    }
+  ],
+  "seen": {},
+  "album_sent": true,
+  "issue_receipts": [],
+  "message_id": 380,
+  "delivered_at": 1790176314100,
+  "deadline": 1790179914100,
+  "action": {
+    "id": "rv-434e62572d1bf8e9-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790180516921
+  },
+  "claimed": false,
+  "claim_expires": 1790182363362,
+  "result": {
+    "action_id": "rv-434e62572d1bf8e9-timeout",
+    "state": "published",
+    "media_id": "18024416414857635",
+    "token": "434e62572d1bf8e9"
+  }
+}
