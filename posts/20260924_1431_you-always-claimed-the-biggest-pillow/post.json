@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "you always claimed the [[biggest pillow]], now i roll the soft rug out for you",
+      "mood": "warm",
+      "pose": "waving"
+    }
+  ],
+  "caption": "you taught me that the last cookie tastes better when we split it\nnow i leave the warm tea in the kettle for you when i’m done\nsend this to your older brother who still saves the last cookie for you\n\n#siblings #oldersiblings #brotherandsister",
+  "alt": "a short line about an older sibling claiming the biggest pillow and now the narrator rolls a soft rug out for them",
+  "hook_options": [
+    "you always claimed the [[biggest pillow]], now i roll the soft rug out for you",
+    "you hoarded the warmest sweater, so i leave the extra one folded for you",
+    "you took the last cup of cocoa, now i stir an extra spoonful for you"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-24_2000",
+  "created_at": "2026-09-24T14:31:39Z",
+  "slug": "20260924_1431_you-always-claimed-the-biggest-pillow",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}
