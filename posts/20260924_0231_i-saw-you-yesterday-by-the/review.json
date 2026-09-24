@@ -1,0 +1,19 @@
+{
+  "token": "dc2f9ef93f12df25",
+  "slug": "20260924_0231_i-saw-you-yesterday-by-the",
+  "files": {
+    "post.json": "8506a55c5fc99a0782cc427208054dd153d21ed628faec7f659b120ef86be616",
+    "caption.txt": "34f7ac5ee282bba0862be655f01371c0e17dbb8858fe694697624cf3273ed153",
+    "contact_sheet.png": "811b9a89f02941f5b926612b486b6ff36e85909c4ce48bdd0317fcd2b17c975a",
+    "slides/01.jpg": "e9f2791b07c1bad686c5d9f15ac512493c164afa17564f81b938e5c50040d5da",
+    "slides/02.jpg": "cdaf394ded3b003567a6b167a394ba6f438f80851c212ae311aa0e970f9483da",
+    "slides/03.jpg": "e6ad64d2079278d378ba7b4813850899707f1e9e606923cf947f0ee3cef91335",
+    "slides/04.jpg": "532f614da9c89d9779d5904f6622d5cb37b003efe1f59975df61753d52121194",
+    "slides/05.jpg": "e9f64a69ab8e901395254486c85783c0a2f3487a37674e8de97eb8f0ace137ed",
+    "slides/06.jpg": "e22aa07801c639f182acfb76019a270b595afb489a04dc22a76b3d0fe5c33c16",
+    "slides/07.jpg": "d5bff34048e7e47a6483cf20d2b6827d4899597d18db6eba1792d0d4fa1b2f38",
+    "slides/08.jpg": "f28a2ac4f4538f99f9934908194e49fa60afa3c806fb2ffd394a55a70e4347b3"
+  },
+  "parent": null,
+  "manifest": "db5360edc05865cb42b10bd869b055f96cf2b32a3e17ed1dd9e6e5bddf68c445"
+}

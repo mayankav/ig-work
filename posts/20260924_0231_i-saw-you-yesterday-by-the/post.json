@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "i saw you yesterday by the library, carrying a stack of paperback books with rubber bands around them.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "you looked exactly the same, only your hair was a little whiter and your coat was a different shade of brown.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "i wanted to walk past, because it has been twelve years and i was never your brightest student.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "but you stopped by the stone steps, looked at me, and asked if i was still drawing in the margins of my notebooks.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "we stood in the autumn wind for five minutes, talking about the old radiator that used to clank in room ten.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "i was about to say goodbye and walk to my car, but i stopped.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "i looked at my boots and finally said the thing i kept to myself all through high school.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "\"i only passed that class,\" i told you, \"because you [[let me sit by the window]] on the days my head hurt.\"",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "sometimes they are the only reason we made it through the year.\nthey noticed us when we were trying so hard to be invisible.\nsend this to the teacher who changed everything for you.",
+  "alt": "a comic sequence showing a small green donkey meeting an old teacher and thanking them for a small kindness from years ago.",
+  "hook_options": [
+    "i saw you yesterday by the library, carrying a stack of paperback books with rubber bands around them.",
+    "you stayed after the bell rang to help me search the recycling bin for my lost drawing.",
+    "i still write my sevens with a line through the middle, just because you did."
+  ],
+  "model": "gemini-3.5-flash",
+  "slot": "2026-09-24_0800",
+  "created_at": "2026-09-24T02:31:20Z",
+  "slug": "20260924_0231_i-saw-you-yesterday-by-the"
+}
