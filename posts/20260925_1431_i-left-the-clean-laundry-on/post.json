@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
+  "slides": [
+    {
+      "text": "i left [[the clean laundry]] on the bedroom chair, because clean was close enough for tonight.",
+      "mood": "calm",
+      "pose": "relieved"
+    }
+  ],
+  "caption": "some days you put everything in drawers, and some days you just turn the lamp off.\nmy best friend taught me that an unfolded pile never hurt anybody.\nsend this to the person who has lived out of a clean laundry basket all week.\n\n#selflovequotes #bekindtoyourself #rest",
+  "alt": "a tiny truth about leaving clean clothes on the bedroom chair at the end of a long day",
+  "hook_options": [
+    "i left [[the clean laundry]] on the bedroom chair, because clean was close enough for tonight.",
+    "i stayed in the driveway with the engine off, until [[the headlights]] clicked dark on their own.",
+    "i left [[the soup pot]] soaking in the sink, so the kitchen could go to sleep too."
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.8-flash",
+  "slot": "2026-09-25_2000",
+  "created_at": "2026-09-25T14:31:18Z",
+  "slug": "20260925_1431_i-left-the-clean-laundry-on",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "calm"
+  }
+}
