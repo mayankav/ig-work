@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "things we trusted strangers with before we got careful",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "asking the bus driver where the big wheel goes, just to hear him say [[front left]] while he clicked your ticket.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "waving from the backseat window at four in the afternoon until the man in the work van tapped his horn once.",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "letting the woman in aisle four hold your mitten while you looked for your mum's green jacket.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "telling an old man on the park bench about your loose tooth, because you assumed everyone had two minutes to listen.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "dropping your six copper coins on the sidewalk, knowing someone would bend down to help you gather every single one.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "falling asleep against a stranger's wool coat on the evening train, because [[you knew they wouldn't let you miss your stop]].",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for the evening you need to give someone the benefit of the doubt again.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we teach kids to watch out for the world, but most people along the way were gentle.\nnone of them gave their names, but they held the heavy door and picked up the dropped coins.\nsave this for the evening someone new feels hard to trust.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness",
+  "alt": "A list of six small ways we trusted kind strangers as children without second thought.",
+  "hook_options": [
+    "things we trusted strangers with before we got careful",
+    "things you did around strangers before you got cautious",
+    "brave things you did at seven without thinking twice"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-09-25_0800",
+  "created_at": "2026-09-25T04:37:33Z",
+  "slug": "20260925_0437_things-we-trusted-strangers-with-before"
+}
