@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "habits of people who are easy to love",
+  "slides": [
+    {
+      "text": "signs you shared a kitchen with the right person",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "putting your wet umbrella in the bathtub to dry before it soaked the hallway rug.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "leaving [[the last clean fork]] in the dish rack, even when they made pasta.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "letting you hang the hallway mirror at your eye level, even though they were four inches taller.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "texting \"starting the kettle\" from the kitchen on a freezing tuesday morning.",
+      "mood": "warm",
+      "pose": "warm_mug"
+    },
+    {
+      "text": "sliding their envelope of rent across the kitchen table two days early, every single month.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "turning the front door handle [[with both hands]] so the latch never clicked loud enough to wake you.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "save this for the one who shared an address with you and made those three small rooms feel easy.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "you only realise how rare it is years later, when you are cleaning someone else's dried soup off the stove.\nmy old roommate never made you feel like you were taking up too much space.\nsave this for the day you pack your boxes to move again.",
+  "alt": "a series of slides showing a small green donkey in various peaceful poses, illustrating the quiet, thoughtful habits of a great roommate.",
+  "hook_options": [
+    "signs you shared a kitchen with the right person",
+    "how to tell they were easy to live with",
+    "proof your old roommate made it easy"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-25_0800",
+  "created_at": "2026-09-25T02:31:11Z",
+  "slug": "20260925_0231_signs-you-shared-a-kitchen-with"
+}
