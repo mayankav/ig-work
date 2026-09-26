@@ -12,13 +12,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 school days \u00b7 \ud83c\udfac Reel, 9.6s, warm tune\n\n<b>\u201cnobody talks about how you kept a spare eraser for me, so i never asked for a new one\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the hallway clock ticked louder when you walked in\ni kept the extra notebook you left on my desk for weeks\nsend this to the teacher who always saved a spare eraser for you\n\n#childhoodmemories #schoolmemories #teacher</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>fd3d6c22332d03e1</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1790433704768,
+      "decision": "publish",
+      "request_id": "tg-602066247"
+    }
+  ],
+  "seen": {
+    "tg-602066247": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 415,
   "delivered_at": 1790433669012,
-  "deadline": 1790437269012
+  "deadline": 1790437269012,
+  "action": {
+    "id": "rv-fd3d6c22332d03e1-tg-602066247",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790434305986
+  },
+  "claimed": false,
+  "claim_expires": 1790436172173,
+  "result": {
+    "action_id": "rv-fd3d6c22332d03e1-tg-602066247",
+    "state": "published",
+    "media_id": "18013693025751470",
+    "token": "fd3d6c22332d03e1"
+  }
 }
