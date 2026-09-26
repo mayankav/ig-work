@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i was about to throw out the old plastic container because the lid never clicked shut",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "it had a melted mark near the corner from sitting too close to the toaster.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "so i held it over the rubbish bin, ready to finally clear the shelf.",
+      "mood": "sad",
+      "pose": "turning_away"
+    },
+    {
+      "text": "but then i turned it around and saw the piece of tape along the rim.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "your handwriting was still there in faded marker: [[eat this first]].",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "you pressed it down with your thumb at the kitchen counter before i drove away into the dark.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "i rinsed the dust off, dried it on my sleeve, and put it right back in the cupboard.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    }
+  ],
+  "caption": "mum always makes sure you leave her house with more than you brought.\nshe still packs extra food in boxes she knows she will never get back.\nsend this to your mum if she still tries to feed you before you walk out the door.\n\n#mother #mumquotes #motherdaughter #motherson",
+  "alt": "A short story about almost throwing away an old plastic container until seeing a piece of tape with mum's handwriting.",
+  "hook_options": [
+    "i was about to throw out the old plastic container because the lid never clicked shut",
+    "i nearly tossed the scratched plastic container into the bin this morning",
+    "i found the old plastic container in the back of the saucepan cupboard"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-26_0800",
+  "created_at": "2026-09-26T02:31:40Z",
+  "slug": "20260926_0231_i-was-about-to-throw-out"
+}
