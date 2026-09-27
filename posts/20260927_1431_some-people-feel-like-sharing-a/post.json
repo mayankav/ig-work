@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend from school",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some people feel like [[sharing a heavy school textbook]], where you always let me rest my elbow on your side of the desk.",
+      "mood": "calm",
+      "pose": "reading"
+    }
+  ],
+  "caption": "we didn't have much to say back then, but we always sat together.\nthank you for making those long afternoons go a little faster.\nsend this to the one who sat next to you in homeroom.\n\n#childhoodfriends #bestfriendquotes #friendshipquotes",
+  "alt": "a small green donkey wearing glasses and reading an open book, with text about sharing a school textbook with a best friend.",
+  "hook_options": [
+    "some people feel like [[sharing a heavy school textbook]], where you always let me rest my elbow on your side of the desk.",
+    "some people feel like [[the drafty school bus ride home]], where you turned your knees to the side so i could fit my bag.",
+    "some people feel like [[sharing a desk in biology]], when you did all the cutting but still put my name at the top."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-27_2000",
+  "created_at": "2026-09-27T14:31:56Z",
+  "slug": "20260927_1431_some-people-feel-like-sharing-a",
+  "reel": {
+    "seconds": 11.2,
+    "tune": "calm"
+  }
+}
