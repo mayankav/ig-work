@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 friendship \u00b7 \ud83c\udfac Reel, 11.2s, calm tune\n\n<b>\u201csome people feel like sharing a heavy school textbook, where you always let me rest my elbow on your side of the desk.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we didn't have much to say back then, but we always sat together.\nthank you for making those long afternoons go a little faster.\nsend this to the one who sat next to you in homeroom.\n\n#childhoodfriends #bestfriendquotes #friendshipquotes</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>ca95257ae7284a93</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790523596317,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 430,
   "delivered_at": 1790519996277,
-  "deadline": 1790523596277
+  "deadline": 1790523596277,
+  "action": {
+    "id": "rv-ca95257ae7284a93-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790524197838
+  },
+  "claimed": false,
+  "claim_expires": 1790526046082,
+  "result": {
+    "action_id": "rv-ca95257ae7284a93-timeout",
+    "state": "published",
+    "media_id": "18139089838729159",
+    "token": "ca95257ae7284a93"
+  }
 }
