@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "times a stranger stepped in and asked for nothing back",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "holding the heavy lift door with an elbow because both your arms were full of cardboard boxes.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "tapping on your window at the red light just to point out your petrol cap was swinging open.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "leaving [[their unexpired parking ticket]] face up on the meter so you didn't have to break a ten.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "sliding three extra napkins across the counter without a word when you knocked your glass over.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "the cashier quietly scanning their own discount barcode when your card gave an error the first time.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "the person behind you in line at midnight saying [[take your time]] when you dropped your keys.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for the cold evening you start to think people only look out for themselves.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "a stranger rarely wants an audience when they help you out.\nthey just fix the small thing and walk away before you can find the right words.\nsave this for the evening you need to give people another chance.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness",
+  "alt": "A carousel post listing small, quiet moments where a stranger stepped in to help without asking for anything in return.",
+  "hook_options": [
+    "times a stranger stepped in and asked for nothing back",
+    "times a stranger quietly took care of you",
+    "small ways strangers made sure you were okay"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-09-27_0800",
+  "created_at": "2026-09-27T02:31:50Z",
+  "slug": "20260927_0231_times-a-stranger-stepped-in-and"
+}
