@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 kindness \u00b7 8 slides\n\n<b>\u201ctimes a stranger stepped in and asked for nothing back\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. times a stranger stepped in and asked for nothing back\n2. holding the heavy lift door with an elbow because both your arms were full of cardboard boxes.\n3. tapping on your window at the red light just to point out your petrol cap was swinging open.\n4. leaving their unexpired parking ticket face up on the meter so you didn't have to break a ten.\n5. sliding three extra napkins across the counter without a word when you knocked your glass over.\n6. the cashier quietly scanning their own discount barcode when your card gave an error the first time.\n7. the person behind you in line at midnight saying take your time when you dropped your keys.\n8. save this for the cold evening you start to think people only look out for themselves.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>a stranger rarely wants an audience when they help you out.\nthey just fix the small thing and walk away before you can find the right words.\nsave this for the evening you need to give people another chance.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>28aa253798db2ed8</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790480288401,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 427,
   "delivered_at": 1790476688371,
-  "deadline": 1790480288371
+  "deadline": 1790480288371,
+  "action": {
+    "id": "rv-28aa253798db2ed8-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790480890069
+  },
+  "claimed": false,
+  "claim_expires": 1790482742814,
+  "result": {
+    "action_id": "rv-28aa253798db2ed8-timeout",
+    "state": "published",
+    "media_id": "18021423221712389",
+    "token": "28aa253798db2ed8"
+  }
 }
