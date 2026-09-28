@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a parent's odd habit that the child only understands years later",
+  "slides": [
+    {
+      "text": "every afternoon after school, you made me wait on the bottom step while you checked every room first.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "you told me it was a game to see if i could count to sixty without making a sound.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "so i sat there in my sneakers, listening to the floorboards creak upstairs as you pushed open every door.",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "you came back down the stairs, tapped my shoulder once, and said the coast was clear.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "then we split a sleeve of round crackers at the table, and you always took the broken ones.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "i spent years thinking you were just bossy because you had the brass key around your neck.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "but [[you were only eleven]], and you were making sure the dark house was safe before you let me in.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "an older sister who carried the front door key before she was even tall enough to reach the top shelf in the pantry.\nsend this to the one who walked you home from the bus stop and made sure you got inside first.\n\n#siblings #siblinglove #oldersiblings #growingupwithsiblings",
+  "alt": "A seven-slide story about an older sibling who checked every room in the empty house after school before letting their younger sibling come inside.",
+  "hook_options": [
+    "every afternoon after school, you made me wait on the bottom step while you checked every room first.",
+    "you always made me sit on the kitchen counter while you checked the back door twice.",
+    "you always took the broken crackers from the sleeve and told me the full ones tasted better."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-28_0800",
+  "created_at": "2026-09-28T02:31:41Z",
+  "slug": "20260928_0231_every-afternoon-after-school-you-made"
+}
