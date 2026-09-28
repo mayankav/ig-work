@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "they kept the [[hallway light]] on after midnight, so i never had to fumble for the fridge in the dark",
+      "mood": "warm",
+      "pose": "phone_call"
+    }
+  ],
+  "caption": "the soft glow turned the night into a quiet hallway\nyou could hear the fridge hum without the rush\nsend this to the roommate who still leaves the hallway light on\n\n#roommate #nightlight #smallhabit",
+  "alt": "a single line about an old roommate leaving the hallway light on at night so you never have to fumble for the fridge in the dark",
+  "hook_options": [
+    "they kept the hallway light on after midnight, so i never had to fumble for the fridge in the dark.",
+    "they left the spare spoon in the drawer, so i could stir my coffee without hunting for it.",
+    "they kept the charger by the bedside, so i could plug in my phone without scrambling at night."
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-28_2000",
+  "created_at": "2026-09-28T14:31:56Z",
+  "slug": "20260928_1431_they-kept-the-hallway-light-on",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "warm"
+  }
+}
