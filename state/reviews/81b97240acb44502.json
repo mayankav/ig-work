@@ -12,13 +12,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 adult life \u00b7 \ud83c\udfac Reel, 10s, warm tune\n\n<b>\u201cthey kept the hallway light on after midnight, so i never had to fumble for the fridge in the dark\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the soft glow turned the night into a quiet hallway\nyou could hear the fridge hum without the rush\nsend this to the roommate who still leaves the hallway light on\n\n#roommate #nightlight #smallhabit</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>81b97240acb44502</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1790608298389,
+      "decision": "publish",
+      "request_id": "tg-602066249"
+    }
+  ],
+  "seen": {
+    "tg-602066249": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 444,
   "delivered_at": 1790606381833,
-  "deadline": 1790609981833
+  "deadline": 1790609981833,
+  "action": {
+    "id": "rv-81b97240acb44502-tg-602066249",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790608900169
+  },
+  "claimed": false,
+  "claim_expires": 1790610755076,
+  "result": {
+    "action_id": "rv-81b97240acb44502-tg-602066249",
+    "state": "published",
+    "media_id": "17991337608052457",
+    "token": "81b97240acb44502"
+  }
 }
