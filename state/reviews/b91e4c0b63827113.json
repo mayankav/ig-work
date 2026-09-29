@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 parents \u00b7 8 slides\n\n<b>\u201csmall habits that make a new flat feel like home, even far away\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. small habits that make a new flat feel like home, even far away\n2. checking the weather report for a postcode three hours away, just to see if it rains on his shed tomorrow.\n3. keeping a roll of heavy black tape in the cutlery drawer, because he always said it could fix anything until morning.\n4. checking the pressure in all four tyres before a long drive, because he used to stand by the bumper and watch you.\n5. scraping the butter all the way to the crust, because he never let you eat a dry piece of toast.\n6. leaving the radio playing low on the kitchen counter, so the room sounds like his when you walk in.\n7. turning the deadbolt twice with your thumb before bed, the exact way he checked the back door every night.\n8. save this for the quiet sunday you realise you turned your own flat into his.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>i bought the exact same heavy hammer he kept under the stairs, and it sits in my cupboard.\nwe borrow so many things from dad without even planning to.\nsave this for the evening you look around your kitchen and realise you are just like him.\n\n#dad #dadquotes #fatherson #fatherdaughter</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>b91e4c0b63827113</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790653111664,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 456,
   "delivered_at": 1790649511642,
-  "deadline": 1790653111642
+  "deadline": 1790653111642,
+  "action": {
+    "id": "rv-b91e4c0b63827113-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790653713371
+  },
+  "claimed": false,
+  "claim_expires": 1790655566690,
+  "result": {
+    "action_id": "rv-b91e4c0b63827113-timeout",
+    "state": "published",
+    "media_id": "18071247851774031",
+    "token": "b91e4c0b63827113"
+  }
 }
