@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
+  "slides": [
+    {
+      "text": "my sister always kept the spare key under the mat, so i never locked myself out, and she still steals my cookies",
+      "mood": "wistful",
+      "pose": "holding_key"
+    }
+  ],
+  "caption": "small habits turn a house into a shared memory\nthe key was a quiet promise that someone was home\nsend this to the sister who still slips a sticky note into your lunch\n\n#siblings #sisterlove #siblinglove",
+  "alt": "oneliner about a sister keeping a spare key under the mat, never locking the narrator out, with a twist about stealing cookies",
+  "hook_options": [
+    "my sister always kept the spare key under the mat, so i never locked myself out",
+    "she tucked a spare charger in my bag, so i never missed a call",
+    "she left the bathroom light on at night, so i never stumbled in the dark"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-09-29_2000",
+  "created_at": "2026-09-29T14:31:55Z",
+  "slug": "20260929_1431_my-sister-always-kept-the-spare",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "wistful"
+  }
+}
