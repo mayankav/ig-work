@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "things that feel like home, even when you're far from it",
+  "slides": [
+    {
+      "text": "small habits that make a new flat feel like home, even far away",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "checking the weather report for a postcode three hours away, just to see if it rains on his shed tomorrow.",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "keeping a roll of [[heavy black tape]] in the cutlery drawer, because he always said it could fix anything until morning.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "checking the pressure in all four tyres before a long drive, because he used to stand by the bumper and watch you.",
+      "mood": "calm",
+      "pose": "flashlight"
+    },
+    {
+      "text": "scraping the butter all the way to the crust, because he never let you eat a dry piece of toast.",
+      "mood": "calm",
+      "pose": "cardigan_mug"
+    },
+    {
+      "text": "leaving the radio playing low on the kitchen counter, so the room sounds like his when you walk in.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "turning the deadbolt twice with your thumb before bed, [[the exact way he checked the back door]] every night.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "save this for the quiet sunday you realise you turned your own flat into his.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "i bought the exact same heavy hammer he kept under the stairs, and it sits in my cupboard.\nwe borrow so many things from dad without even planning to.\nsave this for the evening you look around your kitchen and realise you are just like him.\n\n#dad #dadquotes #fatherson #fatherdaughter",
+  "alt": "a list of small daily habits learned from a dad that make a new flat feel like home.",
+  "hook_options": [
+    "small habits that make a new flat feel like home, even far away",
+    "things that make a quiet flat feel like home, even three towns over",
+    "habits that quietly bring you right back to his kitchen"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-09-29_0800",
+  "created_at": "2026-09-29T02:31:54Z",
+  "slug": "20260929_0231_small-habits-that-make-a-new"
+}
