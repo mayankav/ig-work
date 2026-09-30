@@ -1,0 +1,17 @@
+{
+  "token": "99dfe7aa93aab38c",
+  "slug": "20260930_0231_you-handed-me-the-dry-tea",
+  "files": {
+    "post.json": "8483d9a86efe9b99ad8ab43d49274d46dc85513448553e027f600845f54172a1",
+    "caption.txt": "ec9f4eac4ff97b26f8a6bf583ebf59727bb5b55f058a6908b537988c771fb1bf",
+    "contact_sheet.png": "974e8990c20d67c2c360d1f2b02e59e5da4cfa7944cc45de38cad28b09e33d46",
+    "slides/01.jpg": "561dc7f8b0bae8474fcee4f8b1d56a9fc600cf6d34d92ef7b33aaf392b9a3cc6",
+    "slides/02.jpg": "168538df9ab463f603b9dc49c6ec0c926174d7b0e6dcdcd08ce3534e1b1bbe4e",
+    "slides/03.jpg": "e6309a48de75b6ab04dda6466a3394d6fccf191855b5c5898d79d2e9c7d7e181",
+    "slides/04.jpg": "b00ea41c3a6e6d93640329c10e41b1fdaa47bfdadebb45d9bc99c7356c787381",
+    "slides/05.jpg": "657cc449441d56e84041f2120d963c55cea635ba6ad6f2332c2ce6322e986195",
+    "slides/06.jpg": "c5f773814e16da3e95c87421cbfe3d66384d307341f70e4419947dfff0378577"
+  },
+  "parent": null,
+  "manifest": "ae08af2a6841c3541fd19538c8670f2e454d551001f0da70053a75b36443243d"
+}

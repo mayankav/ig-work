@@ -1,0 +1,49 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "you handed me the dry tea towel without looking up from the roasting pan.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "you always took the wash basin, telling me i was too clumsy with the hot tap.",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "so for ten years i stood by the drainer, complaining about every greasy fork.",
+      "mood": "sad",
+      "pose": "turning_away"
+    },
+    {
+      "text": "but tonight you stayed at the sink while the water went cold around your wrists.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "you said you only took the wash side so the boiling water would never burn my hands.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "i dried the last chipped mug three times, [[just so i didn't have to leave the room]].",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "you took the rougher half of every chore and made it sound like an insult so i wouldn't notice.\nsend this to the brother or sister who always took the hot water first.\n\n#siblings #siblinglove #growingupwithsiblings #oldersiblings",
+  "alt": "A short story about an older sibling who always insisted on washing the dishes so their younger sibling would never get burned by the hot water.",
+  "hook_options": [
+    "you handed me the dry tea towel without looking up from the roasting pan.",
+    "we were standing at the kitchen sink at ten, splitting the dinner plates.",
+    "you pushed the dry tea towel into my ribs and turned the hot tap all the way on."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-30_0800",
+  "created_at": "2026-09-30T02:31:57Z",
+  "slug": "20260930_0231_you-handed-me-the-dry-tea"
+}
