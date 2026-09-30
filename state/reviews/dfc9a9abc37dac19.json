@@ -12,13 +12,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 parents \u00b7 \ud83c\udfac Reel, 8s, warm tune\n\n<b>\u201chaving someone who still writes your flight times on the kitchen calendar. pure wealth.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she still tracks the weather where you land, too.\neven when you are thirty and have your own keys.\nsend this to your mum if she is the one who keeps the calendar.\n\n#mumquotes #motherdaughter #motherson #mother</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>dfc9a9abc37dac19</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1790782566770,
+      "decision": "publish",
+      "request_id": "tg-602066251"
+    }
+  ],
+  "seen": {
+    "tg-602066251": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 473,
   "delivered_at": 1790781177619,
-  "deadline": 1790784777619
+  "deadline": 1790784777619,
+  "action": {
+    "id": "rv-dfc9a9abc37dac19-tg-602066251",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790783168409
+  },
+  "claimed": false,
+  "claim_expires": 1790785215914,
+  "result": {
+    "action_id": "rv-dfc9a9abc37dac19-tg-602066251",
+    "state": "published",
+    "media_id": "18014215616959365",
+    "token": "dfc9a9abc37dac19"
+  }
 }
