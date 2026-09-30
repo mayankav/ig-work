@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "having someone who still writes [[your flight times]] on the kitchen calendar. pure wealth.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "she still tracks the weather where you land, too.\neven when you are thirty and have your own keys.\nsend this to your mum if she is the one who keeps the calendar.\n\n#mumquotes #motherdaughter #motherson #mother",
+  "alt": "A small green donkey with its hoof on its chest stands next to text that reads: having someone who still writes your flight times on the kitchen calendar. pure wealth.",
+  "hook_options": [
+    "having someone who still writes [[your flight times]] on the kitchen calendar. pure wealth.",
+    "having someone who still buys [[your childhood cereal]] when you come to visit. absolute luxury.",
+    "having someone who still saves [[the grocery coupons]] for the one yogurt you like. pure wealth."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.7-flash",
+  "slot": "2026-09-30_2000",
+  "created_at": "2026-09-30T15:07:02Z",
+  "slug": "20260930_1507_having-someone-who-still-writes-your",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}
