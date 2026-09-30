@@ -17,13 +17,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 siblings \u00b7 6 slides\n\n<b>\u201cyou handed me the dry tea towel without looking up from the roasting pan.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. you handed me the dry tea towel without looking up from the roasting pan.\n2. you always took the wash basin, telling me i was too clumsy with the hot tap.\n3. so for ten years i stood by the drainer, complaining about every greasy fork.\n4. but tonight you stayed at the sink while the water went cold around your wrists.\n5. you said you only took the wash side so the boiling water would never burn my hands.\n6. i dried the last chipped mug three times, just so i didn't have to leave the room.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you took the rougher half of every chore and made it sound like an insult so i wouldn't notice.\nsend this to the brother or sister who always took the hot water first.\n\n#siblings #siblinglove #growingupwithsiblings #oldersiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>99dfe7aa93aab38c</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790739423984,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 467,
   "delivered_at": 1790735823887,
-  "deadline": 1790739423887
+  "deadline": 1790739423887,
+  "action": {
+    "id": "rv-99dfe7aa93aab38c-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790740025400
+  },
+  "claimed": false,
+  "claim_expires": 1790741878766,
+  "result": {
+    "action_id": "rv-99dfe7aa93aab38c-timeout",
+    "state": "published",
+    "media_id": "18138724696615841",
+    "token": "99dfe7aa93aab38c"
+  }
 }
