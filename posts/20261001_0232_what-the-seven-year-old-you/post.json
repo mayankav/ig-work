@@ -1,0 +1,64 @@
+{
+  "format": "list",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "what someone taught you without ever saying it out loud",
+  "slides": [
+    {
+      "text": "what the seven-year-old you was trying to show you",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "wearing the bright yellow socks because they were at the top of the drawer, without checking if they matched your shoes.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "crying on the back porch for five minutes, then immediately going to look at a shiny green beetle in the grass.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "[[sitting right on the kitchen floor]] when your knees got tired, because you didn't care about looking polite.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "staring at the rain on the car window for three towns straight, without needing to be anywhere else.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "saying you wanted to go home the second you felt tired, without spending ten minutes making up an excuse.",
+      "mood": "calm",
+      "pose": "stretching"
+    },
+    {
+      "text": "believing a blue plaster with cartoon dogs on it [[made the scrape stop hurting]].",
+      "mood": "warm",
+      "pose": "holding_heart"
+    },
+    {
+      "text": "running all the way to the garden gate just to feel the wind in your teeth, not because anyone was timing you.",
+      "mood": "joy",
+      "pose": "cheering"
+    },
+    {
+      "text": "save this for the morning you forget how to look after the kid who got you this far.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "you spent so many years trying to grow up.\nbut the kid with the scraped knees already knew how to live.\nthey knew exactly when to stop and look at the grass.\nsave this for a sunday morning when you forget how to rest.\n\n#growingup #childhoodmemories #innerchild",
+  "alt": "a nine-slide post about the simple things your childhood self knew, with a tiny green donkey on each slide.",
+  "hook_options": [
+    "what the seven-year-old you was trying to show you",
+    "the quiet things you knew before you tried so hard",
+    "what the kid in your old school photos was quietly teaching you"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-01_0800",
+  "created_at": "2026-10-01T02:32:33Z",
+  "slug": "20261001_0232_what-the-seven-year-old-you"
+}
