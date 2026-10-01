@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "having someone who still remembers the exact lie you told your mum about the cracked plate. [[steady witness]]",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "she still remembers the treehouse we built that fell down in the rain.\nshe kept the secret about the dent in the garden fence for twelve years.\nsend this to the sister who still covers for you when you run late.\n\n#siblings #sisterlove #oldersiblings",
+  "alt": "a drawing of a small green donkey with glasses on giving a knowing sideways look, next to text about having an older sibling who still remembers the exact lie you told your mum about a cracked plate.",
+  "hook_options": [
+    "having someone who still remembers the exact lie you told your mum about the cracked plate. steady witness.",
+    "having someone who still knows you only eat the red ones from the box. quiet safety.",
+    "having someone who still remembers the name of your first goldfish. permanent proof."
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.5-flash",
+  "slot": "2026-10-01_2000",
+  "created_at": "2026-10-01T14:33:46Z",
+  "slug": "20261001_1433_having-someone-who-still-remembers-the",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "wistful"
+  }
+}
