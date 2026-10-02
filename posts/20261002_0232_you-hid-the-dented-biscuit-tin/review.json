@@ -1,0 +1,18 @@
+{
+  "token": "22d855c9f7dea065",
+  "slug": "20261002_0232_you-hid-the-dented-biscuit-tin",
+  "files": {
+    "post.json": "a2cedf85b64896e4537bb502a42928c6150d589ce5828137b60bfd7ecdfd95f8",
+    "caption.txt": "b810f58942ebc20f19ee184bc898ee8361f5d6c62a6e805068279c367d800b83",
+    "contact_sheet.png": "1903303f86694a8fe30211b1b7c4e561587e2a03ef82f697d699a53762498d94",
+    "slides/01.jpg": "354c185b60509b59b67200995e4d7c85e3f75813d3612662d8390c2638bdfdd3",
+    "slides/02.jpg": "33b22e39b524b1dc20ce2590d6c97aee6e5c0b26c24cdd9b8d51d373b83c0a89",
+    "slides/03.jpg": "6fe0b075ed9536c54dc310bdedc76fb19086b2cb1f7bdd66cfea08fcf12809bb",
+    "slides/04.jpg": "c49a7e383dcc37c1a3a2e559282821caf7dba6d2b87e9dc967f05f474e67aef9",
+    "slides/05.jpg": "238b3933fbb4a9743415c30ff6b7c7402f2351e5da9911d4ce1c1b645db5de8e",
+    "slides/06.jpg": "c75b09095c8aed320694d3443698f7eb372b9c23f98ecde1bcde683d77d6a0ba",
+    "slides/07.jpg": "22be8a90458d10bad79419ec110e948f2eed2989799173e42aa7c48b60befa5b"
+  },
+  "parent": null,
+  "manifest": "0662cc6c8a37c4d4317e0f805249e0c71e932e4f5189981c34d1bcf7dbb90dfc"
+}

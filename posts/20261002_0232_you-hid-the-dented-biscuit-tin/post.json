@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "you hid the [[dented biscuit tin]] behind grandma's water tank and swore it was full of stolen gold",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "so for three summers i guarded the path with a bamboo cane while the grown-ups talked inside",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "we sat on the back step splitting a bottle of warm orange squash, pretending we had a secret to protect",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "but on our last sunday before the long drive home, you pulled the tin out of the nettles and pushed it into my hands",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "there was no gold inside, just three smooth stones and a green plastic soldier with half a rifle missing",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "you said you made up the treasure [[so i wouldn't cry]] when my dad packed the suitcases into the boot",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "that little soldier is still on my desk, thirty years after grandma's house was sold",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    }
+  ],
+  "caption": "we spent two months of every year sharing bunk beds and drinking warm squash from plastic cups.\nthen the car boot slammed shut and we had to go back to different towns.\nsend this to the cousin who shared the fold-out couch with you every august.\n\n#childhoodmemories #nostalgia #grandmashouse #growinguptogether",
+  "alt": "a story about an old biscuit tin hidden behind grandma's house and the cousin who invented a treasure hunt to soften goodbye",
+  "hook_options": [
+    "you hid the [[dented biscuit tin]] behind grandma's water tank and swore it was full of stolen gold",
+    "you shoved an old tin box into the nettles behind grandma's shed and told me never to look",
+    "you kept a rusted biscuit tin behind the water tank all summer and swore we were rich"
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.8-flash",
+  "slot": "2026-10-02_0800",
+  "created_at": "2026-10-02T02:32:03Z",
+  "slug": "20261002_0232_you-hid-the-dented-biscuit-tin"
+}
