@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 nostalgia \u00b7 7 slides\n\n<b>\u201cyou hid the dented biscuit tin behind grandma's water tank and swore it was full of stolen gold\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. you hid the dented biscuit tin behind grandma's water tank and swore it was full of stolen gold\n2. so for three summers i guarded the path with a bamboo cane while the grown-ups talked inside\n3. we sat on the back step splitting a bottle of warm orange squash, pretending we had a secret to protect\n4. but on our last sunday before the long drive home, you pulled the tin out of the nettles and pushed it into my hands\n5. there was no gold inside, just three smooth stones and a green plastic soldier with half a rifle missing\n6. you said you made up the treasure so i wouldn't cry when my dad packed the suitcases into the boot\n7. that little soldier is still on my desk, thirty years after grandma's house was sold</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we spent two months of every year sharing bunk beds and drinking warm squash from plastic cups.\nthen the car boot slammed shut and we had to go back to different towns.\nsend this to the cousin who shared the fold-out couch with you every august.\n\n#childhoodmemories #nostalgia #grandmashouse #growinguptogether</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>22d855c9f7dea065</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1790912528359,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 500,
   "delivered_at": 1790908928324,
-  "deadline": 1790912528324
+  "deadline": 1790912528324,
+  "action": {
+    "id": "rv-22d855c9f7dea065-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790913130059
+  },
+  "claimed": false,
+  "claim_expires": 1790915010988,
+  "result": {
+    "action_id": "rv-22d855c9f7dea065-timeout",
+    "state": "published",
+    "media_id": "18106594286227795",
+    "token": "22d855c9f7dea065"
+  }
 }
