@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "nobody talks about how you still [[buy the cheap tea]] because your first roommate swore the yellow box tasted exactly the same.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "you lived on cheap pasta and shared a toaster that only worked on one side.\nyou still can't go down the hot drinks aisle without thinking of them.\nsend this to the roommate who shared your first terrible kitchen.",
+  "alt": "a small green donkey wearing glasses holds a hoof to its chin with a knowing look next to text about buying cheap tea because of an old roommate.",
+  "hook_options": [
+    "nobody talks about how you still buy the cheap tea",
+    "nobody talks about keeping the kitchen habits of your first roommate",
+    "nobody talks about the tiny things you still do because of an old roommate"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-02_2000",
+  "created_at": "2026-10-02T14:32:23Z",
+  "slug": "20261002_1432_nobody-talks-about-how-you-still",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "wistful"
+  }
+}
