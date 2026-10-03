@@ -1,0 +1,64 @@
+{
+  "format": "list",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "how to tell you landed in safe hands",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "plugging your phone into the charger on their side of the mattress when you fall asleep on the rug.",
+      "mood": "sad",
+      "pose": "phone_down"
+    },
+    {
+      "text": "tiptoeing down the far edge of the wooden stairs at six in the morning so you get [[another twenty minutes]].",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "shifting to the curb side of the pavement every single walk, without turning around or mentioning it once.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "scraping the thick frost off your windscreen in the driveway before they even touch their own car.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "taking the heavy grocery bag out of your arms at the front door [[without interrupting]] whatever story you were telling.",
+      "mood": "tired",
+      "pose": "carrying_bags"
+    },
+    {
+      "text": "choosing the side of the bed nearest the bedroom door every night, so they are the one facing the dark room first.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "sitting down by the radiator next to you when a hard week catches up, just to share [[the quiet]].",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "save this for the evening you forget how many small things are keeping you safe.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "it took me years to see that love is mostly somebody quietly taking the cold side of things. my partner never announced any of it at the time.\nsave this for an evening you need to remember what being looked after feels like.\n\n#relationshipquotes #quotesaboutlove #partnership #reallove",
+  "alt": "A nine-slide post about the quiet, unannounced ways a partner looks after you every day.",
+  "hook_options": [
+    "the quiet ways someone makes room for you",
+    "how to tell you landed in safe hands",
+    "small ways to know someone is looking after you"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-03_0800",
+  "created_at": "2026-10-03T02:32:05Z",
+  "slug": "20261003_0232_how-to-tell-you-landed-in"
+}
