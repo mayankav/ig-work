@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "living in different cities now, but we still [[leave two bites in the carton]] so nobody gets blamed for finishing it.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "four hundred miles between our kitchens, and we still share the exact same reflexes from the fridge door.\nyou taught me every trick we got away with.\nsend this to the older sibling who knows why the box is never quite empty.\n\n#siblings #siblinglove #oldersiblings #growingupwithsiblings",
+  "alt": "A short post about living in different cities from an older sibling but still leaving two bites in the food carton so nobody gets blamed.",
+  "hook_options": [
+    "living in different cities now, but we still leave two bites in the carton so nobody gets blamed for finishing it.",
+    "three hundred miles apart now, but we still leave two sips at the bottom of the juice carton so mum doesn't yell.",
+    "we live in different postcodes now, but we still put the empty cereal box back in the cupboard out of habit."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-10-03_2000",
+  "created_at": "2026-10-03T14:32:02Z",
+  "slug": "20261003_1432_living-in-different-cities-now-but",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "wistful"
+  }
+}
