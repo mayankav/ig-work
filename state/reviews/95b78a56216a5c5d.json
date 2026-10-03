@@ -20,13 +20,38 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 love \u00b7 9 slides\n\n<b>\u201chow to tell you landed in safe hands\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. how to tell you landed in safe hands\n2. plugging your phone into the charger on their side of the mattress when you fall asleep on the rug.\n3. tiptoeing down the far edge of the wooden stairs at six in the morning so you get another twenty minutes.\n4. shifting to the curb side of the pavement every single walk, without turning around or mentioning it once.\n5. scraping the thick frost off your windscreen in the driveway before they even touch their own car.\n6. taking the heavy grocery bag out of your arms at the front door without interrupting whatever story you were telling.\n7. choosing the side of the bed nearest the bedroom door every night, so they are the one facing the dark room first.\n8. sitting down by the radiator next to you when a hard week catches up, just to share the quiet.\n9. save this for the evening you forget how many small things are keeping you safe.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>it took me years to see that love is mostly somebody quietly taking the cold side of things. my partner never announced any of it at the time.\nsave this for an evening you need to remember what being looked after feels like.\n\n#relationshipquotes #quotesaboutlove #partnership #reallove</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>95b78a56216a5c5d</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
-  "seen": {},
+  "history": [
+    {
+      "at": 1790995056686,
+      "decision": "publish",
+      "request_id": "tg-602066253"
+    }
+  ],
+  "seen": {
+    "tg-602066253": true
+  },
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 512,
   "delivered_at": 1790994953545,
-  "deadline": 1790998553545
+  "deadline": 1790998553545,
+  "action": {
+    "id": "rv-95b78a56216a5c5d-tg-602066253",
+    "decision": "publish",
+    "slide": 0,
+    "slides": [],
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1790995657802
+  },
+  "claimed": false,
+  "claim_expires": 1790997502629,
+  "result": {
+    "action_id": "rv-95b78a56216a5c5d-tg-602066253",
+    "state": "published",
+    "media_id": "18107280899581060",
+    "token": "95b78a56216a5c5d"
+  }
 }
