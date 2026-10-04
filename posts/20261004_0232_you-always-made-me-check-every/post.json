@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "a parent's odd habit that the child only understands years later",
+  "slides": [
+    {
+      "text": "you always made me check every apple in the wooden crate outside the corner shop, like it was serious work.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "you told the man behind the counter that i had the sharpest eye on our street, so he had to wait for me.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "so i stood on my toes under the green awning every tuesday, turning the fruit over until my fingers went cold.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "but you weren't looking at the apples.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "you just needed two quiet minutes to [[count the coins]] in your palm before we reached the till.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "you still let me carry the brown paper bag through the front door, announcing that i had picked the best ones.",
+      "mood": "tired",
+      "pose": "carrying_bags"
+    },
+    {
+      "text": "that seven-year-old still thinks they were the reason we had supper.",
+      "mood": "warm",
+      "pose": "self_hug"
+    }
+  ],
+  "caption": "mum had a hundred small ways to protect us from the numbers on the receipt.\nwe never noticed the quiet maths happening right above our heads.\nsend this to your mum if she spent years making the hard things look like a game.\n\n#growingup #childhoodmemories",
+  "alt": "a story about a mother who gave her child a chore at the corner shop to buy time while counting her coins",
+  "hook_options": [
+    "you always made me check every apple in the wooden crate outside the corner shop, like it was serious work.",
+    "you always told me to hold the grocery list with both hands while we waited at the till.",
+    "you always made me count the fence posts on the walk home from the bus stop, swearing you forgot the number."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-04_0800",
+  "created_at": "2026-10-04T02:32:03Z",
+  "slug": "20261004_0232_you-always-made-me-check-every"
+}

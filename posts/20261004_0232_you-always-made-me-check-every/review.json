@@ -1,0 +1,18 @@
+{
+  "token": "4c856c3c0b1d9752",
+  "slug": "20261004_0232_you-always-made-me-check-every",
+  "files": {
+    "post.json": "7033e655d36044bcc4cce1a016a90cf30d7f571b91cd92f480ef2d6179ec6fb2",
+    "caption.txt": "8e30fdc68eb5c17b0b73fbfab7a4a50be564cfb0ffa07a83bd05f69913f70d3f",
+    "contact_sheet.png": "b4e99489951ed9d5043edf6ecdda5d487329f3fbcc7ab813acced9cb4970bc43",
+    "slides/01.jpg": "974bfe438fb8c1478f85aea4a17f4495e806f7f9758d8157d7545b0f8a857b6c",
+    "slides/02.jpg": "46fb3126b125e8353bc4e0b40a0f9a1c75213a75a793a9e0d7eb9c75db81e884",
+    "slides/03.jpg": "b815a2a9a6a0dbf9de39b74eedb659622087a8c120bc195aa996c5218361fb22",
+    "slides/04.jpg": "2fd3967743570891bb50f12f7dc3a4e7a043be645e464406455702c2d4b3faed",
+    "slides/05.jpg": "671bcf22d9a3f4653cd2821ec8397470c51d87c2612b6473d627fd3306eb4bd2",
+    "slides/06.jpg": "5773e42614f2579fe8f766a5b98b9778ea71c27de6a82550c9bb5626eef4d12e",
+    "slides/07.jpg": "5ee2b0b564cabeecbbd7af53b7f7f8222d627768969a28a0738651b6d007a248"
+  },
+  "parent": null,
+  "manifest": "1d548d9aa8eebc1b4cd2d8df4449a43ce891836431aad22b5939c2178caa9b38"
+}
