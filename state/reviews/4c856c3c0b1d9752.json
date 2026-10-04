@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 growing up \u00b7 7 slides\n\n<b>\u201cyou always made me check every apple in the wooden crate outside the corner shop, like it was serious work.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. you always made me check every apple in the wooden crate outside the corner shop, like it was serious work.\n2. you told the man behind the counter that i had the sharpest eye on our street, so he had to wait for me.\n3. so i stood on my toes under the green awning every tuesday, turning the fruit over until my fingers went cold.\n4. but you weren't looking at the apples.\n5. you just needed two quiet minutes to count the coins in your palm before we reached the till.\n6. you still let me carry the brown paper bag through the front door, announcing that i had picked the best ones.\n7. that seven-year-old still thinks they were the reason we had supper.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>mum had a hundred small ways to protect us from the numbers on the receipt.\nwe never noticed the quiet maths happening right above our heads.\nsend this to your mum if she spent years making the hard things look like a game.\n\n#growingup #childhoodmemories</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>4c856c3c0b1d9752</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791085027755,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 526,
   "delivered_at": 1791081427719,
-  "deadline": 1791085027719
+  "deadline": 1791085027719,
+  "action": {
+    "id": "rv-4c856c3c0b1d9752-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791085629364
+  },
+  "claimed": false,
+  "claim_expires": 1791087482885,
+  "result": {
+    "action_id": "rv-4c856c3c0b1d9752-timeout",
+    "state": "published",
+    "media_id": "18433757533199364",
+    "token": "4c856c3c0b1d9752"
+  }
 }
