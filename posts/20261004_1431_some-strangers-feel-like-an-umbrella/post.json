@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some strangers feel like [[an umbrella tilted over your shoulder]] for three steps in the rain, then they are gone.",
+      "mood": "calm",
+      "pose": "umbrella"
+    }
+  ],
+  "caption": "you never got their name, but you still remember the bright red jacket.\nquiet people keep the whole street running on bad weather days.\nsend this to the friend who always holds the heavy glass door for the person rushing behind them.\n\n#kindnessmatters #randomactsofkindness #kindnessquotes",
+  "alt": "a small green donkey standing under a yellow umbrella with text about the quiet kindness of strangers.",
+  "hook_options": [
+    "some strangers feel like [[an umbrella tilted over your shoulder]] for three steps in the rain, then they are gone.",
+    "some strangers feel like the person who holds the heavy train door with an elbow when your hands are full.",
+    "some strangers feel like finding a dry wooden bench under the awning right when your bags get heavy."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-04_2000",
+  "created_at": "2026-10-04T14:31:50Z",
+  "slug": "20261004_1431_some-strangers-feel-like-an-umbrella",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "calm"
+  }
+}
