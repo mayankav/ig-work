@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "rare kinds of people, and why you should keep them close",
+  "slides": [
+    {
+      "text": "the rare kinds of people who quietly carry the heavy side of the table",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "the ones who always took [[the burnt piece of toast]] so you could have the soft middle.",
+      "mood": "calm",
+      "pose": "cardigan_mug"
+    },
+    {
+      "text": "they folded your clean laundry twice, just so it would fit in the crowded bottom drawer.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "they stayed up past midnight to wash your school shirt in the sink, because you forgot to tell them it was dirty.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "they kept buying the carton of cherry juice you liked at seven, long after you grew up and forgot the taste.",
+      "mood": "calm",
+      "pose": "lunchbox"
+    },
+    {
+      "text": "they sat through the entire school play without looking at their phone, just to watch you wave from the back row.",
+      "mood": "wistful",
+      "pose": "looking_up"
+    },
+    {
+      "text": "[[they never told you]] how much the winter coat cost, they just made sure to zip it right up to your chin.",
+      "mood": "warm",
+      "pose": "self_hug"
+    },
+    {
+      "text": "save this for the quiet sunday you need to call her.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "she was the one who kept the kitchen warm before the heaters kicked in.\nshe still calls just to tell you the rain has stopped where she is.\nsave this for the next quiet sunday you need to call your mum.",
+  "alt": "A series of slides showing a small green donkey in various gentle poses, listing the quiet and selfless ways a mother shows her care, like saving the best piece of toast or washing a school shirt late at night.",
+  "hook_options": [
+    "the rare kinds of people who quietly carry the heavy side of the table",
+    "the rare ones who saved the warmest piece for you",
+    "the quiet ways she showed you she was staying"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-05_0800",
+  "created_at": "2026-10-05T02:31:43Z",
+  "slug": "20261005_0231_the-rare-kinds-of-people-who"
+}
