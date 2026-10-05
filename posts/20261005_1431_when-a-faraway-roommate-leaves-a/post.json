@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "when a faraway roommate leaves a tiny reminder, we still pour coffee into the chipped mug at midnight, so the empty kitchen feels a little less lonely",
+      "mood": "warm",
+      "pose": "gift_box"
+    }
+  ],
+  "caption": "the mug has seen every box we packed\nthe night’s first sip still lingers\nmy old roommate knows how small rituals linger\nsend this to the roommate who still leaves the midnight coffee on the nightstand\n\n#longdistance #midnightcoffee #smallrituals",
+  "alt": "oneliner about a faraway roommate leaving a tiny reminder, sharing a midnight coffee ritual with a chipped mug that makes the empty kitchen feel less lonely",
+  "hook_options": [
+    "when a faraway roommate leaves a tiny reminder",
+    "the habit that still feels like a hallway chat",
+    "what a chipped mug can say about distance"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-05_2000",
+  "created_at": "2026-10-05T14:31:49Z",
+  "slug": "20261005_1431_when-a-faraway-roommate-leaves-a",
+  "reel": {
+    "seconds": 12.8,
+    "tune": "warm"
+  }
+}
