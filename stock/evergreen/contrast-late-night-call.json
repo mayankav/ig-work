@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-late-night-call",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "10:40 pm and the phone lights up. Which text is fair?",
+  "cover_2": "Read both, then see why.",
+  "payoff": "The second text names tomorrow 10 am, so the night stays yours.",
+  "caption": "A late text is not a late deadline unless it says so. Send this to the person whose phone never rests.",
+  "request": "A manager needs an answer on a file at 10:40 pm.",
+  "pushy": "Call me now. Why are you not picking up?",
+  "professional": "Late text, sorry. A reply by 10 am tomorrow is fine.",
+  "why": "It admits the late hour and gives a clear time to reply, so tonight stays free.",
+  "reply_me": "Sorry, I was offline. I will check the file at 9 am and reply by 10 am.",
+  "key": 2
+ },
+ "report": {
+  "hook": 13,
+  "voice": "dry",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

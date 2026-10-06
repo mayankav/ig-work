@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-weekend-report",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Same Monday report. Which text would you want to get?",
+  "cover_2": "See why one works.",
+  "payoff": "The second text moves the deadline into the working week and says why.",
+  "caption": "Weekend work needs a reason and a plan, not a mood. Send this to the colleague whose Friday evening keeps disappearing.",
+  "request": "A report is needed first thing on Monday.",
+  "pushy": "Finish it this weekend. Monday 9 am.",
+  "professional": "Can you send it by Friday 6 pm? Then Monday starts calmly.",
+  "why": "It moves the deadline into the working week and gives a reason.",
+  "reply_me": "I can send it Friday 6 pm if the figures reach me by Thursday noon. Does that work?",
+  "key": 3
+ },
+ "report": {
+  "hook": 3,
+  "voice": "matter-of-fact",
+  "shape": "time",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

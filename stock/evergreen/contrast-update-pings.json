@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-update-pings",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Why does your manager ask for updates every hour?",
+  "cover_2": "See what works better.",
+  "payoff": "Fixed update times cut the pings and still keep the manager informed.",
+  "caption": "Fixed check-ins keep a manager informed and a junior working. Send this to the colleague who gets pinged all day.",
+  "request": "A manager wants to know how the work is going.",
+  "pushy": "Any update? Why does nobody tell me anything?",
+  "professional": "A short update at 1 pm and 4 pm is enough. No pings between.",
+  "why": "It sets fixed check-in times, so the junior can focus in between.",
+  "reply_me": "Can we fix update times, 1 pm and 4 pm? Then I can work without breaks.",
+  "key": 2
+ },
+ "report": {
+  "hook": 11,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

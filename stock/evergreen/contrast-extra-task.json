@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-extra-task",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "More work lands on an already full week. Which ask is fair?",
+  "cover_2": "Find out why.",
+  "payoff": "The fair ask names what moves aside for the new task.",
+  "caption": "Adding work without moving work is only pressure with a smile. Send this to the friend who says yes to everything.",
+  "request": "A full week, and one more task arrives.",
+  "pushy": "Everyone is busy. You take this also, no choice.",
+  "professional": "This is urgent. Which of your tasks can wait so you can take it?",
+  "why": "It admits the cost and lets the junior say what moves.",
+  "reply_me": "Happy to take it. Which of my current tasks should move, so I can plan it?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "playful",
+  "shape": "limit",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

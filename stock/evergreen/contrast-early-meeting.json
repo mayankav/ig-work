@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-early-meeting",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A meeting is called tonight for tomorrow. Which text respects the evening?",
+  "cover_2": "Here is the difference.",
+  "payoff": "The better text gives a late start, a length and an agenda.",
+  "caption": "A meeting without an agenda is a surprise with a calendar invite. Send this to the one who always calls them.",
+  "request": "A meeting is wanted tomorrow morning, announced tonight.",
+  "pushy": "Meeting tomorrow 8 am. Everyone must join, no excuses.",
+  "professional": "Can we meet 11 am tomorrow, half an hour? Agenda is attached.",
+  "why": "It gives a time with some room, a length and an agenda.",
+  "reply_me": "I will join at 8 am. Could you send the agenda tonight so I come prepared?",
+  "key": 2
+ },
+ "report": {
+  "hook": 3,
+  "voice": "matter-of-fact",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
