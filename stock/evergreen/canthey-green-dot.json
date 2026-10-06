@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-green-dot",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "The little green dot beside your name. Who is watching it?",
+  "cover_2": "Read this before you panic.",
+  "payoff": "Some tools show status to everyone, and fair use checks the work, not the minutes.",
+  "caption": "A green dot shows presence and tells nothing about the work. Send this to the one who keeps the chat open all day.",
+  "situation": "Can your manager track when your chat shows you online?",
+  "answer": "Some tools show it to everyone, so it may be visible. Fair use is checking work, not minutes.",
+  "reply_me": "Shall I send my day's plan each morning? Then you can see the work, not just the status dot.",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "dry",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

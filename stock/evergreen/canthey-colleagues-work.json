@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-colleagues-work",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A colleague's tasks appear on your board. Nobody told you.",
+  "cover_2": "Which question helps?",
+  "payoff": "It happens when a team runs short, and asking who decided is fair.",
+  "caption": "Quiet reassignments become permanent when nobody asks. Send this to the one who covers everyone's work.",
+  "situation": "Can they hand you a colleague's work without telling you?",
+  "answer": "It happens when a team runs short. Asking who decided and how long it lasts is fair.",
+  "reply_me": "I see I now hold the vendor tasks. Who decided this, and until when should I cover them?",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

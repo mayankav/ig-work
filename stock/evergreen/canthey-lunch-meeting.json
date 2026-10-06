@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-lunch-meeting",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A meeting is fixed right on your lunch break. Fair?",
+  "cover_2": "Check your reply first.",
+  "payoff": "It may be needed once, and when it repeats, asking for another time is fair.",
+  "caption": "Lunch is also work time, because you work better after it. Send this to the colleague who eats at the desk.",
+  "situation": "Can a meeting be fixed during your lunch break?",
+  "answer": "It may be needed once in a while. When it repeats, asking for another time is fair.",
+  "reply_me": "Could we move this to 2 pm? I would like to take my lunch first and join fresh.",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "dry",
+  "shape": "time",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

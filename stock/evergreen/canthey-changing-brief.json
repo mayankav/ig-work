@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-changing-brief",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "You finish the slides. The brief changes. Again. Is that normal?",
+  "cover_2": "Watch how to stop it.",
+  "payoff": "It often happens when the ask was never written down, and a short brief prevents rework.",
+  "caption": "Rework usually starts with a spoken brief. Send this to the colleague who redraws the same slide all week.",
+  "situation": "Can they keep changing the brief after you finish?",
+  "answer": "It often happens when the ask was never written down. A short written brief up front often prevents rework.",
+  "reply_me": "To avoid rework, can we write the brief in short points before I start the next version?",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "playful",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
