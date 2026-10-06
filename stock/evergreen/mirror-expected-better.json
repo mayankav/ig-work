@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-expected-better",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "The manager says the work is not good. What to fix?",
+  "cover_2": "Here is the missing part.",
+  "payoff": "Without the exact miss, the junior has nothing to fix.",
+  "caption": "Feedback without a target is only disappointment. Send this to the lead who expects better but never says where.",
+  "sent": "I expected better from you.",
+  "lands": "The junior may replay it all day and still not know which part was wrong.",
+  "better": "The second slide missed the client's ask. Fix it by 3 pm?",
+  "why": "It names the exact miss and a time, so the junior knows what to change.",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "warm",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

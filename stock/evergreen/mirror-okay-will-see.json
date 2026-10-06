@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-okay-will-see",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Okay, will see. The junior waits all day for more.",
+  "cover_2": "See what could come instead.",
+  "payoff": "A reply that says what happens next ends the waiting.",
+  "caption": "Silence after submitted work feels like a verdict. Send this to the manager whose replies are always short.",
+  "sent": "Okay, will see.",
+  "lands": "The junior may wonder if the work was good, bad or never opened.",
+  "better": "Got it. I will review it by 5 pm and tell you.",
+  "why": "It says what happens next and when, so the junior is not left waiting.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "playful",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

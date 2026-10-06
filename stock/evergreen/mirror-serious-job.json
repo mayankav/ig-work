@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-serious-job",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Asking a junior if they are serious about the job can backfire.",
+  "cover_2": "Here is the reason.",
+  "payoff": "It makes the junior perform loyalty instead of improving the work.",
+  "caption": "A question that tests loyalty gets effort that looks like loyalty. Send this to the manager who asks it in reviews.",
+  "sent": "Are you serious about this job?",
+  "lands": "The junior may feel judged, then work late just to look present.",
+  "better": "Let us talk about the planning work. What would help you own it?",
+  "why": "It asks for one clear change and offers a talk, not a loyalty test.",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "matter-of-fact",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

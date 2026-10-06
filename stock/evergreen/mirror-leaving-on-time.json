@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-leaving-on-time",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A junior leaves at 6 pm and hears a joke.",
+  "cover_2": "Find out what the joke costs.",
+  "payoff": "It teaches the junior to stay late just to be seen.",
+  "caption": "A joke about leaving on time is still a rule about staying late. Send this to the manager who makes it often.",
+  "sent": "Leaving already? Half day today?",
+  "lands": "The junior may start staying late to be seen, even when the work is done.",
+  "better": "Anything pending before you go? If not, good evening.",
+  "why": "It checks the work, not the clock, and lets the junior leave with ease.",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "warm",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

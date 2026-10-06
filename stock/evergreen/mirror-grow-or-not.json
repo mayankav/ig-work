@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-grow-or-not",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Do you want to grow or not? Said to motivate.",
+  "cover_2": "See how it sounds.",
+  "payoff": "It may sound like a threat, so the junior stops asking for anything.",
+  "caption": "Motivation that sounds like a threat teaches silence. Send this to the lead who says it before every review.",
+  "sent": "Do you want to grow or not?",
+  "lands": "A junior who asks for more may hear a threat and stop asking for anything.",
+  "better": "Let us sit down next week and list what you would like to learn.",
+  "why": "It turns a challenge into a plan and gives the junior a date to expect.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "dry",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
