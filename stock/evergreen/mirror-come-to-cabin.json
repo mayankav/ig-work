@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-come-to-cabin",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A short call to the cabin can ruin a junior's afternoon.",
+  "cover_2": "Here is why.",
+  "payoff": "With no topic and no time, the junior guesses the worst.",
+  "caption": "The walk to the cabin is longer when nobody says why. Send this to the manager who calls juniors in without a word.",
+  "sent": "Come to my cabin.",
+  "lands": "The junior may spend the whole walk guessing what went wrong, and hear nothing else.",
+  "better": "Free at 4 pm for a quick chat about the deck? Nothing urgent.",
+  "why": "It gives a time and a topic, so the walk is not spent guessing.",
+  "key": 3
+ },
+ "report": {
+  "hook": 3,
+  "voice": "warm",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

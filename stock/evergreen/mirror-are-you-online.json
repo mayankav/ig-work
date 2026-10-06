@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-are-you-online",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Are you online? One question that keeps a junior awake.",
+  "cover_2": "See what to send instead.",
+  "payoff": "Saying what is needed and by when lets the junior sleep.",
+  "caption": "A late question with no reason is a weight on the junior's night. Send this to the boss who pings after dinner.",
+  "sent": "Are you online?",
+  "lands": "At night the junior may stare at the phone, afraid to answer and afraid not to.",
+  "better": "Need a yes or no on the file. Tomorrow 10 am is fine.",
+  "why": "It says what is needed and when, so the night stays quiet.",
+  "key": 3
+ },
+ "report": {
+  "hook": 13,
+  "voice": "dry",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

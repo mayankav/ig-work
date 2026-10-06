@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-why-pending",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "One short question from a manager, and the junior goes quiet.",
+  "cover_2": "See what it sounds like.",
+  "payoff": "It can sound like blame, so the junior hides the blocker.",
+  "caption": "A question about the work can land as a verdict. Send this to the boss who asks why it is pending.",
+  "sent": "Why is this still pending?",
+  "lands": "It may sound like blame, so the junior hides the blocker and says almost done.",
+  "better": "What is blocking this, and what can I clear for you?",
+  "why": "It asks for the blocker and offers help, so the real problem comes out.",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "dry",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

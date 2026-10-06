@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-small-thing",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A small thing, said quickly, can fill a whole evening.",
+  "cover_2": "See how.",
+  "payoff": "Small asks stack up, and the junior never dares to say the pile is full.",
+  "caption": "Small tasks add up to a long evening. Send this to the manager whose small things never end.",
+  "sent": "Just a small thing, do it quickly.",
+  "lands": "Small things stack up, and the junior may not dare to say the pile is full.",
+  "better": "This should take about an hour. Can it go by 5 pm?",
+  "why": "It sizes the task and sets a time, so the junior can say if it fits.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "playful",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

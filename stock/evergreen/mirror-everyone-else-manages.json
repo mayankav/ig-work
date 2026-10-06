@@ -1,0 +1,29 @@
+{
+ "slug": "mirror-everyone-else-manages",
+ "type": "mirror",
+ "audience": "manager",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Comparing a junior with everyone else feels like pushing.",
+  "cover_2": "Find out what it does.",
+  "payoff": "It tells the junior that asking for help is a weakness.",
+  "caption": "Comparison feels like motivation to the manager and like a wall to the junior. Send this to the lead who says it daily.",
+  "sent": "Everyone else manages this, why can't you?",
+  "lands": "The junior may stop asking for help and quietly carry the whole load alone.",
+  "better": "That is a lot at once. What should we drop first?",
+  "why": "It sees the load and asks what can move, so asking for help gets easier.",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "matter-of-fact",
+  "shape": "",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
