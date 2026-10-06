@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-work-outside-role",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Hired for one job, handed another. Is that how it works?",
+  "cover_2": "Here is how to ask.",
+  "payoff": "It may be fair for a while, and worth asking what it leads to.",
+  "caption": "A stretched role can be a chance or a trap, and only a question tells which. Send this to the one doing everyone's job.",
+  "situation": "Can your manager give you work outside your role?",
+  "answer": "Teams often stretch roles early on. It may be fair for a while, and worth asking what it leads to.",
+  "reply_me": "Happy to help for now. Could we talk about how long this lasts and what it means for my role?",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "playful",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

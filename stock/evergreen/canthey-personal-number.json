@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-personal-number",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Your manager wants your personal number. Must you give it?",
+  "cover_2": "Find out what to offer.",
+  "payoff": "Asking is common, and offering another route first is a fair answer.",
+  "caption": "A boundary stated kindly is still a boundary. Send this to the friend who gives out numbers to avoid awkwardness.",
+  "situation": "Can your manager insist on your personal number?",
+  "answer": "Asking is common. Whether you must give it may depend on company policy, so read it before you refuse.",
+  "reply_me": "I would like to keep calls on the office line. Can we use the team chat for urgent things?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "matter-of-fact",
+  "shape": "limit",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

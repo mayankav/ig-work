@@ -1,0 +1,28 @@
+{
+ "slug": "canthey-shouting-in-meeting",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Shouted at in front of the whole team. Is that normal?",
+  "cover_2": "See where to turn.",
+  "payoff": "It is poor behaviour, and your company's conduct policy may cover it.",
+  "caption": "Being corrected is fine and being shouted at is not the same thing. Send this to someone who goes quiet in meetings.",
+  "situation": "Can your manager shout at you in front of the team?",
+  "answer": "It is poor behaviour. Your company's conduct policy may cover it, and HR can show you.",
+  "reply_me": "Could we talk about feedback one on one? It is easier for me to take it in that way.",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
