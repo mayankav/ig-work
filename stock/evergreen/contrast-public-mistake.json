@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-public-mistake",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "One mistake in a report. One text goes to the whole group.",
+  "cover_2": "See which one fixes it.",
+  "payoff": "Private feedback with the exact fix and a time corrects the work and keeps the person.",
+  "caption": "Fixing the error and shaming the person are different jobs. Send this to the one who corrects people in front of everyone.",
+  "request": "A mistake in a report needs to be corrected.",
+  "pushy": "Everyone look at this mistake. So careless.",
+  "professional": "Messaging you privately about an error in the report. Fix by 4 pm?",
+  "why": "It corrects the work in private and names the exact fix and time.",
+  "reply_me": "Sorry about the error. Fixing it by 4 pm. Can feedback come privately next time?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "warm",
+  "shape": "limit",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

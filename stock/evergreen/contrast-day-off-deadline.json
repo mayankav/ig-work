@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-day-off-deadline",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "A day off asked before a deadline. Which reply is fair?",
+  "cover_2": "See what works.",
+  "payoff": "The second reply treats the request as planning, not as a test of loyalty.",
+  "caption": "A day off asked early is a plan, not a lack of interest. Send this to the one who is afraid to ask.",
+  "request": "A junior asks for a day off before a deadline.",
+  "pushy": "A day off now? Serious about this job?",
+  "professional": "Let us check the plan. If the work is covered, take the day.",
+  "why": "It treats the request as planning, not as a test of loyalty.",
+  "reply_me": "The report and notes will be ready by Tuesday 6 pm. Can we plan the day around that?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "dry",
+  "shape": "time",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

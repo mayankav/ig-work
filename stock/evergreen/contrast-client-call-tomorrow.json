@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-client-call-tomorrow",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Tomorrow, a client call. Nobody told you your part.",
+  "cover_2": "See the better text.",
+  "payoff": "The better text gives the time, your role and the agenda.",
+  "caption": "Preparing for a call takes less time than guessing for it. Send this to the junior who joins calls cold.",
+  "request": "A manager wants a junior on a client call tomorrow.",
+  "pushy": "Join tomorrow's client call. Be ready for everything.",
+  "professional": "Please join the 4 pm client call. Your part is the demo, agenda attached.",
+  "why": "It names the time, the role and the agenda, so the junior can prepare.",
+  "reply_me": "Happy to join. What should I be ready for, and when do I speak?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "matter-of-fact",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

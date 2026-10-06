@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-the-needful",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "Please do the needful. What does that mean at your desk?",
+  "cover_2": "Here is a clearer text.",
+  "payoff": "A clear task has a name, a time and a starting point.",
+  "caption": "The needful is only a task with the details removed. Send this to the colleague who types it daily.",
+  "request": "A task is handed over with almost no details.",
+  "pushy": "Please do the needful. You know what I mean.",
+  "professional": "Update the client sheet by 3 pm, starting from last week's file.",
+  "why": "It names the task, the time and the starting file, so nothing is guessed.",
+  "reply_me": "Which task is the needful, and by when? I want it right the first time.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "playful",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

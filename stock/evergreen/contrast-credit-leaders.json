@@ -1,0 +1,30 @@
+{
+ "slug": "contrast-credit-leaders",
+ "type": "contrast",
+ "audience": "employee",
+ "status": "reasoned",
+ "source": null,
+ "script": {
+  "cover_1": "The senior leaders clap. Whose name did they hear?",
+  "cover_2": "Here is how credit goes right.",
+  "payoff": "A good manager names the person who built it and lets them speak.",
+  "caption": "Credit costs a manager one sentence and a junior a whole year. Send this to someone whose work was presented by another name.",
+  "request": "A manager presents the team's work to senior leaders.",
+  "pushy": "I handled the heavy work, the team supported.",
+  "professional": "The newest member of our team built this part. They can explain it best.",
+  "why": "It names who did the work and hands them the stage.",
+  "reply_me": "Could I present my part to the leaders next time? I know the details best.",
+  "key": 3
+ },
+ "report": {
+  "hook": 3,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
