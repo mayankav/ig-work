@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i still have the plastic tub of soup you gave me three months ago, tucked behind the frozen peas.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "you wrote my name across a strip of blue masking tape, so nobody else would touch it before i loaded the car.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "it rode on the passenger seat all the way back, but then the weeks got fast and i pushed it to the back shelf.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "until tonight, when i got home late in the rain to an empty fridge and half a loaf of stale bread.",
+      "mood": "tired",
+      "pose": "floor_slumped"
+    },
+    {
+      "text": "so i pulled out the tub, peeled off the frosty tape, and heated up the carrots you chopped at your own counter.",
+      "mood": "calm",
+      "pose": "stirring_pot"
+    },
+    {
+      "text": "you didn't make a big speech on the drive when i left, and you didn't ask when i was coming back.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "you just made sure that when [[the long day caught up]], there was a hot supper waiting.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "she still asks what i had for lunch, even though i pay my own rent now.\nsome kinds of care are just made of mismatched plastic tubs and freezer tape.\nsend this to your mum if she never lets you leave the kitchen empty-handed.",
+  "alt": "A 7-slide story with a small green donkey about saving a frozen container of homemade soup from mum until a long, exhausting evening.",
+  "hook_options": [
+    "i still have the plastic tub of soup you gave me three months ago, tucked behind the frozen peas.",
+    "there is still a plastic tub of soup in my freezer with my name written in blue tape.",
+    "you packed a plastic tub of soup into my boot three months ago, and tonight i finally needed it."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-06_0800",
+  "created_at": "2026-10-06T02:31:50Z",
+  "slug": "20261006_0231_i-still-have-the-plastic-tub"
+}

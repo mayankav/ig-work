@@ -1,0 +1,18 @@
+{
+  "token": "a40de1b6fcf755cf",
+  "slug": "20261006_0231_i-still-have-the-plastic-tub",
+  "files": {
+    "post.json": "e19007296cc7ecadd5751d78ad1d5e1cd351ca5a0b203aabd5b9b0510cbd1626",
+    "caption.txt": "4bef8480e5b27267228a146f394f8e095f6ca854146638ed07b9cbf670e76af6",
+    "contact_sheet.png": "05fc26dc010e2e6f0341bdbaa1057d95b204bb92ffd5cf566e5afe560d223511",
+    "slides/01.jpg": "91ee1a76cb8b69656a412907cbf0100379b0c908d7f6d4239bbf5c7a1a7d70a3",
+    "slides/02.jpg": "a784519e399f275cc8071f86cb835847aca2e3e07fadaba0a021df7bca1e0267",
+    "slides/03.jpg": "1919ed6ec0a013017ae5b7b706cf8f5960d6a05a9bf5383d7f6e081c0cdf580c",
+    "slides/04.jpg": "6c90fd52ba3065267c0b86ed0e48030d1dd4f36b6e948e6b6cfcb061ad4373fd",
+    "slides/05.jpg": "d340fb91bd1e3f49553e11e018dfecb2ed0efaf1b7736f72f3f052fcbe87d78e",
+    "slides/06.jpg": "0e370c00bad0286ee88019a2c1f262509b3cf5dfbe7e5ae980773d3e5bc9e968",
+    "slides/07.jpg": "a6be95c9fa29ba6fe9ed143bbc9ef732c678a7ce0bbcd0a46ff0513df91b8f5e"
+  },
+  "parent": null,
+  "manifest": "8d88fe0303890a3ce4242b8d4e5f5e0f391986b066bd048c7d792b81e73f4698"
+}
