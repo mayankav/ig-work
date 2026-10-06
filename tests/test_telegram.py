@@ -13,7 +13,7 @@ def post(caption="a caption\nsend it to them", count=3):
 def test_card_carries_the_review_id_and_every_reply():
     card = telegram.review_card(post(), "0123456789abcdef")
     assert "Review ID: <code>0123456789abcdef</code>" in card
-    for reply in ("approve", "disapprove", "redo all", "redo images 2,4"):
+    for reply in ("approve", "disapprove", "redo all", "redo images 1"):
         assert f"<code>{reply}</code>" in card
     assert "Posts itself in 1 hour" in card
     assert "&lt;b&gt;" in card and "[[" not in card
@@ -39,6 +39,8 @@ def test_reel_card_says_it_is_a_reel():
     one = post(count=1)
     one["reel"] = {"seconds": 10.4, "tune": "warm"}
     assert "Reel, 10.4s, warm tune" in telegram.review_card(one, "0123456789abcdef")
+    one["reel"] = {"seconds": 8.5, "tune": "warm", "reveal": 3.5}
+    assert "Reel, 8.5s, twist at 3.5s, warm tune" in telegram.review_card(one, "0123456789abcdef")
 
 
 def test_failure_says_what_happened_what_to_do_and_what_silence_does():
@@ -139,3 +141,15 @@ def test_a_problem_that_blocks_everything_does_not_promise_the_next_post():
     text = telegram.failed("The 20:00 post", "IG_USER_ID or IG_ACCESS_TOKEN is not set. Nothing was posted.")
     assert "send this message to Claude" in text and "every post fails the same way" in text
     assert "the next post is at" not in text
+
+
+def test_an_ab_card_says_what_redo_images_does_and_how_many_sounds_came_from_freesound():
+    one = post(count=1)
+    one["format"] = "ab"
+    one["reel"] = {"seconds": 21.8, "tune": "joy", "sounds": [{"source": "freesound"}, {"source": "built-in"}, {"source": "freesound"}]}
+    card = telegram.review_card(one, "0123456789abcdef")
+    assert "A or B" in card and "<code>redo images 1</code> · new poses of Silly and new sounds" in card
+    assert "Reel, 21.8s, joy tune, 🔊 2 of 3 sounds from Freesound" in card
+    assert "new poses of Silly and new sounds" in telegram.plain_card(one, "0123456789abcdef")
+    other = telegram.review_card(post(), "0123456789abcdef")
+    assert "only the cover has Silly" in other

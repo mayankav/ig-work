@@ -33,6 +33,16 @@ body { position: relative; background: #f4ecde url('%(paper)s') no-repeat; color
 .cover .box p { font-size: 90px; line-height: 1.14; font-weight: 560; letter-spacing: -0.012em;
                 font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 120; }
 .single .box p { font-size: 76px; line-height: 1.24; font-weight: 470; }
+.single .box { bottom: 560px; }
+.single .donkey { height: 460px; right: 96px; bottom: 90px; }
+.cover .box { bottom: 700px; }
+.cover .donkey { height: 560px; right: 84px; bottom: 84px; }
+.inner .box { bottom: 250px; }
+.inner .box p { font-size: 72px; }
+.twist.blank { position: relative; -webkit-text-fill-color: transparent; text-decoration: underline;
+               text-decoration-color: rgba(46, 40, 34, .55); text-decoration-thickness: 5px; text-underline-offset: .16em; }
+.twist.blank .mark { background: none; }
+.twist.cursor::before { content: ''; position: absolute; left: 0; top: .1em; width: 7px; height: .88em; background: #2e2822; }
 .mark { background: linear-gradient(transparent 58%%, rgba(255, 206, 84, .78) 58%%, rgba(255, 206, 84, .78) 90%%, transparent 90%%);
         -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 .06em; }
 .donkey { position: absolute; right: 124px; bottom: 104px; height: 340px; }
@@ -87,24 +97,41 @@ def paper(target: Path, size: tuple[int, int] = SIZE) -> Path:
     return target
 
 
-def page(text: str, pose: str, kind: str, count: str, assets: dict) -> str:
+def body(text: str, beats: tuple[str, str, str] | None) -> str:
+    """The words of a page. A two-beat one-liner is (setup, twist, state): "full" shows the twist,
+    "blank" hides it under an underline of the same size, "blank-cursor" adds a cursor to the blank.
+    The twist keeps its place in all three, so the words never move between pictures."""
+    if not beats:
+        return markup(text)
+    setup, twist, state = beats
+    shown = "twist" if state == "full" else "twist blank" + (" cursor" if state == "blank-cursor" else "")
+    return f"{markup(setup)} <span class='{shown}'>{markup(twist)}</span>"
+
+
+def page(text: str, pose: str | None, kind: str, count: str, assets: dict, beats=None) -> str:
     css = CSS % assets
     counter = f'<div class="count">{count}</div>' if count else ""
+    donkey = f"<img class='donkey' src='{pose_path(pose).as_uri()}'>" if pose and kind != "inner" else ""
     return (f"<!doctype html><html><head><meta charset='utf-8'><style>{css}</style></head>"
             f"<body class='{kind}'><div class='vignette'></div><div class='sheet'>{counter}"
-            f"<div class='box'><p>{markup(text)}</p></div>"
-            f"<img class='donkey' src='{pose_path(pose).as_uri()}'>"
+            f"<div class='box'><p>{body(text, beats)}</p></div>{donkey}"
             f"<div class='sign'>{HANDLE}</div></div></body></html>")
 
 
 def render(post: dict, out_dir: Path) -> list[Path]:
-    """Render every slide of `post` (slides need text, mood, pose) to out_dir/NN.jpg."""
+    """Render every slide of `post` (slides need text and pose) to out_dir/NN.jpg.
+
+    Only the cover has a donkey. A one-liner's card shows the finished moment: the twist, with its pose."""
     out_dir.mkdir(parents=True, exist_ok=True)
     for old in out_dir.glob("*.jpg"):
         old.unlink()
+    if post.get("format") == "ab":  # drawn by abreel, which also makes the Reel; imported here because abreel imports this module
+        from . import abreel
+        return [abreel.still(post, out_dir / "01.jpg")]
     slides = post["slides"]
     total = len(slides)
-    return _shoot([(slide["text"], slide["pose"],
+    return _shoot([(slide["text"],
+                    (slide.get("twist_pose") or slide.get("pose")) if total == 1 else slide.get("pose"),
                     "single" if total == 1 else ("cover" if number == 1 else "inner"),
                     f"{number} / {total}" if total > 1 and number > 1 else "",
                     out_dir / f"{number:02d}.jpg") for number, slide in enumerate(slides, 1)], SIZE)
@@ -116,8 +143,21 @@ def reel_frame(post: dict, target: Path) -> Path:
     return _shoot([(slide["text"], slide["pose"], "single", "", target)], REEL)[0]
 
 
-def _shoot(pages: list[tuple[str, str, str, str, Path]], size: tuple[int, int]) -> list[Path]:
-    """Screenshot each (text, pose, kind, count, target) page at `size`."""
+def reel_frames(post: dict, folder: Path) -> dict[str, Path]:
+    """The three pictures of a two-beat Reel: the setup over a blank with the cursor on, the same with
+    the cursor off (so it blinks), and the finished card with the twist and the donkey's second pose."""
+    slide = post["slides"][0]
+    setup, twist = slide["setup"], slide["twist"]
+    finished = slide.get("twist_pose") or slide["pose"]
+    shots = (("blank_on", slide["pose"], "blank-cursor"), ("blank_off", slide["pose"], "blank"),
+             ("full", finished, "full"))
+    written = _shoot([(slide["text"], pose, "single", "", folder / f"{name}.jpg", (setup, twist, state))
+                      for name, pose, state in shots], REEL)
+    return dict(zip((name for name, _, _ in shots), written))
+
+
+def _shoot(pages: list[tuple], size: tuple[int, int]) -> list[Path]:
+    """Screenshot each (text, pose, kind, count, target[, beats]) page at `size`."""
     from playwright.sync_api import sync_playwright
 
     written = []
@@ -131,9 +171,9 @@ def _shoot(pages: list[tuple[str, str, str, str, Path]], size: tuple[int, int]) 
             browser = pw.chromium.launch()
             try:
                 view = browser.new_page(viewport={"width": size[0], "height": size[1]}, device_scale_factor=1)
-                for number, (text, pose, kind, count, target) in enumerate(pages, 1):
+                for number, (text, pose, kind, count, target, *beats) in enumerate(pages, 1):
                     source = scratch / f"{number:02d}.html"
-                    source.write_text(page(text, pose, kind, count, assets), encoding="utf-8")
+                    source.write_text(page(text, pose, kind, count, assets, *beats), encoding="utf-8")
                     view.goto(source.as_uri(), wait_until="load")
                     status = view.evaluate(FIT)
                     if status == "fonts":

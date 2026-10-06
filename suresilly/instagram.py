@@ -57,7 +57,7 @@ def alt_text(slide_text: str) -> str:
     words = " ".join(slide_text.replace("[[", "").replace("]]", "").split())
     if words[-1:].isalnum():
         words += "."
-    return f"{words} A small green donkey is in the corner.".strip()[:1000]  # Instagram's limit
+    return f"{words} Silly, the small green mascot, is in the corner.".strip()[:1000]  # Instagram's limit
 
 
 def _container(base: str, user: str, token: str, alt: str, **params) -> str:
@@ -103,15 +103,24 @@ def _go_live(post: Path, base: str, user: str, token: str, container: str) -> di
     return record
 
 
-def publish_reel(post: Path, video_url: str, caption: str, alt: str = "") -> str:
-    """Post the video as a Reel that also shows on the grid, and return the media id. Never twice."""
+def publish_reel(post: Path, video_url: str, caption: str, alt: str = "", thumb_offset: int | None = None) -> str:
+    """Post the video as a Reel that also shows on the grid, and return the media id. Never twice.
+
+    thumb_offset (milliseconds) picks the frame for the grid cover: a two-beat Reel starts on a blank,
+    so its cover is taken after the reveal. If Instagram refuses it, the Reel goes out with its default cover."""
     if done := _already(post):
         return done
     user, token = credentials()
     base = graph_base(token)
     # Meta's docs say Reels don't take alt text; send it anyway and let the check below say what stuck.
-    container = _container(base, user, token, alt, media_type="REELS", video_url=video_url, caption=caption,
-                           share_to_feed="true")
+    reel = dict(media_type="REELS", video_url=video_url, caption=caption, share_to_feed="true")
+    try:
+        container = _container(base, user, token, alt, **reel, **({"thumb_offset": thumb_offset} if thumb_offset else {}))
+    except InstagramError as error:
+        if not thumb_offset:
+            raise
+        print(f"Trying this Reel again without a chosen cover frame: {error}")
+        container = _container(base, user, token, alt, **reel)
     _wait_until_ready(base, container, token, tries=75)  # a video takes longer than an image: allow 5 minutes
     record = _go_live(post, base, user, token, container)
     if alt:

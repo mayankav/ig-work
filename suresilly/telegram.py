@@ -13,7 +13,12 @@ import requests
 
 IST = timezone(timedelta(hours=5, minutes=30))
 CARD_LIMIT = 3900
-LABEL = {"list": "📚 List", "story": "📖 Story", "oneliner": "💬 One-liner"}
+LABEL = {"list": "📚 List", "story": "📖 Story", "oneliner": "💬 One-liner", "ab": "🆎 A or B"}
+
+
+def redo_images(post: dict) -> str:
+    """What `redo images 1` does for this post, in a few words."""
+    return "new poses of Silly and new sounds" if post.get("format") == "ab" else "new pose of Silly on the cover (only the cover has Silly)"
 SLOTS = (8, 20)
 
 
@@ -33,7 +38,11 @@ def summary(post: dict) -> str:
     count = len(post["slides"])
     size = "1 image" if count == 1 else f"{count} slides"
     if post.get("reel"):
-        size = f"🎬 Reel, {post['reel']['seconds']:g}s, {post['reel']['tune']} tune"
+        reel = post["reel"]
+        twist = f", twist at {reel['reveal']:g}s" if reel.get("reveal") else ""
+        heard = reel.get("sounds") or []
+        sounds = f", 🔊 {sum(s.get('source') == 'freesound' for s in heard)} of {len(heard)} sounds from Freesound" if heard else ""
+        size = f"🎬 Reel, {reel['seconds']:g}s{twist}, {reel['tune']} tune{sounds}"
     return f"{LABEL.get(post['format'], post['format'])} · {esc(post.get('topic', ''))} · {size}"
 
 
@@ -47,7 +56,7 @@ def review_card(post: dict, token: str, *, manual: bool = False, redo_of: str | 
                "✅ <code>approve</code> · post it now\n"
                "🗑 <code>disapprove</code> · cancel it\n"
                "🔁 <code>redo all</code> · write a new one\n"
-               "🎨 <code>redo images 2,4</code> · new donkey on those slides")
+               f"🎨 <code>redo images 1</code> · {redo_images(post)}")
     footer = f"Review ID: <code>{token}</code>"
 
     def build(slides_text: str, caption: str) -> str:
@@ -77,7 +86,7 @@ def plain_card(post: dict, token: str, *, manual: bool = False, redo_of: str | N
     hook = post["slides"][0]["text"].replace("[[", "").replace("]]", "")[:300]
     return (f"{title}\n{label}\n\n“{hook}”\n\n{timer}\n\n↩️ Reply to this message with:\n"
             f"✅ approve · post it now\n🗑 disapprove · cancel it\n🔁 redo all · write a new one\n"
-            f"🎨 redo images 2,4 · new donkey on those slides\n\nReview ID: {token}")
+            f"🎨 redo images 1 · {redo_images(post)}\n\nReview ID: {token}")
 
 
 def plain_details(post: dict) -> str:
@@ -195,6 +204,15 @@ def token_trouble(problems: list[tuple[str, str]]) -> str:
             f"\n{lines}\n\n<b>What you can do:</b> {todo}\n<b>If you do nothing:</b> {silence}")
 
 
+def video_missing() -> str:
+    """What happened, what you can reply, and what silence does, for a Reel whose video Telegram was not given."""
+    return ("⚠️ <b>The Reel video did not reach you.</b> The card above shows only a still picture, because the Telegram "
+            "helper (the Worker) has not been updated to send videos.\n\n"
+            "↩️ <b>You can:</b> reply <code>disapprove</code> to the card to cancel, or <code>approve</code> to post it without watching it.\n"
+            "⏰ <b>If you stay quiet:</b> it posts itself in 1 hour, unseen.\n"
+            "🛠 <b>To fix it for next time:</b> run <code>cd ops/dispatch-worker && npx wrangler deploy</code>.")
+
+
 def dropped(post: dict) -> str:
     return (f"🗑 <b>Cancelled.</b> Nothing was posted.\n<i>“{esc(post['slides'][0]['text'])}”</i>\n\n"
             f"⏭ Next post: {next_slot()}. Reply <code>retry</code> if you want a new one now.")
@@ -281,7 +299,7 @@ AREAS = {
         "long": ("too long", "the caption was too long: 2 to 4 short lines"),
         "tags": ("hashtags off", "the hashtags were off: 3 to 5 lowercase tags from the topic's list, none branded or catch-all"),
     }),
-    "donkey": ("donkey didn't fit", {}),
+    "donkey": ("Silly didn't fit", {}),
     "whole": ("the whole thing felt off", {
         "generated": ("felt generated", "the post read as generated: fewer parallel shapes, one odd true detail per slide"),
         "boring": ("nothing surprising in it", "nothing surprised the reader: one line must turn or reveal"),
@@ -361,8 +379,8 @@ def send(text: str, buttons: list[list[tuple[str, str]]] | None = None) -> None:
         return
     body = {"chat_id": chat, "text": text, "parse_mode": "HTML", "link_preview_options": {"is_disabled": True}}
     if buttons:
-        body["reply_markup"] = {"inline_keyboard": [[{"text": label, "callback_data": data} for label, data in row]
-                                                    for row in buttons]}
+        body["reply_markup"] = {"inline_keyboard": [[{"text": label, **({"url": data} if data.startswith("https://") else {"callback_data": data})}
+                                                     for label, data in row] for row in buttons]}
     response = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", timeout=20, json=body)
     if response.status_code != 200 or not response.json().get("ok"):
         raise RuntimeError(f"Telegram did not accept the message (HTTP {response.status_code}).")

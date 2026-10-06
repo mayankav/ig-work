@@ -13,6 +13,11 @@ export function validPhotos(photos, slug, token) {
     photos.every(url => typeof url === 'string' && url.startsWith(prefix) && /^[0-9]{2}\.(jpg|png)$/.test(url.slice(prefix.length)));
 }
 
+// The Reel video must be this exact preview's reel.mp4 on the media host, nothing else.
+export function validVideo(video, slug, token) {
+  return video === `https://media.suresilly.com/slides/${slug}/reviews/${token}/reel.mp4`;
+}
+
 async function telegram(env, method, body) {
   const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, signal: AbortSignal.timeout(20000),
@@ -68,6 +73,7 @@ export class ReviewWindow {
           typeof input.caption !== 'string' || input.caption.length > (input.photos ? 3900 : 1000) ||
           !input.caption.replace(/<[^>]+>/g, '').includes(`Review ID: ${input.token}`)) return json({error: 'Invalid preview'}, 400);
       if (input.photos !== undefined && !validPhotos(input.photos, input.slug, input.token)) return json({error: 'Invalid preview photos'}, 400);
+      if (input.video !== undefined && (!input.photos || !validVideo(input.video, input.slug, input.token))) return json({error: 'Invalid preview video'}, 400);
       const url = new URL(input.sheet_url);
       if (url.origin !== 'https://media.suresilly.com' || url.search || url.hash ||
           url.pathname !== `/slides/${input.slug}/reviews/${input.token}/contact_sheet.png`) return json({error: 'Invalid preview URL'}, 400);
@@ -81,9 +87,11 @@ export class ReviewWindow {
       let receipt;
       try {
         if (input.photos) {
-          // The real slides as a swipeable album, then the card you reply to.
+          // A Reel goes as the whole video, so you see it move and hear it before it can post.
+          // Anything else goes as the real slides in a swipeable album. Then the card you reply to.
           if (!record.album_sent) {
-            await telegram(this.env, input.photos.length === 1 ? 'sendPhoto' : 'sendMediaGroup',
+            if (input.video) { await telegram(this.env, 'sendVideo', {video: input.video, supports_streaming: true, width: 1080, height: 1920}); record.video_sent = true; }
+            else await telegram(this.env, input.photos.length === 1 ? 'sendPhoto' : 'sendMediaGroup',
               input.photos.length === 1 ? {photo: input.photos[0]} : {media: input.photos.map(url => ({type: 'photo', media: url}))});
             record.album_sent = true; await this.ctx.storage.put('review', record);
           }

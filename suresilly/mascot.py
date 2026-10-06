@@ -1,8 +1,9 @@
 """The donkey poses: what each one shows, and how a slide gets one.
 
-The writer picks a pose by name for every slide, reading the notes below. The
-mood groups are the fallback: when a name is missing, misspelt or already used
-in the post, the slide gets a pose from its mood's group instead.
+Only the cover (slide 1) shows a donkey; a one-liner's two beats get two poses. The
+writer picks each pose by name, reading the notes below. The mood groups are the
+fallback: when a name is missing, misspelt or already used in the post, the slide
+gets a pose from its mood's group instead.
 Library poses only: no new art, no text in the art.
 """
 from __future__ import annotations
@@ -147,6 +148,28 @@ def pick(moods: list[str], seed: str, avoid: set[str] | frozenset = frozenset())
         name = rng.choice(fresh or list(options))
         used.add(name)
         chosen.append(name)
+    return chosen
+
+
+def twist_pose(slide: dict, seed: str) -> str:
+    """The donkey's second pose for a one-liner's twist: the writer's when real and different from the first, else a fresh one."""
+    name = slide.get("twist_pose")
+    if name in NOTES and name != slide["pose"]:
+        return name
+    return pick([slide.get("mood", "calm")], f"{seed}-twist", avoid={slide["pose"]})[0]
+
+
+def ab_poses(slide: dict, seed: str, avoid: frozenset | set = frozenset()) -> dict[str, str]:
+    """The three poses of an A or B Reel (the hook, the reveal, the send), all different and none from `avoid`:
+    the writer's when real, else one for the moment."""
+    chosen: dict[str, str] = {}
+    used = set(avoid)
+    for key, mood in (("pose", "wistful"), ("reveal_pose", "sad"), ("send_pose", "invite")):
+        name = slide.get(key)
+        if name not in NOTES or name in used:
+            name = pick([mood], f"{seed}-{key}", avoid=used)[0]
+        chosen[key] = name
+        used.add(name)
     return chosen
 
 

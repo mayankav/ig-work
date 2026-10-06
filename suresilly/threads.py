@@ -43,7 +43,7 @@ def publish(post: dict, image_url: str) -> tuple[str, str]:
     line = " ".join(post["slides"][0]["text"].replace("[[", "").replace("]]", "").split())[:500]
     topic = post.get("topic", "")
     params = {"media_type": "IMAGE", "image_url": image_url, "text": line, "access_token": token,
-              "alt_text": f"{line} A small green donkey is in the corner."}
+              "alt_text": f"{line} Silly, the small green mascot, is in the corner."}
     if topic:
         params["topic_tag"] = TOPIC.get(topic, topic.title())
     container = _call("POST", f"{BASE}/{user}/threads", **params)["id"]

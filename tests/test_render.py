@@ -109,3 +109,92 @@ def test_makes_a_reel_instagram_accepts(tmp_path):
     streams = {s["codec_name"]: s for s in probe["streams"]}
     assert (streams["h264"]["width"], streams["h264"]["height"], streams["h264"]["pix_fmt"]) == (1080, 1920, "yuv420p")
     assert "aac" in streams and abs(float(probe["format"]["duration"]) - 8.0) < 0.1
+
+
+def test_two_beat_timing_follows_the_reading_not_a_fixed_delay():
+    from suresilly import reel
+    assert reel.reveal_for("one two three") == 2.0                        # never before 2 s
+    assert reel.reveal_for(" ".join(["w"] * 7)) == 3.0
+    assert reel.reveal_for(" ".join(["w"] * 20)) == 3.5                   # never after 3.5 s
+    reveal, total = reel.two_beat_seconds(" ".join(["w"] * 9), "three small words")
+    assert (reveal, total) == (3.5, 8.0)                                  # the card holds 4 s at least; 8 s floor
+    assert reel.two_beat_seconds("a b c d e f", " ".join(["w"] * 10)) == (2.7, 8.7)   # a long twist holds longer
+
+
+def test_the_blank_blinks_until_the_reveal_then_the_finished_card_holds():
+    from pathlib import Path
+    from suresilly import reel
+    frames = {name: Path(name) for name in ("blank_on", "blank_off", "full")}
+    parts = reel.timeline(frames, 2.2, 8.0)
+    assert [p.name for p, _ in parts] == ["blank_on", "blank_off", "blank_on", "blank_off", "blank_on", "full"]
+    assert [round(length, 1) for _, length in parts] == [0.5, 0.5, 0.5, 0.5, 0.2, 5.8]
+    assert round(sum(length for _, length in parts), 1) == 8.0
+
+
+def test_the_blank_and_the_finished_card_lay_out_identically(tmp_path):
+    pytest.importorskip("playwright")
+    from PIL import Image, ImageChops
+    from suresilly import render
+    post = {"slides": [{"text": "we fought over [[the window seat]], but today you can have the whole bus.",
+                        "setup": "we fought over [[the window seat]], but", "twist": "today you can have the whole bus.",
+                        "pose": "arms_crossed_waiting", "twist_pose": "arms_crossed_waiting"}]}
+    try:
+        frames = render.reel_frames(post, tmp_path)
+    except Exception as exc:
+        if "Executable doesn't exist" in str(exc):
+            pytest.skip("chromium is not installed")
+        raise
+    assert set(frames) == {"blank_on", "blank_off", "full"}
+    on, off, full = (Image.open(frames[k]).convert("L") for k in ("blank_on", "blank_off", "full"))
+    top = on.crop((0, 0, 1080, 560))                       # the setup's lines: the same pixels in all three
+    assert ImageChops.difference(top, off.crop((0, 0, 1080, 560))).getbbox() is None
+    assert ImageChops.difference(top, full.crop((0, 0, 1080, 560))).getbbox() is None
+    assert ImageChops.difference(on, off).getbbox() is not None   # the cursor is the only difference between the two blanks
+    assert ImageChops.difference(off, full).getbbox() is not None  # the twist is what the reveal adds
+
+
+def test_only_the_cover_shows_a_donkey_and_a_oneliner_card_shows_the_twist_pose(tmp_path):
+    pytest.importorskip("playwright")
+    from PIL import Image
+    from suresilly import render
+    post = {"slides": [{"text": "a short cover", "pose": "hands_over_mouth"},
+                       {"text": "an inner line", "pose": None}, {"text": "another inner line", "pose": "warm_mug"}]}
+    try:
+        files = render.render(post, tmp_path / "s")
+    except Exception as exc:
+        if "Executable doesn't exist" in str(exc):
+            pytest.skip("chromium is not installed")
+        raise
+    corner = (540, 800, 1080, 1350)                          # lower right: where the donkey is
+    assert Image.open(files[0]).convert("L").crop(corner).getextrema()[0] < 100   # the cover's dark outline
+    for inner in files[1:]:                                  # even a slide that names a pose has no donkey
+        assert Image.open(inner).convert("L").crop(corner).getextrema()[0] > 120
+
+
+def test_makes_a_two_beat_reel_with_the_reveal_and_a_cover_frame_after_it(tmp_path):
+    import json
+    import shutil
+    import subprocess
+    from suresilly import reel
+    pytest.importorskip("playwright")
+    if not shutil.which("ffprobe"):
+        pytest.skip("ffmpeg is not installed")
+    post = {"format": "oneliner", "slides": [{
+        "text": "we fought over the window seat, but today you can have the whole bus.",
+        "setup": "we fought over the window seat, but", "twist": "today you can have the whole bus.",
+        "mood": "wistful", "pose": "arms_crossed_waiting", "twist_pose": "laughing"}]}
+    folder = tmp_path / "20261006_2000_we-fought"
+    folder.mkdir()
+    try:
+        video = reel.make(post, folder)
+    except Exception as exc:
+        if "Executable doesn't exist" in str(exc):
+            pytest.skip("chromium is not installed")
+        raise
+    assert post["reel"] == {"seconds": 8.0, "tune": "wistful", "reveal": 3.0, "cover_ms": 3600}
+    probe = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                                       "stream=codec_name,width,height,pix_fmt:format=duration",
+                                       "-of", "json", str(video)], capture_output=True, text=True).stdout)
+    streams = {s["codec_name"]: s for s in probe["streams"]}
+    assert (streams["h264"]["width"], streams["h264"]["height"], streams["h264"]["pix_fmt"]) == (1080, 1920, "yuv420p")
+    assert 7.9 <= float(probe["format"]["duration"]) <= 8.2

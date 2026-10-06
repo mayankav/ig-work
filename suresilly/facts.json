@@ -1,0 +1,163 @@
+{
+  "_about": "Sourced facts only: what a rule says, where it was read, when, and what is not certain. No post copy lives here: the writer model writes every word the viewer reads. These 14 came from one research pass on 2026-10-05 (secondary sources). The harvest job replaces them with facts read from official feeds; the owner approves each one. status: checked = state with its source line; reported = state only with a REPORTED stamp.",
+  "facts": [
+    {
+      "id": "wages-2-days",
+      "area": "rights",
+      "title": "Two Working Days: Code On Wages And Employee's Final Settlement",
+      "claim": "Final wages are due within 2 working days of resigning or being removed. The clock starts on the last working day.",
+      "source": "LiveLaw",
+      "source_date": "3 Oct 2026",
+      "law": "Code on Wages 2019, section 17(2). In force since 21 Nov 2025.",
+      "caveat": "Covers wages only. Gratuity has its own 30 days.",
+      "status": "checked"
+    },
+    {
+      "id": "gratuity-30-days",
+      "area": "rights",
+      "title": "Gratuity: payment within 30 days",
+      "claim": "Gratuity must be paid within 30 days. It is separate from final wages.",
+      "source": "LiveLaw",
+      "source_date": "3 Oct 2026",
+      "caveat": "Reported in the same article as the 2-day wages rule. You need about 5 years of service; two High Courts accept 4 years and 240 days.",
+      "status": "reported"
+    },
+    {
+      "id": "wage-50-percent",
+      "area": "newrule",
+      "title": "50% wage rule under the new Labour Codes",
+      "claim": "If allowances are more than 50% of your total pay, the extra is counted as wages. This raises the base for PF and gratuity.",
+      "source": "SCC Online",
+      "source_date": "26 Apr 2026",
+      "law": "Code on Wages 2019, definition of wages.",
+      "caveat": "The ministry FAQ says take-home does not fall if PF stays on the ceiling.",
+      "status": "checked"
+    },
+    {
+      "id": "epf-ceiling",
+      "area": "newrule",
+      "title": "EPF wage ceiling goes from 15,000 to 25,000 rupees",
+      "claim": "The EPF wage ceiling goes from ₹15,000 to ₹25,000 from 17 Sep 2026.",
+      "source": "SCC Online",
+      "source_date": "Sep 2026",
+      "law": "Cabinet decision of 16 Sep 2026.",
+      "caveat": "Reported. The date is not in the gazette text the checker could open.",
+      "status": "reported"
+    },
+    {
+      "id": "epf-withdraw-12-months",
+      "area": "newrule",
+      "title": "EPF final withdrawal: 12 months wait",
+      "claim": "After you lose a job, the final EPF withdrawal waits 12 months. It used to wait 2 months. On a part withdrawal, 25% must stay in the account.",
+      "source": "SCC Online",
+      "source_date": "29 Jun 2026",
+      "law": "EPF Scheme 2026, gazetted 29 Jun 2026.",
+      "caveat": "Reported. The 36-month pension wait is not confirmed.",
+      "status": "reported"
+    },
+    {
+      "id": "epf-rates",
+      "area": "rights",
+      "title": "EPF: 12% from you, 12% from the employer",
+      "claim": "You pay 12% of your wages into EPF and the employer pays 12%. The employer must deposit by the 15th of the next month.",
+      "source": "EPFO (owner to confirm)",
+      "source_date": "2026",
+      "caveat": "Reported. Source name to be confirmed.",
+      "status": "reported"
+    },
+    {
+      "id": "tax-zero-12-75",
+      "area": "newrule",
+      "title": "Zero income tax up to 12.75 lakh salary, FY 2026-27",
+      "claim": "In the new tax regime for FY 2026-27, a salary of up to ₹12.75 lakh pays zero income tax. The standard deduction is ₹75,000 and the rebate is ₹60,000.",
+      "source": "ClearTax",
+      "source_date": "Feb 2026",
+      "law": "Union Budget, 1 Feb 2026. Slabs unchanged.",
+      "caveat": "It is salary, not CTC. The rebate does not cover special-rate capital gains.",
+      "status": "checked"
+    },
+    {
+      "id": "professional-tax",
+      "area": "rights",
+      "title": "Professional tax: a state tax, capped at 2,500 rupees a year",
+      "claim": "Professional tax is a state tax, capped at ₹2,500 a year. Delhi, Haryana, UP and Rajasthan do not charge it.",
+      "source": "Taxscan (owner to confirm)",
+      "source_date": "2026",
+      "law": "State Acts. Odisha repealed it from 1 Apr 2026.",
+      "caveat": "Your state decides. Source name to be confirmed.",
+      "status": "reported"
+    },
+    {
+      "id": "notice-contractual",
+      "area": "rights",
+      "title": "Notice period is set by your contract",
+      "claim": "No central law fixes the notice period in a private job. Your contract fixes it.",
+      "source": "Delhi Shops and Establishments Act",
+      "source_date": "2026",
+      "law": "Delhi: one month's written notice after 3 months of service. Other states differ.",
+      "caveat": "Other states differ.",
+      "status": "checked"
+    },
+    {
+      "id": "bond-fair-estimate",
+      "area": "rights",
+      "title": "Training bond: the amount must be a fair estimate of loss",
+      "claim": "A minimum-service bond can be valid, but the amount you pay for leaving early must be a fair estimate of the employer's real loss.",
+      "source": "Supreme Court, Vijaya Bank v. Narnaware",
+      "source_date": "14 May 2025",
+      "law": "Indian Contract Act, section 74.",
+      "caveat": "The case was about a public sector bank.",
+      "status": "checked"
+    },
+    {
+      "id": "no-right-to-disconnect",
+      "area": "rights",
+      "title": "India has no right-to-disconnect law",
+      "claim": "India has no law that lets you ignore work messages after hours. A private member's bill was tabled in Dec 2025.",
+      "source": "Private member's bill",
+      "source_date": "Dec 2025",
+      "law": "A bill only. It is not law.",
+      "status": "checked"
+    },
+    {
+      "id": "work-hours",
+      "area": "rights",
+      "title": "Working hours: 9 a day, 48 a week",
+      "claim": "Delhi, Maharashtra and Karnataka cap work at 9 hours a day and 48 hours a week. Overtime is paid extra.",
+      "source": "Delhi, Maharashtra and Karnataka rules",
+      "source_date": "2026",
+      "law": "State rules apply until states notify the new central rules.",
+      "caveat": "IT and ITES firms may be exempt in some states. Source name to be confirmed.",
+      "status": "reported"
+    },
+    {
+      "id": "appointment-letter",
+      "area": "rights",
+      "title": "An appointment letter is mandatory",
+      "claim": "The Labour Codes make an appointment letter mandatory, in a prescribed format.",
+      "source": "KPMG",
+      "source_date": "8 May 2026",
+      "law": "Labour Codes, in force 21 Nov 2025.",
+      "status": "checked"
+    },
+    {
+      "id": "variable-pay-contract",
+      "area": "rights",
+      "title": "Variable pay and CTC structure are set by contract",
+      "claim": "Variable pay is contractual. Your employer cannot change a pay term without your consent.",
+      "source": "Indian Contract Act, section 62",
+      "source_date": "2026",
+      "law": "Indian Contract Act 1872.",
+      "caveat": "Read how your offer letter defines variable pay.",
+      "status": "checked"
+    }
+  ],
+  "do_not_state": [
+    "How long probation can last, or that a confirmation letter is required.",
+    "That notice-period buyout is legal or illegal.",
+    "That a company must give a relieving letter.",
+    "That a signed offer cannot be withdrawn.",
+    "That IT firms are exempt from working-hour limits.",
+    "Any figure, date or section number that is not in this file."
+  ]
+}

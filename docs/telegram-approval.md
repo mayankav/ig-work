@@ -2,7 +2,7 @@
 
 ## The short version
 
-1. At 08:00 and 20:00 IST the bot sends the slides as an album, then a **card**.
+1. At 08:00 and 20:00 IST the bot sends the slides as an album, then a **card**. For the evening Reel it sends the **whole Reel as a video with sound** instead of the album, then the card, so you see it move and hear it before it can post.
 2. **Swipe left on the card** and reply with one word from the table below. You can also send the word plus the card's Review ID as a normal message.
 3. **If you don't reply for 1 hour, the post goes out by itself.** A preview made with `force` waits for you instead.
 
@@ -13,7 +13,7 @@
 | `approve` | Posts it now. The Instagram link comes back in Telegram. |
 | `disapprove` | Cancels it. `cancel` and `reject` work too. |
 | `redo all` | Writes a completely new post. A new card arrives in about 3 minutes. |
-| `redo images 2,4` | Draws a new donkey on those slides and keeps the words. Use numbers 1–9, separated by commas. A new card arrives. |
+| `redo images 1` | Draws a new pose of Silly on the cover and keeps the words. For an A or B Reel it picks new poses and new sounds. Only the cover (slide 1) has a donkey, so a reply naming only other slides fails with a plain message that says so. A one-liner changes both of its poses. A new card arrives. |
 
 ## Replies sent as a plain message
 
@@ -31,7 +31,7 @@ Send these as a normal message, not as a reply to a card. As a reply to a card, 
 | `approve` | Swipe-reply to the **card** | ✅ Posts |
 | `approve 1a2b3c4d5e6f7a8b` | Plain message, no swipe needed | ✅ Posts. The 16-character ID is at the bottom of the card |
 | `approve` | Plain message, no ID | 🤔 The bot says "No change made". Nothing posts |
-| `approve` | Swipe-reply to a **photo** in the album | 🤔 "No change made". Only the card carries the ID |
+| `approve` | Swipe-reply to a **photo** or the **video** in the preview | 🤔 "No change made". Only the card carries the ID |
 | `Approve` or ` approve ` | Reply to the card | ✅ Works. Capitals and spaces don't matter |
 | `approved`, `approve!`, `approve ✅` | Reply to the card | 🤔 "No change made". It has to be the exact word |
 | `ok`, `yes`, `approved` | Plain message | 🔇 Ignored, with no answer at all |
@@ -67,7 +67,7 @@ Every answer is one line in `docs/craft-watchlist.md`. The next post reads it as
 | `approve` | Anything, after posting has started | ⚠️ "No change made". It posts once |
 | `approve` | `disapprove`, within ~1–2 min | 🗑 Cancelled. Nothing posts |
 | `disapprove` | Anything | ⚠️ "No change made". Cancelling is final |
-| `redo all` / `redo images 2,4` | Anything on the **old** card | ⚠️ "No change made". Reply to the new card instead |
+| `redo all` / `redo images 1` | Anything on the **old** card | ⚠️ "No change made". Reply to the new card instead |
 | No reply for 1 hour | `disapprove`, within ~1–2 min of the hour ending | 🗑 Cancelled. Any later reply is too late, and it posts |
 | Telegram delivers the same reply twice | — | 👍 "Already got that reply". It counts once |
 

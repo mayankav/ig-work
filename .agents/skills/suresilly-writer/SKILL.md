@@ -1,6 +1,6 @@
 ---
 name: suresilly-writer
-description: Write, judge and tune the @suresilly tiny-truth posts (lowercase relatable lines about family, friendship, growing up and love, with a small green donkey). Use when reviewing a post or a Telegram card, when a post reads weak, when changing the writer prompt, or when comparing writer models. The craft rules live in suresilly/craft.md and this skill says how to use them.
+description: Write, judge and tune @suresilly posts, the first job in India explained by Silly, a small green mascot, for ages 18 to 30. Use when reviewing a post, a cover or a Telegram card, when a hook reads weak, when changing the writer prompt, or when comparing writer models. Six content areas, carousels and Vox-style Reels. The craft rules live in suresilly/craft.md and this skill says how to use them; the quality gates, the hook playbook and the weekly plan are in references/.
 ---
 
 # suresilly-writer
@@ -11,33 +11,29 @@ Read `AGENTS.md` first. Rule 1 (our own words only), rule 5 (a better prompt bef
 
 ## The goal
 
-Growth: saves, sends, likes, followers. Not originality. We never copy another page's words (rule 1), but a true line that most people recognise is the whole point, even if ten pages could have said it. The evidence is in `docs/pivot/quote-pages-teardown.md`: the biggest hit measured, 364K likes, was a plain line about a school friend who lasted. The 2026-09-13 dig (`references/keyword-dfs-2026-09-13.md`) corrected one claim. The relatable wall's pinned 100K post is a different image, and its text could not be read logged out. Its "not everyone has a family that checks in" carousel got 1.5K likes on Instagram and 2.1K shares as a copy on Facebook.
+Followers. Strangers find the page through Reels (our data: Reels reach about 143, carousels about 5), so a Reel's cover and first 1.5 seconds must make a stranger stop; the profile grid must make them follow. Saves and sends come from posts that give something usable: an exact sentence, a checklist, a source.
 
-What each metric comes from:
-
-- **Sends and shares:** the reader thinks of one person. Validation lines ("not everyone had...") and "send this to the one who..." endings.
-- **Saves:** lists worth coming back to, and lines worth screenshotting. Slide 1 must promise the list is worth keeping.
-- **Likes and reach:** one-read recognition. Nothing to decode, nothing private.
-- **What loses reach:** engagement bait (Meta penalises it), preaching, therapy talk, anything that needs a second read.
-- **Search:** hashtags and the caption only tell Instagram what the post is about. They bring no reach on their own (Mosseri, 2025 and 2026). Three to five specific tags from the topic's list in `write.TAGS`, and the person named once, plainly, in the caption.
+The niche is the first job in India: offer letter, CTC, PF, notice period, probation, bond, final settlement, payslip, boss messages, plus the feelings of the first year. Six content areas and a weekly plan: `references/pillars-and-calendar.md`.
 
 ## The bar
 
-A post passes when all five are true. Judge slides in order, then the caption.
+A post passes when all seven are true. Judge the cover or first scene first, then the rest, then the caption.
 
-1. **Slide 1 is a promise, not a label.** Under 12 words, 9 is better, no full stop, and a stranger needs to see what follows.
-2. **The recognition test.** Would most readers see their own life in each line on one read? A line only one family would recognise is too narrow. A line with no detail at all is forgettable. One shared detail per line.
-3. **The send test.** Name the one person the reader would send it to. If you cannot, the post has no target.
-4. **The save test, for lists.** Would a reader keep this for a bad day or to send later? If the items are pleasant but disposable, the list will get likes and no saves.
-5. **The end is warm, not preachy.** A picture or one plain warm sentence a reader would screenshot. Never a lesson, never a question, never a follow ask.
+1. **The cover is a hook.** It raises a question or a conflict and withholds the payoff, with a promise line ("Here is what is."). The payoff is inside. Name the hook technique used (`references/hook-playbook.md`). Test: can a stranger answer the cover's question without opening the post? If yes, rewrite.
+2. **It is complete.** Every instruction carries its exact words in the same slide or scene. "Send one line" fails. A sentence in quotation marks passes. Jargon is explained where it first appears.
+3. **It is true and sourced.** Facts only from the fact bank or a dated source packet. A source line on every factual slide. "Reported" on anything unconfirmed. The owner approves with a claim-to-quote table.
+4. **It is specific.** At least one number, date, named form or source. If it could sit under any post, it is not finished.
+5. **The send and save tests.** Name the one person who would get it. Name the slide someone would screenshot (the SAY THIS card, the checklist, the email).
+6. **It is laid out cleanly.** Both audits at zero (`references/quality-gates.md` §4), no stub lines, text at least 32 px on a phone, nothing in the app's button zone.
+7. **It is different from the last 14.** Another pillar, colour and hook technique than yesterday; no opener or shape repeated.
 
-Things that fail on sight: "tag a friend", "comment yes", "let that sink in"; a lecture in the last line; therapy words; a private detail most readers cannot picture; a line that needs a second read; a donkey holding a mug under a line with no mug in it; a made-up or branded hashtag (#tinytruths) or a catch-all one (#love, #family); a send line that could sit under any post.
+Things that fail on sight: a cover that prints its own answer; "tag a friend", "comment yes", "let that sink in"; a lecture; an instruction without its words; a claim without a source; a number the model did not copy from the source; therapy words; a lone word on its last line.
 
 Three lenses for when a post passes and still feels off:
 
-- **The mum read.** Someone smart, sixty, not on Instagram much. Which line would she nod at without getting it? Which one would she forward?
+- **The stranger.** Someone who has never heard of us sees only the cover for one second. Would they stop? What do they think the payoff is?
 - **The screenshot test.** Which single slide would someone crop and post to their story? If none, the post has no peak.
-- **The one-person test, again.** Say the name of the person the last slide is for. If it is "everyone", rewrite it for one.
+- **The one-person test.** Say the name of the person it is for. If it is "everyone", rewrite it for one.
 
 ## Judging a Telegram card
 
@@ -97,14 +93,18 @@ Each researcher gets about six direct Instagram fetches before the login wall. S
 
 ## What we learned from other skills, and from search
 
-Three reference files:
+Reference files:
 
+- `references/reel-scripts.md`: how a model writes a Reel script, the rule of no hand-written words and no samples, the checks, and how to qualify a model.
+- `references/hook-playbook.md`: 26 hook techniques with sources, the cover recipe, and what we could not verify. `suresilly/hooks.py` holds the cards the writer reads.
+- `references/quality-gates.md`: the six gates (accurate, complete, hook cover, layout, varied, sound) with approved and rejected examples.
+- `references/pillars-and-calendar.md`: the six content areas and the weekly plan.
 - `references/skill-teardown-2026-09-12.md`: four public "viral content" skills read in full and compared. None is for our genre, all are unsourced, and about a dozen rules transferred.
 - `references/craft-sources-2026-09-12.md`: about 90 skills, plugins and prompt packs read by three researchers. No public skill reaches 5 of 5 for this page. The eight that reached 4 are listed with what we took from each, where public advice disagrees with our bar, and what we refused.
 - `references/keyword-dfs-2026-09-13.md`: what people search in our topics, the facts about hashtags and search, and a depth-first dig through seven keyword clusters. It records what we took, what we refused, and what to watch in the next posts.
 
 Do not install any of them. Two carry embedded product plugs, several scrape other accounts, and rule 1 forbids feeding another page's posts to the writer. The sentences worth having are already in `craft.md`.
 
-## Adding donkey poses
+## Adding poses of Silly
 
 `docs/new-poses.md` has the ChatGPT prompt, the keep-or-redo checks, and the import steps. Every pose needs a one-line note in `mascot.GROUPS`; the tests check that every file has one.

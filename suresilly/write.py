@@ -12,7 +12,7 @@ from .llm import chat_json
 
 # Slides per format. Nine is the ceiling because Telegram's `redo images` reply
 # takes single digits 1-9.
-FORMATS = {"list": (7, 9), "story": (6, 8), "oneliner": (1, 1)}
+FORMATS = {"list": (7, 9), "story": (6, 8), "oneliner": (1, 1), "ab": (1, 1)}
 MOODS = ("warm", "calm", "wistful", "sad", "tired", "joy", "wise", "invite")
 MAX_SLIDE_CHARS = 200
 MAX_CAPTION_CHARS = 2000
@@ -22,8 +22,9 @@ MAX_HIGHLIGHTS = 3
 PEOPLE = {
     "a best friend from school": "friendship", "a friend you drifted from": "friendship",
     "a best friend who moved away": "friendship",
-    "an old roommate": "adult life", "mum": "parents", "dad": "parents", "a grandparent": "family",
-    "an older sibling": "siblings", "a sister": "siblings", "a cousin you grew up with": "nostalgia",
+    "an old roommate or hostel friend": "adult life", "mummy": "parents", "papa": "parents",
+    "a grandparent (nani or dadi)": "family",
+    "an older sibling (didi or bhai)": "siblings", "a sister": "siblings", "a cousin you grew up with": "nostalgia",
     "a partner": "love",
     "your younger self": "growing up", "a favourite teacher": "school days",
     "a stranger who was kind": "kindness", "yourself, on a hard week": "being kind to yourself",
@@ -53,15 +54,29 @@ SHAPES = {
         "a younger self and an older self, one small moment apart",
         "the first time you look after someone who used to look after you, in one small everyday way",
     ),
+    "ab": (
+        "the friend who is always 'on my way' while still at home, and the one who arrives early",
+        "the friend who always says 'next time i'll pay', and the one who splits to the exact rupee",
+        "the friend who has been 'planning' a trip for years, and the one who books it first",
+        "the friend who says 'i'll be quick' and the one who really is",
+        "the friend who borrows your charger and never returns it, and the one who brings a spare",
+        "the friend who says 'i'm not hungry' and eats half your plate, and the one who orders their own",
+        "the friend who reads your message and replies tomorrow, and the one who answers in a minute",
+        "the friend who says 'just five more minutes' at midnight, and the one who is asleep by ten",
+        "the friend who forgets your birthday but remembers your order, and the one with every date saved",
+        "the friend who says 'send me the photos' and never looks, and the one who edits them the same night",
+        "the friend who says 'we should meet' every month, and the one who fixes a date at once",
+        "the friend who says 'five minutes away' from the other side of the city, and the one who sends a live location",
+    ),
     "oneliner": (
-        "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
-        "nobody talks about a small, true feeling everyone has had",
-        "someone does a small thing for you and never mentions it; name that as love",
+        "what you expected from a small everyday moment, and what someone actually did",
+        "someone does a small thing for you and never mentions it, told as a setup and then the thing itself",
         "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
-        "some people feel like a cosy everyday comparison",
-        "a small thing you fought as a kid and would welcome now, pinned to one object",
+        "a small thing you fought over as a kid and would welcome now, pinned to one object",
         "a small everyday annoyance someone causes now, seen from the day it stops",
-        "someone who lives far away now, and the one small habit you both kept",
+        "someone who lives in another city now, and the one small habit you both kept",
+        "the thing someone always said, and what you only understood they meant later",
+        "something you pretend not to need, and the person who always has it ready",
     ),
 }
 
@@ -98,24 +113,33 @@ _WRITER_CRAFT, _EDITOR_CRAFT = (part.strip() for part in _CRAFT.split("\n## edit
 
 SYSTEM = _WRITER_CRAFT + """
 
-Every slide names the donkey's pose. The donkey is the reader, not a character in the \
-story: pick the pose for what the line makes the reader feel or do. Rules:
-- pick from the list below, by exact name. never the same pose twice in one post.
+Silly (the mascot) shows on slide 1 only: the cover of a list or a story, the two beats of a \
+one-liner, or the hook, reveal and send screens of an ab (three poses; its question screen has \
+no Silly). Slides after the first take no pose. Silly is the \
+reader, not a character in the story. On a cover its face is the thumbnail, so pick the \
+pose whose expression matches the gap the hook opens (surprised, puzzled, caught, \
+hopeful, deadpan); a pointing pose is fine when the cover is an invitation. Rules:
+- pick from the list below, by exact name.
 - a pose marked OBJECT only when the line is about that object or that exact moment \
 (a mug for tea or a slow morning, a book for reading, a phone for a text). otherwise a \
 plain-body pose. when the line does name a thing we have a pose for, prefer that pose.
 - lying-down poses (curled_up, face_down, on_back, propped_up) only for rest, collapse \
-or a lazy evening, never for a tender line.
-- slide 1 of a list or a story: point_right, beckoning or presenting.
-- the last slide of a list: offering, waving, holding_heart or beckoning.
+or a lazy evening, never on a hook.
 - winking and approving are cheeky; never on the line that carries the feeling.
 
 Poses:
 """ + mascot.notes() + """
 
-Reply with JSON only:
-{"hook_options": ["...", "...", "..."], "slides": [{"text": "...", "pose": "..."}], \
-"caption": "...", "alt": "one sentence describing the post for screen readers"}"""
+Reply with JSON only. For a list or a story (pose on slide 1 only):
+{"hook_options": ["...", "...", "..."], "slides": [{"text": "...", "pose": "..."}, {"text": "..."}], \
+"caption": "...", "alt": "one sentence describing the post for screen readers"}
+For an ab (one slide, no "text"):
+{"hook_options": ["...", "...", "..."], "slides": [{"hook": "\u201c...\u201d", "a": "...", "b": "...", "win": "...", \
+"send": "send this to the friend who ...", "pose": "...", "reveal_pose": "...", "send_pose": "..."}], \
+"caption": "...", "alt": "one sentence describing the post for screen readers"}
+For a one-liner (one slide, two beats, no "text"):
+{"hook_options": ["...", "...", "..."], "slides": [{"setup": "...", "twist": "...", \
+"pose": "...", "twist_pose": "..."}], "caption": "...", "alt": "one sentence describing the post for screen readers"}"""
 
 
 EDITOR = SYSTEM + "\n\n" + _EDITOR_CRAFT
@@ -127,6 +151,18 @@ class WriteError(RuntimeError):
 
 def plain(text: str) -> str:
     return text.replace("[[", "").replace("]]", "")
+
+
+def full_text(slide: dict) -> str:
+    """A slide's words: its text, or for a two-beat one-liner the setup and then the twist."""
+    if not isinstance(slide, dict):
+        return ""
+    if "setup" in slide or "twist" in slide:
+        return " ".join(f"{slide.get('setup') or ''} {slide.get('twist') or ''}".split())
+    if "hook" in slide:
+        return " ".join(f"{slide['hook']} which friend are you? A: {slide.get('a', '')}. B: {slide.get('b', '')}.".split())
+    text = slide.get("text", "")
+    return text if isinstance(text, str) else ""
 
 
 def words(text: str) -> set[str]:
@@ -170,6 +206,21 @@ def recent_posts(root=POSTS, days: int = 14, limit: int = 10) -> list[str]:
     return lines
 
 
+def recent_openers(root=POSTS, days: int = 14) -> list[str]:
+    """The first three words of every first line posted lately, each once: the do-not-open-with list."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y%m%d")
+    seen: dict[str, None] = {}
+    for path in sorted(root.glob("*/post.json"), reverse=True):
+        if path.parent.name[:8] < cutoff:
+            break
+        try:
+            first = json.loads(path.read_text())["slides"][0]["text"]
+        except (OSError, ValueError, KeyError, IndexError):
+            continue
+        seen[" ".join(plain(first).lower().split()[:3])] = None
+    return list(seen)
+
+
 def owner_notes(path=None, days: int = 14, limit: int = 8) -> list[str]:
     """What the owner said when sending a post back, newest first. 'fine' means nothing to learn."""
     path = path or ROOT / "docs" / "craft-watchlist.md"
@@ -188,13 +239,17 @@ def owner_notes(path=None, days: int = 14, limit: int = 8) -> list[str]:
     return list(reversed(notes))[:limit]
 
 
-def context(previous_posts: list[str], notes: list[str]) -> str:
+def context(previous_posts: list[str], notes: list[str], openers: list[str] | None = None) -> str:
     """The part of the brief that changes every day: what not to repeat, and what the owner said."""
     text = ""
     if previous_posts:
         text += ("Already posted in the last two weeks. Do not reuse their objects, their openings, "
                  "their people or their sentence shapes; a reader who saw one should not feel they are "
                  "reading it again:\n" + "\n".join(f"- {p}" for p in previous_posts) + "\n\n")
+    if openers:
+        text += ("Openings this page has used in the last two weeks. The first words of your first line "
+                 "must not be any of these, or anything that reads like them. A page that opens the same "
+                 "way every day trains people to scroll past it:\n" + "\n".join(f"- {o} ..." for o in openers) + "\n\n")
     if notes:
         text += ("Recent notes from the owner on posts that were sent back, newest first. Each note "
                  "names one exact thing. Change that one thing and nothing else: keep every other "
@@ -205,6 +260,8 @@ def context(previous_posts: list[str], notes: list[str]) -> str:
 
 def draw(fmt: str, seed: str) -> dict:
     rng = random.Random(seed)
+    if fmt == "ab":  # always about one close friend
+        return {"topic": "friendship", "person": "a close friend", "shape": rng.choice(SHAPES[fmt])}
     person = rng.choice(sorted(PEOPLE))
     return {"topic": PEOPLE[person], "person": person, "shape": rng.choice(SHAPES[fmt])}
 
@@ -217,6 +274,42 @@ def ask(fmt: str, angle: dict, daily: str = "", note: str = "") -> str:
             f"Who it is quietly about: {angle['person']}\n{tags}{note}Write it.")
 
 
+# Words allowed in each beat of a one-liner. The brief asks for 5-9 and 3-8; these only catch what would not work on screen.
+BEATS = {"setup": (3, 10), "twist": (2, 10)}
+
+
+# Words allowed in each field of an A or B Reel. The brief asks for less; these only catch what would not fit on screen.
+AB_LIMITS = {"hook": (1, 5), "a": (2, 8), "b": (2, 8), "win": (2, 11), "send": (6, 16)}
+
+
+def ab_problems(slide: dict) -> list[str]:
+    found = []
+    for part, (least, most) in AB_LIMITS.items():
+        value = slide.get(part) if isinstance(slide, dict) else None
+        count = len(plain(value).split()) if isinstance(value, str) else 0
+        if not least <= count <= most:
+            found.append(f"an ab needs a {part} of {least}-{most} words")
+        elif "[[" in value:
+            found.append("an ab has no highlights")
+    send = slide.get("send") if isinstance(slide, dict) else None
+    if isinstance(send, str) and not send.lower().startswith("send this to"):
+        found.append('the send line must start "send this to the friend who"')
+    return found
+
+
+def beat_problems(slide: dict) -> list[str]:
+    """What is wrong with a one-liner's two beats: a missing one, the wrong length, a highlight cut in half."""
+    found = []
+    for part, (least, most) in BEATS.items():
+        value = slide.get(part) if isinstance(slide, dict) else None
+        count = len(plain(value).split()) if isinstance(value, str) else 0
+        if not least <= count <= most:
+            found.append(f"a one-liner needs a {part} of {least}-{most} words")
+        elif value.count("[[") != value.count("]]"):
+            found.append(f"the {part} has a highlight that is not closed inside it")
+    return found
+
+
 def problems(post: dict, fmt: str) -> list[str]:
     found = []
     slides = post.get("slides")
@@ -225,8 +318,12 @@ def problems(post: dict, fmt: str) -> list[str]:
         found.append(f"a {fmt} needs {low}-{high} slides")
         slides = slides if isinstance(slides, list) else []
     for number, slide in enumerate(slides, 1):
-        text = slide.get("text", "") if isinstance(slide, dict) else ""
-        if not isinstance(text, str) or not text.strip():
+        if fmt == "oneliner":
+            found += beat_problems(slide)
+        elif fmt == "ab":
+            found += ab_problems(slide)
+        text = full_text(slide)
+        if not text.strip():
             found.append(f"slide {number} is empty")
             continue
         if len(plain(text)) > MAX_SLIDE_CHARS:
@@ -255,35 +352,57 @@ def tidy_caption(caption: str) -> str:
     return body + ("\n\n" + " ".join(tags) if tags else "")
 
 
+def clean(text: str) -> str:
+    return " ".join(re.sub(r"\s*[—–]\s*", ", ", text).split()).replace(" ,", ",")
+
+
 def tidy(post: dict, fmt: str) -> list[dict]:
-    """Slides with text, a real pose name (or none), and the mood that pose belongs to."""
+    """Slides with text, a real pose name (or none), and the mood that pose belongs to.
+
+    Only slide 1 has a donkey. A one-liner has two beats, so its one slide also keeps the setup,
+    the twist and a second pose for the twist."""
     slides, highlights = [], 0
     for number, slide in enumerate(post["slides"], 1):
-        pose = slide.get("pose") if slide.get("pose") in mascot.NOTES else None
+        if fmt == "ab":
+            entry = {"mood": "joy", **{key: clean(plain(slide[key])) for key in AB_LIMITS},
+                     **{key: slide.get(key) if slide.get(key) in mascot.NOTES else None for key in ("pose", "reveal_pose", "send_pose")}}
+            entry["text"] = full_text(entry)
+            slides.append(entry)
+            continue
+        pose = slide.get("pose") if number == 1 and slide.get("pose") in mascot.NOTES else None
         mood = mascot.MOOD_OF[pose] if pose else (slide.get("mood") if slide.get("mood") in MOODS else "calm")
-        if fmt != "oneliner" and number == 1:
-            if mood != "invite":  # the donkey points you into the swipe
-                mood, pose = "invite", None
-        elif mood == "invite":
-            mood, pose = "warm", None
-        text = " ".join(re.sub(r"\s*[—–]\s*", ", ", slide["text"]).split()).replace(" ,", ",")
+        if number == 1 and not pose and fmt != "oneliner":
+            mood = "invite"  # no usable pose: a pointing donkey, picked later
+        elif number > 1 and mood == "invite":
+            mood = "warm"
+        entry = {"mood": mood, "pose": pose}
+        if fmt == "oneliner":
+            entry["setup"], entry["twist"] = clean(slide["setup"]), clean(slide["twist"])
+            twist_pose = slide.get("twist_pose")
+            entry["twist_pose"] = twist_pose if twist_pose in mascot.NOTES and twist_pose != pose else None
+        else:
+            entry["text"] = clean(slide["text"])
+        text = full_text(entry)
         if "[[" in text:
             highlights += 1
             if highlights > MAX_HIGHLIGHTS:
-                text = plain(text)
-        slides.append({"text": text, "mood": mood, "pose": pose})
+                entry = {key: plain(value) if key in ("text", "setup", "twist") else value for key, value in entry.items()}
+        entry["text"] = full_text(entry)
+        slides.append(entry)
     return slides
 
 
 def write_post(fmt: str, seed: str, previous: list[str] | None = None,
                chat: Callable[[str, str], tuple[dict, str]] = chat_json,
-               recent: list[str] | None = None, notes: list[str] | None = None) -> dict:
+               recent: list[str] | None = None, notes: list[str] | None = None,
+               openers: list[str] | None = None) -> dict:
     if fmt not in FORMATS:
         raise WriteError(f"Unknown format {fmt!r}.")
     angle = draw(fmt, seed)
     previous = previous if previous is not None else previous_hooks()
     daily = context(recent if recent is not None else recent_posts(),
-                    notes if notes is not None else owner_notes())
+                    notes if notes is not None else owner_notes(),
+                    openers if openers is not None else (recent_openers() if recent is None else []))
     note = ""
     faults: list[str] = []
     for _ in range(3):

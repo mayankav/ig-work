@@ -26,6 +26,7 @@ MOODS = {
     "joy": (92, MAJOR, (0, 4, 5, 3)),      # I V vi IV
     "wise": (68, MAJOR, (0, 2, 3, 0)),     # I iii IV I
 }
+MOODS["hype"] = (120, MAJOR, (0, 4, 5, 3))  # the A or B quiz: bright, and fast enough to carry a beat
 MOODS["invite"] = MOODS["warm"]
 
 # One bar of melody, in beats. The last bar of a tune is always (2, 2).

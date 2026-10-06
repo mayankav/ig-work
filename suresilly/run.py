@@ -46,12 +46,12 @@ def halted() -> bool:
 
 
 def format_for(slot: str) -> str:
-    """Mornings alternate list and story; evenings are one-liners."""
+    """Mornings alternate list and story; evenings are A or B Reels."""
     match = re.fullmatch(r"(\d{4}-\d{2}-\d{2})_(\d{2})00", slot or "")
     if not match:
         return "list"
     if match.group(2) == "20":
-        return "oneliner"
+        return "ab"
     return "list" if date.fromisoformat(match.group(1)).toordinal() % 2 == 0 else "story"
 
 
@@ -75,7 +75,7 @@ def draw(post: dict, post_dir: Path) -> None:
     from .render import contact_sheet, render
     slides = render(post, post_dir / "slides")
     contact_sheet(slides, post_dir / "contact_sheet.png")
-    if post["format"] == "oneliner":  # evenings go out as a Reel; the tune follows the folder, so a redraw keeps it
+    if post["format"] in ("oneliner", "ab"):  # evenings go out as a Reel; the tune follows the folder, so a redraw keeps it
         reel.make(post, post_dir)
     (post_dir / "post.json").write_text(json.dumps(post, indent=2, ensure_ascii=False) + "\n")
     (post_dir / "caption.txt").write_text(post["caption"] + "\n")
@@ -94,10 +94,17 @@ def build(fmt: str | None, slot: str, new: bool = False) -> Path | None:
     fmt = fmt or format_for(slot)
     seed = f"{slot or now.isoformat()}-{os.urandom(4).hex()}"
     post = write_post(fmt, seed)
-    for slide, pose in zip(post["slides"], mascot.choose(post["slides"], seed)):
-        slide["pose"] = pose  # the writer's pick when it named a real pose, else one for the mood
+    first = post["slides"][0]
+    if fmt == "ab":
+        first.update(mascot.ab_poses(first, seed))
+    else:
+        first["pose"] = mascot.choose(post["slides"][:1], seed)[0]  # the writer's pick when it named a real pose, else one for the mood
+        for slide in post["slides"][1:]:
+            slide["pose"] = None  # only the cover has a donkey
+    if fmt == "oneliner":
+        first["twist_pose"] = mascot.twist_pose(first, seed)
     post.update(slot=slot or "", created_at=now.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    post_dir = POSTS / f"{now:%Y%m%d_%H%M}_{slugify(post['slides'][0]['text'])}"
+    post_dir = POSTS / f"{now:%Y%m%d_%H%M}_{slugify(first.get('hook') or first['text'])}"  # an A or B post is named by its phrase
     post_dir.mkdir(parents=True, exist_ok=False)
     post["slug"] = post_dir.name
     draw(post, post_dir)
@@ -107,16 +114,29 @@ def build(fmt: str | None, slot: str, new: bool = False) -> Path | None:
 
 
 def redraw(post_dir: Path, numbers: list[int]) -> None:
-    """New donkey poses on the named slides; the words stay exactly as they were."""
+    """A new donkey on the cover (both poses of a one-liner); the words stay exactly as they were.
+
+    Only slide 1 has a donkey, so asking for slide 2 or 4 alone is an error that says so."""
     post = load(post_dir)
     count = len(post["slides"])
     numbers = sorted({n for n in numbers if 1 <= n <= count})
     if not numbers:
         raise ValueError(f"This post has {count} slide(s); there is nothing to redo at those numbers.")
-    current = {slide["pose"] for slide in post["slides"]}
-    fresh = mascot.pick([post["slides"][n - 1]["mood"] for n in numbers], os.urandom(4).hex(), avoid=current)
-    for number, pose in zip(numbers, fresh):
-        post["slides"][number - 1]["pose"] = pose
+    if numbers[0] != 1:
+        raise ValueError("Only the cover (slide 1) has Silly now, so redoing those slides would change "
+                         "nothing. Reply redo images 1 for a new pose of Silly, or redo all for new words.")
+    first, seed = post["slides"][0], os.urandom(4).hex()
+    if post["format"] == "ab":  # new donkey poses, and new sounds too: the seed that picks them changes
+        old = {first["pose"], first["reveal_pose"], first["send_pose"]}
+        first.update(mascot.ab_poses({}, seed, avoid=old))
+        post["sound_seed"] = seed
+        draw(post, post_dir)
+        return
+    old = {first["pose"], first.get("twist_pose")}
+    first["pose"] = mascot.pick([first["mood"]], seed, avoid=old)[0]
+    if post["format"] == "oneliner":  # the twist's pose stays in its own mood, so the reaction still fits
+        mood = mascot.MOOD_OF.get(first.get("twist_pose"), first["mood"])
+        first["twist_pose"] = mascot.pick([mood], seed + "-twist", avoid=old | {first["pose"]})[0]
     draw(post, post_dir)
 
 
@@ -162,10 +182,11 @@ def register(post_dir: Path, manual: bool = False) -> None:
     try:
         receipt = review.api(record["token"], "register", {
             **base, "photos": review.slide_urls(record), "html": True, "resources": "",
+            **({"video": review.reel_url(record)} if review.reel_url(record) else {}),
             "caption": telegram.review_card(post, record["token"], manual=manual, redo_of=record.get("parent"))})
     except ValueError as exc:
-        if "Invalid preview" not in str(exc):
-            raise
+        if "Invalid preview" not in str(exc) or "preview video" in str(exc):
+            raise  # a refused video is a real fault: do not fall back to a preview with no video
         # A Worker that predates album previews: contact sheet, plain card, details.
         print("The Worker has no album previews yet; sending the plain version.")
         receipt = review.api(record["token"], "register", {
@@ -175,6 +196,11 @@ def register(post_dir: Path, manual: bool = False) -> None:
         raise ValueError("Telegram did not confirm the preview.")
     (post_dir / "review_delivery.json").write_text(json.dumps(receipt, indent=2) + "\n")
     review.save_history(ROOT, record["token"])
+    if review.reel_url(record) and not receipt.get("video_sent"):  # an old Worker sent only the still: never let that pass quietly
+        try:
+            telegram.send(telegram.video_missing())
+        except Exception as error:  # the preview is already delivered; this is only a warning
+            print(f"Could not send the missing-video warning: {error}")
     output(delivered="true")
 
 
@@ -203,7 +229,8 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
             caption = (post_dir / "caption.txt").read_text().strip()
             if review.reel_url(local):
                 alt = instagram.alt_text(post["slides"][0].get("text", ""))
-                media_id = instagram.publish_reel(post_dir, review.reel_url(local), caption, alt)
+                media_id = instagram.publish_reel(post_dir, review.reel_url(local), caption, alt,
+                                                  thumb_offset=post.get("reel", {}).get("cover_ms"))
             else:
                 alts = [instagram.alt_text(slide.get("text", "")) for slide in post["slides"]]
                 media_id = instagram.publish(post_dir, review.slide_urls(local), caption, alts)
@@ -239,7 +266,7 @@ def act(post_dir: Path, token: str, action_id: str) -> None:
 
 def echo(post_dir: Path, post: dict, record: dict) -> dict | None:
     """Put a one-liner on Threads after Instagram has it. Never raises; the result goes in published.json."""
-    if post["format"] != "oneliner" or not all(threads.credentials()):
+    if post["format"] not in ("oneliner", "ab") or not all(threads.credentials()):
         return None
     receipt = post_dir / "published.json"
     published = json.loads(receipt.read_text())

@@ -1,0 +1,156 @@
+{
+  "note": "Sites the owner approves as inputs. Feeds only: no post text, no facts. Add or remove a line to change what the weekly job reads. Official sources are listed apart because a rights or news Reel may state a fact only from one of them. Listing pages are read by Google's fetcher through the Gemini API (URL context), because Reddit refuses cloud servers; they give titles and a short preview, with no score and no link. A page lists its readers in order, a ladder, most accurate first: \"tavily\" (Tavily Extract, the real page text; needs TAVILY_API_KEY; cannot read Reddit, which costs nothing to find out), \"jina\" (Jina Reader, free, no key, gives page text and links; Reddit refuses it), \"gemini\" (Google's fetcher through the Gemini API) The first that returns items wins; one that fails rests and is tried again the next day. A search is a broad query about the audience, never about a kind of story: the filter decides what is useful. Searches cost 1 credit each on the free Tavily plan (1,000 a month).",
+  "feeds": [
+    {
+      "name": "HR Katha",
+      "url": "https://www.hrkatha.com/feed/",
+      "kind": "news"
+    },
+    {
+      "name": "Asianet Newsable",
+      "url": "https://newsable.asianetnews.com/rss",
+      "kind": "news"
+    },
+    {
+      "name": "The Hindu business",
+      "url": "https://www.thehindu.com/business/feeder/default.rss",
+      "kind": "news"
+    },
+    {
+      "name": "Livemint companies",
+      "url": "https://www.livemint.com/rss/companies",
+      "kind": "news"
+    },
+    {
+      "name": "PIB",
+      "url": "https://pib.gov.in/RssMain.aspx?ModId=6&Lang=1&Regid=3",
+      "kind": "official"
+    }
+  ],
+  "official_domains": [
+    "pib.gov.in",
+    "labour.gov.in",
+    "indiacode.nic.in",
+    "epfindia.gov.in",
+    "incometax.gov.in",
+    "egazette.gov.in",
+    "gov.in",
+    "nic.in",
+    "who.int",
+    "ilo.org"
+  ],
+  "pages": [
+    {
+      "name": "r/IndianWorkplace",
+      "url": "https://www.reddit.com/r/IndianWorkplace/new/",
+      "kind": "post",
+      "readers": [
+        "tavily",
+        "gemini"
+      ]
+    },
+    {
+      "name": "r/developersIndia",
+      "url": "https://www.reddit.com/r/developersIndia/new/",
+      "kind": "post",
+      "readers": [
+        "tavily",
+        "gemini"
+      ]
+    },
+    {
+      "name": "Storyboard18 trending",
+      "url": "https://www.storyboard18.com/trending/",
+      "kind": "news",
+      "readers": [
+        "tavily",
+        "jina",
+        "gemini"
+      ]
+    },
+    {
+      "name": "Gulf News India",
+      "url": "https://www.gulfnews.com/world/asia/india",
+      "kind": "news",
+      "readers": [
+        "tavily",
+        "jina",
+        "gemini"
+      ]
+    }
+  ],
+  "searches": [
+    {
+      "name": "Tavily: India workplace news",
+      "query": "India employees workplace news",
+      "topic": "news",
+      "time_range": "week",
+      "max_results": 20
+    },
+    {
+      "name": "Tavily: India first job freshers",
+      "query": "India freshers first job employees",
+      "topic": "news",
+      "time_range": "week",
+      "max_results": 20
+    }
+  ],
+  "principles": {
+    "note": "Where lessons for managers come from: opinions of people who manage, research, and official guidance. The owner curates every line. A lesson is a perspective with a link, never a fact stated as settled.",
+    "feeds": [
+      {
+        "name": "Zerodha Z-Connect",
+        "url": "https://zerodha.com/z-connect/feed",
+        "kind": "opinion"
+      },
+      {
+        "name": "Seth Godin",
+        "url": "https://seths.blog/feed/",
+        "kind": "opinion"
+      },
+      {
+        "name": "Farnam Street",
+        "url": "https://fs.blog/feed/",
+        "kind": "opinion"
+      },
+      {
+        "name": "Lenny's Newsletter",
+        "url": "https://www.lennysnewsletter.com/feed",
+        "kind": "opinion"
+      },
+      {
+        "name": "Zoho blog",
+        "url": "https://www.zoho.com/blog/feed",
+        "kind": "opinion"
+      }
+    ],
+    "searches": [
+      {
+        "name": "Evidence: managers and wellbeing",
+        "query": "how a manager's behaviour affects employee wellbeing and performance",
+        "topic": "general",
+        "max_results": 10,
+        "include_domains": [
+          "gallup.com",
+          "who.int",
+          "ilo.org",
+          "apa.org",
+          "shrm.org",
+          "mckinsey.com",
+          "deloitte.com"
+        ],
+        "kind": "research"
+      }
+    ],
+    "openalex": [
+      {
+        "name": "OpenAlex: supervisor behaviour",
+        "query": "supervisor behaviour employee wellbeing",
+        "from_year": 2020,
+        "per_page": 15,
+        "kind": "research"
+      }
+    ]
+  },
+  "official_domains_note": "Sites whose pages may ground a rule or a news Reel. Owner-curated; a bare domain covers its subdomains."
+}

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {ReviewWindow, REVIEW_HOUR, parseWindowReply} from '../src/review-window.js';
+import {ReviewWindow, REVIEW_HOUR, parseWindowReply, validVideo} from '../src/review-window.js';
 const token = 'a'.repeat(16), manifest = 'b'.repeat(64);
 let now = 100000, deliveries = 0, dispatches = 0, telegramFails = false, githubFails = false;
 Date.now = () => now;
@@ -130,4 +130,36 @@ for (const tail of ['images 0','images 10','images 2,2','images 2-4','images 2,'
  }
  globalThis.fetch=original;
  console.log('review-window: album preview, HTML card and photo checks passed');
+}
+{
+ // A Reel preview: the whole video (not the still), then the card. A video that is not this
+ // preview's own reel.mp4 is refused, and so is a video with no card flow.
+ const original=globalThis.fetch, sent=[];
+ globalThis.fetch=async(url,init)=>{
+  if(!url.includes('telegram.org')) return original(url,init);
+  sent.push({method:url.split('/').pop(),body:JSON.parse(init.body)});
+  return Response.json({ok:true,result:{message_id:43}});
+ };
+ const base=`https://media.suresilly.com/slides/a-deck/reviews/${token}`;
+ const photos=[`${base}/slides/01.jpg`], video=`${base}/reel.mp4`;
+ const card=`<b>New post ready</b>\nReview ID: <code>${token}</code>`;
+ const {obj}=object();
+ const r=await call(obj,'register',{...preview,caption:card,html:true,photos,video,resources:''});
+ assert.equal(r.state,'waiting'); assert.equal(r.message_id,43); assert.equal(r.video_sent,true);   // the caller can tell the video went
+ assert.deepEqual(sent.map(x=>x.method),['sendVideo','sendMessage']);
+ assert.equal(sent[0].body.video,video); assert.equal(sent[0].body.supports_streaming,true);
+ assert.equal(sent[0].body.photo,undefined);
+ assert.equal(sent[1].body.text,card);
+ assert.equal(validVideo(video,'a-deck',token),true);
+ for (const bad of ['https://evil.example/reel.mp4',`${base}/reel.mp4?x=1`,`${base}/slides/01.jpg`,
+                    video.replace('a-deck','other'),video.replace(token,'0'.repeat(16)),42,'']) {
+  assert.equal((await call(object().obj,'register',{...preview,caption:card,html:true,photos,video:bad,resources:''})).status,400,String(bad));
+ }
+ assert.equal((await call(object().obj,'register',{...preview,caption:card,video,resources:''})).status,400); // no photos
+ globalThis.fetch=async(url,init)=>url.includes('telegram.org')?(sent.push(url.split('/').pop()),Response.json({ok:false})):original(url,init);
+ const failing=object();                                   // Telegram refuses the video: fail closed, no posting timer
+ const f=await call(failing.obj,'register',{...preview,caption:card,html:true,photos,video,resources:''});
+ assert.equal(f.status,502); assert.equal(failing.storage.alarm,undefined);
+ globalThis.fetch=original;
+ console.log('review-window: whole-Reel preview and video checks passed');
 }

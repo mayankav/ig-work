@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from suresilly import instagram, review, run
+from suresilly import instagram, mascot, review, run
 
 
 def make_post(folder, count=2):
@@ -45,7 +45,7 @@ def test_api_refuses_a_bad_token():
 
 
 def test_format_rotation():
-    assert run.format_for("2026-09-11_2000") == "oneliner"
+    assert run.format_for("2026-09-11_2000") == "ab"
     mornings = {run.format_for("2026-09-11_0800"), run.format_for("2026-09-12_0800")}
     assert mornings == {"list", "story"}
     assert run.format_for("") == "list"
@@ -62,15 +62,30 @@ def test_prune_removes_only_old_dated_folders(tmp_path):
     assert sorted(p.name for p in tmp_path.iterdir()) == ["29990101_0800_new", "CNAME-folder"]
 
 
-def test_redraw_changes_only_the_named_poses(tmp_path, monkeypatch):
+def test_redraw_gives_the_cover_a_new_donkey_and_nothing_else(tmp_path, monkeypatch):
     post = make_post(tmp_path / "p", count=3)
     monkeypatch.setattr(run, "draw", lambda data, folder: (folder / "post.json").write_text(json.dumps(data)))
-    run.redraw(post, [2, 9])
+    run.redraw(post, [1, 2, 9])
     after = json.loads((post / "post.json").read_text())["slides"]
-    assert [s["pose"] for s in after][0::2] == ["sitting", "sitting"]
-    assert after[1]["pose"] != "sitting" and [s["text"] for s in after] == ["line 1", "line 2", "line 3"]
+    assert after[0]["pose"] != "sitting" and [s["pose"] for s in after[1:]] == ["sitting", "sitting"]
+    assert [s["text"] for s in after] == ["line 1", "line 2", "line 3"]
     with pytest.raises(ValueError, match="nothing to redo"):
         run.redraw(post, [7])
+    with pytest.raises(ValueError, match="Only the cover"):
+        run.redraw(post, [2, 3])
+
+
+def test_redraw_changes_both_poses_of_a_oneliner_and_keeps_the_twist_in_its_mood(tmp_path, monkeypatch):
+    post = make_post(tmp_path / "p", count=1)
+    data = json.loads((post / "post.json").read_text())
+    data["format"] = "oneliner"
+    data["slides"][0].update(setup="a b c", twist="d e", mood="wistful", pose="looking_far", twist_pose="laughing")
+    (post / "post.json").write_text(json.dumps(data))
+    monkeypatch.setattr(run, "draw", lambda data, folder: (folder / "post.json").write_text(json.dumps(data)))
+    run.redraw(post, [1])
+    slide = json.loads((post / "post.json").read_text())["slides"][0]
+    assert slide["pose"] != "looking_far" and slide["twist_pose"] != "laughing"
+    assert slide["twist_pose"] in mascot.POSES["joy"] and slide["pose"] != slide["twist_pose"]
 
 
 def test_halt_file_stops_a_build(tmp_path, monkeypatch):
@@ -183,8 +198,8 @@ def test_alt_text_goes_on_each_carousel_child_and_not_the_parent(tmp_path, monke
     # after posting, Instagram shows alt text on only one of the two slides
     sent = fake_graph(monkeypatch, live=Reply(200, {"children": {"data": [{"id": "c1", "alt_text": "x"}, {"id": "c2"}]}}))
     alts = [instagram.alt_text(text) for text in ("a short [[title]]", "you said,\n[[i missed you]].")]
-    assert alts == ["a short title. A small green donkey is in the corner.",
-                    "you said, i missed you. A small green donkey is in the corner."]
+    assert alts == ["a short title. Silly, the small green mascot, is in the corner.",
+                    "you said, i missed you. Silly, the small green mascot, is in the corner."]
     post = make_post(tmp_path / "p")
     instagram.publish(post, ["https://a/1.jpg", "https://a/2.jpg"], "hello", alts)
     posts = [data for method, _, data in sent if method == "POST"]
@@ -200,7 +215,7 @@ def test_alt_text_goes_on_each_carousel_child_and_not_the_parent(tmp_path, monke
 def test_a_refused_alt_text_is_dropped_and_the_post_still_goes_out(tmp_path, monkeypatch):
     sent = fake_graph(monkeypatch, refuse=lambda data: "alt_text" in data and "(#100) Invalid parameter")
     post = make_post(tmp_path / "p", count=1)
-    assert instagram.publish(post, ["https://a/1.jpg"], "hi", ["words. A small green donkey is in the corner."])
+    assert instagram.publish(post, ["https://a/1.jpg"], "hi", ["words. Silly, the small green mascot, is in the corner."])
     first, retry = [data for method, name, data in sent if method == "POST" and name == "media"]
     assert first["alt_text"] and "alt_text" not in retry and retry["caption"] == first["caption"] == "hi"
     assert json.loads((post / "published.json").read_text())["alt_text"] == "0/1"
@@ -214,7 +229,7 @@ def test_a_refused_alt_text_is_dropped_and_the_post_still_goes_out(tmp_path, mon
 def test_a_reel_sends_alt_text_and_still_goes_out_if_refused(tmp_path, monkeypatch):
     sent = fake_graph(monkeypatch, live=Reply(200, {"alt_text": "x"}))
     post = make_post(tmp_path / "p", count=1)
-    assert instagram.publish_reel(post, "https://a/reel.mp4", "hi", "words. A small green donkey is in the corner.")
+    assert instagram.publish_reel(post, "https://a/reel.mp4", "hi", "words. Silly, the small green mascot, is in the corner.")
     reel = [data for method, name, data in sent if method == "POST" and name == "media"]
     assert len(reel) == 1 and reel[0]["media_type"] == "REELS" and reel[0]["alt_text"].startswith("words.")
     assert sent[-1][2]["fields"] == "alt_text"
@@ -402,3 +417,157 @@ def test_a_broken_key_renewer_is_reported_not_crashed(monkeypatch):
     monkeypatch.setenv("SECRETS_PAT", "pat")
     monkeypatch.setattr(tokens, "due", lambda: (_ for _ in ()).throw(RuntimeError("GitHub refused `gh secret list`: 401")))
     assert tokens.keep_alive() == [("SECRETS_PAT", "GitHub refused `gh secret list`: 401")]
+
+
+def test_a_reel_asks_for_its_cover_frame_and_goes_out_without_it_if_refused(tmp_path, monkeypatch):
+    monkeypatch.setenv("IG_USER_ID", "1")
+    monkeypatch.setenv("IG_ACCESS_TOKEN", "IGAAtoken")
+    sent = []
+
+    def fake(refuse):
+        def call(method, url, **params):
+            sent.append((method, url.rsplit("/", 1)[-1], params))
+            if method == "GET":
+                return {"status_code": "FINISHED"}
+            if url.endswith("media_publish"):
+                return {"id": "17900000000000003"}
+            if refuse and params.get("thumb_offset"):
+                raise instagram.InstagramError("Instagram said HTTP 400: thumb_offset")
+            return {"id": "c1"}
+        return call
+
+    monkeypatch.setattr(instagram, "_call", fake(refuse=False))
+    assert instagram.publish_reel(make_post(tmp_path / "a", count=1), "https://a/r.mp4", "hi", thumb_offset=4100)
+    assert [p for m, n, p in sent if n == "media"][0]["thumb_offset"] == 4100
+    sent.clear()
+    monkeypatch.setattr(instagram, "_call", fake(refuse=True))
+    assert instagram.publish_reel(make_post(tmp_path / "b", count=1), "https://a/r.mp4", "hi", thumb_offset=4100)
+    containers = [p for m, n, p in sent if n == "media"]
+    assert "thumb_offset" in containers[0] and "thumb_offset" not in containers[-1]
+    sent.clear()
+    assert instagram.publish_reel(make_post(tmp_path / "c", count=1), "https://a/r.mp4", "hi")
+    assert "thumb_offset" not in [p for m, n, p in sent if n == "media"][0]
+
+
+def ab_post(folder):
+    make_post(folder, count=1)
+    slide = {"hook": "“on my way”", "a": "“bas 5 min”", "b": "early", "win": "“bas 5 min”", "send": "send this to the friend who is “on my way”",
+             "text": "t", "mood": "joy", "pose": "phone_call", "reveal_pose": "on_back", "send_pose": "beckoning"}
+    (folder / "post.json").write_text(json.dumps({"format": "ab", "topic": "friendship", "caption": "c", "slides": [slide]}))
+    return folder
+
+
+def capture_register(monkeypatch, raises=None):
+    sent = []
+
+    def api(token, operation, body=None):
+        if operation == "register":
+            sent.append(body)
+            if raises:
+                raise raises
+            return {"state": "waiting", "message_id": 5}
+        return {"state": "waiting"}
+
+    monkeypatch.setattr(run, "wait_for_hosting", lambda record: None)
+    monkeypatch.setattr(run.review, "api", api)
+    return sent
+
+
+def test_register_sends_the_whole_reel_to_telegram_when_there_is_one(tmp_path, monkeypatch):
+    post = ab_post(tmp_path / "20261006_2000_x")
+    (post / "reel.mp4").write_bytes(b"video")
+    record = review.prepare(post)
+    sent = capture_register(monkeypatch)
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    run.register(post)
+    assert sent[0]["video"] == f"https://media.suresilly.com/slides/20261006_2000_x/reviews/{record['token']}/reel.mp4"
+    assert sent[0]["photos"] and "Review ID:" in sent[0]["caption"]
+
+
+def test_register_sends_no_video_for_a_post_that_is_not_a_reel(tmp_path, monkeypatch):
+    post = make_post(tmp_path / "20260911_0800_x")
+    (post / "post.json").write_text(json.dumps({"format": "list", "topic": "love", "caption": "c",
+                                                "slides": [{"text": "hook"}, {"text": "two"}]}))
+    review.prepare(post)
+    sent = capture_register(monkeypatch)
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    run.register(post)
+    assert "video" not in sent[0] and sent[0]["photos"]
+
+
+def test_a_refused_video_is_an_error_not_a_quiet_preview_without_it(tmp_path, monkeypatch):
+    post = ab_post(tmp_path / "20261006_2000_x")
+    (post / "reel.mp4").write_bytes(b"video")
+    review.prepare(post)
+    sent = capture_register(monkeypatch, raises=ValueError("The review service refused register: Invalid preview video"))
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    with pytest.raises(ValueError, match="Invalid preview video"):
+        run.register(post)
+    assert len(sent) == 1                                    # no second try with the plain card
+
+
+def test_redraw_gives_an_ab_reel_new_poses_and_new_sounds(tmp_path, monkeypatch):
+    post = ab_post(tmp_path / "20261006_2000_x")
+    monkeypatch.setattr(run, "draw", lambda data, folder: (folder / "post.json").write_text(json.dumps(data)))
+    before = json.loads((post / "post.json").read_text())["slides"][0]
+    run.redraw(post, [1])
+    data = json.loads((post / "post.json").read_text())
+    after = data["slides"][0]
+    old = {before["pose"], before["reveal_pose"], before["send_pose"]}
+    new = {after["pose"], after["reveal_pose"], after["send_pose"]}
+    assert len(new) == 3 and not new & old and data["sound_seed"]
+    assert (after["hook"], after["send"]) == (before["hook"], before["send"])      # the words stay
+    with pytest.raises(ValueError, match="nothing to redo"):
+        run.redraw(post, [2])                              # a one-slide post has no slide 2
+
+
+def test_build_makes_an_ab_post_for_the_evening_slot_with_three_poses(tmp_path, monkeypatch):
+    from suresilly import write
+    monkeypatch.setattr(run, "POSTS", tmp_path)
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    monkeypatch.setattr(run, "STATE", tmp_path / "state")
+    monkeypatch.setattr(run, "slot_taken", lambda slot: False)
+    drawn = []
+    monkeypatch.setattr(run, "draw", lambda post, folder: drawn.append((post, folder)))
+    raw = {"hook": "“on my way”", "a": "“bas 5 min”", "b": "arrives early", "win": "“bas 5 min” (in bed)",
+           "send": "send this to the friend who is always “on my way”", "pose": "phone_call", "reveal_pose": "phone_call", "send_pose": None}
+    tidied = write.tidy({"slides": [raw]}, "ab")
+    monkeypatch.setattr(run, "write_post", lambda fmt, seed: {"format": fmt, "topic": "friendship", "person": "a close friend",
+                                                              "slides": tidied, "caption": "c", "alt": "a", "hook_options": [], "model": "m"})
+    folder = run.build(None, "2026-10-06_2000")                     # no format given: the slot decides
+    post, where = drawn[0]
+    slide = post["slides"][0]
+    assert post["format"] == "ab" and where == folder and folder.name.endswith("_on-my-way")
+    assert len({slide["pose"], slide["reveal_pose"], slide["send_pose"]}) == 3          # a repeated or missing pose is replaced
+    assert slide["pose"] == "phone_call" and slide["text"].startswith("“on my way” which friend are you?")
+
+
+def test_a_reel_whose_video_the_worker_did_not_send_gets_a_warning(tmp_path, monkeypatch):
+    post = ab_post(tmp_path / "20261006_2000_x")
+    (post / "reel.mp4").write_bytes(b"video")
+    review.prepare(post)
+    sent = capture_register(monkeypatch)
+    messages = []
+    monkeypatch.setattr(run.telegram, "send", lambda *texts, **kw: messages.append(texts[0]))
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    run.register(post)                                       # the capture's reply has no video_sent: an old Worker
+    assert len(messages) == 1 and "did not reach you" in messages[0] and "wrangler deploy" in messages[0]
+    assert "disapprove" in messages[0] and "unseen" in messages[0]            # what you can reply, and what silence does
+
+
+def test_no_warning_when_the_worker_sent_the_video_or_there_is_no_reel(tmp_path, monkeypatch):
+    messages = []
+    monkeypatch.setattr(run.telegram, "send", lambda *texts, **kw: messages.append(texts[0]))
+    monkeypatch.setattr(run, "ROOT", tmp_path)
+    post = ab_post(tmp_path / "20261006_2000_x")
+    (post / "reel.mp4").write_bytes(b"video")
+    review.prepare(post)
+    monkeypatch.setattr(run, "wait_for_hosting", lambda record: None)
+    monkeypatch.setattr(run.review, "api", lambda token, op, body=None: {"state": "waiting", "message_id": 5, "video_sent": True})
+    run.register(post)
+    plain = make_post(tmp_path / "20260911_0800_y")
+    (plain / "post.json").write_text(json.dumps({"format": "list", "topic": "love", "caption": "c", "slides": [{"text": "a"}, {"text": "b"}]}))
+    review.prepare(plain)
+    monkeypatch.setattr(run.review, "api", lambda token, op, body=None: {"state": "waiting", "message_id": 5})
+    run.register(plain)
+    assert messages == []
