@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "you always claimed the top bunk, leaving the floor for me; i’d love that view now",
+      "mood": "warm",
+      "pose": "winking"
+    }
+  ],
+  "caption": "the ceiling used to be a secret only you could see\nnow it feels like a quiet place i still want to reach\nsend this to the older sibling who still saves the top bunk for you on lazy Sundays",
+  "alt": "a green donkey stands presenting while a line reads about an older sibling taking the top bunk, ending with a wish to have that view now.",
+  "hook_options": [
+    "you always claimed the top bunk, leaving the floor for me; i’d love that view now",
+    "you hoarded the highest shelf, so i learned to stretch for the nightlight; i’d trade for a step up",
+    "you kept the attic ladder for yourself, while i climbed the stairs; i’d gladly take that height"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-07_2000",
+  "created_at": "2026-10-07T14:32:07Z",
+  "slug": "20261007_1432_you-always-claimed-the-top-bunk",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "warm"
+  }
+}
