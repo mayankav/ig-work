@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 siblings \u00b7 \ud83c\udfac Reel, 8.4s, warm tune\n\n<b>\u201cyou always claimed the top bunk, leaving the floor for me; i\u2019d love that view now\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the ceiling used to be a secret only you could see\nnow it feels like a quiet place i still want to reach\nsend this to the older sibling who still saves the top bunk for you on lazy Sundays</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>de3fd08d78ecfcc4</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791387762832,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 562,
   "delivered_at": 1791384162792,
-  "deadline": 1791387762792
+  "deadline": 1791387762792,
+  "action": {
+    "id": "rv-de3fd08d78ecfcc4-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791388364530
+  },
+  "claimed": false,
+  "claim_expires": 1791390212373,
+  "result": {
+    "action_id": "rv-de3fd08d78ecfcc4-timeout",
+    "state": "published",
+    "media_id": "17959328448248135",
+    "token": "de3fd08d78ecfcc4"
+  }
 }
