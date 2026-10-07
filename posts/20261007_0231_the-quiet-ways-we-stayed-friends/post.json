@@ -1,0 +1,64 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a best friend from school",
+  "shape": "small things someone does that secretly mean 'i love you'",
+  "slides": [
+    {
+      "text": "the quiet ways we stayed friends since the school bus",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "they always took the wobbly stool in science class, so you could have the one that didn't squeak.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "they broke the cheap yellow pencil when yours snapped, and let you keep the half with [[the pink eraser]].",
+      "mood": "calm",
+      "pose": "reading"
+    },
+    {
+      "text": "they waited by the rusty bike racks in the drizzle, pretending they lost their key so you didn't have to walk home alone.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "they copied the history homework onto a scrap of lined paper on the bus, so you could scribble it down before the first bell.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "they stayed on the landline in the dark hallway till your dad got home, just humming to keep you company.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "they still use the silly secret name you gave the maths teacher, even when you are both sitting in [[serious offices]].",
+      "mood": "joy",
+      "pose": "laughing"
+    },
+    {
+      "text": "they never asked why you stopped calling during that bad winter, they just saved [[your old spot]] on the sofa.",
+      "mood": "warm",
+      "pose": "warm_mug"
+    },
+    {
+      "text": "save this for the morning you hear that old song you both used to scream in the back of the car.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "we grew up and the keys got heavier, but some people still remember the exact street where you lost your school bag.\nthe ones who still laugh at the jokes you made when you were twelve.\nsave this for the person who still calls you by your school nickname.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "A series of slides featuring a small green donkey, illustrating the quiet ways childhood friends show they care, from sharing pencils to keeping each other company on the phone.",
+  "hook_options": [
+    "the quiet ways we stayed friends since the school bus",
+    "how to know you met your person at fifteen",
+    "the small things we did to survive the school hallway"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-07_0800",
+  "created_at": "2026-10-07T02:31:38Z",
+  "slug": "20261007_0231_the-quiet-ways-we-stayed-friends"
+}
