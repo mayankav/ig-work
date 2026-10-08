@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "one day you will miss the [[double phone call]] she made just to ask if you read the text she sent five minutes ago.",
+      "mood": "warm",
+      "pose": "phone_call"
+    }
+  ],
+  "caption": "she just wanted to hear your voice, even if she only called to ask what you had for lunch.\nsend this to the mum who still rings twice.",
+  "alt": "a small green donkey holding a phone to its ear with a warm smile, next to lowercase text about missing a double phone call from your mum.",
+  "hook_options": [
+    "one day you will miss the [[double phone call]] she made just to ask if you read the text she sent five minutes ago.",
+    "one day you will miss her [[wiping the kitchen counter]] while you are still standing there trying to eat.",
+    "one day you will miss the [[three urgent texts]] she sent just to tell you it was raining where she is."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-08_2000",
+  "created_at": "2026-10-08T14:32:25Z",
+  "slug": "20261008_1432_one-day-you-will-miss-the",
+  "reel": {
+    "seconds": 11.6,
+    "tune": "warm"
+  }
+}
