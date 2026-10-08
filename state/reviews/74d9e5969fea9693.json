@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 family \u00b7 7 slides\n\n<b>\u201cevery sunday at four, grandma lost her reading glasses the moment dad picked up the car keys.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. every sunday at four, grandma lost her reading glasses the moment dad picked up the car keys.\n2. dad was already waiting by the car, so she pulled me back into the hallway by the sleeve.\n3. we checked behind the clock on the mantelpiece and under the cushion on her armchair.\n4. we pulled open the sideboard drawer, shifting the yellow receipts around until dad tapped on the glass.\n5. but they were tucked into her cardigan pocket the whole time.\n6. she just wanted five more minutes of running through the hall before the house went quiet.\n7. i am grown now, and when it is time to leave, i still take my coat off and ask where she left them.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>it took twenty years to understand why grandma never cleared the tea mugs until the drive was completely empty.\nthe front room must have sounded very large at half past four.\nsend this to the cousin who used to search the hallway rug with you.\n\n#grandma #grandparents #grandmashouse</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>74d9e5969fea9693</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791430407565,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 571,
   "delivered_at": 1791426807543,
-  "deadline": 1791430407543
+  "deadline": 1791430407543,
+  "action": {
+    "id": "rv-74d9e5969fea9693-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791431009287
+  },
+  "claimed": false,
+  "claim_expires": 1791432870101,
+  "result": {
+    "action_id": "rv-74d9e5969fea9693-timeout",
+    "state": "published",
+    "media_id": "18094555013405485",
+    "token": "74d9e5969fea9693"
+  }
 }
