@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "a parent's odd habit that the child only understands years later",
+  "slides": [
+    {
+      "text": "every sunday at four, grandma lost her reading glasses the moment dad picked up the car keys.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "dad was already waiting by the car, so she pulled me back into the hallway by the sleeve.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "we checked behind the clock on the mantelpiece and under the cushion on her armchair.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "we pulled open the sideboard drawer, shifting the yellow receipts around until dad tapped on the glass.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "but they were tucked into her cardigan pocket the whole time.",
+      "mood": "wise",
+      "pose": "realising"
+    },
+    {
+      "text": "she just wanted [[five more minutes]] of running through the hall before the house went quiet.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "i am grown now, and when it is time to leave, i still take my coat off and ask where she left them.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "it took twenty years to understand why grandma never cleared the tea mugs until the drive was completely empty.\nthe front room must have sounded very large at half past four.\nsend this to the cousin who used to search the hallway rug with you.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "a story about a grandmother who hid her glasses every sunday just to keep her grandchild in the house for five more minutes.",
+  "hook_options": [
+    "every sunday at four, grandma lost her reading glasses the moment dad picked up the car keys.",
+    "we never once left grandma's house on time, and it was always because of her glasses.",
+    "grandma always forgot where she left her glasses the second my coat was zipped."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-08_0800",
+  "created_at": "2026-10-08T02:31:32Z",
+  "slug": "20261008_0231_every-sunday-at-four-grandma-lost"
+}
