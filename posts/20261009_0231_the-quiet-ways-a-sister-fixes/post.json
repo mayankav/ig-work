@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "little things that quietly fix a bad day",
+  "slides": [
+    {
+      "text": "the quiet ways a sister fixes a bad day",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "leaving the television humming in the front room, so you don't walk into a silent house at six.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "pretending she didn't see you pull [[her warm grey sweatshirt]] off the bedroom door hook.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "sitting on the edge of your bed in the dark, letting you complain about the same things until you fell asleep.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "dropping two metal spoons on the kitchen counter beside the ice cream tub, without asking a single question.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "walking two paces ahead on the gravel path, so you can wipe your face in the cold air [[without having to hide it]].",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "sending the most embarrassing photo of you both from ten years ago into the family group chat, just to change the subject.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "save this for the quiet evening you need to text her first.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "she never makes a big speech when things go wrong.\na sister just leaves her thick socks on your bed and takes the blame when you are late.\nsave this for the next long tuesday when you need to remember she is in your corner.",
+  "alt": "A carousel of slides illustrating the quiet, practical ways a sister helps make a difficult day easier.",
+  "hook_options": [
+    "the quiet ways a sister fixes a bad day",
+    "little things a sister does when the day goes wrong",
+    "how a sister puts a bad day back together"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-09_0800",
+  "created_at": "2026-10-09T02:31:42Z",
+  "slug": "20261009_0231_the-quiet-ways-a-sister-fixes"
+}
