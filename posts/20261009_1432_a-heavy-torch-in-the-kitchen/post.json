@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "a heavy torch in the kitchen drawer with batteries you never had to buy. [[quiet wealth]].",
+      "mood": "calm",
+      "pose": "flashlight"
+    }
+  ],
+  "caption": "dad never made a speech about looking after things.\nhe just tested the switch every autumn and set it back by the pantry door.\nsend this to your dad if he's the one who always kept the fuse box labeled in pencil.\n\n#dad #dadquotes #fatherdaughter #fatherson",
+  "alt": "a small green donkey holds a flashlight beside text about having a working torch in the kitchen drawer.",
+  "hook_options": [
+    "a heavy torch in the kitchen drawer with batteries you never had to buy. [[quiet wealth]].",
+    "a tyre gauge in the glovebox that never lost its cap. [[quiet wealth]].",
+    "a set of jumper cables in the boot you never had to pay for. [[pure luxury]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-09_2000",
+  "created_at": "2026-10-09T14:32:19Z",
+  "slug": "20261009_1432_a-heavy-torch-in-the-kitchen",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "calm"
+  }
+}
