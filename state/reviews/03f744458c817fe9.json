@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 siblings \u00b7 8 slides\n\n<b>\u201cthe quiet ways a sister fixes a bad day\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. the quiet ways a sister fixes a bad day\n2. leaving the television humming in the front room, so you don't walk into a silent house at six.\n3. pretending she didn't see you pull her warm grey sweatshirt off the bedroom door hook.\n4. sitting on the edge of your bed in the dark, letting you complain about the same things until you fell asleep.\n5. dropping two metal spoons on the kitchen counter beside the ice cream tub, without asking a single question.\n6. walking two paces ahead on the gravel path, so you can wipe your face in the cold air without having to hide it.\n7. sending the most embarrassing photo of you both from ten years ago into the family group chat, just to change the subject.\n8. save this for the quiet evening you need to text her first.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she never makes a big speech when things go wrong.\na sister just leaves her thick socks on your bed and takes the blame when you are late.\nsave this for the next long tuesday when you need to remember she is in your corner.</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>03f744458c817fe9</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791517228386,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 584,
   "delivered_at": 1791513628346,
-  "deadline": 1791517228346
+  "deadline": 1791517228346,
+  "action": {
+    "id": "rv-03f744458c817fe9-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791517829984
+  },
+  "claimed": false,
+  "claim_expires": 1791519688541,
+  "result": {
+    "action_id": "rv-03f744458c817fe9-timeout",
+    "state": "published",
+    "media_id": "18114459344044457",
+    "token": "03f744458c817fe9"
+  }
 }
