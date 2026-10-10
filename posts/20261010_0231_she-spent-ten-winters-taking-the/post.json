@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "the first time you look after someone who used to look after you, in one small everyday way",
+  "slides": [
+    {
+      "text": "she spent ten winters taking the wet side of the umbrella, until last tuesday.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "it started walking back from the bus stop at four, when she tilted the spokes so the drips missed my blazer.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "she kept the dry middle for me every november, while her own left sleeve soaked straight through.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "but last tuesday we came out of the clinic doors into the sleet, and her hands stayed deep in her coat pockets.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "so i took the handle, popped the ribs open, and leaned the wet curve over my own shoulder.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "she pulled her wool scarf up to her chin, looked down at the pavement, and didn't try to take it back.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "[[thank you for taking the wet shoulder]] until i was finally tall enough to carry it.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "she went into every cold room first, just so the radiator had time to click on.\nit took twenty years to notice her fingers got red, too.\nsend this to the older sister who still reaches for your bag when you get off the train.\n\n#siblings #sisterlove #siblinglove #oldersiblings",
+  "alt": "A short story about an older sister who always tilted the umbrella to keep you dry, until the day you finally held it over her.",
+  "hook_options": [
+    "she spent ten winters taking the wet side of the umbrella, until last tuesday.",
+    "for ten years she walked with one soaked sleeve so my blazer stayed dry, until last week.",
+    "she was always the one holding the umbrella crooked, taking the rain on her own coat."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-10_0800",
+  "created_at": "2026-10-10T02:31:54Z",
+  "slug": "20261010_0231_she-spent-ten-winters-taking-the"
+}
