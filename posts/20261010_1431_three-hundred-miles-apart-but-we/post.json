@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "three hundred miles apart, but [[we still send the storm radar]] twenty minutes before the rain hits either house.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "we were never built for long phone calls on a tuesday.\nhe just watches the yellow clouds moving toward my town, and i track his.\nsend this to your dad if he still texts you to roll the windows up when the wind picks up.\n\n#dad #dadquotes #fatherdaughter #fatherson",
+  "alt": "a single slide about staying connected to dad across hundreds of miles by texting the storm radar before it rains.",
+  "hook_options": [
+    "three hundred miles apart, but [[we still send the storm radar]] twenty minutes before the rain hits either house.",
+    "four hundred miles away, but [[we still text the thermometer reading]] at seven just to see who froze first.",
+    "two states over, but [[we still send the weather radar]] twenty minutes before the clouds reach either roof."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-10_2000",
+  "created_at": "2026-10-10T14:31:46Z",
+  "slug": "20261010_1431_three-hundred-miles-apart-but-we",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "wistful"
+  }
+}
