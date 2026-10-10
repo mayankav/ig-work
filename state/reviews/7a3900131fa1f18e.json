@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 parents \u00b7 \ud83c\udfac Reel, 9.6s, wistful tune\n\n<b>\u201cthree hundred miles apart, but we still send the storm radar twenty minutes before the rain hits either house.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we were never built for long phone calls on a tuesday.\nhe just watches the yellow clouds moving toward my town, and i track his.\nsend this to your dad if he still texts you to roll the windows up when the wind picks up.\n\n#dad #dadquotes #fatherdaughter #fatherson</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>7a3900131fa1f18e</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791646845650,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 599,
   "delivered_at": 1791643245410,
-  "deadline": 1791646845410
+  "deadline": 1791646845410,
+  "action": {
+    "id": "rv-7a3900131fa1f18e-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791647447171
+  },
+  "claimed": false,
+  "claim_expires": 1791649297013,
+  "result": {
+    "action_id": "rv-7a3900131fa1f18e-timeout",
+    "state": "published",
+    "media_id": "17895942687417452",
+    "token": "7a3900131fa1f18e"
+  }
 }
