@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 siblings \u00b7 7 slides\n\n<b>\u201cshe spent ten winters taking the wet side of the umbrella, until last tuesday.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. she spent ten winters taking the wet side of the umbrella, until last tuesday.\n2. it started walking back from the bus stop at four, when she tilted the spokes so the drips missed my blazer.\n3. she kept the dry middle for me every november, while her own left sleeve soaked straight through.\n4. but last tuesday we came out of the clinic doors into the sleet, and her hands stayed deep in her coat pockets.\n5. so i took the handle, popped the ribs open, and leaned the wet curve over my own shoulder.\n6. she pulled her wool scarf up to her chin, looked down at the pavement, and didn't try to take it back.\n7. thank you for taking the wet shoulder until i was finally tall enough to carry it.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she went into every cold room first, just so the radiator had time to click on.\nit took twenty years to notice her fingers got red, too.\nsend this to the older sister who still reaches for your bag when you get off the train.\n\n#siblings #sisterlove #siblinglove #oldersiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>cfcab5493dc720c3</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791603653932,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 596,
   "delivered_at": 1791600053880,
-  "deadline": 1791603653880
+  "deadline": 1791603653880,
+  "action": {
+    "id": "rv-cfcab5493dc720c3-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791604255575
+  },
+  "claimed": false,
+  "claim_expires": 1791606104381,
+  "result": {
+    "action_id": "rv-cfcab5493dc720c3-timeout",
+    "state": "published",
+    "media_id": "17957466438253139",
+    "token": "cfcab5493dc720c3"
+  }
 }
