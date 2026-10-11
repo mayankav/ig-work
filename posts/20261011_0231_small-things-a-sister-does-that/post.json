@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "small things someone does that secretly mean 'i love you'",
+  "slides": [
+    {
+      "text": "small things a sister does that secretly mean i love you",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "plugging your phone into the kitchen socket first, even when hers was sitting at four percent.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "dropping a heavy fork on the dining room floor, just to derail the lecture before it reached you.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "leaving the last cold soda in the fridge door, then pushing it across the counter without looking up.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "telling mum you were in the upstairs bathroom, buying you [[five extra minutes]] to slip through the side door.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "pulling the heavy bedroom curtains shut on a saturday, so the morning sun didn't wake you before ten.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "answering on the first ring with [[\"what happened\"]], already angry at whoever made your voice sound small.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "save this for a day she gets on your nerves, to remember [[who stood by you]].",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "you spend half of growing up fighting over the bathroom mirror and the hall light.\nthen you leave home and realise nobody else knows exactly how that house felt.\na sister gives you a dozen quiet passes you never even had to ask for.\nsave this for the morning she texts you something unhinged before eight.\n\n#sisterlove #siblings #siblinglove #growingupwithsiblings",
+  "alt": "a carousel about small everyday things a sister does that secretly mean love.",
+  "hook_options": [
+    "small things a sister does that secretly mean i love you",
+    "tiny ways a sister tells you i love you without words",
+    "things your sister does that quietly mean i love you"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-11_0800",
+  "created_at": "2026-10-11T02:31:50Z",
+  "slug": "20261011_0231_small-things-a-sister-does-that"
+}
