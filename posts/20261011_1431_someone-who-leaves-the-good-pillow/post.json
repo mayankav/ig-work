@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "someone who leaves the good pillow on your side of the bed every night. [[pure gold]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "they never make a speech about it.\nyou pull back the duvet at midnight and the soft one is already on your side.\nsend this to your partner who gives up the better pillow without keeping score.\n\n#relationshipquotes #quotesaboutlove #livingtogether #marriagequotes",
+  "alt": "a text post with a small green donkey giving a knowing look, about a partner who quietly leaves the good pillow on your side of the bed.",
+  "hook_options": [
+    "someone who leaves the good pillow on your side of the bed every night. [[pure gold]].",
+    "someone who warms up the car five minutes before you even step outside. [[rare luck]].",
+    "someone who checks the front door deadbolt before you turn out the lamp. [[proper peace]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-11_2000",
+  "created_at": "2026-10-11T14:31:34Z",
+  "slug": "20261011_1431_someone-who-leaves-the-good-pillow",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "wistful"
+  }
+}
