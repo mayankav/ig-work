@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 adult life \u00b7 8 slides\n\n<b>\u201cat twenty-one, you never turned the latch on our flat door without pausing to listen first.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. at twenty-one, you never turned the latch on our flat door without pausing to listen first.\n2. you wanted to hear if the radio was humming, or if the hallway was completely dark.\n3. so if it was dark, you slipped your boots off outside and carried them by the laces.\n4. but if the kettle was on, you let the lock click and dropped your keys straight into the bowl.\n5. so three years later we split the deposit, taped up the boxes, and moved to different towns.\n6. but last weekend you drove four hours north to stay two nights at my new place.\n7. so at midnight you came in from the cold, easing the door shut with your elbow to make no sound.\n8. you still carry your boots by the laces when the lights are out.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we had thin walls and two mismatched mugs between us.\nyou never really lose the habit of moving quietly for someone who shared your space.\nsend this to the old roommate who still turns the door handle all the way down so the latch won't click.\n\n#roommates #flatmates #movingout #growingup</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>81f4538bb2defbde</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791776445708,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 622,
   "delivered_at": 1791772845660,
-  "deadline": 1791776445660
+  "deadline": 1791776445660,
+  "action": {
+    "id": "rv-81f4538bb2defbde-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791777047193
+  },
+  "claimed": false,
+  "claim_expires": 1791778896123,
+  "result": {
+    "action_id": "rv-81f4538bb2defbde-timeout",
+    "state": "published",
+    "media_id": "17998825443046040",
+    "token": "81f4538bb2defbde"
+  }
 }
