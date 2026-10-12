@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "the stranger who jumped my car lives three states away now, but [[we still text 'made it']] every first frost.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "she stood in the sleet with the red cables just to make sure the engine wouldn't die at the lights.\nthe stranger gave me her number at the kerb just to be certain i reached home, and never asked for anything back.\nsend this to the person who still tells you to text the second you pull into the drive.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness",
+  "alt": "a short text post about a kind stranger who helped jump-start a car years ago and the winter text message habit they still keep.",
+  "hook_options": [
+    "the stranger who jumped my car lives three states away now, but [[we still text 'made it']] every first frost.",
+    "we only spoke for five minutes in the snow, but [[we still text 'made it']] every first frost.",
+    "she lives three states away now, but the stranger who jumped my car [[still texts 'made it']] every november."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-12_2000",
+  "created_at": "2026-10-12T14:32:16Z",
+  "slug": "20261012_1432_the-stranger-who-jumped-my-car",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "warm"
+  }
+}
