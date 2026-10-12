@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 kindness \u00b7 \ud83c\udfac Reel, 10s, warm tune\n\n<b>\u201cthe stranger who jumped my car lives three states away now, but we still text 'made it' every first frost.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she stood in the sleet with the red cables just to make sure the engine wouldn't die at the lights.\nthe stranger gave me her number at the kerb just to be certain i reached home, and never asked for anything back.\nsend this to the person who still tells you to text the second you pull into the drive.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>eb930df2ba42d7b1</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791819343245,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 625,
   "delivered_at": 1791815743207,
-  "deadline": 1791819343207
+  "deadline": 1791819343207,
+  "action": {
+    "id": "rv-eb930df2ba42d7b1-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791819945324
+  },
+  "claimed": false,
+  "claim_expires": 1791821807100,
+  "result": {
+    "action_id": "rv-eb930df2ba42d7b1-timeout",
+    "state": "published",
+    "media_id": "18023298893944537",
+    "token": "eb930df2ba42d7b1"
+  }
 }
