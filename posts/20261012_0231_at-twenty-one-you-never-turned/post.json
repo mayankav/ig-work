@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "a younger self and an older self, one small moment apart",
+  "slides": [
+    {
+      "text": "at twenty-one, you never turned the latch on our flat door without pausing to listen first.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "you wanted to hear if the radio was humming, or if the hallway was completely dark.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "so if it was dark, you slipped your boots off outside and carried them by the laces.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "but if the kettle was on, you let the lock click and dropped your keys straight into the bowl.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "so three years later we split the deposit, taped up the boxes, and moved to different towns.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "but last weekend you drove four hours north to stay two nights at my new place.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "so at midnight you came in from the cold, [[easing the door shut with your elbow]] to make no sound.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "you still carry your boots by the laces when the lights are out.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we had thin walls and two mismatched mugs between us.\nyou never really lose the habit of moving quietly for someone who shared your space.\nsend this to the old roommate who still turns the door handle all the way down so the latch won't click.\n\n#roommates #flatmates #movingout #growingup",
+  "alt": "a story about an old roommate who still walks quietly through the hallway years later.",
+  "hook_options": [
+    "at twenty-one, you never turned the latch on our flat door without pausing to listen first.",
+    "we spent three years in that cold flat learning how to walk without making a sound.",
+    "you never used your front door key at midnight without listening at the wood first."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-12_0800",
+  "created_at": "2026-10-12T02:31:59Z",
+  "slug": "20261012_0231_at-twenty-one-you-never-turned"
+}
