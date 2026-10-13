@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "little things that quietly fix a bad day",
+  "slides": [
+    {
+      "text": "how a friend who moved away still fixes your worst afternoons",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "sending a six-minute voice note from the supermarket car park, just so your quiet kitchen has some noise while you unpack groceries.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "texting you a photo of an ugly green armchair at a yard sale, because she knows you would have hated it too.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "calling on a tuesday evening to say [[put me on speaker]], then washing her own dishes in silence while you fold laundry.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "sending three dollars on an app with the note \"buy the donut\", right after your twelve o'clock meeting went sideways.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "mailing a battered paperback with the corner of page eighty turned down, right where the plot gets stupid enough to distract you.",
+      "mood": "calm",
+      "pose": "reading"
+    },
+    {
+      "text": "texting [[call me when you walk out]] at ten past two, because she remembered the doctor appointment you only mentioned once.",
+      "mood": "warm",
+      "pose": "holding_note"
+    },
+    {
+      "text": "save this for the long evenings when the map feels too wide, to remember nobody actually left.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "it takes four hours on a train to see my best friend now.\nthe distance is real, but the way we complain about bad drivers hasn't changed at all.\nsave this for a slow sunday evening when the flat feels too quiet.\n\n#longdistancefriendship #bestfriendquotes #friendshipquotes",
+  "alt": "a list of quiet ways a best friend who moved away still comforts you during a bad day.",
+  "hook_options": [
+    "how a friend who moved away still fixes your worst afternoons",
+    "small ways an old friend rescues your evening from far away",
+    "how an old friend still carries your bad day from another town"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-13_0800",
+  "created_at": "2026-10-13T02:31:52Z",
+  "slug": "20261013_0231_how-a-friend-who-moved-away"
+}
