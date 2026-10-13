@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "the squeaky cabinet finally stopped, so the little me could finally sneak a midnight snack",
+      "mood": "calm",
+      "pose": "relieved"
+    }
+  ],
+  "caption": "the quiet after it stopped felt like a secret victory\nlittle you finally learned that some noises can be silenced\nsend this to the roommate who always leaves the cabinet door ajar\n\n#growingup #childhoodmemories #quietmoments",
+  "alt": "a tiny truth about a squeaky cabinet finally stopping, recalling the younger self sneaking midnight snacks",
+  "hook_options": [
+    "the squeaky cabinet finally stopped, so the little me could finally sneak a midnight snack",
+    "the hallway fan that rattled at night finally fell quiet, letting my younger self finally sleep",
+    "the kitchen light that blinked every hour finally stayed steady, so the kid in me could read without interruption"
+  ],
+  "model": "openai/gpt-oss-120b",
+  "slot": "2026-10-13_2000",
+  "created_at": "2026-10-13T14:32:06Z",
+  "slug": "20261013_1432_the-squeaky-cabinet-finally-stopped-so",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "calm"
+  }
+}
