@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 friendship \u00b7 8 slides\n\n<b>\u201chow a friend who moved away still fixes your worst afternoons\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. how a friend who moved away still fixes your worst afternoons\n2. sending a six-minute voice note from the supermarket car park, just so your quiet kitchen has some noise while you unpack groceries.\n3. texting you a photo of an ugly green armchair at a yard sale, because she knows you would have hated it too.\n4. calling on a tuesday evening to say put me on speaker, then washing her own dishes in silence while you fold laundry.\n5. sending three dollars on an app with the note \"buy the donut\", right after your twelve o'clock meeting went sideways.\n6. mailing a battered paperback with the corner of page eighty turned down, right where the plot gets stupid enough to distract you.\n7. texting call me when you walk out at ten past two, because she remembered the doctor appointment you only mentioned once.\n8. save this for the long evenings when the map feels too wide, to remember nobody actually left.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>it takes four hours on a train to see my best friend now.\nthe distance is real, but the way we complain about bad drivers hasn't changed at all.\nsave this for a slow sunday evening when the flat feels too quiet.\n\n#longdistancefriendship #bestfriendquotes #friendshipquotes</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>f237aef9a57645b1</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791862419180,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 635,
   "delivered_at": 1791858819162,
-  "deadline": 1791862419162
+  "deadline": 1791862419162,
+  "action": {
+    "id": "rv-f237aef9a57645b1-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791863020916
+  },
+  "claimed": false,
+  "claim_expires": 1791864889427,
+  "result": {
+    "action_id": "rv-f237aef9a57645b1-timeout",
+    "state": "published",
+    "media_id": "17931011778167210",
+    "token": "f237aef9a57645b1"
+  }
 }
