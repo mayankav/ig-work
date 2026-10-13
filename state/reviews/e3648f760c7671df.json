@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 growing up \u00b7 \ud83c\udfac Reel, 8s, calm tune\n\n<b>\u201cthe squeaky cabinet finally stopped, so the little me could finally sneak a midnight snack\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the quiet after it stopped felt like a secret victory\nlittle you finally learned that some noises can be silenced\nsend this to the roommate who always leaves the cabinet door ajar\n\n#growingup #childhoodmemories #quietmoments</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>e3648f760c7671df</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1791906404317,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 638,
   "delivered_at": 1791902804205,
-  "deadline": 1791906404205
+  "deadline": 1791906404205,
+  "action": {
+    "id": "rv-e3648f760c7671df-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1791907005862
+  },
+  "claimed": false,
+  "claim_expires": 1791908868913,
+  "result": {
+    "action_id": "rv-e3648f760c7671df-timeout",
+    "state": "published",
+    "media_id": "17960762859228117",
+    "token": "e3648f760c7671df"
+  }
 }
