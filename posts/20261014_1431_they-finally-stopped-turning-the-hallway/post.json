@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "they finally stopped turning the hallway light on for midnight snacks, so the dark finally let me sleep",
+      "mood": "warm",
+      "pose": "gift_box"
+    }
+  ],
+  "caption": "the quiet after the switch feels like a soft sigh in the room\ni notice the floor tiles more when the bulb stays dark\nit’s the little night that lets thoughts drift\nsend this to the partner who still flips the hallway light on for midnight snacks\n\n#relationshipquotes #quotesaboutlove #nighttime #quiet",
+  "alt": "a single slide shows a line about a partner finally stopping turning on the hallway light for midnight snacks, with a small green donkey pointing right",
+  "hook_options": [
+    "they finally stopped turning the hallway light on for midnight snacks, so the dark finally let me sleep",
+    "they stopped leaving the kitchen faucet running after my coffee, so the water stayed calm for my morning",
+    "they finally stopped stealing the last spoon from the drawer, so my cereal stayed whole every morning"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-14_2000",
+  "created_at": "2026-10-14T14:31:30Z",
+  "slug": "20261014_1431_they-finally-stopped-turning-the-hallway",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "warm"
+  }
+}
