@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a younger self and an older self, one small moment apart",
+  "slides": [
+    {
+      "text": "at eleven, you never let me hold my own bus ticket.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "you kept both paper slips zipped in your coat, so they wouldn't get crumpled in my bag.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "you dropped the coins in for both of us and took the aisle seat by the door.",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "so i just leaned against the glass, never once having to count the stops.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "but last sunday we met on the train platform after dad's birthday in town.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "you were so tired you kept patting your coat, convinced you had dropped the pass.",
+      "mood": "sad",
+      "pose": "facepalm"
+    },
+    {
+      "text": "so i tapped my card at the gate for both of us and took the heavy bag from your hand.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "[[i have the tickets tonight.]]",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "they spent years making sure we didn't miss our stop before we even knew what getting lost felt like.\nan older brother or sister never really turns off that radar.\nsend this to the older sibling who still checks if you reached your front door.\n\n#siblings #oldersiblings #brotherandsister #siblinglove",
+  "alt": "an eight-slide story about an older sibling who guarded the bus tickets in childhood, and the moment years later when the younger sibling paid for the train ticket.",
+  "hook_options": [
+    "at eleven, you never let me hold my own bus ticket.",
+    "i never once looked at the street signs on the number four bus.",
+    "you kept both paper passes zipped in your coat pocket until high school."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-14_0800",
+  "created_at": "2026-10-14T02:31:38Z",
+  "slug": "20261014_0231_at-eleven-you-never-let-me"
+}
