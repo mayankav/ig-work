@@ -1,40 +1,12 @@
 {
-  "gemini_day": "2026-10-14",
+  "gemini_day": "2026-10-15",
   "gemini": {
     "gemini-3.8-flash \u00b7 key 1": {
-      "used": 8,
+      "used": 4,
       "empty": false
     },
     "gemini-3.8-flash \u00b7 key 2": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.8-flash \u00b7 key 3": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.7-flash \u00b7 key 1": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.7-flash \u00b7 key 2": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.7-flash \u00b7 key 3": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.5-flash \u00b7 key 1": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.5-flash \u00b7 key 2": {
-      "used": 4,
-      "empty": false
-    },
-    "gemini-3.5-flash \u00b7 key 3": {
-      "used": 4,
+      "used": 1,
       "empty": false
     }
   },

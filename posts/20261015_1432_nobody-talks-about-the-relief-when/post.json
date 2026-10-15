@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "kindness",
+  "person": "a stranger who was kind",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "nobody talks about the relief when a stranger hands you a tissue, then [[looks straight out the window]].",
+      "mood": "calm",
+      "pose": "relieved"
+    }
+  ],
+  "caption": "giving someone a napkin without asking what happened is the quietest kind of good.\na stranger who lets you hide in plain sight stays with you for years.\nsend this to the friend who always changes the subject when your voice starts to crack.\n\n#kindnessmatters #kindnessquotes #randomactsofkindness",
+  "alt": "A one-slide post about the quiet relief of a stranger offering a tissue and looking away to give you privacy, with a small green donkey looking relieved.",
+  "hook_options": [
+    "nobody talks about the relief when a stranger hands you a tissue, then [[looks straight out the window]].",
+    "nobody talks about how kind it feels when a stranger sees you crying, and [[looks hard at the floor]].",
+    "nobody talks about the stranger who slides a napkin across the booth, and [[never looks up from the menu]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-15_2000",
+  "created_at": "2026-10-15T14:32:00Z",
+  "slug": "20261015_1432_nobody-talks-about-the-relief-when",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "calm"
+  }
+}
