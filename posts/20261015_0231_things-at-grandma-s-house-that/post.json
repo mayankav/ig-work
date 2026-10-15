@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "things at grandma's house that take nerve now",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "walking straight past the grown-ups into the pantry and [[opening a fresh box]] of biscuits without asking.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "leaving your sneakers upside down in the front hallway, knowing someone else would set them straight by the door.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "asking straight across the table why the boy in the silver photo frame never visited.",
+      "mood": "wistful",
+      "pose": "photo_frame"
+    },
+    {
+      "text": "falling asleep across the big armchair at three in the afternoon, trusting the whole house to stay quiet around you.",
+      "mood": "tired",
+      "pose": "propped_up"
+    },
+    {
+      "text": "crawling under her quilt at seven on a saturday morning just because the kitchen linoleum was cold on bare feet.",
+      "mood": "sad",
+      "pose": "knees_hugged"
+    },
+    {
+      "text": "walking up to the sink with a splinter in your thumb and [[handing your hand over]] without saying a word.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for the days you forget how safe you once were at that table.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "it took years to notice that grandma never actually sat down until everyone else had seconds.\nnobody ever knocked on that screen door back then.\nsave this for an evening when you need to remember how quiet that kitchen was.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "A list of small things we used to do at grandma's house without thinking that take nerve to ask for now.",
+  "hook_options": [
+    "things at grandma's house that take nerve now",
+    "tiny things we did as kids that take nerve now",
+    "things we did at grandma's without thinking twice"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-15_0800",
+  "created_at": "2026-10-15T02:31:29Z",
+  "slug": "20261015_0231_things-at-grandma-s-house-that"
+}
