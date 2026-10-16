@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "we live three states apart now, but we still [[count down from three]] to press play, so neither of us laughs alone.",
+      "mood": "warm",
+      "pose": "phone_call"
+    }
+  ],
+  "caption": "some nights the audio lags by half a second.\nwe still rewind all the way back just to stay in step.\nsend this to your partner who stays on the line until the credits roll.\n\n#relationshipquotes #quotesaboutlove #longdistancerelationship #longdistance",
+  "alt": "a donkey holding a phone to its ear with a caption about counting down from three to watch a movie together while living states apart.",
+  "hook_options": [
+    "we live three states apart now, but we still [[count down from three]] to press play, so neither of us laughs alone.",
+    "we live four hours apart now, but you still [[leave the kitchen light on]] until my train gets into town.",
+    "we live in different cities now, but you still [[call right at seven]] so we eat our dinner together off the coffee table."
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.8-flash",
+  "slot": "2026-10-16_2000",
+  "created_at": "2026-10-16T14:31:48Z",
+  "slug": "20261016_1431_we-live-three-states-apart-now",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "warm"
+  }
+}
