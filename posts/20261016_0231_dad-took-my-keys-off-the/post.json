@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "what looked like a small annoyance turns out to be love",
+  "slides": [
+    {
+      "text": "dad took my keys off the hall hook every night",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "he would step outside, start my noisy engine, and turn the car around in the drive",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "it annoyed me because he always left the seat pushed all the way back",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "so one evening i asked why he couldn't just leave it where i parked",
+      "mood": "wise",
+      "pose": "explaining"
+    },
+    {
+      "text": "he just picked up his mug of tea and said the street got busy early",
+      "mood": "warm",
+      "pose": "warm_mug"
+    },
+    {
+      "text": "last autumn i finally moved out into my own flat in town",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "my first morning running late for work, i ran outside in the dark",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "and realized [[he spent three years]] making sure i never had to reverse into traffic",
+      "mood": "wise",
+      "pose": "realising"
+    }
+  ],
+  "caption": "he never said drive safe when i left the house\nhe just kept the windshield clear and the nose pointing forward\nsend this to the dad who always backed your car out for you.\n\n#dad #dadquotes #fatherdaughter #fatherson",
+  "alt": "An 8‑slide story about a dad who moved his child's car each night so they never had to reverse in the morning.",
+  "hook_options": [
+    "dad took my keys off the hall hook every night",
+    "dad turned my car around in the driveway each evening",
+    "i kept getting annoyed when dad moved my driver seat each night"
+  ],
+  "model": "gemini-3.5-flash + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-16_0800",
+  "created_at": "2026-10-16T02:31:24Z",
+  "slug": "20261016_0231_dad-took-my-keys-off-the"
+}
