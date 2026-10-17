@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "mum tilted the umbrella over your backpack the whole walk, and [[just shook her wet sleeve at the door]].",
+      "mood": "calm",
+      "pose": "umbrella"
+    }
+  ],
+  "caption": "her left shoulder was soaked through before you even reached the gate.\nshe just hung her coat on the peg and put the kettle on.\nmum was always taking the rain first.\nsend this to the person who still texts to ask if you brought a jacket.\n\n#mother #mumquotes #motherdaughter #motherson",
+  "alt": "a short post about a mother holding an umbrella over her child's backpack and shaking out her own wet sleeve at the door.",
+  "hook_options": [
+    "mum tilted the umbrella over your backpack the whole walk, and [[just shook her wet sleeve at the door]].",
+    "mum took the burnt corner off the baking tray standing up, so [[your plate got the soft middle]].",
+    "mum held your heavy coat while you ran around the shop, and [[never once complained her arms were full]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-17_2000",
+  "created_at": "2026-10-17T14:31:44Z",
+  "slug": "20261017_1431_mum-tilted-the-umbrella-over-your",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "calm"
+  }
+}
