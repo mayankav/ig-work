@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "free things that are still the best things",
+  "slides": [
+    {
+      "text": "the best free things about having the right roommate",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "stopping the microwave with [[one second left]] on the timer, so the loud beeps never woke you up.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "leaving the last two slices of garlic bread on the tray, with the foil folded over neat for when your shift ended.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "turning the speakers down to eight the minute your bedroom door clicked, without you having to ask once.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "listening to you read the same three-line email out loud four times at the counter, without once checking their phone.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "setting a glass of ice water on your milk crate at three in the morning, because they heard you cough from across the hall.",
+      "mood": "sad",
+      "pose": "sleepless"
+    },
+    {
+      "text": "splitting one carton of cold noodles on the rug, [[never having to pretend]] your life was going well.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "save this for when you miss having someone two doors down who made a cheap flat feel safe.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "you never realize how quiet living alone is until nobody is running the tap in the other room.\na good roommate teaches you how to share a small kitchen without getting in the way.\nsave this for the quiet sunday when your flat feels a little too still.\n\n#roommates #firstapartment #livingtogether #movingout",
+  "alt": "a list of quiet courtesies between old roommates who shared a cheap flat, paired with a small green donkey.",
+  "hook_options": [
+    "the best free things about having the right roommate",
+    "free luxuries nobody warns you that you will miss",
+    "small things that cost nothing when you share four walls"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-17_0800",
+  "created_at": "2026-10-17T02:31:50Z",
+  "slug": "20261017_0231_the-best-free-things-about-having"
+}
