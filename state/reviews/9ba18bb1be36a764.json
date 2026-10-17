@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 parents \u00b7 \ud83c\udfac Reel, 9.6s, calm tune\n\n<b>\u201cmum tilted the umbrella over your backpack the whole walk, and just shook her wet sleeve at the door.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>her left shoulder was soaked through before you even reached the gate.\nshe just hung her coat on the peg and put the kettle on.\nmum was always taking the rain first.\nsend this to the person who still texts to ask if you brought a jacket.\n\n#mother #mumquotes #motherdaughter #motherson</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>9ba18bb1be36a764</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792251212843,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 690,
   "delivered_at": 1792247612806,
-  "deadline": 1792251212806
+  "deadline": 1792251212806,
+  "action": {
+    "id": "rv-9ba18bb1be36a764-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792251814154
+  },
+  "claimed": false,
+  "claim_expires": 1792253673498,
+  "result": {
+    "action_id": "rv-9ba18bb1be36a764-timeout",
+    "state": "published",
+    "media_id": "18017293145954612",
+    "token": "9ba18bb1be36a764"
+  }
 }
