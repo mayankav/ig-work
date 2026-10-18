@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "there is a thick green jumper on my top shelf that was never supposed to be mine.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "at fifteen, you saved babysitting money for a month to buy it from the shop window in town.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "you kept it folded in your bottom drawer, with a note taped to the wood saying don't touch this.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "but two winters later, i got dumped by the bike racks at twenty past three on a freezing thursday.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "so i walked two miles home in the sleet, ready to lock my door and skip dinner.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "but when i walked into my bedroom, that green jumper was laid out flat across my quilt.",
+      "mood": "joy",
+      "pose": "hands_over_mouth"
+    },
+    {
+      "text": "you were sitting on the bottom step peeling a clementine, and you didn't say a single word.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "[[you gave me your favourite thing]], and never once asked for it back.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "older sisters spend years guarding their bedroom door, until the day you actually need something to hide inside. my sister never asked for that wool back, not even when she moved out.\nsend this to the sister who let you borrow the good clothes when it mattered.\n\n#sisterlove #oldersiblings #siblinglove #growingupwithsiblings",
+  "alt": "a story slide post about an older sister who quietly gave away her favourite green jumper to comfort her sibling after a heartbreak.",
+  "hook_options": [
+    "there is a thick green jumper on my top shelf that was never supposed to be mine.",
+    "you spent three weeks warning the whole house never to touch that green jumper.",
+    "every autumn i pull down the oversized wool jumper i definitely didn't buy."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-18_0800",
+  "created_at": "2026-10-18T02:31:28Z",
+  "slug": "20261018_0231_there-is-a-thick-green-jumper"
+}
