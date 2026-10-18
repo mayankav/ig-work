@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "having someone who got stuck at the kids' table with you until you were twenty-two. [[lifetime witness]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "my cousin and i never had to explain why our family was loud.\nwe just traded paper plates and stayed out of the kitchen until dessert.\nsend this to the one who always claimed the wobbly chair next to yours.\n\n#childhoodmemories #growinguptogether #childhoodfriends #nostalgia",
+  "alt": "a one-slide post about having a cousin who got stuck at the kids' table with you until adulthood, acting as a lifetime witness.",
+  "hook_options": [
+    "having someone who got stuck at the kids' table with you until you were twenty-two. [[lifetime witness]].",
+    "having someone who took half the blame for the cracked storm door twenty summers ago. [[built-in alibi]].",
+    "having someone who split the pull-out couch in your aunt's basement every single august. [[built-in ally]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-18_2000",
+  "created_at": "2026-10-18T14:31:27Z",
+  "slug": "20261018_1431_having-someone-who-got-stuck-at",
+  "reel": {
+    "seconds": 8.8,
+    "tune": "wistful"
+  }
+}

@@ -1,8 +1,8 @@
 {
-  "gemini_day": "2026-10-17",
+  "gemini_day": "2026-10-18",
   "gemini": {
     "gemini-3.8-flash \u00b7 key 1": {
-      "used": 5,
+      "used": 2,
       "empty": false
     }
   },
