@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 siblings \u00b7 8 slides\n\n<b>\u201cthere is a thick green jumper on my top shelf that was never supposed to be mine.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. there is a thick green jumper on my top shelf that was never supposed to be mine.\n2. at fifteen, you saved babysitting money for a month to buy it from the shop window in town.\n3. you kept it folded in your bottom drawer, with a note taped to the wood saying don't touch this.\n4. but two winters later, i got dumped by the bike racks at twenty past three on a freezing thursday.\n5. so i walked two miles home in the sleet, ready to lock my door and skip dinner.\n6. but when i walked into my bedroom, that green jumper was laid out flat across my quilt.\n7. you were sitting on the bottom step peeling a clementine, and you didn't say a single word.\n8. you gave me your favourite thing, and never once asked for it back.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>older sisters spend years guarding their bedroom door, until the day you actually need something to hide inside. my sister never asked for that wool back, not even when she moved out.\nsend this to the sister who let you borrow the good clothes when it mattered.\n\n#sisterlove #oldersiblings #siblinglove #growingupwithsiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>136919abb36bf4b2</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792294551464,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 700,
   "delivered_at": 1792290951411,
-  "deadline": 1792294551411
+  "deadline": 1792294551411,
+  "action": {
+    "id": "rv-136919abb36bf4b2-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792295152731
+  },
+  "claimed": false,
+  "claim_expires": 1792296999159,
+  "result": {
+    "action_id": "rv-136919abb36bf4b2-timeout",
+    "state": "published",
+    "media_id": "17897733579405935",
+    "token": "136919abb36bf4b2"
+  }
 }
