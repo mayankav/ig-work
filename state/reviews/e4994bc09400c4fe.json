@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 parents \u00b7 8 slides\n\n<b>\u201csmall things mum handled before they reached your door\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. small things mum handled before they reached your door\n2. eating the burnt toast over the sink, so the two golden slices were always on your plate.\n3. snipping the stiff tag out of your collar with scissors before you ever put the shirt on.\n4. giving you the window seat on the train, while she sat backwards the whole hour.\n5. shaking the thermometer down and saying thirty-eight was nothing, then pulling the quilt to your chin.\n6. standing between you and the nurse at the clinic, telling you to count five blue tiles on the ceiling.\n7. signing the school trip letter at the kitchen table, never once letting on what it cost.\n8. save this for a morning you need to remember who carried the heavy half for you.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we spent years thinking our childhood was just naturally calm.\nmost of it was mum taking the friction before it ever reached the hallway.\nshe made an ordinary morning feel safe on purpose.\nsave this for a day you need to remember how much quiet love was in the room.\n\n#mother #mumquotes #motherdaughter #motherson</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>e4994bc09400c4fe</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792381279316,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 713,
   "delivered_at": 1792377679090,
-  "deadline": 1792381279090
+  "deadline": 1792381279090,
+  "action": {
+    "id": "rv-e4994bc09400c4fe-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792381880642
+  },
+  "claimed": false,
+  "claim_expires": 1792383741255,
+  "result": {
+    "action_id": "rv-e4994bc09400c4fe-timeout",
+    "state": "published",
+    "media_id": "18092081825480538",
+    "token": "e4994bc09400c4fe"
+  }
 }
