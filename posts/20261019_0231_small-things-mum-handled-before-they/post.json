@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "small things mum handled before they reached your door",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "eating the burnt toast over the sink, so the two golden slices were always on your plate.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "snipping the stiff tag out of your collar with scissors before you ever put the shirt on.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "giving you the window seat on the train, while she sat backwards the whole hour.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "shaking the thermometer down and saying thirty-eight was nothing, then pulling the quilt to your chin.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "standing between you and the nurse at the clinic, telling you to count [[five blue tiles]] on the ceiling.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "signing the school trip letter at the kitchen table, never once letting on what it cost.",
+      "mood": "warm",
+      "pose": "holding_note"
+    },
+    {
+      "text": "save this for a morning you need to remember who carried [[the heavy half]] for you.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "we spent years thinking our childhood was just naturally calm.\nmost of it was mum taking the friction before it ever reached the hallway.\nshe made an ordinary morning feel safe on purpose.\nsave this for a day you need to remember how much quiet love was in the room.\n\n#mother #mumquotes #motherdaughter #motherson",
+  "alt": "an eight-slide post about the quiet ways mothers absorb worry and friction to protect their children.",
+  "hook_options": [
+    "small things mum handled before they reached your door",
+    "the quiet half mum carried so you didn't have to",
+    "small things mum absorbed before you walked in"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-19_0800",
+  "created_at": "2026-10-19T02:31:14Z",
+  "slug": "20261019_0231_small-things-mum-handled-before-they"
+}
