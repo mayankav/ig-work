@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "nobody talks about the cold floor at 6 am greeting your bare feet, so you smile before the day asks for anything",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "the kitchen lights flicker, but the morning still feels like a small win\ni notice the quiet when the coffee brews slower than my thoughts\nsend this to the friend who always leaves a spare pen on your desk\n\n#selflovequotes #bekindtoyourself #hardweek",
+  "alt": "a single line about the cold floor at 6 am greeting bare feet and smiling before the day, shown with a donkey pointing right",
+  "hook_options": [
+    "nobody talks about the cold floor at 6 am, because you still get up and smile",
+    "nobody mentions the empty kettle humming at night, while you keep waiting for tea",
+    "no one says the quiet hum of the fridge at midnight reminds you you’re still alive"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-19_2000",
+  "created_at": "2026-10-19T14:31:20Z",
+  "slug": "20261019_1431_nobody-talks-about-the-cold-floor",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "warm"
+  }
+}
