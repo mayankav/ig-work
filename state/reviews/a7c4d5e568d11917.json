@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 being kind to yourself \u00b7 \ud83c\udfac Reel, 10.8s, warm tune\n\n<b>\u201cnobody talks about the cold floor at 6 am greeting your bare feet, so you smile before the day asks for anything\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the kitchen lights flicker, but the morning still feels like a small win\ni notice the quiet when the coffee brews slower than my thoughts\nsend this to the friend who always leaves a spare pen on your desk\n\n#selflovequotes #bekindtoyourself #hardweek</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>a7c4d5e568d11917</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792424258100,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 716,
   "delivered_at": 1792420658060,
-  "deadline": 1792424258060
+  "deadline": 1792424258060,
+  "action": {
+    "id": "rv-a7c4d5e568d11917-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792424859820
+  },
+  "claimed": false,
+  "claim_expires": 1792426710938,
+  "result": {
+    "action_id": "rv-a7c4d5e568d11917-timeout",
+    "state": "published",
+    "media_id": "17956871445267068",
+    "token": "a7c4d5e568d11917"
+  }
 }
