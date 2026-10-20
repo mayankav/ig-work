@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 love \u00b7 \ud83c\udfac Reel, 9.6s, warm tune\n\n<b>\u201cputting the good pillow on your side of the bed every night and never mentioning it. that is love\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the quiet swaps keep the night smooth\nthey don\u2019t wait for thanks, they just do\nsend this to the one who always saves the soft side.\n\n#relationship #smallgestures #partner</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>b2723e333dc99714</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792510839285,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 720,
   "delivered_at": 1792507239236,
-  "deadline": 1792510839236
+  "deadline": 1792510839236,
+  "action": {
+    "id": "rv-b2723e333dc99714-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792511441100
+  },
+  "claimed": false,
+  "claim_expires": 1792513304696,
+  "result": {
+    "action_id": "rv-b2723e333dc99714-timeout",
+    "state": "published",
+    "media_id": "17960027301249231",
+    "token": "b2723e333dc99714"
+  }
 }
