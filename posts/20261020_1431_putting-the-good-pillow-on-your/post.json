@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "putting the good pillow on your side of the bed every night and never mentioning it. that is [[love]]",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "the quiet swaps keep the night smooth\nthey don’t wait for thanks, they just do\nsend this to the one who always saves the soft side.\n\n#relationship #smallgestures #partner",
+  "alt": "a single slide showing a green donkey with its hoof on its chest beside the text about a partner putting the good pillow on your side of the bed each night without mentioning it",
+  "hook_options": [
+    "putting the good pillow on your side of the bed every night and never mentioning it. that is [[love]]",
+    "plugging your dead phone into the charger at two in the morning and never mentioning it. that is [[love]]",
+    "taking the drafty side of the mattress every winter and never once mentioning it. that is [[love]]"
+  ],
+  "model": "gemini-3.8-flash + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-20_2000",
+  "created_at": "2026-10-20T14:31:12Z",
+  "slug": "20261020_1431_putting-the-good-pillow-on-your",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "warm"
+  }
+}
