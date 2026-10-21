@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 school days \u00b7 8 slides\n\n<b>\u201chow brave we used to be between nine and three\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. how brave we used to be between nine and three\n2. raising your hand straight in the air before you even had the rest of the sentence ready.\n3. standing up in front of thirty desks to read three shaky lines you wrote about a stray dog.\n4. walking straight up to the big wooden desk just to say \"i don't get it\".\n5. leaving a grey pebble from the gravel yard on the corner of the chalk tray, certain it was safe.\n6. crying over a torn workbook page by the metal pencil sharpener, without once hiding your face.\n7. handing over a lopsided picture of your family, never doubting it belonged taped flat to the blackboard.\n8. save this for a morning you hesitate, and remember the teacher who gave you that nerve.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>nobody is born second-guessing what they have to say.\nwe only felt that brave because one good teacher made thirty desks feel safe.\nsave this for a morning you hesitate before speaking up.\n\n#childhoodmemories #schoolmemories #elementaryschool #growingup</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>95c36e2931d63ab3</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1792553693114,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 730,
   "delivered_at": 1792550093078,
-  "deadline": 1792553693078
+  "deadline": 1792553693078,
+  "action": {
+    "id": "rv-95c36e2931d63ab3-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1792554294817
+  },
+  "claimed": false,
+  "claim_expires": 1792556144867,
+  "result": {
+    "action_id": "rv-95c36e2931d63ab3-timeout",
+    "state": "published",
+    "media_id": "18158603719502329",
+    "token": "95c36e2931d63ab3"
+  }
 }
