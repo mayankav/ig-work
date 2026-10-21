@@ -1,0 +1,19 @@
+{
+  "token": "95c36e2931d63ab3",
+  "slug": "20261021_0231_how-brave-we-used-to-be",
+  "files": {
+    "post.json": "a8ba29d61bc789223b008b45d90314d480485c17bbb680be9432d00901fa8409",
+    "caption.txt": "53398e0ce958d087998b43ec989ce31c1cdba2741cf6a6311422e27d4d87204c",
+    "contact_sheet.png": "856d5631ec26dadffd64c87e2751eaf78775610f3541fc08a07c98d174b291a8",
+    "slides/01.jpg": "ae279778a864ea806fc9d54ad59c2d762aceaee3b063ad3dbf4949e571def817",
+    "slides/02.jpg": "c9cbb1840f4b126d02f9b8ddd5e275e7d8011c9df2c66bf820bfd41b7031a9aa",
+    "slides/03.jpg": "ff41574adb00779c34223e3e76edf9c3d089e510b5bc6bdf304cbdb3bc035885",
+    "slides/04.jpg": "84c5df4420d388b656870f29a97c84246be828a511a5197d92edd345be4bc2af",
+    "slides/05.jpg": "c1df7ee1d3febcdd5b5da2a7b6b36cdf92a0f9c9a65affed08c8d8b9322902c7",
+    "slides/06.jpg": "01b677bbcfd9f7927d77dbb8cf1e81e847c313fcee7dae2451c360720c7ecae4",
+    "slides/07.jpg": "5fd715d945d5c83add9d1d52a59b55be7ec534ec7c1908f4909c203b53e79634",
+    "slides/08.jpg": "9353075c2bd995069164cfe3aa841c7a409e2352a509508a222490abede60872"
+  },
+  "parent": null,
+  "manifest": "e214b318a61facb51def7cb31a5b753d72bc539ef53f925e85319b39167df0be"
+}

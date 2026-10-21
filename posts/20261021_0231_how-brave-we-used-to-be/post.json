@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "how brave we used to be between nine and three",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "raising your hand straight in the air before you even had [[the rest of the sentence]] ready.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "standing up in front of thirty desks to read three shaky lines you wrote about a stray dog.",
+      "mood": "calm",
+      "pose": "reading"
+    },
+    {
+      "text": "walking straight up to the big wooden desk just to say \"i don't get it\".",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "leaving a grey pebble from the gravel yard on the corner of the chalk tray, certain it was safe.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "crying over a torn workbook page by the metal pencil sharpener, without once hiding your face.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "handing over a lopsided picture of your family, [[never doubting]] it belonged taped flat to the blackboard.",
+      "mood": "wistful",
+      "pose": "photo_frame"
+    },
+    {
+      "text": "save this for a morning you hesitate, and remember the teacher who gave you that nerve.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "nobody is born second-guessing what they have to say.\nwe only felt that brave because one good teacher made thirty desks feel safe.\nsave this for a morning you hesitate before speaking up.\n\n#childhoodmemories #schoolmemories #elementaryschool #growingup",
+  "alt": "a carousel list about the unthinking courage of being a child in a classroom and the teacher who made it safe",
+  "hook_options": [
+    "how brave we used to be between nine and three",
+    "the effortless nerve we had in row two",
+    "small things we did at school before we learned caution"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-21_0800",
+  "created_at": "2026-10-21T02:31:24Z",
+  "slug": "20261021_0231_how-brave-we-used-to-be"
+}
