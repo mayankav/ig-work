@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "getting midnight for free because someone else took the shouting for ten past ten. [[advance team]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "my sister took every lecture about the front door lock in nineteen ninety-eight.\nby the time i turned sixteen, nobody even looked up from the television.\nsend this to the one who still reminds you how strict mum used to be.\n\n#siblings #oldersiblings #growingupwithsiblings",
+  "alt": "a one-slide post showing a small green donkey giving a knowing look beside text about getting midnight curfew for free because an older sibling took the shouting years earlier.",
+  "hook_options": [
+    "getting midnight for free because someone else took the shouting for ten past ten. [[advance team]].",
+    "walking into high school behind someone who already broke in every teacher. [[paved road]].",
+    "someone ahead of you took every front door argument, so you walked in at midnight without a question. [[advance team]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-21_2000",
+  "created_at": "2026-10-21T14:31:07Z",
+  "slug": "20261021_1431_getting-midnight-for-free-because-someone",
+  "reel": {
+    "seconds": 8.4,
+    "tune": "wistful"
+  }
+}
