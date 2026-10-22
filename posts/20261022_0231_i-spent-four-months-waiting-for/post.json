@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "someone waits a long time for something, and it arrives in a small way",
+  "slides": [
+    {
+      "text": "i spent four months waiting for someone to notice i was hiding in the stairwell.",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "every lunchtime the yard filled up, but i slipped behind the heavy fire doors with a squashed sandwich.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "by november the concrete step was cold right through my trousers, but the noise out there was worse.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "so i just sat in the dim light, counting the bolts on the handrail until the bell rang.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "but on a wet thursday, you came down the steps carrying a cardboard box of paperbacks.",
+      "mood": "wistful",
+      "pose": "looking_up"
+    },
+    {
+      "text": "you didn't ask what was wrong, and you didn't tell me to go outside.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "you just propped the library door open with a brick, and handed me the blue ink stamp.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "[[you gave me somewhere to sit]] without ever making me say i had nowhere to go.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "some people teach the syllabus, and some notice when a kid is running out of places to stand.\ntwenty years later, i still remember the quiet in that room.\nsend this to the teacher who left their door unlocked at lunch.\n\n#childhoodmemories #schoolmemories #teacherappreciation",
+  "alt": "a story about hiding in a school stairwell at lunch until a quiet teacher left the library door open and gave a place to sit.",
+  "hook_options": [
+    "i spent four months waiting for someone to notice i was hiding in the stairwell.",
+    "for an entire winter, i ate my sandwich on the cold concrete behind the fire doors.",
+    "i spent three terms waiting for someone to catch me sitting by the fire escape."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-22_0800",
+  "created_at": "2026-10-22T02:31:37Z",
+  "slug": "20261022_0231_i-spent-four-months-waiting-for"
+}
