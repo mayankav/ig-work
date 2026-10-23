@@ -1,13 +1,14 @@
 # Evergreen Reel scripts
 
-30 scripts for @suresilly, first-job India, age 18 to 30. Nothing here is live. Each file is `<slug>.json`: `script` holds the fields `script.py` writes, `report` the hook, voice and shape.
+30 scripts for @suresilly, first-job India, age 18 to 30. Nothing here is live. Each file is `<slug>.json`: `script` holds the fields `script.py` writes, `report` the hook, voice and shape. The `can_they` files also hold the `fact` the answer rests on.
 
-- **Status: all 30 are reasoned.** The official sites in `suresilly/sources.json` could not be opened from the cloud session (the network policy refused them), so no script names a source or uses a number except a time. Nothing about law, pay, PF, notice or leave is stated.
-- Audience: 20 for the employee (contrast, can_they), 10 for the manager (mirror). A contrast also shows a manager the better text, but its reply is for the employee.
-- Every script passes `script.check` for its type, in order against the ones before it (no repeats), and `python -m pytest -q` passes (298 passed, 5 skipped).
-- The `can_they` answers say what the outcome may depend on and what to ask, since no official page could be read. If you want a verified answer, open the page first and turn it into a FACT.
+- **20 for the employee** (10 contrast, 10 can_they), **10 for the manager** (mirror). A contrast also shows the manager the better text, but its reply is for the employee.
+- **Status `reasoned` (20):** contrast and mirror. No source named, no number except a time.
+- **Status `reported` (10):** the can_they scripts. Government sites could not be opened from the cloud session (network block), and no web page could be fetched at all. Nine facts come from `suresilly/facts.json` (your earlier research pass, secondary sources). One, `salary-by-7th`, comes from a web search summary of the Code on Wages text; the page itself was not opened. Every answer says "Reports say". None is `verified`: please check the source before you approve.
+- `gratuity` says about 5 years (from `facts.json`). Search summaries say fixed-term staff may get it after 1 year. That is not used here.
+- Every script passes `script.check` for its type, against all earlier ones. `python -m pytest -q`: 298 passed, 5 skipped.
 
-Format: type · audience · hook (cover line 1) · status · file
+Format: type · audience · cover line 1 · status · file · source
 
 - contrast · employee · Tomorrow, a client call. Nobody told you your part. · reasoned · `contrast-client-call-tomorrow.json`
 - contrast · employee · The senior leaders clap. Whose name did they hear? · reasoned · `contrast-credit-leaders.json`
@@ -29,13 +30,13 @@ Format: type · audience · hook (cover line 1) · status · file
 - mirror · manager · Asking a junior if they are serious about the job can backfire. · reasoned · `mirror-serious-job.json`
 - mirror · manager · A small thing, said quickly, can fill a whole evening. · reasoned · `mirror-small-thing.json`
 - mirror · manager · One short question from a manager, and the junior goes quiet. · reasoned · `mirror-why-pending.json`
-- can_they · employee · Camera on for every single call? Your manager insists. · reasoned · `canthey-camera-on.json`
-- can_they · employee · You finish the slides. The brief changes. Again. Is that normal? · reasoned · `canthey-changing-brief.json`
-- can_they · employee · A colleague's tasks appear on your board. Nobody told you. · reasoned · `canthey-colleagues-work.json`
-- can_they · employee · The little green dot beside your name. Who is watching it? · reasoned · `canthey-green-dot.json`
-- can_they · employee · Your idea, in your manager's voice. Can they do that? · reasoned · `canthey-idea-as-theirs.json`
-- can_they · employee · 11 pm and the work chat is still buzzing. Is that fair? · reasoned · `canthey-late-work-chat.json`
-- can_they · employee · A meeting is fixed right on your lunch break. Fair? · reasoned · `canthey-lunch-meeting.json`
-- can_they · employee · Your manager wants your personal number. Must you give it? · reasoned · `canthey-personal-number.json`
-- can_they · employee · Shouted at in front of the whole team. Is that normal? · reasoned · `canthey-shouting-in-meeting.json`
-- can_they · employee · Hired for one job, handed another. Is that how it works? · reasoned · `canthey-work-outside-role.json`
+- can_they · employee · A bond in your first job. Can the amount be anything? · reported · `canthey-bond-amount.json` · source: Supreme Court, Vijaya Bank v. Narnaware
+- can_they · employee · Your last day was Friday. The last salary has not come. · reported · `canthey-final-salary.json` · source: LiveLaw
+- can_they · employee · You served for years and left. Where is the gratuity? · reported · `canthey-gratuity-wait.json` · source: LiveLaw
+- can_they · employee · PF is cut from your salary. Does it reach your account? · reported · `canthey-late-pf.json` · source: EPFO (owner to confirm)
+- can_they · employee · You resign, and your manager says a longer notice applies. · reported · `canthey-longer-notice.json` · source: Delhi Shops and Establishments Act
+- can_they · employee · Midnight at the desk, again. Is there a limit? · reported · `canthey-midnight-desk.json` · source: Delhi, Maharashtra and Karnataka rules
+- can_they · employee · 11 pm and your boss messages. Does any law cover this? · reported · `canthey-night-messages.json` · source: Private member's bill
+- can_they · employee · Your first day is Monday. You still have no letter. · reported · `canthey-no-appointment-letter.json` · source: KPMG
+- can_they · employee · Last month's salary has still not arrived. · reported · `canthey-salary-weeks-late.json` · source: Code on Wages 2019 (text on labour.gov.in, seen through search results; page not opened)
+- can_they · employee · The variable part of your pay shrank. Nobody asked you. · reported · `canthey-variable-pay-cut.json` · source: Indian Contract Act, section 62
