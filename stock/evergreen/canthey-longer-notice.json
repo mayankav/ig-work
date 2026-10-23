@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-longer-notice",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Delhi Shops and Establishments Act",
+ "fact": {
+  "id": "notice-contractual",
+  "area": "rights",
+  "title": "Notice period is set by your contract",
+  "claim": "No central law fixes the notice period in a private job. Your contract fixes it.",
+  "source": "Delhi Shops and Establishments Act",
+  "source_date": "2026",
+  "law": "Delhi: one month's written notice after 3 months of service. Other states differ.",
+  "caveat": "Other states differ.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "You resign, and your manager says a longer notice applies.",
+  "cover_2": "Check what you signed.",
+  "payoff": "Reports say the contract fixes the notice period, not the manager.",
+  "caption": "Notice is a term in the contract you signed on day one. Send this to the friend who is planning to resign.",
+  "situation": "Can your manager demand a longer notice than your offer letter says?",
+  "answer": "Reports say no central law fixes private notice periods. Your contract does, so the clause matters.",
+  "reply_me": "Could we read the notice clause in my signed contract together? I want to stay within it.",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "matter-of-fact",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-salary-weeks-late",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Code on Wages 2019 (text on labour.gov.in, seen through search results; page not opened)",
+ "fact": {
+  "id": "salary-by-7th",
+  "area": "rights",
+  "title": "Monthly wages are due by the 7th of the next month",
+  "claim": "Monthly wages must be paid before the end of the 7th day of the next month.",
+  "source": "Code on Wages 2019 (text on labour.gov.in, seen through search results; page not opened)",
+  "source_date": "2026-10-23",
+  "law": "Code on Wages 2019, section 17(1)(iv).",
+  "caveat": "Reports say the Code has applied since 21 Nov 2025. The gazette notice was not read.",
+  "status": "reported"
+ },
+ "script": {
+  "cover_1": "Last month's salary has still not arrived.",
+  "cover_2": "Is there a deadline?",
+  "payoff": "Reports say monthly wages are due before the end of the 7th day.",
+  "caption": "A late salary is a payment problem, not a favour you ask for. Send this to the friend who waits for the credit message.",
+  "situation": "Can your company keep paying the salary weeks late?",
+  "answer": "Reports say monthly wages are due before the end of the 7th day of the next month.",
+  "reply_me": "My salary for last month has not come. Can you confirm the payment date? It is due by the 7th.",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "dry",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

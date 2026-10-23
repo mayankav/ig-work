@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-bond-amount",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Supreme Court, Vijaya Bank v. Narnaware",
+ "fact": {
+  "id": "bond-fair-estimate",
+  "area": "rights",
+  "title": "Training bond: the amount must be a fair estimate of loss",
+  "claim": "A minimum-service bond can be valid, but the amount you pay for leaving early must be a fair estimate of the employer's real loss.",
+  "source": "Supreme Court, Vijaya Bank v. Narnaware",
+  "source_date": "14 May 2025",
+  "law": "Indian Contract Act, section 74.",
+  "caveat": "The case was about a public sector bank.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "A bond in your first job. Can the amount be anything?",
+  "cover_2": "Here is the test.",
+  "payoff": "Reports say the amount must be a fair estimate of the employer's real loss.",
+  "caption": "A bond is a promise with a price, and the price needs a reason. Send this to the friend who signed one without reading it.",
+  "situation": "Can your company charge a huge amount if you leave early?",
+  "answer": "Reports say a bond can be valid, but the amount must be a fair estimate of real loss.",
+  "reply_me": "Could you share how the bond amount was worked out? I would like to see the loss it covers.",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "dry",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-variable-pay-cut",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Indian Contract Act, section 62",
+ "fact": {
+  "id": "variable-pay-contract",
+  "area": "rights",
+  "title": "Variable pay and CTC structure are set by contract",
+  "claim": "Variable pay is contractual. Your employer cannot change a pay term without your consent.",
+  "source": "Indian Contract Act, section 62",
+  "source_date": "2026",
+  "law": "Indian Contract Act 1872.",
+  "caveat": "Read how your offer letter defines variable pay.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "The variable part of your pay shrank. Nobody asked you.",
+  "cover_2": "See what the contract says.",
+  "payoff": "Reports say a pay term cannot change without your consent.",
+  "caption": "Pay terms live in your offer letter, not in someone's memory. Send this to the friend whose variable pay keeps moving.",
+  "situation": "Can your company cut your variable pay without asking you?",
+  "answer": "Reports say variable pay is contractual, and a pay term cannot change without your consent.",
+  "reply_me": "Could you share in writing why my variable pay changed? My offer letter lists the earlier terms.",
+  "key": 3
+ },
+ "report": {
+  "hook": 6,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

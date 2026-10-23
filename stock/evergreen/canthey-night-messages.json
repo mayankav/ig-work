@@ -1,0 +1,38 @@
+{
+ "slug": "canthey-night-messages",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Private member's bill",
+ "fact": {
+  "id": "no-right-to-disconnect",
+  "area": "rights",
+  "title": "India has no right-to-disconnect law",
+  "claim": "India has no law that lets you ignore work messages after hours. A private member's bill was tabled in Dec 2025.",
+  "source": "Private member's bill",
+  "source_date": "Dec 2025",
+  "law": "A bill only. It is not law.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "11 pm and your boss messages. Does any law cover this?",
+  "cover_2": "The honest answer is inside.",
+  "payoff": "Reports say no law lets you ignore after-hours messages, so agree on times.",
+  "caption": "With no law to lean on, a clear agreement is your best protection. Send this to the one whose phone buzzes at bedtime.",
+  "situation": "Can your boss message you at night and expect a reply?",
+  "answer": "Reports say no law lets you ignore work messages after hours. A bill was tabled in Dec 2025.",
+  "reply_me": "I will reply to work messages by 10 am. Can we agree nothing before then is urgent?",
+  "key": 3
+ },
+ "report": {
+  "hook": 13,
+  "voice": "playful",
+  "shape": "time",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
