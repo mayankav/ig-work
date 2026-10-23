@@ -1,0 +1,38 @@
+{
+ "slug": "canthey-gratuity-wait",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "LiveLaw",
+ "fact": {
+  "id": "gratuity-30-days",
+  "area": "rights",
+  "title": "Gratuity: payment within 30 days",
+  "claim": "Gratuity must be paid within 30 days. It is separate from final wages.",
+  "source": "LiveLaw",
+  "source_date": "3 Oct 2026",
+  "caveat": "Reported in the same article as the 2-day wages rule. You need about 5 years of service; two High Courts accept 4 years and 240 days.",
+  "status": "reported"
+ },
+ "script": {
+  "cover_1": "You served for years and left. Where is the gratuity?",
+  "cover_2": "See the deadline.",
+  "payoff": "A report says gratuity must be paid within 30 days.",
+  "caption": "Gratuity is easy to forget and easy to delay. Send this to a senior colleague who is about to leave.",
+  "situation": "Can your company make you wait months for your gratuity?",
+  "answer": "A report says gratuity must be paid within 30 days. It needs about 5 years of service.",
+  "reply_me": "Please confirm when my gratuity will be paid. I understand it is due within 30 days.",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "warm",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

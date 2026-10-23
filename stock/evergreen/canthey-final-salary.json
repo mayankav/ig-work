@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-final-salary",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "LiveLaw",
+ "fact": {
+  "id": "wages-2-days",
+  "area": "rights",
+  "title": "Two Working Days: Code On Wages And Employee's Final Settlement",
+  "claim": "Final wages are due within 2 working days of resigning or being removed. The clock starts on the last working day.",
+  "source": "LiveLaw",
+  "source_date": "3 Oct 2026",
+  "law": "Code on Wages 2019, section 17(2). In force since 21 Nov 2025.",
+  "caveat": "Covers wages only. Gratuity has its own 30 days.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "Your last day was Friday. The last salary has not come.",
+  "cover_2": "Here is the deadline.",
+  "payoff": "Reports say final wages are due within 2 working days.",
+  "caption": "Final wages have a deadline, and it is shorter than most people expect. Send this to the friend who just resigned.",
+  "situation": "Can HR hold your last salary for a month after you resign?",
+  "answer": "Reports say final wages are due within 2 working days of resigning or removal. Gratuity is separate.",
+  "reply_me": "Please confirm the date my final wages will be paid. I understand it is due within 2 working days.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "matter-of-fact",
+  "shape": "confirm",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

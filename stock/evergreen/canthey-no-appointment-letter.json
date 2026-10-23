@@ -1,0 +1,38 @@
+{
+ "slug": "canthey-no-appointment-letter",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "KPMG",
+ "fact": {
+  "id": "appointment-letter",
+  "area": "rights",
+  "title": "An appointment letter is mandatory",
+  "claim": "The Labour Codes make an appointment letter mandatory, in a prescribed format.",
+  "source": "KPMG",
+  "source_date": "8 May 2026",
+  "law": "Labour Codes, in force 21 Nov 2025.",
+  "status": "checked"
+ },
+ "script": {
+  "cover_1": "Your first day is Monday. You still have no letter.",
+  "cover_2": "Here is what to ask.",
+  "payoff": "Reports say an appointment letter is now mandatory, in a set format.",
+  "caption": "A letter on day one saves a lot of arguments later. Send this to the friend who starts a new job next week.",
+  "situation": "Can a company make you start work with no appointment letter?",
+  "answer": "Reports say the Labour Codes make an appointment letter mandatory, in a set format.",
+  "reply_me": "Could you please send my appointment letter before I start? I would like it for my records.",
+  "key": 3
+ },
+ "report": {
+  "hook": 17,
+  "voice": "warm",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

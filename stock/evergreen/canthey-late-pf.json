@@ -1,0 +1,38 @@
+{
+ "slug": "canthey-late-pf",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "EPFO (owner to confirm)",
+ "fact": {
+  "id": "epf-rates",
+  "area": "rights",
+  "title": "EPF: 12% from you, 12% from the employer",
+  "claim": "You pay 12% of your wages into EPF and the employer pays 12%. The employer must deposit by the 15th of the next month.",
+  "source": "EPFO (owner to confirm)",
+  "source_date": "2026",
+  "caveat": "Reported. Source name to be confirmed.",
+  "status": "reported"
+ },
+ "script": {
+  "cover_1": "PF is cut from your salary. Does it reach your account?",
+  "cover_2": "Check the date.",
+  "payoff": "Reports say the employer must deposit by the 15th of the next month.",
+  "caption": "The cut shows on your payslip, but the deposit shows only in your passbook. Send this to the friend who never checks it.",
+  "situation": "Can your employer deduct PF and deposit it whenever they like?",
+  "answer": "Reports say the employer must deposit by the 15th of the next month, with 12% from each side.",
+  "reply_me": "Could you share the date my PF for this month was deposited? It is due by the 15th.",
+  "key": 3
+ },
+ "report": {
+  "hook": 25,
+  "voice": "dry",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}

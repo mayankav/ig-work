@@ -1,0 +1,39 @@
+{
+ "slug": "canthey-midnight-desk",
+ "type": "can_they",
+ "audience": "employee",
+ "status": "reported",
+ "source": "Delhi, Maharashtra and Karnataka rules",
+ "fact": {
+  "id": "work-hours",
+  "area": "rights",
+  "title": "Working hours: 9 a day, 48 a week",
+  "claim": "Delhi, Maharashtra and Karnataka cap work at 9 hours a day and 48 hours a week. Overtime is paid extra.",
+  "source": "Delhi, Maharashtra and Karnataka rules",
+  "source_date": "2026",
+  "law": "State rules apply until states notify the new central rules.",
+  "caveat": "IT and ITES firms may be exempt in some states. Source name to be confirmed.",
+  "status": "reported"
+ },
+ "script": {
+  "cover_1": "Midnight at the desk, again. Is there a limit?",
+  "cover_2": "Find out for your state.",
+  "payoff": "Delhi, Maharashtra and Karnataka cap work at 9 hours a day, with overtime extra.",
+  "caption": "Long days feel normal when everyone around you has them. Send this to the friend who forgot what daylight at the office looks like.",
+  "situation": "Can your manager keep you at your desk till midnight every day?",
+  "answer": "Reports say Delhi, Maharashtra and Karnataka cap work at 9 hours a day, with overtime paid extra.",
+  "reply_me": "How many hours a day does our policy allow, and how is overtime paid?",
+  "key": 3
+ },
+ "report": {
+  "hook": 11,
+  "voice": "dry",
+  "shape": "question",
+  "tries": 0,
+  "problems": [
+   []
+  ],
+  "steps": {},
+  "origin": "cloud-sprint"
+ }
+}
