@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "one day the television won't be blaring the five o'clock news at volume forty-five, and you'll [[hate the quiet]].",
+      "mood": "wistful",
+      "pose": "pondering"
+    }
+  ],
+  "caption": "my grandma always turned it up so high the floorboards shook.\nit meant she was in her armchair, right where she belonged.\nsend this to a cousin who sat on the rug next to you.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "A single slide post about missing the loud television at a grandparent's house once it goes quiet.",
+  "hook_options": [
+    "one day the television won't be blaring the five o'clock news at volume forty-five",
+    "one day nobody will ask three times if you ate lunch before eleven in the morning",
+    "one day nobody will wrap your birthday money in five layers of taped newspaper"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-23_2000",
+  "created_at": "2026-10-23T14:31:36Z",
+  "slug": "20261023_1431_one-day-the-television-won-t",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "wistful"
+  }
+}
