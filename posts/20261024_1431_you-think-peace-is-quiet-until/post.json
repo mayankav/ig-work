@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
+  "slides": [
+    {
+      "text": "you think peace is quiet, until you [[fall asleep]] while someone washes two plates in the kitchen.",
+      "mood": "calm",
+      "pose": "relieved"
+    }
+  ],
+  "caption": "the flat does not have to be empty for your head to settle down.\nit just takes the right partner running the hot water down the hall.\nsend this to the person whose footsteps never make you sit up.\n\n#relationshipquotes #quotesaboutlove #livingtogether #partners",
+  "alt": "a small green donkey with its eyes closed and a soft smile, standing next to lowercase text about finding peace when falling asleep while someone washes dishes in the kitchen.",
+  "hook_options": [
+    "you think peace is quiet, until you [[fall asleep]] while someone washes two plates in the kitchen.",
+    "we think peace is an empty house, until you [[drift off]] while someone puts the shopping away.",
+    "you think safety is a deadbolt, until you [[fall asleep]] while someone runs the tap down the hall."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-24_2000",
+  "created_at": "2026-10-24T14:31:35Z",
+  "slug": "20261024_1431_you-think-peace-is-quiet-until",
+  "reel": {
+    "seconds": 8.8,
+    "tune": "calm"
+  }
+}
