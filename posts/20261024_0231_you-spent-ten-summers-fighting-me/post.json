@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "what looked like a small annoyance turns out to be love",
+  "slides": [
+    {
+      "text": "you spent ten summers fighting me for the outside edge of the spare mattress.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "nan only had the one small room upstairs, with two thin quilts laid out flat on the floorboards.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "so every night after tea, you ran up first to throw your bag right by the door.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "you took the open side and shoved me against the cold wallpaper, wedged by the skirting board.",
+      "mood": "sad",
+      "pose": "turning_away"
+    },
+    {
+      "text": "i spent hours listening to the house creak, annoyed at your sharp elbow in my ribs.",
+      "mood": "sad",
+      "pose": "sleepless"
+    },
+    {
+      "text": "but last winter, standing by the kettle in nan's kitchen, you finally told me why.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "you were terrified of that dark hallway too, but you knew i was worse.",
+      "mood": "wise",
+      "pose": "realising"
+    },
+    {
+      "text": "[[you just wanted to be the first thing]] whatever came up the stairs had to go through.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we shared two mattresses pulled across the rug and three board games with half the plastic counters missing.\nhaving a cousin means someone else watched the exact same family happen from two feet away.\nsend this to the one who always split the ice pop with you at the bottom of the garden.\n\n#childhoodmemories #grandmashouse #growinguptogether #nostalgia",
+  "alt": "A story across eight slides about a cousin who always claimed the outside edge of a floor mattress at their grandmother's house to guard against the dark hallway.",
+  "hook_options": [
+    "you spent ten summers fighting me for the outside edge of the spare mattress.",
+    "i spent years annoyed that you shoved me against the cold wallpaper every night.",
+    "every august at nan's house, you stole the side of the bed by the door and called it dibs."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-24_0800",
+  "created_at": "2026-10-24T02:31:41Z",
+  "slug": "20261024_0231_you-spent-ten-summers-fighting-me"
+}
