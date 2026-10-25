@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "things you did without flinching because someone went first",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "pushing the wooden alley gate open at dusk, without looking left or right because their shoes were already on the pavement.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "ringing the neighbour's brass doorbell at five to get a stray ball back, [[never wondering if they'd be angry]].",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "pedalling flat out down the steep gravel hill past the water tower, because their back tyre made it look easy.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "laying your fifty-pence coin on the high shop counter and speaking right up, before you knew what being shy felt like.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "telling four bigger kids by the park swings to move aside, without turning around once to check if [[they were standing right behind you]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "wading straight past the red buoy into the cold lake, certain you couldn't sink while you held their wrist.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "save this for an afternoon you feel small, and remember the one who went first so you didn't have to.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "an older brother takes the sharp edges off first, so you get to grow up thinking the pavement was always smooth. you don't even notice you were borrowing courage until you have to cross the road on your own two feet.\nsave this for a morning you have to walk into a quiet room alone.\n\n#siblings #brotherandsister #siblinglove #oldersiblings #growingupwithsiblings",
+  "alt": "a list of eight slides about fearless things you did as a child because an older sibling was always right in front of you.",
+  "hook_options": [
+    "things you did without flinching because someone went first",
+    "how easy being brave was when someone walked three steps ahead",
+    "the wild nerve you had before you ever had to walk alone"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-25_0800",
+  "created_at": "2026-10-25T02:31:24Z",
+  "slug": "20261025_0231_things-you-did-without-flinching-because"
+}
