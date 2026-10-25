@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "you hear their laugh as the bus doors shut",
+      "mood": "warm",
+      "pose": "warm_mug"
+    }
+  ],
+  "caption": "the hallway feels longer when the echo fades\ni still catch their joke in the quiet moments\nsend this to the friend who always saved the last slice of pizza\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "oneliner about hearing a friend's laugh as a bus door closes, recalling a small, true feeling of home",
+  "hook_options": [
+    "you hear their laugh as the bus doors shut",
+    "the empty kitchen seat still smells of their coffee",
+    "streetlights flicker, you picture them turning the corner"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-10-25_2000",
+  "created_at": "2026-10-25T14:31:30Z",
+  "slug": "20261025_1431_you-hear-their-laugh-as-the",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}
