@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 siblings \u00b7 \ud83c\udfac Reel, 10s, wistful tune\n\n<b>\u201cone morning you won't trip over his heavy boots on the doormat, and the door will open far too wide.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you spend fifteen years complaining about how much space they take up.\nthen they move out in twenty minutes and leave a room that feels twice as big.\nsend this to the brother who always left his things everywhere.\n\n#siblings #growingupwithsiblings #oldersiblings #brotherandsister</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>df2b1bdaa9c49269</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793029721006,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 783,
   "delivered_at": 1793026120967,
-  "deadline": 1793029720967
+  "deadline": 1793029720967,
+  "action": {
+    "id": "rv-df2b1bdaa9c49269-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793030322766
+  },
+  "claimed": false,
+  "claim_expires": 1793032194070,
+  "result": {
+    "action_id": "rv-df2b1bdaa9c49269-timeout",
+    "state": "published",
+    "media_id": "18120959162058027",
+    "token": "df2b1bdaa9c49269"
+  }
 }
