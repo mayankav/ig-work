@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "one morning you won't trip over his [[heavy boots on the doormat]], and the door will open far too wide.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    }
+  ],
+  "caption": "you spend fifteen years complaining about how much space they take up.\nthen they move out in twenty minutes and leave a room that feels twice as big.\nsend this to the brother who always left his things everywhere.\n\n#siblings #growingupwithsiblings #oldersiblings #brotherandsister",
+  "alt": "A single slide post featuring a small green donkey glancing back over its shoulder next to a sentence about missing an older sibling's messy boots in the hallway.",
+  "hook_options": [
+    "one morning you won't trip over his heavy boots on the doormat, and the door will open far too wide.",
+    "you will spend ten years yelling about his shoes in the hallway, until the day the rug is empty.",
+    "one day the bathroom door won't be locked at quarter past seven, and the morning will feel too big."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-26_2000",
+  "created_at": "2026-10-26T14:31:40Z",
+  "slug": "20261026_1431_one-morning-you-won-t-trip",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "wistful"
+  }
+}
