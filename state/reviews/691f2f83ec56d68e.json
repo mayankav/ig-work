@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 family \u00b7 8 slides\n\n<b>\u201cwhat grandma taught you without ever making it a lesson\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. what grandma taught you without ever making it a lesson\n2. keeping the tin of biscuits on the low shelf, so small hands never had to stretch or ask.\n3. setting four plates at the oilcloth table for three people, in case someone dropped in at one.\n4. washing out empty jam jars at the sink, until every pantry shelf was full of buttons and seeds.\n5. sitting on the green bench doing absolutely nothing at three o'clock, and calling it a full afternoon.\n6. pressing a folded ten-pound note into your palm at the door, so you had bus money for the way back.\n7. standing by the wooden gate in the rain, waving until your car reached the main road.\n8. save this for a quiet Sunday, to remember the house that made you feel safe.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>she never gave speeches about taking it easy, she just kept the kettle hot and left the back door unlocked.\nyou catch yourself doing the exact same things years later and realise where you picked them up.\nsave this for a slow morning when you miss grandma.\n\n#grandma #grandparents #grandmashouse</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>691f2f83ec56d68e</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793072919047,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 793,
   "delivered_at": 1793069318843,
-  "deadline": 1793072918843
+  "deadline": 1793072918843,
+  "action": {
+    "id": "rv-691f2f83ec56d68e-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793073520366
+  },
+  "claimed": false,
+  "claim_expires": 1793075369509,
+  "result": {
+    "action_id": "rv-691f2f83ec56d68e-timeout",
+    "state": "published",
+    "media_id": "17989407960095417",
+    "token": "691f2f83ec56d68e"
+  }
 }
