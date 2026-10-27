@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "what someone taught you without ever saying it out loud",
+  "slides": [
+    {
+      "text": "what grandma taught you without ever making it a lesson",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "keeping the tin of biscuits on the low shelf, so small hands never had to stretch or ask.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "[[setting four plates]] at the oilcloth table for three people, in case someone dropped in at one.",
+      "mood": "calm",
+      "pose": "stirring_pot"
+    },
+    {
+      "text": "washing out empty jam jars at the sink, until every pantry shelf was full of buttons and seeds.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "sitting on the green bench doing absolutely nothing at three o'clock, and calling it a full afternoon.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "[[pressing a folded ten-pound note]] into your palm at the door, so you had bus money for the way back.",
+      "mood": "warm",
+      "pose": "offering"
+    },
+    {
+      "text": "[[standing by the wooden gate]] in the rain, waving until your car reached the main road.",
+      "mood": "warm",
+      "pose": "waving"
+    },
+    {
+      "text": "save this for a quiet Sunday, to remember the house that made you feel safe.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "she never gave speeches about taking it easy, she just kept the kettle hot and left the back door unlocked.\nyou catch yourself doing the exact same things years later and realise where you picked them up.\nsave this for a slow morning when you miss grandma.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "An 8-slide list describing the quiet, unspoken lessons learned from a grandmother, featuring a small green donkey in various poses.",
+  "hook_options": [
+    "what grandma taught you without ever making it a lesson",
+    "things you learned at grandma's house without a single word",
+    "what grandma taught you just by sitting in her kitchen"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-27_0800",
+  "created_at": "2026-10-27T02:31:25Z",
+  "slug": "20261027_0231_what-grandma-taught-you-without-ever"
+}
