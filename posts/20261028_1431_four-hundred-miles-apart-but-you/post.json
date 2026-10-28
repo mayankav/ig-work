@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "four hundred miles apart, but you still send [[the screenshot of mum's text]] before i even open it.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "we haven't shared a hallway in six years, but my phone still buzzes the second she hits send.\nno extra words attached, because you already know what face i am making.\nsend this to your sister if she always sends the screenshot first.\n\n#siblings #sisterlove #siblinglove #oldersiblings",
+  "alt": "a small green donkey wearing glasses with a knowing look, above text about a sister sending screenshots of mum's text.",
+  "hook_options": [
+    "four hundred miles apart, but you still send [[the screenshot of mum's text]] before i even open it.",
+    "three train rides away, but you still call from the supermarket aisle to ask which soup to buy.",
+    "two time zones over, but you still send [[a photo from the fitting room]] before you buy the coat."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-28_2000",
+  "created_at": "2026-10-28T14:31:25Z",
+  "slug": "20261028_1431_four-hundred-miles-apart-but-you",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "wistful"
+  }
+}
