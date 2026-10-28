@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 adult life \u00b7 7 slides\n\n<b>\u201cin our first flat, you always left the stove light on before going to bed.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. in our first flat, you always left the stove light on before going to bed.\n2. i switched it off every night, annoyed at the meter eating our pound coins.\n3. so we spent winter in that small fight, you turning it on, me clicking it off.\n4. but the night i lost my job, i walked home in the cold past midnight.\n5. the stairs were pitch black, and i stood outside the door for five minutes, too tired to turn the key.\n6. when i pushed it open, that thin yellow strip was already sitting on the kitchen lino.\n7. you were never forgetful. you just didn't want me walking into a dark flat.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we were nineteen and arguing over fifty pence on the electric meter.\nyou never once explained why you kept turning it back on.\nsend this to the roommate who always left a light burning for your late shift.\n\n#roommates #firstflat #movingout #firstapartment</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>c965de43e38ef0ce</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793158742174,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 803,
   "delivered_at": 1793155142140,
-  "deadline": 1793158742140
+  "deadline": 1793158742140,
+  "action": {
+    "id": "rv-c965de43e38ef0ce-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793159343642
+  },
+  "claimed": false,
+  "claim_expires": 1793161202106,
+  "result": {
+    "action_id": "rv-c965de43e38ef0ce-timeout",
+    "state": "published",
+    "media_id": "18140827099622513",
+    "token": "c965de43e38ef0ce"
+  }
 }
