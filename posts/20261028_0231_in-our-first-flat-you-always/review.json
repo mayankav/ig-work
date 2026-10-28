@@ -1,0 +1,18 @@
+{
+  "token": "c965de43e38ef0ce",
+  "slug": "20261028_0231_in-our-first-flat-you-always",
+  "files": {
+    "post.json": "fbea6bff5ed9d3ff40dc2d1683b06295077bb7b300e288b9ba0f59c893a40400",
+    "caption.txt": "31f130ade55512ef0ddb83916fc57760d4525255030c1e060bfedd98b59aa767",
+    "contact_sheet.png": "1d5e9b6cf05c2604cf1b1d5e4b3aeb3d705fad308d63c2d9d881f448cd54821b",
+    "slides/01.jpg": "ccc5f59203c12038bd3fc870bc2c23286e324042e68c1b2e8dd4a4123f9917cc",
+    "slides/02.jpg": "234269ce7741773781c32631202bbd26ea204468707beed0251f9c8f0c37bbb3",
+    "slides/03.jpg": "28f684d2f2a6ee328ee5ae6097cc3a80e13d6ae2931f956f2b8a9136f0f3040a",
+    "slides/04.jpg": "d8dd6e2aad8693fdc21475fdf11aeebceb94225fc2889120631869ab94f82ee9",
+    "slides/05.jpg": "75f2f6f6e858641b64a2321dba5f1a5210739ab240d7d53c7627fbdeddc44637",
+    "slides/06.jpg": "d65ef8a668cc25f4faff7ec2cefc2995c01eec6c747a1ea1950b5654f76cb47f",
+    "slides/07.jpg": "85b96c5ae5157c74dc20ae1328e2bd7e3dbf3129d5ef1cc0c3a25aff38b8cac4"
+  },
+  "parent": null,
+  "manifest": "c5fbf549f1b3519947d821a1dc19899f2719bb69eca7e5f151e089b6610d8c50"
+}

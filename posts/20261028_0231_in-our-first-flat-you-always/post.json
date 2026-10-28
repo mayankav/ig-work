@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "a parent's odd habit that the child only understands years later",
+  "slides": [
+    {
+      "text": "in our first flat, you always left the stove light on before going to bed.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "i switched it off every night, annoyed at the meter eating our pound coins.",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "so we spent winter in that small fight, you turning it on, me clicking it off.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "but the night i lost my job, i walked home in the cold past midnight.",
+      "mood": "sad",
+      "pose": "walking_away"
+    },
+    {
+      "text": "the stairs were pitch black, and i stood outside the door for five minutes, too tired to turn the key.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "when i pushed it open, that thin yellow strip was already sitting on the kitchen lino.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "[[you were never forgetful.]] you just didn't want me walking into a dark flat.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we were nineteen and arguing over fifty pence on the electric meter.\nyou never once explained why you kept turning it back on.\nsend this to the roommate who always left a light burning for your late shift.\n\n#roommates #firstflat #movingout #firstapartment",
+  "alt": "a seven-slide story about an old roommate who always left the stove light on at night, and what that quiet habit actually meant.",
+  "hook_options": [
+    "in our first flat, you always left the stove light on before going to bed.",
+    "for six months, you left the stove light on and i kept switching it off.",
+    "you never went to sleep without leaving the stove light on."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.7-flash",
+  "slot": "2026-10-28_0800",
+  "created_at": "2026-10-28T02:31:12Z",
+  "slug": "20261028_0231_in-our-first-flat-you-always"
+}
