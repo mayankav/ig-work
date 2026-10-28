@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 siblings \u00b7 \ud83c\udfac Reel, 9.2s, wistful tune\n\n<b>\u201cfour hundred miles apart, but you still send the screenshot of mum's text before i even open it.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we haven't shared a hallway in six years, but my phone still buzzes the second she hits send.\nno extra words attached, because you already know what face i am making.\nsend this to your sister if she always sends the screenshot first.\n\n#siblings #sisterlove #siblinglove #oldersiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>89eefa4e4d2d4ac7</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793202020263,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 806,
   "delivered_at": 1793198420181,
-  "deadline": 1793202020181
+  "deadline": 1793202020181,
+  "action": {
+    "id": "rv-89eefa4e4d2d4ac7-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793202622052
+  },
+  "claimed": false,
+  "claim_expires": 1793204480209,
+  "result": {
+    "action_id": "rv-89eefa4e4d2d4ac7-timeout",
+    "state": "published",
+    "media_id": "18137128030657984",
+    "token": "89eefa4e4d2d4ac7"
+  }
 }
