@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "signs you were loved better than you knew growing up",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "waking up under a heavy wool blanket in your own bed, [[with no memory of anyone carrying you]] up the stairs.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "finding your school shoes polished and waiting on the doormat every monday, before you even knew shoes got dirty.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "an orange peeled into clean crescents on a saucer, so your fingers never got sticky.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "someone watching from the window at four until your satchel turned the corner, then pretending they were just watering the sill.",
+      "mood": "calm",
+      "pose": "holding_plant"
+    },
+    {
+      "text": "eating the two sweet plums from the paper bag, while someone else ate the bruised one standing at the kitchen sink.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "[[never knowing how cold the house was]], because your small room had the electric heater running all winter.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for an evening you feel alone, to remind your younger self how safe you really were.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "you spent years thinking that was just how houses worked.\nit takes getting older to see how much quiet work your mum did to keep the edges soft.\nsave this for an evening you need to remember where your calm came from.\n\n#growingup #childhoodmemories",
+  "alt": "A carousel of small, concrete childhood memories showing the quiet ways someone protected you without you ever noticing.",
+  "hook_options": [
+    "tiny signs you grew up with quiet love",
+    "signs you were loved better than you knew growing up",
+    "proof you grew up softer than you remember"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-29_0800",
+  "created_at": "2026-10-29T02:31:29Z",
+  "slug": "20261029_0231_signs-you-were-loved-better-than"
+}
