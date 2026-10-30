@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "a younger self and an older self, one small moment apart",
+  "slides": [
+    {
+      "text": "at fourteen, we could never just say goodbye at the front gate.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "i walked you to the red postbox, so you turned around and walked me back to my drive.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "a five-minute walk took an hour, back and forth along the same six gardens.",
+      "mood": "joy",
+      "pose": "laughing"
+    },
+    {
+      "text": "but now you live a three-hour flight away, with your own lease and two sets of keys.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "so when my visit ended on sunday, the cab pulled up before dawn.",
+      "mood": "wistful",
+      "pose": "looking_at_watch"
+    },
+    {
+      "text": "we stayed quiet down the motorway, just watching the tail lights.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "but you carried my heavy duffel right to the security trays, and stood by the glass until final call.",
+      "mood": "sad",
+      "pose": "leaning_on"
+    },
+    {
+      "text": "we're thirty now, but [[you still walked me halfway]].",
+      "mood": "warm",
+      "pose": "waving"
+    }
+  ],
+  "caption": "some goodbyes take an extra twenty minutes because neither of you wants to be the first one to turn around.\nsend this to the best friend who still stands on the pavement until your taxi turns the corner.\n\n#childhoodfriends #bestfriendquotes #longdistancefriendship #friendshipquotes",
+  "alt": "an eight-slide story about two childhood best friends who still walk each other as far as they can before saying goodbye.",
+  "hook_options": [
+    "at fourteen, we could never just say goodbye at the front gate.",
+    "at fourteen, we could never leave each other's houses without walking halfway back.",
+    "for five years, a simple goodbye took three trips between our driveways."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-30_0800",
+  "created_at": "2026-10-30T02:31:39Z",
+  "slug": "20261030_0231_at-fourteen-we-could-never-just"
+}
