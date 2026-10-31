@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "an everyday thing everyone thinks they already understand, seen new through one small moment most people have lived",
+  "slides": [
+    {
+      "text": "you thought your granddad fell asleep during the afternoon news, but [[he only closed his eyes when the house was full]].",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "he knew every voice in that room by heart.\nsend this to a cousin who remembers those sunday afternoons.\n\n#grandparents #grandmashouse #granddad",
+  "alt": "a slide reading: you thought your granddad fell asleep during the afternoon news, but he only closed his eyes when the house was full.",
+  "hook_options": [
+    "you thought your granddad fell asleep during the afternoon news, but he only closed his eyes when the house was full.",
+    "you thought your granddad was just a slow walker, until you noticed his boots always stayed half a step behind yours.",
+    "you thought he kept the television on for the news, but he just wanted the living room to sound full."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-10-31_2000",
+  "created_at": "2026-10-31T14:31:39Z",
+  "slug": "20261031_1431_you-thought-your-granddad-fell-asleep",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "calm"
+  }
+}
