@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "habits of people who are easy to love",
+  "slides": [
+    {
+      "text": "the quiet ways you started looking after yourself",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "shutting the laptop screen while afternoon light is still on the desk, even with three unread tabs waiting.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "rinsing your face with cold water over the basin, then pulling on a thick pair of dry socks.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "packing tomorrow's lunch into a tin before bed, so the morning feels like someone already looked out for you.",
+      "mood": "calm",
+      "pose": "lunchbox"
+    },
+    {
+      "text": "taking the longer route past the library, just to buy [[seven quiet minutes]] before you unlock the door.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "filling a glass right to the brim and sitting on the rug to drink it, instead of gulping it down by the tap.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "saying \"i am tired\" out loud in the empty hall, [[without listing three reasons]] why you shouldn't be.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for an evening you forget that you are someone worth looking after.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we are patient with everybody else until our own turn comes.\nlooking after yourself is rarely an event.\nmost days it is just turning the big light off and letting today be done.\nsave this for an evening when the week ahead already feels heavy.\n\n#selflovequotes #bekindtoyourself #rest",
+  "alt": "a carousel of eight slides about quiet ways to look after yourself on a hard week.",
+  "hook_options": [
+    "the quiet ways you started looking after yourself",
+    "small courtesies you finally give yourself",
+    "tiny proofs you are treating yourself like someone you love"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-10-31_0800",
+  "created_at": "2026-10-31T02:31:39Z",
+  "slug": "20261031_0231_the-quiet-ways-you-started-looking"
+}
