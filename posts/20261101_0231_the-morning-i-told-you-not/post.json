@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "what looked like a small annoyance turns out to be love",
+  "slides": [
+    {
+      "text": "the morning i told you not to walk beside me anymore.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "i was desperate to look grown up, and your paint-stained fleece felt like the most embarrassing thing on earth.",
+      "mood": "sad",
+      "pose": "facepalm"
+    },
+    {
+      "text": "so you stopped holding my hand, but you didn't head back inside.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "you just dropped twenty paces back, hands in your pockets, whistling at the pavement.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "every time i turned around to scowl, you looked up at the telephone wires like you were only out for milk.",
+      "mood": "wistful",
+      "pose": "looking_up"
+    },
+    {
+      "text": "but you never went into the shop. you stood by the lamppost until my bag went through the gates.",
+      "mood": "wistful",
+      "pose": "looking_far"
+    },
+    {
+      "text": "[[thank you for letting me think i walked alone.]]",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "it takes a lot of quiet patience to let someone feel brave.\nturns out dad knew the exact distance between keeping you safe and letting you grow up.\nsend this to your dad, or whoever walked twenty paces behind so you could feel tall.\n\n#growingup #childhoodmemories #parenthood",
+  "alt": "a short story about telling your dad not to walk you to school anymore, and realising he still watched from twenty paces behind.",
+  "hook_options": [
+    "the morning i told you not to walk beside me anymore.",
+    "the day i told you to stop walking me to the corner.",
+    "i spent a whole winter trying to walk to school without you."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-01_0800",
+  "created_at": "2026-11-01T02:31:15Z",
+  "slug": "20261101_0231_the-morning-i-told-you-not"
+}

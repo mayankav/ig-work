@@ -1,0 +1,18 @@
+{
+  "token": "e2dfa2be4d1fad5a",
+  "slug": "20261101_0231_the-morning-i-told-you-not",
+  "files": {
+    "post.json": "53c3fe00ae802abd6f008e7c10b84bc222f69fd4dbb199a366f5d2d147a642f0",
+    "caption.txt": "0f5c067799837fc1c05d616605020260e4bcf7d5694dbb262245416d6f813db4",
+    "contact_sheet.png": "136016570e10101a52b647891bf472175eeb393a5962b67e3f1c7b95d4c8b3ae",
+    "slides/01.jpg": "e9aacd0398c3cb3129ca65d3ddc3e6544a20669389a67ea4475b3c8c1b988ebc",
+    "slides/02.jpg": "413e0476b49dc5c6f45133abc099143e060e359407aa96c4390d20c2b99eb7c4",
+    "slides/03.jpg": "0caaac5993379b7ceaa13d58e8ba1c33d5c328d1cf2f34466b18e66a251e42e8",
+    "slides/04.jpg": "a33e0e6b23014ab9d526cd7545ce665d65e4ac31fa7161bf2ede091164329dc5",
+    "slides/05.jpg": "a6151f0e853c2bdcbe92fcd652ab43950df17a004b373942e16ff6492eb0c1f2",
+    "slides/06.jpg": "7b5f0b596d6c2e384a20ccfd9d071f947fb0b4e5a8685e115bba16a2a5263d7c",
+    "slides/07.jpg": "9a6bf799f57f7ff050ebb599b4e7d9188abc353c64ddaa4e7ae88648d0162f53"
+  },
+  "parent": null,
+  "manifest": "522a40a2fdad117f356bc3a463ff8eb067ddd33fb0f16d70c73411f4770d3bd4"
+}
