@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 adult life \u00b7 \ud83c\udfac Reel, 10s, wistful tune\n\n<b>\u201csome people feel like an extra coat on the hook: the flat never felt empty until you took it down.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the front hall looked twice as big the afternoon you loaded the car.\ni still look at that bare peg when i unlock the door after six.\nsend this to the flatmate who always bought the big milk before the carton went empty.</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>db7ac5aad20d72de</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793548050154,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 853,
   "delivered_at": 1793544450057,
-  "deadline": 1793548050057
+  "deadline": 1793548050057,
+  "action": {
+    "id": "rv-db7ac5aad20d72de-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793548651685
+  },
+  "claimed": false,
+  "claim_expires": 1793550503907,
+  "result": {
+    "action_id": "rv-db7ac5aad20d72de-timeout",
+    "state": "published",
+    "media_id": "17888986434486721",
+    "token": "db7ac5aad20d72de"
+  }
 }
