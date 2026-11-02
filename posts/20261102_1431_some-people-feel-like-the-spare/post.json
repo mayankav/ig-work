@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some people feel like the spare bunk in the back room: empty for eleven months, but [[your pillow is right where you left it]].",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    }
+  ],
+  "caption": "we only saw each other two weeks every summer, but we picked up the exact same joke by the kitchen door.\ngrowing up with a cousin meant you had a best friend who already knew every family story.\nsend this to the cousin who shared the back seat with you on every family trip.\n\n#childhoodmemories #growinguptogether #nostalgia #childhoodfriends",
+  "alt": "a small green donkey sits on a ledge looking off to the side next to text about growing up with a cousin.",
+  "hook_options": [
+    "some people feel like the spare bunk in the back room",
+    "some people feel like the second helmet on the shed peg",
+    "some people feel like the worn seat on the back porch"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-02_2000",
+  "created_at": "2026-11-02T14:31:21Z",
+  "slug": "20261102_1431_some-people-feel-like-the-spare",
+  "reel": {
+    "seconds": 11.6,
+    "tune": "calm"
+  }
+}
