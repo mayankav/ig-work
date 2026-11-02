@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "small proof your grandparents loved you without saying a word",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "sliding a [[hot water bottle]] between your sheets twenty minutes before bedtime.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "keeping a carton of your juice in the fridge door, even if you only stayed two weekends a year.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "pretending to think hard over a card game, so you could win without guessing they let you.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "keeping a tin of travel sweets in the glovebox, bought only for your sunday ride.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "letting a walk to the corner shop take forty minutes, because you had to balance on every single kerb.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "taping your crayon drawing to the dresser mirror, [[right beside their own wedding photo]].",
+      "mood": "wistful",
+      "pose": "photo_frame"
+    },
+    {
+      "text": "save this for a quiet afternoon you miss the safest room you ever knew.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "grandparents never handed you a bill for their time. you just woke up to warm sheets, or found your drink already bought. they made an entire house feel like it was built just to keep you safe.\nsave this for an afternoon you want to picture that living room again.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "A carousel list of quiet, everyday ways grandparents showed their love through small home comforts.",
+  "hook_options": [
+    "small proof your grandparents loved you without saying a word",
+    "signs you were loved quietly at your grandparents' house",
+    "proof you grew up with more love than you realised at grandma's"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-02_0800",
+  "created_at": "2026-11-02T02:31:26Z",
+  "slug": "20261102_0231_small-proof-your-grandparents-loved-you"
+}
