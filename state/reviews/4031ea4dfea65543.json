@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 adult life \u00b7 \ud83c\udfac Reel, 11.6s, calm tune\n\n<b>\u201cat ten, being sent to bed at eight felt like a punishment. at twenty-four, in our flat, you closing my door was pure mercy.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we used to keep the kitchen light on until two in the morning.\nnow i am asleep before the news even starts.\nsend this to the flatmate who always checked the front door lock before bed.\n\n#roommate #flatmate #growingup #home #friendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>4031ea4dfea65543</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793720517457,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 878,
   "delivered_at": 1793716917409,
-  "deadline": 1793720517409
+  "deadline": 1793720517409,
+  "action": {
+    "id": "rv-4031ea4dfea65543-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793721119360
+  },
+  "claimed": false,
+  "claim_expires": 1793722977261,
+  "result": {
+    "action_id": "rv-4031ea4dfea65543-timeout",
+    "state": "published",
+    "media_id": "18034495568677542",
+    "token": "4031ea4dfea65543"
+  }
 }
