@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 parents \u00b7 7 slides\n\n<b>\u201cfor twenty years, your left arm always shot out across my chest whenever you hit the brakes.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. for twenty years, your left arm always shot out across my chest whenever you hit the brakes.\n2. back then, i just rested my head on the cold window and let you steer us through the dark.\n3. but last night, heavy rain hit the glass while we were still parked outside the shop.\n4. you sat with your fingers around the key, squinting out at the wipers on full speed.\n5. so i held my hand out, took the ring from you, and pointed to the passenger door.\n6. you clicked your seatbelt in, leaned into the headrest, and dropped your shoulders.\n7. you spent two decades keeping us safe in the storm. tonight, you fell asleep before we hit the bypass.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>the day you notice your mum getting tired is the day you stop waiting to be looked after.\nyou just take the keys.\nsend this to your mum tonight.\n\n#mother #mumquotes #motherdaughter #motherson #momquotes</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>4751a854cf7612a8</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793677545014,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 875,
   "delivered_at": 1793673944972,
-  "deadline": 1793677544972
+  "deadline": 1793677544972,
+  "action": {
+    "id": "rv-4751a854cf7612a8-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793678146471
+  },
+  "claimed": false,
+  "claim_expires": 1793680058017,
+  "result": {
+    "action_id": "rv-4751a854cf7612a8-timeout",
+    "state": "published",
+    "media_id": "18040759922671420",
+    "token": "4751a854cf7612a8"
+  }
 }
