@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "the first time you look after someone who used to look after you, in one small everyday way",
+  "slides": [
+    {
+      "text": "for twenty years, your left arm always shot out across my chest whenever you hit the brakes.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "back then, i just rested my head on the cold window and let you steer us through the dark.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "but last night, heavy rain hit the glass while we were still parked outside the shop.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "you sat with your fingers around the key, squinting out at the wipers on full speed.",
+      "mood": "wistful",
+      "pose": "holding_key"
+    },
+    {
+      "text": "so i held my hand out, took the ring from you, and pointed to the passenger door.",
+      "mood": "warm",
+      "pose": "offering"
+    },
+    {
+      "text": "you clicked your seatbelt in, leaned into the headrest, and dropped your shoulders.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "[[you spent two decades keeping us safe in the storm]]. tonight, you fell asleep before we hit the bypass.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "the day you notice your mum getting tired is the day you stop waiting to be looked after.\nyou just take the keys.\nsend this to your mum tonight.\n\n#mother #mumquotes #motherdaughter #motherson #momquotes",
+  "alt": "A seven-slide story post about taking the car keys from your mum on a rainy night and driving her home for the first time.",
+  "hook_options": [
+    "for twenty years, your left arm always shot out across my chest whenever you hit the brakes.",
+    "you sat with your fingers around the key, squinting out at the wipers on full speed.",
+    "for years, i never once thought to ask if you wanted to sit in the passenger seat."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-03_0800",
+  "created_at": "2026-11-03T02:31:24Z",
+  "slug": "20261103_0231_for-twenty-years-your-left-arm"
+}
