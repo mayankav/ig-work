@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "at eight, i hated getting your navy jumper with your name written on the tag. today, i'd give anything to [[wear something you outgrew]].",
+      "mood": "warm",
+      "pose": "self_hug"
+    }
+  ],
+  "caption": "having someone four years ahead meant the map was already drawn before you got there.\nsend this to the older sibling who had to test every curfew first.\n\n#siblings #oldersiblings #siblinglove #growingupwithsiblings",
+  "alt": "an illustration of a small green donkey hugging itself, next to text about an older sibling's hand-me-down jumper.",
+  "hook_options": [
+    "at eight, i hated getting your navy jumper with your name on the label.",
+    "at seven, i hated when you wrapped your thick wool scarf right over my chin.",
+    "at nine, i hated holding the torch while you fixed your bike in the dark."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-04_2000",
+  "created_at": "2026-11-04T14:31:45Z",
+  "slug": "20261104_1431_at-eight-i-hated-getting-your",
+  "reel": {
+    "seconds": 11.6,
+    "tune": "warm"
+  }
+}
