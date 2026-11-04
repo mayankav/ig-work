@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 friendship \u00b7 8 slides\n\n<b>\u201cthings that were easy at nine but take nerve today\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. things that were easy at nine but take nerve today\n2. knocking on a front door and waiting on the mat, without calling ahead to ask if you were free\n3. sitting on the grass at three o'clock with two cold cans, doing nothing until the shadow reached the fence\n4. walking right up to someone by the swings and asking if you could play, before you even knew their name\n5. dropping your bike on the lawn and leaving the front door wide open while you ran inside for two ice lollies\n6. dialling seven numbers on the hallway wall phone from memory and asking someone's mum if they could come out\n7. saying i miss you on the pavement at eight o'clock, without worrying if it was too much\n8. save this for a tuesday when you need to send a simple text to the friend who moved away</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we used to share a park bench for three hours with nowhere else to be.\nnow it takes six texts back and forth just to pick a night.\nreaching out to my best friend used to be as simple as breathing.\nsave this for a quiet evening when you need a small nudge to type out a short hello.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>269c39807747b1d7</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1793763631796,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 888,
   "delivered_at": 1793760031749,
-  "deadline": 1793763631749
+  "deadline": 1793763631749,
+  "action": {
+    "id": "rv-269c39807747b1d7-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1793764233702
+  },
+  "claimed": false,
+  "claim_expires": 1793766080647,
+  "result": {
+    "action_id": "rv-269c39807747b1d7-timeout",
+    "state": "published",
+    "media_id": "17966294202219888",
+    "token": "269c39807747b1d7"
+  }
 }
