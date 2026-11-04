@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "things that were easy at nine but take nerve today",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "knocking on a front door and waiting on the mat, without calling ahead to ask if you were free",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "sitting on the grass at three o'clock with two cold cans, doing nothing until the shadow reached the fence",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "walking right up to someone by the swings and asking if you could play, before you even knew their name",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "dropping your bike on the lawn and leaving the front door wide open while you ran inside for [[two ice lollies]]",
+      "mood": "joy",
+      "pose": "idea"
+    },
+    {
+      "text": "dialling seven numbers on the hallway wall phone from memory and asking someone's mum if they could come out",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "saying [[i miss you]] on the pavement at eight o'clock, without worrying if it was too much",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for a tuesday when you need to send a simple text to the friend who moved away",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we used to share a park bench for three hours with nowhere else to be.\nnow it takes six texts back and forth just to pick a night.\nreaching out to my best friend used to be as simple as breathing.\nsave this for a quiet evening when you need a small nudge to type out a short hello.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "A carousel list of seven small childhood habits that feel intimidating to do as an adult, written for a best friend who moved away.",
+  "hook_options": [
+    "things that were easy at nine but take nerve today",
+    "small things we did at ten that feel brave now",
+    "seven things we did as kids without thinking twice"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-04_0800",
+  "created_at": "2026-11-04T02:31:51Z",
+  "slug": "20261104_0231_things-that-were-easy-at-nine"
+}
