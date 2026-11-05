@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i pulled the old blue camp bed out from behind the wardrobe, and a handful of dried grass fell onto the carpet.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "for six summers, we dragged it into the back bedroom every july so we could fit four kids on one floor.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "one iron leg was bent, so you always took the low side by the wall and gave me the soft cushion.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "we stayed awake until two in the morning, making up silly games until auntie sarah banged on the floorboards.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "but we grew up, and the summers stopped having [[eight long weeks]] in them.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "so last night at dinner, you sat across the table in an ironed shirt, talking about fixed-rate mortgages.",
+      "mood": "wise",
+      "pose": "explaining"
+    },
+    {
+      "text": "but you kicked my shoe under the table during dessert, and didn't even look up from your plate.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "everyone else in the room met me as an adult, but [[you were sitting right there]] on the carpet.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we spent whole summers on one floor, and now we catch up in two-hour dinners twice a year.\nmy cousin is still the only person who knows what i looked like before i learnt to sit properly.\nsend this to the one who shared the spare mattress with you.\n\n#childhoodmemories #nostalgia #growinguptogether #grandmashouse",
+  "alt": "An eight-slide text story about finding an old folding camp bed that brings back childhood memories of growing up with a cousin.",
+  "hook_options": [
+    "i pulled the old blue camp bed out from behind the wardrobe, and a handful of dried grass fell onto the carpet.",
+    "we spent six summers crammed on one folding camp bed before anyone told us we had to be adults.",
+    "i dragged the creaky blue camp bed into the spare room yesterday, twenty years after we last shared it."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-05_0800",
+  "created_at": "2026-11-05T02:31:42Z",
+  "slug": "20261105_0231_i-pulled-the-old-blue-camp"
+}
