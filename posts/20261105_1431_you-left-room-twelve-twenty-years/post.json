@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "you left room twelve twenty years ago, but every birthday card you send me still has [[a red tick in the margin]].",
+      "mood": "warm",
+      "pose": "holding_note"
+    }
+  ],
+  "caption": "she was the first person outside your house who actually listened to your answers.\ntwenty years later, that red ink is still a quiet vote of confidence.\nsend this to the teacher who changed your school days.\n\n#childhoodmemories #schoolmemories #favouriteteacher #teachersofinstagram",
+  "alt": "A single slide with text about a favourite teacher who still puts a red tick in the margin of every birthday card.",
+  "hook_options": [
+    "you left room twelve twenty years ago, but every birthday card you send me still has [[a red tick in the margin]].",
+    "you moved four hours north in two thousand, but every letter you send still comes with [[a paperclip on page two]].",
+    "you retired fifteen years ago, but every card you send still has [[a red tick in the corner]]."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-05_2000",
+  "created_at": "2026-11-05T14:31:49Z",
+  "slug": "20261105_1431_you-left-room-twelve-twenty-years",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "warm"
+  }
+}
