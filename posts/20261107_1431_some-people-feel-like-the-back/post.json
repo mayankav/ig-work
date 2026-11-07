@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend from school",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some people feel like the back gate: ten years later, you don't knock, you just [[walk right into the kitchen]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "we don't even talk every month anymore.\nbut the second we pick up, we are right back sitting on the counter.\nsend this to the best friend who never had to ring your front doorbell.\n\n#bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "A small green donkey gives a knowing look beside text comparing a best friend from school to a back gate you can always walk through.",
+  "hook_options": [
+    "some people feel like the back gate: ten years later, you don't knock, you just walk right into the kitchen.",
+    "some people feel like the shortcut behind the school: ten years later, your feet still know every turn.",
+    "some people feel like the unlatched back door: two years without a word, and you still don't knock."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-07_2000",
+  "created_at": "2026-11-07T14:31:36Z",
+  "slug": "20261107_1431_some-people-feel-like-the-back",
+  "reel": {
+    "seconds": 10.0,
+    "tune": "wistful"
+  }
+}
