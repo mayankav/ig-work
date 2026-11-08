@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "habits of people who are easy to love",
+  "slides": [
+    {
+      "text": "habits of people who were easy to live with",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "turning the brass handle all the way down, so the front door never clicked shut in the dark.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "sliding a cold glass of water onto your desk while you were pacing the hallway on a call.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "wrapping the leftover garlic bread in foil and leaving it on the middle shelf with no note.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "scrubbing the soup pot in the sink, simply because they already had soap on the sponge.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "[[catching the kettle switch]] with their thumb before it clicked, so six in the morning stayed quiet.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "letting three whole hours pass in the front room without needing to [[fill the air]].",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "save this for the person who made four narrow walls feel like home.",
+      "mood": "warm",
+      "pose": "waving"
+    }
+  ],
+  "caption": "you only realise how rare it was after you pack the kitchen into cardboard boxes.\nsharing a flat with your best friend never felt like keeping score.\nthe kettle was quiet, and the sink never turned into a quiet war.\nsave this for a sunday when you miss your old flatmate.\n\n#roommates #flatmates #movingout #apartmentliving",
+  "alt": "A list of quiet, considerate habits of people who were easy to live with, illustrated with a small green donkey.",
+  "hook_options": [
+    "habits of people who were easy to live with",
+    "tiny habits of people who were effortless to live with",
+    "habits of the easiest person you ever shared four walls with"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-08_0800",
+  "created_at": "2026-11-08T02:31:16Z",
+  "slug": "20261108_0231_habits-of-people-who-were-easy"
+}

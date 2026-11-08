@@ -8,6 +8,10 @@
     "gemini-3.7-flash \u00b7 key 1": {
       "used": 1,
       "empty": false
+    },
+    "gemini-3.8-flash \u00b7 key 1": {
+      "used": 2,
+      "empty": false
     }
   },
   "gemini_routes": [
