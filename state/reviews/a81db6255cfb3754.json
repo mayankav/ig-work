@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 adult life \u00b7 8 slides\n\n<b>\u201chabits of people who were easy to live with\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. habits of people who were easy to live with\n2. turning the brass handle all the way down, so the front door never clicked shut in the dark.\n3. sliding a cold glass of water onto your desk while you were pacing the hallway on a call.\n4. wrapping the leftover garlic bread in foil and leaving it on the middle shelf with no note.\n5. scrubbing the soup pot in the sink, simply because they already had soap on the sponge.\n6. catching the kettle switch with their thumb before it clicked, so six in the morning stayed quiet.\n7. letting three whole hours pass in the front room without needing to fill the air.\n8. save this for the person who made four narrow walls feel like home.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you only realise how rare it was after you pack the kitchen into cardboard boxes.\nsharing a flat with your best friend never felt like keeping score.\nthe kettle was quiet, and the sink never turned into a quiet war.\nsave this for a sunday when you miss your old flatmate.\n\n#roommates #flatmates #movingout #apartmentliving</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>a81db6255cfb3754</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1794108868966,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 920,
   "delivered_at": 1794105268905,
-  "deadline": 1794108868905
+  "deadline": 1794108868905,
+  "action": {
+    "id": "rv-a81db6255cfb3754-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1794109470521
+  },
+  "claimed": false,
+  "claim_expires": 1794111329818,
+  "result": {
+    "action_id": "rv-a81db6255cfb3754-timeout",
+    "state": "published",
+    "media_id": "17997559731057469",
+    "token": "a81db6255cfb3754"
+  }
 }
