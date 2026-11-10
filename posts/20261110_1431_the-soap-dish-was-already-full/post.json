@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "being kind to yourself",
+  "person": "yourself, on a hard week",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "the soap dish was already full when i reached for it, i never had to pause, that's [[love]]",
+      "mood": "warm",
+      "pose": "flower"
+    }
+  ],
+  "caption": "even a hard week feels smoother when the basics stay ready\na tiny refill can be a quiet breath of calm\nsend this to the housemate who always tops up the soap\n\n#selflovequotes #bekindtoyourself",
+  "alt": "a green donkey points right as the text describes the soap dish already being full, calling the quiet act love",
+  "hook_options": [
+    "the soap dish was already full, i never paused",
+    "a warm blanket waited on the armchair when i came home",
+    "the living room light flicked on as i opened the door"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-11-10_2000",
+  "created_at": "2026-11-10T14:31:41Z",
+  "slug": "20261110_1431_the-soap-dish-was-already-full",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "warm"
+  }
+}
