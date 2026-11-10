@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "adult life",
+  "person": "an old roommate",
+  "shape": "small things you did without thinking as a kid that take nerve now, each told as what you did, never as advice",
+  "slides": [
+    {
+      "text": "small things in our first flat that take nerve today",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "taking [[a slice of toast]] off your plate before you even sat down at the table",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "pushing your bedroom door open at midnight just to tell you one silly thing",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "standing in the kitchen in my socks to ask if an email sounded too angry",
+      "mood": "calm",
+      "pose": "reading"
+    },
+    {
+      "text": "borrowing your heavy winter coat to run to the corner shop without asking",
+      "mood": "warm",
+      "pose": "self_hug"
+    },
+    {
+      "text": "sitting on the cold radiator and saying [[i only have four pounds left]] until friday",
+      "mood": "tired",
+      "pose": "floor_slumped"
+    },
+    {
+      "text": "tiptoeing into your bedroom to click off your lamp because you fell asleep mid-sentence",
+      "mood": "wise",
+      "pose": "lantern_bearer"
+    },
+    {
+      "text": "save this for the person who shared a tiny hallway with you before life got quiet",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we split the gas bill and argued over whose turn it was to buy bin bags, but neither bedroom door was ever shut.\nliving with an old flatmate when you have nothing makes you braver than you know.\nsave this for a sunday afternoon when you miss having someone one wall away.\n\n#roommates #firstapartment #sharedflat #livingtogether",
+  "alt": "A text slideshow listing small, unthinking habits shared with a first flatmate that would take nerve to do with anyone today.",
+  "hook_options": [
+    "small things in our first flat that take nerve today",
+    "things we did in that shared hallway that take nerve now",
+    "habits from our first rented kitchen that take nerve today"
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-10_0800",
+  "created_at": "2026-11-10T02:31:37Z",
+  "slug": "20261110_0231_small-things-in-our-first-flat"
+}
