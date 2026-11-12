@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "you live three hundred miles away now, but we both still leave the kitchen window open an inch, [[even in december]].",
+      "mood": "wistful",
+      "pose": "looking_far"
+    }
+  ],
+  "caption": "some habits stick long after you leave the small house she built.\nmy grandma still steps outside to check the morning air before putting the kettle on, and so do i.\nsend this to the person whose quiet daily habits live in your kitchen now.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "A text slide about keeping a shared daily habit across a long distance, with a small green donkey shading its eyes to look far away.",
+  "hook_options": [
+    "you live three hundred miles away now, but we both still leave the kitchen window open an inch, [[even in december]].",
+    "you live four states away now, but we both still keep our spare change in an old jam jar by the back door.",
+    "you live four hundred miles north, but we both still check the rain on your street at six before putting on our coats."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-12_2000",
+  "created_at": "2026-11-12T14:31:28Z",
+  "slug": "20261112_1431_you-live-three-hundred-miles-away",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "wistful"
+  }
+}
