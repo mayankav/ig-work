@@ -1,0 +1,59 @@
+{
+  "format": "story",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i almost threw away that bent black umbrella behind the coats this morning, until i noticed which spoke was broken.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "the metal rib on the left snapped years ago, bent completely flat to one side.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "you carried it every morning down the hill, through all of year seven.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "so you kept your elbow locked straight, holding the canvas tilted high over my side.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "my blazer was completely dry every time we reached the school gate.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "but your own left sleeve was soaked through to the skin by eight o'clock.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "you never once told me to walk faster, or asked me to take a turn with the handle.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "i hung it back up today, because [[you took the weather]] for both of us.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "my older brother never made a speech about looking after anyone.\nhe just walked on the curb side of the pavement every morning.\nsend this to the person who took the wet shoulder so you didn't have to.\n\n#siblings #brotherandsister #oldersiblings #growingupwithsiblings",
+  "alt": "a story about an older sibling who held a broken umbrella over their younger sibling in the rain, taking the wet shoulder every morning.",
+  "hook_options": [
+    "i almost threw away that bent black umbrella behind the coats this morning, until i noticed which spoke was broken.",
+    "i finally went to bin that broken black umbrella by the front door today.",
+    "that bent black umbrella has been behind the shoe rack for twelve years."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-13_0800",
+  "created_at": "2026-11-13T02:31:50Z",
+  "slug": "20261113_0231_i-almost-threw-away-that-bent"
+}
