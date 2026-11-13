@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a friend you drifted from",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "some girl in manchester gets to hear your terrible laugh on the bus ride home tonight. [[lucky her]].",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    }
+  ],
+  "caption": "we do not talk much these days, but i hope someone is listening to your stories.\nyou made being sixteen feel easy.\nsend this to the best friend who moved to another city before you both finished growing up.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "A single slide with text reading: some girl in manchester gets to hear your terrible laugh on the bus ride home tonight. lucky her. Beside it, a small green donkey walks away, looking back over its shoulder.",
+  "hook_options": [
+    "some girl in manchester gets to hear your terrible laugh on the bus ride home tonight. [[lucky her]].",
+    "someone in leeds gets to borrow your oversized denim jacket when the wind picks up tonight. [[lucky them]].",
+    "a new desk neighbour gets to hear your silly stories over lukewarm tea today. [[lucky them]]."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-13_2000",
+  "created_at": "2026-11-13T14:31:07Z",
+  "slug": "20261113_1431_some-girl-in-manchester-gets-to",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "wistful"
+  }
+}
