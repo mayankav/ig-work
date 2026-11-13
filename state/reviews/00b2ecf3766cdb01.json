@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 siblings \u00b7 8 slides\n\n<b>\u201ci almost threw away that bent black umbrella behind the coats this morning, until i noticed which spoke was broken.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. i almost threw away that bent black umbrella behind the coats this morning, until i noticed which spoke was broken.\n2. the metal rib on the left snapped years ago, bent completely flat to one side.\n3. you carried it every morning down the hill, through all of year seven.\n4. so you kept your elbow locked straight, holding the canvas tilted high over my side.\n5. my blazer was completely dry every time we reached the school gate.\n6. but your own left sleeve was soaked through to the skin by eight o'clock.\n7. you never once told me to walk faster, or asked me to take a turn with the handle.\n8. i hung it back up today, because you took the weather for both of us.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>my older brother never made a speech about looking after anyone.\nhe just walked on the curb side of the pavement every morning.\nsend this to the person who took the wet shoulder so you didn't have to.\n\n#siblings #brotherandsister #oldersiblings #growingupwithsiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>00b2ecf3766cdb01</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1794541375943,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 941,
   "delivered_at": 1794537775865,
-  "deadline": 1794541375865
+  "deadline": 1794541375865,
+  "action": {
+    "id": "rv-00b2ecf3766cdb01-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1794541977500
+  },
+  "claimed": false,
+  "claim_expires": 1794543833712,
+  "result": {
+    "action_id": "rv-00b2ecf3766cdb01-timeout",
+    "state": "published",
+    "media_id": "17993865416988245",
+    "token": "00b2ecf3766cdb01"
+  }
 }
