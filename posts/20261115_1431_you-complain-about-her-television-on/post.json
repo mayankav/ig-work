@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "a small everyday annoyance someone causes now, seen from the day it stops",
+  "slides": [
+    {
+      "text": "you complain about her television on volume forty-five, but one day you'll sit on that sofa with [[nothing to turn down]].",
+      "mood": "calm",
+      "pose": "listening"
+    }
+  ],
+  "caption": "my grandma still keeps the quiz show loud enough to shake the mantelpiece.\nyou have to shout across the rug just to ask where the biscuits are.\nsend this to your sister who always reaches for the remote control.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "a short text post about leaving a grandparent's loud television alone, beside a small green donkey listening closely.",
+  "hook_options": [
+    "you complain about her television on volume forty-five, but one day you'll sit on that sofa with [[nothing to turn down]].",
+    "we roll our eyes when the television hits volume forty-five, but one day the front room will be [[completely silent]].",
+    "she has the television on volume forty-five every evening, and one day you'd give anything to [[hear it through the wall]]."
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-15_2000",
+  "created_at": "2026-11-15T14:31:09Z",
+  "slug": "20261115_1431_you-complain-about-her-television-on",
+  "reel": {
+    "seconds": 10.4,
+    "tune": "calm"
+  }
+}
