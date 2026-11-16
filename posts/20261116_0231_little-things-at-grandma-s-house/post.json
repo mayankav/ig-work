@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "little things that quietly fix a bad day",
+  "slides": [
+    {
+      "text": "little things at grandma's house that fix a rough day",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "thick woollen socks waiting on the bottom step so your feet never touch the cold lino.",
+      "mood": "calm",
+      "pose": "sitting"
+    },
+    {
+      "text": "the metal lid coming off the biscuit tin before you even take your jacket off.",
+      "mood": "joy",
+      "pose": "sneaking_cookie"
+    },
+    {
+      "text": "sitting at the oilcloth table while she peels an apple into quarters on a small floral saucer.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "watching her stir two spoonfuls of honey into a yellow mug and tell you three o'clock is still early.",
+      "mood": "warm",
+      "pose": "warm_mug"
+    },
+    {
+      "text": "a folded ten-pound note slipped into your jacket pocket by the door, with a firm squeeze so you don't argue.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "[[she never asked what happened]], she just pulled out the heavy wooden chair and made you sit down.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "save this for a day you need to remember having a place where nothing is expected of you.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "my grandma always kept an extra tin of shortbread in the pantry, just in case one of us showed up without calling.\nshe never had much advice to give, just an open chair and an hour of quiet.\nsave this for a sunday night when you need to remember how small a hard week can be made to feel.\n\n#grandma #grandparents #grandmashouse",
+  "alt": "A carousel post listing the quiet, comforting details inside a grandmother's home that help soothe a difficult day.",
+  "hook_options": [
+    "little things at grandma's house that fix a rough day",
+    "tiny things at grandma's that quiet down a heavy week",
+    "what happens the second you walk into grandma's kitchen"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-16_0800",
+  "created_at": "2026-11-16T02:31:26Z",
+  "slug": "20261116_0231_little-things-at-grandma-s-house"
+}
