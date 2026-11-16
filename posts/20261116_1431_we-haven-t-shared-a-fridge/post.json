@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "someone who lives far away now, and the one small habit you both kept",
+  "slides": [
+    {
+      "text": "we haven't shared a fridge in years, but [[we both still leave one sip]] in the carton so someone else has to bin it.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "some kitchen habits were learned before school and never got unlearned.\neven with two different fridges three states away.\nsend this to your sister who still leaves the last mouthful for someone else.\n\n#siblings #sisterlove #siblinglove #growingupwithsiblings",
+  "alt": "a single slide post reading: we haven't shared a fridge in years, but we both still leave one sip in the carton so someone else has to bin it.",
+  "hook_options": [
+    "we haven't shared a fridge in years, but [[we both still leave one sip]] in the carton so someone else has to bin it.",
+    "we live four hours apart now, but [[we both still pause the microwave]] at one second so it never beeps.",
+    "different cities now, but [[we both still check behind the shower curtain]] before we turn the light on."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-16_2000",
+  "created_at": "2026-11-16T14:31:28Z",
+  "slug": "20261116_1431_we-haven-t-shared-a-fridge",
+  "reel": {
+    "seconds": 11.6,
+    "tune": "wistful"
+  }
+}
