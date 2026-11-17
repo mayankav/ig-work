@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "nostalgia",
+  "person": "a cousin you grew up with",
+  "shape": "the first time you look after someone who used to look after you, in one small everyday way",
+  "slides": [
+    {
+      "text": "you were only two years older, but you always knelt down on the mat to untie my wet laces.",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "you picked at the tight double knots with cold fingers, and never once told me to hurry up.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "so i spent years thinking wet shoes were just something someone knelt down to solve.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "but yesterday you fell asleep on the sofa at seven in the evening, after twelve hours on your feet.",
+      "mood": "tired",
+      "pose": "floor_slumped"
+    },
+    {
+      "text": "you didn't even make it out of your heavy work coat before your head dropped.",
+      "mood": "tired",
+      "pose": "asleep_on_floor"
+    },
+    {
+      "text": "so i knelt on the rug, loosened the stiff laces, and eased both boots off by the heel.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "i set them straight against the wall, because [[it was finally my turn to bend down]].",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "we grew up sharing a bedroom floor and hand-me-down coats.\nit takes twenty years to notice when the person who looked after you gets tired.\nsend this to the cousin who always untied your knots first.\n\n#growinguptogether #childhoodmemories #childhoodfriends #nostalgia",
+  "alt": "A seven-slide story about growing up with an older cousin who untied your muddy laces as a child, and gently taking off their work boots after they fall asleep on the sofa years later.",
+  "hook_options": [
+    "you were only two years older, but you always knelt down on the mat to untie my wet laces.",
+    "when we were little, you stood on the back porch every afternoon just to unknot my shoes.",
+    "for three years, you were the one who knelt down to pull off my muddy school boots."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.7-flash",
+  "slot": "2026-11-17_0800",
+  "created_at": "2026-11-17T02:30:50Z",
+  "slug": "20261117_0230_you-were-only-two-years-older"
+}
