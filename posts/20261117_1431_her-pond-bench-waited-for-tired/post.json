@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "family",
+  "person": "a grandparent",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "her pond bench waited for tired visits, peaceful pause",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "she kept the path lit with a lone lantern at dusk\nthe rosemary scent lingered long after the kitchen cleared\nsend this to the grandma who still leaves fresh berries on the counter\n\n#grandma #grandparents #grandmashouse",
+  "alt": "a green donkey sits serenely while the slide reads a line about a grandma's pond bench and a two‑word verdict",
+  "hook_options": [
+    "her pond bench waited for tired visits, peaceful pause",
+    "her knitted shawl on the back porch kept you warm, quiet comfort",
+    "her old radio in the kitchen played soft songs, steady solace"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-11-17_2000",
+  "created_at": "2026-11-17T14:31:03Z",
+  "slug": "20261117_1431_her-pond-bench-waited-for-tired",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "calm"
+  }
+}
