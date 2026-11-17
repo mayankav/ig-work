@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 nostalgia \u00b7 7 slides\n\n<b>\u201cyou were only two years older, but you always knelt down on the mat to untie my wet laces.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. you were only two years older, but you always knelt down on the mat to untie my wet laces.\n2. you picked at the tight double knots with cold fingers, and never once told me to hurry up.\n3. so i spent years thinking wet shoes were just something someone knelt down to solve.\n4. but yesterday you fell asleep on the sofa at seven in the evening, after twelve hours on your feet.\n5. you didn't even make it out of your heavy work coat before your head dropped.\n6. so i knelt on the rug, loosened the stiff laces, and eased both boots off by the heel.\n7. i set them straight against the wall, because it was finally my turn to bend down.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we grew up sharing a bedroom floor and hand-me-down coats.\nit takes twenty years to notice when the person who looked after you gets tired.\nsend this to the cousin who always untied your knots first.\n\n#growinguptogether #childhoodmemories #childhoodfriends #nostalgia</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>e7cc40581bd669e4</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1794887411702,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 974,
   "delivered_at": 1794883811655,
-  "deadline": 1794887411655
+  "deadline": 1794887411655,
+  "action": {
+    "id": "rv-e7cc40581bd669e4-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1794888013399
+  },
+  "claimed": false,
+  "claim_expires": 1794889900932,
+  "result": {
+    "action_id": "rv-e7cc40581bd669e4-timeout",
+    "state": "published",
+    "media_id": "17990323311094875",
+    "token": "e7cc40581bd669e4"
+  }
 }
