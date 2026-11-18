@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "a small thing you fought as a kid and would welcome now, pinned to one object",
+  "slides": [
+    {
+      "text": "i spent years fighting the [[eight o'clock bedtime]] on the hall clock, and now it sounds like a prize.",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "eight o'clock used to mean missing out on everything.\nnow it just means the day is finally over.\nsend this to the friend who falls asleep before the film starts.",
+  "alt": "a one line slide about fighting an eight o'clock bedtime as a child and wanting it now, pictured with a small green donkey standing peacefully with eyes closed",
+  "hook_options": [
+    "i spent years fighting the [[eight o'clock bedtime]] on the hall clock, and now it sounds like a prize.",
+    "i used to fight being sent to bed at eight o'clock, and tonight it feels like mercy.",
+    "i spent my childhood escaping the eight o'clock bedtime, and now nothing sounds sweeter."
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.5-flash",
+  "slot": "2026-11-18_2000",
+  "created_at": "2026-11-18T14:31:19Z",
+  "slug": "20261118_1431_i-spent-years-fighting-the-eight",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "calm"
+  }
+}
