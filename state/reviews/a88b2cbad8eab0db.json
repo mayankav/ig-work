@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 growing up \u00b7 \ud83c\udfac Reel, 9.6s, calm tune\n\n<b>\u201ci spent years fighting the eight o'clock bedtime on the hall clock, and now it sounds like a prize.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>eight o'clock used to mean missing out on everything.\nnow it just means the day is finally over.\nsend this to the friend who falls asleep before the film starts.</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>a88b2cbad8eab0db</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795016461929,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 982,
   "delivered_at": 1795012861791,
-  "deadline": 1795016461791
+  "deadline": 1795016461791,
+  "action": {
+    "id": "rv-a88b2cbad8eab0db-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795017063849
+  },
+  "claimed": false,
+  "claim_expires": 1795018916579,
+  "result": {
+    "action_id": "rv-a88b2cbad8eab0db-timeout",
+    "state": "published",
+    "media_id": "17884130661629548",
+    "token": "a88b2cbad8eab0db"
+  }
 }
