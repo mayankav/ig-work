@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 siblings \u00b7 8 slides\n\n<b>\u201ctiny signs your sister loved you more than you realised\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. tiny signs your sister loved you more than you realised\n2. she yelled when you took her oversized sweater, but left it folded on your bed every sunday evening anyway.\n3. she walked five paces ahead on the pavement, but slowed down at every kerb until she heard your trainers behind her.\n4. she turned the bedroom radio up to six whenever doors slammed downstairs, so you could finish your drawing in peace.\n5. she snapped the chocolate bar in half on the kitchen counter, and slid the thicker square over to your side.\n6. she let you crawl under her duvet after a bad dream, as long as your cold feet stayed on your own side.\n7. she told mum she scuffed the paint in the hall, because she knew loud voices made your stomach hurt.\n8. save this for when you need to remember you never had to face that house alone.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>we argued over clothes and who got the window seat, but having an older sister meant someone had already tested the rules first. she absorbed the worst of it before it reached me.\nsave this for a day you miss sharing a hallway with her.\n\n#siblings #sisterlove #siblinglove #oldersiblings</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>85936e772386f992</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795146672365,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 994,
   "delivered_at": 1795143072314,
-  "deadline": 1795146672314
+  "deadline": 1795146672314,
+  "action": {
+    "id": "rv-85936e772386f992-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795147273906
+  },
+  "claimed": false,
+  "claim_expires": 1795149121376,
+  "result": {
+    "action_id": "rv-85936e772386f992-timeout",
+    "state": "published",
+    "media_id": "18293876938293484",
+    "token": "85936e772386f992"
+  }
 }
