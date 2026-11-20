@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "a specific, lasting good thing a lucky person has, then a two- or three-word verdict",
+  "slides": [
+    {
+      "text": "having a sister who still knows [[which stair creaks]] in your parents' house. proper wealth.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    }
+  ],
+  "caption": "she is still the only person who gets the story before you even finish telling it.\nsome things stay quiet in the hallway you grew up in.\nsend this to the sister who still answers on the first ring.\n\n#siblings #sisterlove #siblinglove #oldersiblings",
+  "alt": "A small green donkey with a knowing expression beside lowercase text about having a sister who remembers which stair creaks in your parents' house.",
+  "hook_options": [
+    "having a sister who still knows [[which stair creaks]] in your parents' house. proper wealth.",
+    "having a sister who still saves [[the window seat]] for you on long drives. quiet fortune.",
+    "having a sister who remembers your [[first landline number]] by heart twenty years later. real luxury."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-20_2000",
+  "created_at": "2026-11-20T14:31:48Z",
+  "slug": "20261120_1431_having-a-sister-who-still-knows",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "wistful"
+  }
+}
