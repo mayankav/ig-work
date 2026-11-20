@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "a sister",
+  "shape": "signs you grew up with more love than you realised",
+  "slides": [
+    {
+      "text": "tiny signs your sister loved you more than you realised",
+      "mood": "invite",
+      "pose": "beckoning"
+    },
+    {
+      "text": "she yelled when you took her oversized sweater, but left it folded on your bed every sunday evening anyway.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "she walked five paces ahead on the pavement, but [[slowed down at every kerb]] until she heard your trainers behind her.",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    },
+    {
+      "text": "she turned the bedroom radio up to six whenever doors slammed downstairs, so you could finish your drawing in peace.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "she snapped the chocolate bar in half on the kitchen counter, and slid the thicker square over to your side.",
+      "mood": "warm",
+      "pose": "offering"
+    },
+    {
+      "text": "she let you crawl under her duvet after a bad dream, as long as your cold feet stayed on your own side.",
+      "mood": "sad",
+      "pose": "knees_hugged"
+    },
+    {
+      "text": "she told mum she scuffed the paint in the hall, because she knew [[loud voices made your stomach hurt]].",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "save this for when you need to remember you never had to face that house alone.",
+      "mood": "warm",
+      "pose": "holding_heart"
+    }
+  ],
+  "caption": "we argued over clothes and who got the window seat, but having an older sister meant someone had already tested the rules first. she absorbed the worst of it before it reached me.\nsave this for a day you miss sharing a hallway with her.\n\n#siblings #sisterlove #siblinglove #oldersiblings",
+  "alt": "A carousel of slides listing quiet, everyday ways an older sister protected and loved her sibling growing up, illustrated with a small green donkey.",
+  "hook_options": [
+    "tiny signs your sister loved you more than you realised",
+    "quiet ways your sister looked out for you without saying it",
+    "small proofs you had a sister quietly on your side"
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-20_0800",
+  "created_at": "2026-11-20T02:32:16Z",
+  "slug": "20261120_0232_tiny-signs-your-sister-loved-you"
+}
