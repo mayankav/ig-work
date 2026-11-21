@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "some people feel like a cosy everyday comparison",
+  "slides": [
+    {
+      "text": "some people feel like the second stool at the kitchen counter: two train changes away, but [[nobody else gets to sit there]].",
+      "mood": "calm",
+      "pose": "sitting"
+    }
+  ],
+  "caption": "we haven't lived in the same town since twenty-two, but my spare room is still basically yours.\nhaving a best friend in another city just means half your life is permanently parked by their kettle.\nsend this to the one who still calls you from the supermarket aisle to ask which pasta you used to buy.\n\n#friendshipquotes #bestfriendquotes #longdistancefriendship",
+  "alt": "a small green donkey sits quietly on the floor next to text about a best friend who moved away.",
+  "hook_options": [
+    "some people feel like the second stool at the kitchen counter: two train changes away, but [[nobody else gets to sit there]].",
+    "some people feel like the corner booth on a tuesday night: three hundred miles away, but [[still saving the seat opposite]].",
+    "some people feel like the hall radiator in november: two train changes away, but [[the cold still never gets past the door]]."
+  ],
+  "model": "gemini-3.7-flash + edit by gemini-3.7-flash",
+  "slot": "2026-11-21_2000",
+  "created_at": "2026-11-21T14:32:07Z",
+  "slug": "20261121_1432_some-people-feel-like-the-second",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "calm"
+  }
+}
