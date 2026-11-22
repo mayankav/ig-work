@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "friendship",
+  "person": "a friend you drifted from",
+  "shape": "free things that are still the best things",
+  "slides": [
+    {
+      "text": "the free things from when we talked every day",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "taking forty minutes to walk three streets with you, just because neither of us wanted to go indoors yet.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "sitting on the low garden wall until the streetlights hummed on, splitting one packet of salted crisps.",
+      "mood": "calm",
+      "pose": "sitting_ledge"
+    },
+    {
+      "text": "sharing a pair of tangled earphones on the back of the bus, holding our heads still so the wire wouldn't drop.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "sitting on your bedroom floor for two hours doing nothing, because [[quiet with you]] never felt like something we had to fix.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "dialling your seven-digit landline from memory, and waiting for your mum to answer on the second ring.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "walking straight into your kitchen on a rainy afternoon without knocking, because [[neither of us was a guest]] in that house.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "save this for a day you miss when [[just showing up]] was the only plan you needed.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "nobody tells you how much work it takes to stay close once you stop sharing the same post code.\nback then my best friend and i had no money and eight hours every afternoon to do nothing.\nsave this for a sunday evening when scheduling a twenty-minute phone call feels like hard work.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "a list of small, everyday memories with a childhood friend from when showing up was effortless.",
+  "hook_options": [
+    "the free things from when we talked every day",
+    "tiny things that cost nothing back when we lived on the same road",
+    "the free things from back when we lived three doors apart"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-22_0800",
+  "created_at": "2026-11-22T02:31:47Z",
+  "slug": "20261122_0231_the-free-things-from-when-we"
+}
