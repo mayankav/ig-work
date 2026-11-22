@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 adult life \u00b7 \ud83c\udfac Reel, 8.8s, wistful tune\n\n<b>\u201cyou moved out two years ago, but the second coat peg by the door still stays bare.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>three years of sharing a small shoe rack and taking turns on the kettle.\ni still look up whenever i hear keys turning in the lock.\nsend this to the flatmate who always left the hall light on for you.\n\n#roommates #flatmates #movingout #firstflat</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>e28fb9790d645c24</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795362052413,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 1017,
   "delivered_at": 1795358452187,
-  "deadline": 1795362052187
+  "deadline": 1795362052187,
+  "action": {
+    "id": "rv-e28fb9790d645c24-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795362653906
+  },
+  "claimed": false,
+  "claim_expires": 1795364502454,
+  "result": {
+    "action_id": "rv-e28fb9790d645c24-timeout",
+    "state": "published",
+    "media_id": "18150289414599750",
+    "token": "e28fb9790d645c24"
+  }
 }
