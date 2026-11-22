@@ -19,13 +19,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcda List \u00b7 friendship \u00b7 8 slides\n\n<b>\u201cthe free things from when we talked every day\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. the free things from when we talked every day\n2. taking forty minutes to walk three streets with you, just because neither of us wanted to go indoors yet.\n3. sitting on the low garden wall until the streetlights hummed on, splitting one packet of salted crisps.\n4. sharing a pair of tangled earphones on the back of the bus, holding our heads still so the wire wouldn't drop.\n5. sitting on your bedroom floor for two hours doing nothing, because quiet with you never felt like something we had to fix.\n6. dialling your seven-digit landline from memory, and waiting for your mum to answer on the second ring.\n7. walking straight into your kitchen on a rainy afternoon without knocking, because neither of us was a guest in that house.\n8. save this for a day you miss when just showing up was the only plan you needed.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>nobody tells you how much work it takes to stay close once you stop sharing the same post code.\nback then my best friend and i had no money and eight hours every afternoon to do nothing.\nsave this for a sunday evening when scheduling a twenty-minute phone call feels like hard work.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>576e5538184bef11</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795318665127,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 1014,
   "delivered_at": 1795315065092,
-  "deadline": 1795318665092
+  "deadline": 1795318665092,
+  "action": {
+    "id": "rv-576e5538184bef11-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795319266571
+  },
+  "claimed": false,
+  "claim_expires": 1795321120619,
+  "result": {
+    "action_id": "rv-576e5538184bef11-timeout",
+    "state": "published",
+    "media_id": "17893967208687174",
+    "token": "576e5538184bef11"
+  }
 }
