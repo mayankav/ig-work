@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 growing up \u00b7 7 slides\n\n<b>\u201ci found a blue plastic ruler in the bottom drawer, with two teeth marks at the ten-centimetre mark.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. i found a blue plastic ruler in the bottom drawer, with two teeth marks at the ten-centimetre mark.\n2. you bit down on it on a tuesday morning in october, trying not to cry over long division.\n3. so you held your breath until the clock hit twelve, and handed the paper in face down.\n4. but nobody noticed the marks on the edge, and the bell for home rang right on time.\n5. so you carried it in your pencil case for three years, sure that one bad morning would follow you around forever.\n6. yesterday i threw away the dried markers and the rusty paperclips.\n7. but i wiped the plastic clean, and put the ruler back on top of the fresh paper.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>you were doing what you could with ten centimetres of plastic and ten minutes of break time.\nturns out the things that felt huge back then were just tuesday.\nsend this to a friend who is always too hard on their younger self.\n\n#growingup #childhoodmemories #schooldays #growingpains</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>3c50f92f29089719</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795405490186,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 1026,
   "delivered_at": 1795401890151,
-  "deadline": 1795405490151
+  "deadline": 1795405490151,
+  "action": {
+    "id": "rv-3c50f92f29089719-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795406091573
+  },
+  "claimed": false,
+  "claim_expires": 1795407942253,
+  "result": {
+    "action_id": "rv-3c50f92f29089719-timeout",
+    "state": "published",
+    "media_id": "18124102240978492",
+    "token": "3c50f92f29089719"
+  }
 }
