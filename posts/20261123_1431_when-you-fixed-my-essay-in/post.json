@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "when you fixed my essay in the margins and said nothing, that was love",
+      "mood": "warm",
+      "pose": "head_tilt"
+    }
+  ],
+  "caption": "you wrote a tiny checkmark and a smile, and i felt seen\nthat quiet mark stayed with me long after the grade\nsend this to the teacher who always marked your work with a tiny star\n\n#childhoodmemories #schoolmemories #teacher",
+  "alt": "a single line noting a teacher's silent correction in the margin as love, with a donkey tilting its head",
+  "hook_options": [
+    "when you fixed my essay in the margins and said nothing, that was love",
+    "the quiet correction in the margin that never got a thank you",
+    "the invisible note you left on my paper that felt like love"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-11-23_2000",
+  "created_at": "2026-11-23T14:31:56Z",
+  "slug": "20261123_1431_when-you-fixed-my-essay-in",
+  "reel": {
+    "seconds": 8.0,
+    "tune": "warm"
+  }
+}
