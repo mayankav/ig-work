@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "growing up",
+  "person": "your younger self",
+  "shape": "an ordinary object that turns out to hold a whole memory",
+  "slides": [
+    {
+      "text": "i found a blue plastic ruler in the bottom drawer, with two teeth marks at the ten-centimetre mark.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "you bit down on it on a tuesday morning in october, trying not to cry over long division.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "so you held your breath until the clock hit twelve, and handed the paper in face down.",
+      "mood": "wistful",
+      "pose": "arms_crossed_waiting"
+    },
+    {
+      "text": "but nobody noticed the marks on the edge, and the bell for home rang right on time.",
+      "mood": "calm",
+      "pose": "slow_blink"
+    },
+    {
+      "text": "so you carried it in your pencil case for three years, sure that [[one bad morning]] would follow you around forever.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "yesterday i threw away the dried markers and the rusty paperclips.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "but i wiped the plastic clean, and [[put the ruler back]] on top of the fresh paper.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "you were doing what you could with ten centimetres of plastic and ten minutes of break time.\nturns out the things that felt huge back then were just tuesday.\nsend this to a friend who is always too hard on their younger self.\n\n#growingup #childhoodmemories #schooldays #growingpains",
+  "alt": "a 7-slide post about finding an old school ruler in a drawer, remembering how heavy small failures felt at school, and keeping it for your younger self.",
+  "hook_options": [
+    "i found a blue plastic ruler in the bottom drawer, with two teeth marks at the ten-centimetre mark.",
+    "there is a blue plastic ruler from school sitting at the bottom of my desk drawer.",
+    "i pulled a blue plastic ruler out of an old desk drawer this morning."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-23_0800",
+  "created_at": "2026-11-23T02:31:51Z",
+  "slug": "20261123_0231_i-found-a-blue-plastic-ruler"
+}
