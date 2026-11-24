@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "the swing in the park still creaks when you push it, even though [[no one else is there]]",
+      "mood": "wistful",
+      "pose": "glancing_back"
+    }
+  ],
+  "caption": "i still hear her humming on the bus ride home.\ni keep the photo of us at the lake on my desk.\nsend this to the friend who still leaves a note on your fridge.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "a single line about a park swing that creaks when pushed, noting the empty space where a best friend used to be",
+  "hook_options": [
+    "the swing in the park still creaks when you push it, even though [[no one else is there]]",
+    "the empty bike lane feels longer when you ride it without her laughter",
+    "the quiet after your favorite song ends, and the room still smells like shared secrets"
+  ],
+  "model": "openai/gpt-oss-120b + edit by openai/gpt-oss-120b",
+  "slot": "2026-11-24_2000",
+  "created_at": "2026-11-24T14:31:44Z",
+  "slug": "20261124_1431_the-swing-in-the-park-still",
+  "reel": {
+    "seconds": 9.2,
+    "tune": "wistful"
+  }
+}
