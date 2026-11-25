@@ -18,13 +18,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcd6 Story \u00b7 school days \u00b7 7 slides\n\n<b>\u201cyou were standing by the garden shop counter, holding a small tray of yellow pansies.\u201d</b>\n\n\ud83d\udcdd <b>Slides</b>\n<blockquote expandable>1. you were standing by the garden shop counter, holding a small tray of yellow pansies.\n2. i almost turned back to the potting soil, sure you only remembered the kid who spilled glue on the rug.\n3. so i stepped closer and asked if room four still smelled like damp wool on rainy mornings.\n4. but you set the tray down, looked over your glasses, and asked if i still kept three pencils in my coat.\n5. so we stood by the seed packets for ten minutes while the rain tapped on the glass roof.\n6. i told you i spent that whole year sure i was the hardest student you had to manage.\n7. you looked down at your shoes and said  you put my desk by the window on purpose , so i could watch the birds whenever the room got too loud.</blockquote>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>some people gave us a quiet spot before we even knew we were overwhelmed.\nthey noticed which corner helped us get through the hour.\nsend this to the teacher who made the room feel a little safer.\n\n#childhoodmemories #schoolmemories #teacher #growingup</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>00afafabd2ceddee</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795578541270,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 1042,
   "delivered_at": 1795574941226,
-  "deadline": 1795578541226
+  "deadline": 1795578541226,
+  "action": {
+    "id": "rv-00afafabd2ceddee-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795579142731
+  },
+  "claimed": false,
+  "claim_expires": 1795580991826,
+  "result": {
+    "action_id": "rv-00afafabd2ceddee-timeout",
+    "state": "published",
+    "media_id": "18117890003033688",
+    "token": "00afafabd2ceddee"
+  }
 }
