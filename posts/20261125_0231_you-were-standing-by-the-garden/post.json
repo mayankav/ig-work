@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "school days",
+  "person": "a favourite teacher",
+  "shape": "two people in an ordinary moment; one finally says the thing they never said",
+  "slides": [
+    {
+      "text": "you were standing by the garden shop counter, holding a small tray of yellow pansies.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "i almost turned back to the potting soil, sure you only remembered the kid who spilled glue on the rug.",
+      "mood": "sad",
+      "pose": "hands_behind_back"
+    },
+    {
+      "text": "so i stepped closer and asked if room four still smelled like damp wool on rainy mornings.",
+      "mood": "wistful",
+      "pose": "walking"
+    },
+    {
+      "text": "but you set the tray down, looked over your glasses, and asked if i still kept three pencils in my coat.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "so we stood by the seed packets for ten minutes while the rain tapped on the glass roof.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "i told you i spent that whole year sure i was the hardest student you had to manage.",
+      "mood": "warm",
+      "pose": "head_tilt"
+    },
+    {
+      "text": "you looked down at your shoes and said [[ you put my desk by the window on purpose ]], so i could watch the birds whenever the room got too loud.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    }
+  ],
+  "caption": "some people gave us a quiet spot before we even knew we were overwhelmed.\nthey noticed which corner helped us get through the hour.\nsend this to the teacher who made the room feel a little safer.\n\n#childhoodmemories #schoolmemories #teacher #growingup",
+  "alt": "A story post about running into an old teacher in a garden shop and learning why they placed your desk by the window.",
+  "hook_options": [
+    "you were standing by the garden shop counter, holding a small tray of yellow pansies.",
+    "i saw you standing by the paint tins at the hardware store on a rainy tuesday afternoon.",
+    "you were sitting on the low wall near the bus station, reading a folded newspaper."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-25_0800",
+  "created_at": "2026-11-25T02:31:42Z",
+  "slug": "20261125_0231_you-were-standing-by-the-garden"
+}

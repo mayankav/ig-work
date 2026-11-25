@@ -1,0 +1,18 @@
+{
+  "token": "00afafabd2ceddee",
+  "slug": "20261125_0231_you-were-standing-by-the-garden",
+  "files": {
+    "post.json": "4a6f3fe09ff0adcb1e5a0f068856f7bd26f5352121dbdd5c63f5bd1837e3e16a",
+    "caption.txt": "1b098c75ea4d317d1c909640cef5566c66f7d0ea17363fbb7b1f254475329e09",
+    "contact_sheet.png": "13495288584b5604bde590ded35b7a5d0fe3a99730acd3807272f79da0b81939",
+    "slides/01.jpg": "fced746e3256bd7c9b52827391e4f9bdd81e139996bfc9a1c4ec065b90356f4f",
+    "slides/02.jpg": "7ecb26f3dea092e5f6d36af1a78c724b3a7fc0912c4035044d24b6e740240bf3",
+    "slides/03.jpg": "63824a7d34b463716f5c11b3e2109a00e4f3fd89ab0beca75113591713138b3f",
+    "slides/04.jpg": "2198aecf4906cbe349b109c4d5da3fd21b8c54bedd86ef5082a424b7e5c3d4a0",
+    "slides/05.jpg": "b59b0bf1936aa2fd639d4ab9ddcbed7d4221ab1f9ff3c63a952dac5420498718",
+    "slides/06.jpg": "82470d11dbbb1e4bf581bc94fe6041fcef676cf6f10b3455b94f91e113eb823b",
+    "slides/07.jpg": "ed3302767027952c539323ae82bc77edaaf5d10da354f4975e0b890fce498a39"
+  },
+  "parent": null,
+  "manifest": "aa2ed360b07b5795827f52fa0e059065de9eb055e68c9dd98409c62277623131"
+}
