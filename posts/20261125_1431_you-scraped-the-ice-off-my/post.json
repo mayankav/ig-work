@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "dad",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "you scraped the ice off my windscreen before my alarm went off, and [[left the keys by my shoes]] without a word.",
+      "mood": "calm",
+      "pose": "serene"
+    }
+  ],
+  "caption": "he never talked about the cold mornings.\nhe always left the car ready before you stepped out.\nsend this to the dad who always clears the ice before you leave.\n\n#dad #dadquotes #fatherson #father",
+  "alt": "a small green donkey standing serenely next to text about a dad quietly scraping ice off a car windscreen.",
+  "hook_options": [
+    "you scraped the ice off my windscreen before my alarm went off, and left the keys by my shoes without a word.",
+    "you checked the air in my tyres every sunday evening, and never once asked where i was planning to go.",
+    "you started my car ten minutes early on winter mornings, so the seats were warm before i walked outside."
+  ],
+  "model": "gemini-3.5-flash + edit by openai/gpt-oss-120b",
+  "slot": "2026-11-25_2000",
+  "created_at": "2026-11-25T14:31:44Z",
+  "slug": "20261125_1431_you-scraped-the-ice-off-my",
+  "reel": {
+    "seconds": 10.8,
+    "tune": "calm"
+  }
+}
