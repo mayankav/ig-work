@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "parents",
+  "person": "mum",
+  "shape": "nobody talks about a small, true feeling everyone has had",
+  "slides": [
+    {
+      "text": "nobody talks about how she still cuts your sandwich into triangles, then [[eats the crusts standing over the sink]].",
+      "mood": "calm",
+      "pose": "cardigan_mug"
+    }
+  ],
+  "caption": "she spent twenty years pretending she liked the ends of the bread.\nsome things only make sense when you start making your own lunch.\nsend this to your mum next time she asks if you've eaten.\n\n#mother #mumquotes #motherdaughter #motherson",
+  "alt": "a small green donkey wearing a beige cardigan holds a warm mug with both hooves as text reads about a mother cutting sandwiches into triangles and eating the crusts over the sink",
+  "hook_options": [
+    "nobody talks about how she still cuts your sandwich into triangles, then eats the crusts standing over the sink",
+    "she leaves the kitchen door ajar when you come home, so she can hear your shoes drop on the rug",
+    "nobody talks about your mum keeping your favorite tea mug on the lowest shelf, right where your hand reaches"
+  ],
+  "model": "openai/gpt-oss-120b + edit by gemini-3.5-flash",
+  "slot": "2026-11-26_2000",
+  "created_at": "2026-11-26T14:31:48Z",
+  "slug": "20261126_1431_nobody-talks-about-how-she-still",
+  "reel": {
+    "seconds": 9.6,
+    "tune": "calm"
+  }
+}
