@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "siblings",
+  "person": "an older sibling",
+  "shape": "things that feel like home, even when you're far from it",
+  "slides": [
+    {
+      "text": "pieces of home you didn't have to pack",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "folding tea towels in neat thirds before putting them away, because you watched them do it every sunday.",
+      "mood": "calm",
+      "pose": "wiping_hands"
+    },
+    {
+      "text": "calling from aisle four at seven in the evening to ask which rice to buy, and they answer on ring one.",
+      "mood": "warm",
+      "pose": "phone_call"
+    },
+    {
+      "text": "writing their number under emergency contact on a form, [[without texting first]] to ask if it's fine.",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "a four-second voice note sent on a wednesday that is just the kettle whistling, with no hello.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "finding a crumpled ten-pound note tucked in your coat pocket with a scrawl that says get dinner.",
+      "mood": "warm",
+      "pose": "holding_note"
+    },
+    {
+      "text": "having someone who remembers the year the roof leaked, so you never have to explain [[why you are like this]].",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "save this for an evening when a new flat feels a little too quiet.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "the miles do not matter as much when you share the same habits. my sister taught me to check the stove twice before leaving, and i still do it every morning.\nsave this for the next time you unpack a box in a quiet room.\n\n#siblings #oldersiblings #siblinglove #brotherandsister",
+  "alt": "A carousel post listing small habits and quiet acts from an older sibling that bring comfort when living far from home.",
+  "hook_options": [
+    "pieces of home you didn't have to pack",
+    "how to know you didn't leave home alone",
+    "tiny things that mean home moved with you"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-26_0800",
+  "created_at": "2026-11-26T02:31:40Z",
+  "slug": "20261126_0231_pieces-of-home-you-didn-t"
+}
