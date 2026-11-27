@@ -12,13 +12,34 @@
   "html": true,
   "resources": "",
   "caption": "\ud83e\udecf <b>New post ready</b>\n\ud83d\udcac One-liner \u00b7 friendship \u00b7 \ud83c\udfac Reel, 8.8s, sad tune\n\n<b>\u201cyou added my town to your weather app the day you left, and never once mentioned it.\u201d</b>\n\n\u270d\ufe0f <b>Caption</b>\n<blockquote expandable>some miles do not stop you checking if someone needs an umbrella.\nsend this to the best friend who still keeps your town saved on their screen.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship</blockquote>\n\n\u23f0 <b>Posts itself in 1 hour</b> if you don't reply.\n\n\u21a9\ufe0f <b>Reply to this message with:</b>\n\u2705 <code>approve</code> \u00b7 post it now\n\ud83d\uddd1 <code>disapprove</code> \u00b7 cancel it\n\ud83d\udd01 <code>redo all</code> \u00b7 write a new one\n\ud83c\udfa8 <code>redo images 2,4</code> \u00b7 new donkey on those slides\n\nReview ID: <code>15aa530bab5c4977</code>",
-  "state": "waiting",
+  "state": "published",
   "delivery_attempts": 1,
-  "history": [],
+  "history": [
+    {
+      "at": 1795794617173,
+      "decision": "timeout_publish"
+    }
+  ],
   "seen": {},
   "album_sent": true,
   "issue_receipts": [],
   "message_id": 1070,
   "delivered_at": 1795791017141,
-  "deadline": 1795794617141
+  "deadline": 1795794617141,
+  "action": {
+    "id": "rv-15aa530bab5c4977-timeout",
+    "decision": "publish",
+    "slide": 0,
+    "attempts": 1,
+    "dispatched": true,
+    "retry_at": 1795795218740
+  },
+  "claimed": false,
+  "claim_expires": 1795797106142,
+  "result": {
+    "action_id": "rv-15aa530bab5c4977-timeout",
+    "state": "published",
+    "media_id": "17991466581087051",
+    "token": "15aa530bab5c4977"
+  }
 }
