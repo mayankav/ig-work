@@ -1,0 +1,28 @@
+{
+  "format": "oneliner",
+  "topic": "friendship",
+  "person": "a best friend who moved away",
+  "shape": "someone does a small thing for you and never mentions it; name that as love",
+  "slides": [
+    {
+      "text": "you added my town to your weather app the day you left, and [[never once mentioned it]].",
+      "mood": "sad",
+      "pose": "phone_down"
+    }
+  ],
+  "caption": "some miles do not stop you checking if someone needs an umbrella.\nsend this to the best friend who still keeps your town saved on their screen.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "A single slide with text that reads: 'you added my town to your weather app the day you left, and never once mentioned it.' featuring a small green donkey looking down at a phone held in its hoof.",
+  "hook_options": [
+    "you added my town to your weather app the day you left, and [[never once mentioned it]].",
+    "you set your watch to my time zone when you moved, and never said a word.",
+    "you check if it is raining in my town before you call, and never mention it."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-27_2000",
+  "created_at": "2026-11-27T14:31:17Z",
+  "slug": "20261127_1431_you-added-my-town-to-your",
+  "reel": {
+    "seconds": 8.8,
+    "tune": "sad"
+  }
+}
