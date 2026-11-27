@@ -1,0 +1,54 @@
+{
+  "format": "story",
+  "topic": "friendship",
+  "person": "a best friend from school",
+  "shape": "a parent's odd habit that the child only understands years later",
+  "slides": [
+    {
+      "text": "my mum packed two yellow apples in my navy school bag every single morning, even though i never ate them.",
+      "mood": "invite",
+      "pose": "presenting"
+    },
+    {
+      "text": "so every afternoon i brought them home bruised, and she put them in the bin without a word.",
+      "mood": "tired",
+      "pose": "floor_slumped"
+    },
+    {
+      "text": "but she kept putting two in the front pocket, right next to my pencil case.",
+      "mood": "wistful",
+      "pose": "pondering"
+    },
+    {
+      "text": "so yesterday while we were clearing out the old pantry, i asked her why she wasted all those apples.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "she folded the brown paper bag and said [[you never brought lunch]] on tuesdays.",
+      "mood": "wise",
+      "pose": "explaining"
+    },
+    {
+      "text": "so she made sure there was extra in my bag, so i could hand one over without making a fuss.",
+      "mood": "warm",
+      "pose": "hoof_on_chest"
+    },
+    {
+      "text": "[[she never said your name]], but for five years she fed the quiet kid who sat next to me in row three.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "my mum still asks about you every time i call her on sunday.\nshe never forgot the year we shared a desk in the back corner.\nsend this to the best friend who shared your desk in school.\n\n#friendshipquotes #bestfriendquotes #childhoodfriends #longdistancefriendship",
+  "alt": "a short story about a mother who packed extra food every day for a childhood best friend.",
+  "hook_options": [
+    "my mum packed two yellow apples in my navy school bag every single morning, even though i never ate them.",
+    "my mum put two green apples in my school bag every morning, even when i told her i hated them.",
+    "my dad kept a second small umbrella in his coat pocket for six years, even on sunny mornings."
+  ],
+  "model": "gemini-3.5-flash + edit by gemini-3.5-flash",
+  "slot": "2026-11-27_0800",
+  "created_at": "2026-11-27T02:31:42Z",
+  "slug": "20261127_0231_my-mum-packed-two-yellow-apples"
+}

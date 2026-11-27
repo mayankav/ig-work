@@ -1,0 +1,18 @@
+{
+  "token": "d933c0fc704bfea2",
+  "slug": "20261127_0231_my-mum-packed-two-yellow-apples",
+  "files": {
+    "post.json": "1e156f41ae773da7d64afffdb77de48b218e124279dc48fc4ac871ba8d5a0f91",
+    "caption.txt": "55715c74cda0cd065aba23b97070f8997b269858b11a2f686df7344fc3b04082",
+    "contact_sheet.png": "8a1a34a9bc74feadf97d6b8947bc055facbcb4efbf99e3eadd919b88228f61a8",
+    "slides/01.jpg": "4d5e5d1f5e7ec8f9939bd0faa113c8b0d468e70e6e61d6be27bd46d22c301cc7",
+    "slides/02.jpg": "f9fdaa487bc9c3d64505c38e9126fc7ca94429862fb5dcfb103b64c70ab3306a",
+    "slides/03.jpg": "01f13846a6d0f15f8fb0a56c0fea18a28ee5ffd46d90d9eb74ffd76f48cd4e67",
+    "slides/04.jpg": "70c47cec90820abc90720d7295cc82087e83af8a85aea33b9691f9c356728f72",
+    "slides/05.jpg": "3d152bdfa1596d93b05a607d0ef108627bb09af7167b191491da4ab0eb1027ec",
+    "slides/06.jpg": "4b40047f25ede9a7cbd87ded234e7c536a0eaf9cc2bd9543c59d12e719d4c398",
+    "slides/07.jpg": "2301e72d8fb1f612d3f37d0a15c889f16cf46db16a37df5e59f916828f544ceb"
+  },
+  "parent": null,
+  "manifest": "b0d9e4bc6e5de69c820ffe418eece538be3271cf2d4b5c879336c9d32a8e4480"
+}
