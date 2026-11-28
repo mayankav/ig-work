@@ -1,0 +1,59 @@
+{
+  "format": "list",
+  "topic": "love",
+  "person": "a partner",
+  "shape": "free things that are still the best things",
+  "slides": [
+    {
+      "text": "the parts of sharing a life that cost nothing",
+      "mood": "invite",
+      "pose": "point_right"
+    },
+    {
+      "text": "taking your side in the hallway before hearing what the argument was even about.",
+      "mood": "calm",
+      "pose": "listening"
+    },
+    {
+      "text": "leaving the [[better pillow]] on your side of the mattress, seven nights a week.",
+      "mood": "calm",
+      "pose": "serene"
+    },
+    {
+      "text": "plugging your phone into the wall by the lamp, because you fell asleep on the rug.",
+      "mood": "calm",
+      "pose": "relieved"
+    },
+    {
+      "text": "three words mouthed across a crowded kitchen: [[let's go home]].",
+      "mood": "wistful",
+      "pose": "knowing_look"
+    },
+    {
+      "text": "walking back two blocks in the rain to get the car, so you can wait under the dry shop awning.",
+      "mood": "calm",
+      "pose": "umbrella"
+    },
+    {
+      "text": "pulling the duvet back over your shoulder at [[four in the morning]], without waking up enough to remember doing it.",
+      "mood": "warm",
+      "pose": "self_hug"
+    },
+    {
+      "text": "save this for a quiet sunday evening, to remember how much of it is free.",
+      "mood": "warm",
+      "pose": "offering"
+    }
+  ],
+  "caption": "we spend so much time worrying about the rent and the groceries.\nmy partner still leaves the warm crust of the loaf for me at breakfast.\nthe best parts of building a home never show up on a receipt.\nsave this for a long week when you forget why you share a kitchen with someone.\n\n#relationshipquotes #quotesaboutlove #livingtogether #couples",
+  "alt": "A carousel list titled 'the parts of sharing a life that cost nothing' illustrating the small, everyday kindnesses shared between partners.",
+  "hook_options": [
+    "the parts of sharing a life that cost nothing",
+    "free things you only get when you share a life",
+    "small free things that feel like staying together"
+  ],
+  "model": "gemini-3.8-flash + edit by gemini-3.8-flash",
+  "slot": "2026-11-28_0800",
+  "created_at": "2026-11-28T02:31:02Z",
+  "slug": "20261128_0231_the-parts-of-sharing-a-life"
+}
